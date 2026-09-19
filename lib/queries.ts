@@ -1,0 +1,65 @@
+import { prisma } from "@/lib/prisma";
+import { emptyCounts, statusToCountKey, type MachineCounts } from "@/lib/next-action";
+import { startOfDay, startOfWeek } from "@/lib/dates";
+
+export async function machineCounts(): Promise<MachineCounts> {
+  const counts = emptyCounts();
+  const grouped = await prisma.card.groupBy({
+    by: ["status"],
+    _count: { _all: true },
+  });
+  for (const row of grouped) {
+    const key = statusToCountKey(row.status);
+    if (key) counts[key] = row._count._all;
+  }
+  const today = startOfDay(new Date());
+  counts.postedToday = await prisma.card.count({
+    where: { postedAt: { gte: today } },
+  });
+  const deals = await prisma.campaign.findMany({
+    where: { status: { in: ["ACTIVE", "TRIAL"] } },
+    select: { postsPerDay: true, accountsAllowed: true },
+  });
+  counts.activeDeals = deals.length;
+  counts.paidSlotsToday = deals.reduce(
+    (sum, deal) => sum + deal.postsPerDay * deal.accountsAllowed,
+    0,
+  );
+  return counts;
+}
+
+export async function weekHours(): Promise<number> {
+  const review = await prisma.weeklyReview.findFirst({
+    where: { weekStart: startOfWeek(new Date()) },
+  });
+  return review?.hours ?? 0;
+}
+
+export async function dashboardTotals() {
+  const posted = await prisma.card.findMany({
+    where: { status: { in: ["POSTED", "DATA"] } },
+    select: {
+      payoutCents: true,
+      views: true,
+      likes: true,
+      comments: true,
+      paid: true,
+      approved: true,
+    },
+  });
+  const revenue = posted.reduce((sum, card) => sum + (card.approved ? card.payoutCents : 0), 0);
+  const projected = posted.reduce((sum, card) => sum + card.payoutCents, 0);
+  const views = posted.reduce((sum, card) => sum + card.views, 0);
+  const likes = posted.reduce((sum, card) => sum + card.likes, 0);
+  const comments = posted.reduce((sum, card) => sum + card.comments, 0);
+  const approved = posted.filter((card) => card.approved).length;
+  return {
+    revenue,
+    projected,
+    views,
+    likes,
+    comments,
+    posted: posted.length,
+    approvalRate: posted.length ? approved / posted.length : 0,
+  };
+}

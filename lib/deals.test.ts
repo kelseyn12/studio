@@ -1,0 +1,42 @@
+import { describe, expect, it } from "vitest";
+import { scoreDeal } from "@/lib/deals";
+
+const deep = {
+  basePayCents: 4000,
+  postsPerDay: 8,
+  accountsAllowed: 2,
+  minutesPerPost: 8,
+  monthlyHoursEstimate: 15,
+  minViews: 0,
+  approvalFriction: "NONE" as const,
+  approvalHours: 0,
+  creativeFreedom: 5,
+  managerResponsive: true,
+  othersViral: true,
+  briefSupply: true,
+  editorIncluded: true,
+  cpmCents: 200,
+};
+
+describe("scoreDeal", () => {
+  it("marks a high-volume easy deal as pass", () => {
+    const score = scoreDeal(deep);
+    expect(score.verdict).toBe("pass");
+    expect(score.monthlyPayoutCents).toBe(4000 * 16 * 30);
+    expect(score.hourlyCents).toBeGreaterThan(30000);
+  });
+
+  it("flags a high-pay low-volume deal as shallow or skip", () => {
+    const score = scoreDeal({
+      ...deep,
+      postsPerDay: 1,
+      accountsAllowed: 1,
+      monthlyHoursEstimate: 60,
+      approvalFriction: "STRICT",
+      othersViral: false,
+      minViews: 100000,
+    });
+    expect(score.verdict).not.toBe("pass");
+    expect(score.reasons.length).toBeGreaterThan(0);
+  });
+});

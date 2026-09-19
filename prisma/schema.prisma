@@ -1,0 +1,244 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CREATOR
+  EDITOR
+  OPERATOR
+}
+
+enum CardStatus {
+  IDEA
+  SCRIPTED
+  FILMED
+  EDITING
+  REVIEW
+  READY
+  POSTED
+  DATA
+}
+
+enum FormatLane {
+  WINNER
+  CHALLENGER
+  TEST
+}
+
+enum AssetKind {
+  RAW
+  VOICE
+  EDITED
+  REFERENCE
+  THUMB
+  GENERATED
+}
+
+enum CampaignStatus {
+  TRIAL
+  ACTIVE
+  PAUSED
+  ENDED
+}
+
+enum ApprovalFriction {
+  NONE
+  LOW
+  STRICT
+}
+
+enum PublishStatus {
+  DRAFT
+  QUEUED
+  PUBLISHED
+  FAILED
+  CANCELLED
+}
+
+enum ClipSlot {
+  HOOK
+  DEMO
+  CTA
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  role      Role
+  pinHash   String?
+  createdAt DateTime @default(now())
+  cards     Card[]   @relation("CreatedCards")
+  edits     Card[]   @relation("EditorCards")
+}
+
+model Campaign {
+  id                    String           @id @default(cuid())
+  name                  String
+  brand                 String
+  status                CampaignStatus   @default(TRIAL)
+  basePayCents          Int
+  postsPerDay           Int
+  accountsAllowed       Int              @default(1)
+  minutesPerPost        Int              @default(10)
+  minViews              Int              @default(0)
+  approvalFriction      ApprovalFriction @default(LOW)
+  approvalHours         Int              @default(24)
+  creativeFreedom       Int              @default(3)
+  managerName           String           @default("")
+  managerResponsive     Boolean          @default(true)
+  othersViral           Boolean          @default(false)
+  briefSupply           Boolean          @default(false)
+  editorIncluded        Boolean          @default(false)
+  cpmCents              Int              @default(0)
+  monthlyHoursEstimate  Int              @default(15)
+  notes                 String           @default("")
+  createdAt             DateTime         @default(now())
+  formats               Format[]
+  cards                 Card[]
+}
+
+model Format {
+  id         String     @id @default(cuid())
+  campaignId String
+  campaign   Campaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  name       String
+  lane       FormatLane @default(TEST)
+  notes      String     @default("")
+  cards      Card[]
+}
+
+model Card {
+  id               String          @id @default(cuid())
+  title            String
+  status           CardStatus      @default(IDEA)
+  campaignId       String?
+  campaign         Campaign?       @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  formatId         String?
+  format           Format?         @relation(fields: [formatId], references: [id], onDelete: SetNull)
+  accountId        String?
+  account          SocialAccount?  @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  createdById      String?
+  createdBy        User?           @relation("CreatedCards", fields: [createdById], references: [id], onDelete: SetNull)
+  editorId         String?
+  editor           User?           @relation("EditorCards", fields: [editorId], references: [id], onDelete: SetNull)
+  premise          String          @default("")
+  hook             String          @default("")
+  body             String          @default("")
+  plug             String          @default("")
+  script           String          @default("")
+  caption          String          @default("")
+  referenceUrl     String          @default("")
+  editorNote       String          @default("")
+  captionStyle     String          @default("")
+  plannedDate      DateTime?
+  scheduledAt      DateTime?
+  postedAt         DateTime?
+  deadlineAt       DateTime?
+  paid             Boolean         @default(true)
+  approved         Boolean         @default(false)
+  payoutCents      Int             @default(0)
+  views            Int             @default(0)
+  likes            Int             @default(0)
+  comments         Int             @default(0)
+  shares           Int             @default(0)
+  saves            Int             @default(0)
+  skipRate         Float           @default(0)
+  outstandPostId   String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  assets           Asset[]
+  publishes        PublishJob[]
+}
+
+model Asset {
+  id        String    @id @default(cuid())
+  cardId    String
+  card      Card      @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  kind      AssetKind
+  filename  String
+  path      String
+  mime      String
+  size      Int
+  createdAt DateTime  @default(now())
+}
+
+model SocialAccount {
+  id                String   @id @default(cuid())
+  outstandAccountId String   @unique
+  network           String
+  username          String
+  nickname          String   @default("")
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  cards             Card[]
+  publishes         PublishJob[]
+}
+
+model PublishJob {
+  id                String        @id @default(cuid())
+  cardId            String
+  card              Card          @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  accountId         String
+  account           SocialAccount @relation(fields: [accountId], references: [id])
+  outstandPostId    String?
+  platformPostId    String?
+  status            PublishStatus @default(DRAFT)
+  error             String?
+  scheduledAt       DateTime?
+  publishedAt       DateTime?
+  createdAt         DateTime      @default(now())
+}
+
+model Transcript {
+  id        String   @id @default(cuid())
+  title     String
+  sourceUrl String   @default("")
+  filename  String   @default("")
+  text      String
+  createdAt DateTime @default(now())
+}
+
+model RepurposeBatch {
+  id          String          @id @default(cuid())
+  name        String
+  status      String          @default("draft")
+  speedOn     Boolean         @default(true)
+  colorOn     Boolean         @default(false)
+  zoomOn      Boolean         @default(false)
+  intensity   String          @default("light")
+  count       Int             @default(1)
+  createdAt   DateTime        @default(now())
+  clips       RepurposeClip[]
+  outputs     RepurposeOut[]
+}
+
+model RepurposeClip {
+  id      String         @id @default(cuid())
+  batchId String
+  batch   RepurposeBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  slot    ClipSlot
+  path    String
+  filename String
+}
+
+model RepurposeOut {
+  id      String         @id @default(cuid())
+  batchId String
+  batch   RepurposeBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  path    String
+  label   String
+}
+
+model WeeklyReview {
+  id        String   @id @default(cuid())
+  weekStart DateTime
+  notes     String   @default("")
+  hours     Int      @default(0)
+  createdAt DateTime @default(now())
+}

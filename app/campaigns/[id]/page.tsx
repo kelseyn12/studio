@@ -1,0 +1,98 @@
+import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
+import { Shell } from "@/components/shell";
+import { StatusPill } from "@/components/status-pill";
+import { formatMoney, scoreDeal } from "@/lib/deals";
+import { prisma } from "@/lib/prisma";
+
+async function addFormat(formData: FormData) {
+  "use server";
+  const campaignId = String(formData.get("campaignId"));
+  await prisma.format.create({
+    data: {
+      campaignId,
+      name: String(formData.get("name") || "Untitled format"),
+      lane: (formData.get("lane") as "WINNER" | "CHALLENGER" | "TEST") || "TEST",
+    },
+  });
+  redirect(`/campaigns/${campaignId}`);
+}
+
+export default async function CampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const campaign = await prisma.campaign.findUnique({
+    where: { id },
+    include: { formats: true, cards: { orderBy: { updatedAt: "desc" }, take: 20 } },
+  });
+  if (!campaign) notFound();
+  const score = scoreDeal(campaign);
+
+  return (
+    <Shell>
+      <div className="mb-8">
+        <p className="text-sm text-mute">{campaign.brand}</p>
+        <h1 className="text-3xl font-semibold tracking-tight">{campaign.name}</h1>
+      </div>
+      <section className="mb-8 grid gap-3 md:grid-cols-4">
+        <div className="rounded-2xl bg-sun px-5 py-4 text-ink">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em]">Score</p>
+          <p className="mt-2 text-4xl font-semibold">{score.total}</p>
+          <p className="mt-1 text-sm text-ink/70">{score.verdict}</p>
+        </div>
+        <div className="rounded-2xl border border-line bg-panel px-5 py-4">
+          <p className="text-xs text-mute">Monthly if you max it</p>
+          <p className="mt-2 text-2xl font-semibold">{formatMoney(score.monthlyPayoutCents)}</p>
+        </div>
+        <div className="rounded-2xl border border-line bg-panel px-5 py-4">
+          <p className="text-xs text-mute">Creator hourly</p>
+          <p className="mt-2 text-2xl font-semibold">{formatMoney(score.hourlyCents)}</p>
+        </div>
+        <div className="rounded-2xl border border-line bg-panel px-5 py-4">
+          <p className="text-xs text-mute">Daily slots</p>
+          <p className="mt-2 text-2xl font-semibold">{campaign.postsPerDay * campaign.accountsAllowed}</p>
+        </div>
+      </section>
+      {score.reasons.length > 0 ? (
+        <ul className="mb-8 space-y-2 text-sm text-mute">
+          {score.reasons.map((reason) => (
+            <li key={reason}>— {reason}</li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mb-8 text-sm text-live">This deal can carry volume. Max it before adding another.</p>
+      )}
+      <section className="mb-8">
+        <h2 className="mb-3 text-lg font-semibold">Formats · 70 / 20 / 10</h2>
+        <form action={addFormat} className="mb-4 flex flex-wrap gap-2">
+          <input type="hidden" name="campaignId" value={campaign.id} />
+          <input name="name" placeholder="Format name" className="rounded-xl border border-line bg-lift px-3 py-2" />
+          <select name="lane" className="rounded-xl border border-line bg-lift px-3 py-2">
+            <option value="WINNER">Winner</option>
+            <option value="CHALLENGER">Challenger</option>
+            <option value="TEST">Test</option>
+          </select>
+          <button className="rounded-xl bg-sun px-3 py-2 text-sm font-semibold text-ink">Add format</button>
+        </form>
+        <div className="grid gap-2 md:grid-cols-3">
+          {campaign.formats.map((format) => (
+            <div key={format.id} className="rounded-2xl border border-line bg-panel px-4 py-3">
+              <p className="text-xs uppercase text-mute">{format.lane}</p>
+              <p className="font-medium">{format.name}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+      <section>
+        <h2 className="mb-3 text-lg font-semibold">Cards</h2>
+        <div className="space-y-2">
+          {campaign.cards.map((card) => (
+            <Link key={card.id} href={`/cards/${card.id}`} className="flex items-center justify-between rounded-2xl border border-line bg-panel px-4 py-3">
+              <span>{card.title}</span>
+              <StatusPill status={card.status} />
+            </Link>
+          ))}
+        </div>
+      </section>
+    </Shell>
+  );
+}

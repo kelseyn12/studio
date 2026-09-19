@@ -1,0 +1,10 @@
+# Conventions
+
+- Next.js App Router. Server components by default. Client components only for recorders and forms that need the browser.
+- Prisma + SQLite locally. Postgres can replace the datasource later without changing page code.
+- Roles: CREATOR films and reviews. EDITOR cuts. OPERATOR schedules through Outstand.
+- Cards move through IDEA → SCRIPTED → FILMED → EDITING → REVIEW → READY → POSTED → DATA.
+- No fake dashboard numbers. Empty states tell the next action.
+- Files stay under 300 lines. Split a page when it grows.
+- Money is stored as integer cents.
+- Outstand account IDs are stored exactly as returned. Never invent them.
