@@ -1,7 +1,7 @@
 import { readFile } from "fs/promises";
 import path from "path";
 import { NextResponse } from "next/server";
-import { UPLOAD_ROOT } from "@/lib/files";
+import { mimeFromName, UPLOAD_ROOT } from "@/lib/files";
 
 export async function GET(
   _request: Request,
@@ -16,7 +16,7 @@ export async function GET(
   try {
     const bytes = await readFile(absolute);
     return new NextResponse(bytes, {
-      headers: { "Content-Type": "application/octet-stream" },
+      headers: { "Content-Type": mimeFromName(relative) },
     });
   } catch {
     return NextResponse.json({ error: "Missing file" }, { status: 404 });

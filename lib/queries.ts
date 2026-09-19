@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { emptyCounts, statusToCountKey, type MachineCounts } from "@/lib/next-action";
-import { startOfDay, startOfWeek } from "@/lib/dates";
+import { addDays, startOfDay, startOfWeek } from "@/lib/dates";
 
 export async function machineCounts(): Promise<MachineCounts> {
   const counts = emptyCounts();
@@ -62,4 +62,22 @@ export async function dashboardTotals() {
     posted: posted.length,
     approvalRate: posted.length ? approved / posted.length : 0,
   };
+}
+
+export async function viewsByDay(days = 90) {
+  const start = addDays(startOfDay(new Date()), -(days - 1));
+  const cards = await prisma.card.findMany({
+    where: { postedAt: { gte: start } },
+    select: { postedAt: true, views: true, payoutCents: true, approved: true },
+  });
+  return Array.from({ length: days }, (_, index) => {
+    const day = addDays(start, index);
+    const key = day.toDateString();
+    const rows = cards.filter((card) => card.postedAt && card.postedAt.toDateString() === key);
+    return {
+      date: day,
+      views: rows.reduce((sum, card) => sum + card.views, 0),
+      revenue: rows.reduce((sum, card) => sum + (card.approved ? card.payoutCents : 0), 0),
+    };
+  });
 }

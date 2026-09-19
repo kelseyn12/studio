@@ -1,8 +1,10 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export function VoiceBox({ cardId }: { cardId: string }) {
+  const router = useRouter();
   const [status, setStatus] = useState("Idle");
 
   async function record() {
@@ -11,18 +13,20 @@ export function VoiceBox({ cardId }: { cardId: string }) {
     const chunks: BlobPart[] = [];
     recorder.ondataavailable = (event) => chunks.push(event.data);
     recorder.onstop = async () => {
-      const blob = new Blob(chunks, { type: "audio/webm" });
-      const file = new File([blob], "voice-note.webm", { type: "audio/webm" });
+      const file = new File([new Blob(chunks, { type: "audio/webm" })], "voice-note.webm", {
+        type: "audio/webm",
+      });
       const body = new FormData();
       body.set("id", cardId);
       body.set("kind", "VOICE");
       body.set("file", file);
       await fetch("/api/assets", { method: "POST", body });
-      setStatus("Saved voice note");
+      setStatus("Voice note saved");
       stream.getTracks().forEach((track) => track.stop());
+      router.refresh();
     };
     recorder.start();
-    setStatus("Recording 20s…");
+    setStatus("Recording 20s… talk the brief");
     window.setTimeout(() => recorder.stop(), 20000);
   }
 

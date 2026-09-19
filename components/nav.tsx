@@ -15,7 +15,6 @@ const GROUPS = [
     label: "Make",
     items: [
       { href: "/plan", label: "Plan" },
-      { href: "/edits", label: "Edits" },
       { href: "/repurposer", label: "Repurpose" },
       { href: "/transcriber", label: "Transcribe" },
     ],
@@ -23,6 +22,8 @@ const GROUPS = [
   {
     label: "Ship",
     items: [
+      { href: "/edits", label: "CapCut in" },
+      { href: "/library", label: "Library" },
       { href: "/calendar", label: "Calendar" },
       { href: "/connections", label: "Accounts" },
     ],

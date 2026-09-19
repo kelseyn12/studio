@@ -85,7 +85,7 @@ export async function scheduleCard(formData: FormData) {
   });
   if (!card) return;
   const when = formData.get("scheduledAt") ? new Date(String(formData.get("scheduledAt"))) : new Date();
-  const edited = card.assets.find((asset) => asset.kind === "EDITED");
+  const edited = card.assets.find((asset) => asset.kind === "EDITED" || asset.kind === "GENERATED");
   if (hasOutstand() && card.account) {
     const origin = process.env.OUTSTAND_REDIRECT_URI?.replace("/connections/callback", "") || "http://localhost:3000";
     const media = edited

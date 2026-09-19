@@ -1,20 +1,22 @@
 import Link from "next/link";
 import { ActionCard } from "@/components/action-card";
 import { Shell } from "@/components/shell";
+import { Spark } from "@/components/spark";
 import { Stat } from "@/components/stat";
 import { StatusPill } from "@/components/status-pill";
 import { formatCompact, formatMoney } from "@/lib/deals";
 import { pickNextAction } from "@/lib/next-action";
 import { PIPELINE_STATUSES } from "@/lib/pipeline";
-import { dashboardTotals, machineCounts, weekHours } from "@/lib/queries";
+import { dashboardTotals, machineCounts, viewsByDay, weekHours } from "@/lib/queries";
 import { prisma } from "@/lib/prisma";
 import { startOfDay } from "@/lib/dates";
 
 export default async function TodayPage() {
-  const [counts, totals, hours, todayCards] = await Promise.all([
+  const [counts, totals, hours, series, todayCards] = await Promise.all([
     machineCounts(),
     dashboardTotals(),
     weekHours(),
+    viewsByDay(90),
     prisma.card.findMany({
       where: {
         OR: [
@@ -60,6 +62,7 @@ export default async function TodayPage() {
           <Stat label="Posted" value={String(totals.posted)} />
           <Stat label="Day target" value={formatMoney(dayTarget)} hint="Operational, not motivational" />
         </section>
+        <Spark points={series.map((row) => row.views)} label="Views · last 90 days" />
         <section>
           <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-mute">Pipeline</p>
           <div className="grid grid-cols-2 gap-2 md:grid-cols-8">

@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { Suspense, useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense } from "react";
 
 function LoginForm() {
   const router = useRouter();
@@ -38,8 +37,9 @@ function LoginForm() {
   return (
     <form onSubmit={onSubmit} className="w-full max-w-md space-y-4">
       <div>
-        <h1 className="text-3xl font-semibold tracking-tight">System Studio</h1>
-        <p className="mt-2 text-mute">Creator films. Editor cuts. Operator ships.</p>
+        <p className="text-sm text-mute">One place for the whole week</p>
+        <h1 className="mt-1 text-3xl font-semibold tracking-tight">System Studio</h1>
+        <p className="mt-2 text-mute">Film the batch. Multiply it. Drop the CapCut. Ship the calendar.</p>
       </div>
       <input name="name" required placeholder="Your name" className="field" />
       <input name="email" type="email" required placeholder="Email" className="field" />
@@ -60,8 +60,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center px-6">
-      <style>{`.field{width:100%;border-radius:12px;border:1px solid #2a2a30;background:#121214;padding:12px 14px;color:#fafaf7}`}</style>
+    <div className="flex min-h-screen items-center justify-center bg-ink px-6">
       <Suspense>
         <LoginForm />
       </Suspense>

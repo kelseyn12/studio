@@ -5,6 +5,8 @@
 - Roles: CREATOR films and reviews. EDITOR cuts. OPERATOR schedules through Outstand.
 - Cards move through IDEA → SCRIPTED → FILMED → EDITING → REVIEW → READY → POSTED → DATA.
 - No fake dashboard numbers. Empty states tell the next action.
+- Palette is warm charcoal + honey, not neon yellow. Status colors stay muted.
+- CapCut is the editor. Studio takes the export and ships.
 - Files stay under 300 lines. Split a page when it grows.
 - Money is stored as integer cents.
 - Outstand account IDs are stored exactly as returned. Never invent them.

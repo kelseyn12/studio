@@ -29,6 +29,17 @@ export function publicFileUrl(relative: string): string {
   return `/api/files/${relative.split(path.sep).join("/")}`;
 }
 
+export function mimeFromName(name: string): string {
+  const ext = name.split(".").pop()?.toLowerCase();
+  if (ext === "mp4" || ext === "mov" || ext === "webm") return `video/${ext === "mp4" ? "mp4" : ext}`;
+  if (ext === "mp3") return "audio/mpeg";
+  if (ext === "wav") return "audio/wav";
+  if (ext === "jpg" || ext === "jpeg") return "image/jpeg";
+  if (ext === "png") return "image/png";
+  if (ext === "webp") return "image/webp";
+  return "application/octet-stream";
+}
+
 export function absoluteUpload(relative: string): string {
   return path.join(UPLOAD_ROOT, relative);
 }

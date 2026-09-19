@@ -18,3 +18,10 @@
 
 - [ ] Outstand webhooks for publish + analytics
   Polling can wait. Wire `post.published` when the key is in.
+
+- [X] Volume pass: repurposer, library, bulk calendar, calmer palette
+  Hooks × demos × CTAs now keep audio, optional music, hook text, and land as Ready cards.
+  Skipped students and an in-app editor. CapCut stays the cutter.
+
+- [ ] Screenshot-parity pass
+  Still open: live Outstand posting, URL download/transcribe, month calendar filters.

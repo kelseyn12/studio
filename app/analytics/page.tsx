@@ -1,12 +1,14 @@
 import { Shell } from "@/components/shell";
+import { Spark } from "@/components/spark";
 import { Stat } from "@/components/stat";
 import { formatCompact, formatMoney } from "@/lib/deals";
-import { dashboardTotals } from "@/lib/queries";
+import { dashboardTotals, viewsByDay } from "@/lib/queries";
 import { prisma } from "@/lib/prisma";
 
 export default async function AnalyticsPage() {
-  const [totals, videos, accounts] = await Promise.all([
+  const [totals, series, videos, accounts] = await Promise.all([
     dashboardTotals(),
+    viewsByDay(90),
     prisma.card.findMany({
       where: { status: { in: ["POSTED", "DATA"] } },
       orderBy: { views: "desc" },
@@ -25,6 +27,9 @@ export default async function AnalyticsPage() {
         <Stat label="Views" value={formatCompact(totals.views)} />
         <Stat label="Approval" value={`${Math.round(totals.approvalRate * 100)}%`} />
       </section>
+      <div className="mb-8">
+        <Spark points={series.map((row) => row.views)} label="Views · last 90 days" />
+      </div>
       <div className="grid gap-6 lg:grid-cols-2">
         <section>
           <h2 className="mb-3 font-semibold">Top videos</h2>

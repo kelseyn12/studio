@@ -205,25 +205,39 @@ model Transcript {
 }
 
 model RepurposeBatch {
-  id          String          @id @default(cuid())
+  id          String           @id @default(cuid())
   name        String
-  status      String          @default("draft")
-  speedOn     Boolean         @default(true)
-  colorOn     Boolean         @default(false)
-  zoomOn      Boolean         @default(false)
-  intensity   String          @default("light")
-  count       Int             @default(1)
-  createdAt   DateTime        @default(now())
+  status      String           @default("draft")
+  speedOn     Boolean          @default(true)
+  colorOn     Boolean          @default(false)
+  zoomOn      Boolean          @default(false)
+  intensity   String           @default("light")
+  allCombos   Boolean          @default(true)
+  count       Int              @default(12)
+  campaignId  String?
+  accountId   String?
+  createdAt   DateTime         @default(now())
   clips       RepurposeClip[]
+  tracks      RepurposeTrack[]
   outputs     RepurposeOut[]
 }
 
 model RepurposeClip {
-  id      String         @id @default(cuid())
-  batchId String
-  batch   RepurposeBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
-  slot    ClipSlot
-  path    String
+  id       String         @id @default(cuid())
+  batchId  String
+  batch    RepurposeBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  slot     ClipSlot
+  path     String
+  filename String
+  hookText String         @default("")
+  thumbPath String        @default("")
+}
+
+model RepurposeTrack {
+  id       String         @id @default(cuid())
+  batchId  String
+  batch    RepurposeBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  path     String
   filename String
 }
 
@@ -231,6 +245,7 @@ model RepurposeOut {
   id      String         @id @default(cuid())
   batchId String
   batch   RepurposeBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  cardId  String?
   path    String
   label   String
 }

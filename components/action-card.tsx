@@ -5,7 +5,7 @@ export function ActionCard({ action }: { action: StudioAction }) {
   return (
     <Link
       href={action.href}
-      className="block rounded-3xl bg-sun px-8 py-8 text-ink transition hover:brightness-95"
+      className="block rounded-3xl bg-sun px-8 py-8 text-ink transition hover:brightness-[1.03]"
     >
       <p className="text-xs font-semibold uppercase tracking-[0.18em]">Do this next</p>
       <h2 className="mt-3 text-4xl font-semibold tracking-tight">{action.title}</h2>

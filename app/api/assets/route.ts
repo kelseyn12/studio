@@ -19,5 +19,13 @@ export async function POST(request: Request) {
   }
   const saved = await saveUpload(file, `cards/${id}`);
   await prisma.asset.create({ data: { cardId: id, kind, ...saved } });
+  if (kind === "EDITED") {
+    await prisma.card.update({ where: { id }, data: { status: "REVIEW" } });
+  } else if (kind === "RAW" || kind === "VOICE") {
+    const card = await prisma.card.findUnique({ where: { id } });
+    if (card && (card.status === "IDEA" || card.status === "SCRIPTED")) {
+      await prisma.card.update({ where: { id }, data: { status: "FILMED" } });
+    }
+  }
   return NextResponse.json({ ok: true });
 }

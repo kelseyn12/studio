@@ -8,13 +8,13 @@
 
 html,
 body {
-  background: #09090b;
-  color: #fafaf7;
+  background: #14120f;
+  color: #f6f1e8;
 }
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: #2a2a30 transparent;
+  scrollbar-color: #3d382e transparent;
 }
 
 a,
@@ -22,10 +22,33 @@ button,
 input,
 select,
 textarea {
-  outline-color: #f5c400;
+  outline-color: #e0b36a;
 }
 
 ::selection {
-  background: #f5c400;
-  color: #09090b;
+  background: #e0b36a;
+  color: #14120f;
+}
+
+.field {
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid #3d382e;
+  background: #2a261f;
+  padding: 10px 14px;
+  color: #f6f1e8;
+}
+
+.field::placeholder {
+  color: #a89f91;
+}
+
+.label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #a89f91;
 }
