@@ -30,5 +30,5 @@
   Clips are labeled by the row you drop them in. Mix settings sit on the same batch page.
   CapCut cards now show a missing-packet list. ffmpeg exports at CRF 18.
 
-- [X] Raws live in Drive, finals ship through Outstand
-  Cards take a folder link. Editors cut 1080 exports. Studio does not store 4K.
+- [X] Editor desk is a slice, not the whole studio
+  Add them on Team as Editor. Assign on the card. They only see CapCut in and their jobs.

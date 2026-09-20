@@ -11,10 +11,12 @@ import { PIPELINE_META, PIPELINE_STATUSES } from "@/lib/pipeline";
 import { prisma } from "@/lib/prisma";
 import { EditorNeed } from "@/components/editor-need";
 import { editorNeeds } from "@/lib/editor-packet";
+import { requireUser } from "@/lib/auth";
 import { advanceCard, scheduleCard, updateCard } from "./actions";
 
 export default async function CardPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const user = await requireUser();
   const [card, campaigns, formats, accounts, editors] = await Promise.all([
     prisma.card.findUnique({
       where: { id },
@@ -23,9 +25,11 @@ export default async function CardPage({ params }: { params: Promise<{ id: strin
     prisma.campaign.findMany(),
     prisma.format.findMany(),
     prisma.socialAccount.findMany({ where: { isActive: true } }),
-    prisma.user.findMany({ where: { role: { in: ["EDITOR", "CREATOR"] } }, orderBy: { name: "asc" } }),
+    prisma.user.findMany({ where: { role: "EDITOR" }, orderBy: { name: "asc" } }),
   ]);
   if (!card) notFound();
+  if (user.role === "EDITOR" && card.editorId !== user.id) notFound();
+  const desk = user.role === "EDITOR";
   const next = PIPELINE_META[card.status].next;
   const edited = card.assets.find((asset) => asset.kind === "EDITED" || asset.kind === "GENERATED");
   const packet = editorNeeds(card);
@@ -42,7 +46,7 @@ export default async function CardPage({ params }: { params: Promise<{ id: strin
       <div className="mb-6 max-w-xl">
         <Stepper status={card.status} />
       </div>
-      {next ? (
+      {next && !desk ? (
         <form action={advanceCard.bind(null, card.id, next)} className="mb-8">
           <button className="rounded-xl bg-sun px-4 py-3 text-sm font-semibold text-ink">
             Move to {PIPELINE_META[next].label}
@@ -50,7 +54,8 @@ export default async function CardPage({ params }: { params: Promise<{ id: strin
         </form>
       ) : null}
 
-      <div className="grid gap-8 xl:grid-cols-2">
+      <div className={`grid gap-8 ${desk ? "" : "xl:grid-cols-2"}`}>
+        {desk ? null : (
         <form action={updateCard} className="space-y-3">
           <input type="hidden" name="id" value={card.id} />
           <input type="hidden" name="likes" value={card.likes} />
@@ -87,14 +92,17 @@ export default async function CardPage({ params }: { params: Promise<{ id: strin
               </option>
             ))}
           </select>
-          <select name="editorId" defaultValue={card.editorId ?? ""} className="field">
-            <option value="">Editor</option>
-            {editors.map((person) => (
-              <option key={person.id} value={person.id}>
-                {person.name} · {person.role.toLowerCase()}
-              </option>
-            ))}
-          </select>
+          <label>
+            <span className="label">Assign editor</span>
+            <select name="editorId" defaultValue={card.editorId ?? ""} className="field">
+              <option value="">None yet</option>
+              {editors.map((person) => (
+                <option key={person.id} value={person.id}>
+                  {person.name}
+                </option>
+              ))}
+            </select>
+          </label>
           <input name="rawsUrl" defaultValue={card.rawsUrl} placeholder="Raws folder — Drive or Dropbox" className="field" />
           <input name="referenceUrl" defaultValue={card.referenceUrl} placeholder="Reference video (optional)" className="field" />
           <textarea name="premise" defaultValue={card.premise} placeholder="Premise — what payoff does the viewer get?" className="field min-h-16" />
@@ -113,13 +121,15 @@ export default async function CardPage({ params }: { params: Promise<{ id: strin
           <input name="captionStyle" type="hidden" defaultValue={card.captionStyle} />
           <button className="w-full rounded-xl border border-line py-3">Save</button>
         </form>
+        )}
 
         <div className="space-y-4">
           <section className="rounded-card border border-line bg-panel p-5">
             <h2 className="mb-1 font-semibold">Editor packet</h2>
             <p className="mb-3 text-sm text-mute">
-              Editor works from the folder, not this laptop. Hook, script, raws link, and a note. Then they drop a 1080
-              CapCut export.
+              {desk
+                ? "Open the folder, cut 1080×1920 in CapCut, drop the export. That is the whole job."
+                : "Add them on Team, assign here, paste the Drive folder, write the note. They never see deals or the calendar."}
             </p>
             <EditorNeed items={packet} />
           </section>
@@ -165,6 +175,7 @@ export default async function CardPage({ params }: { params: Promise<{ id: strin
                 Open the delivered video
               </a>
             ) : null}
+            {desk ? null : (
             <form action={scheduleCard} className="mt-4 space-y-2">
               <input type="hidden" name="id" value={card.id} />
               <input
@@ -175,6 +186,7 @@ export default async function CardPage({ params }: { params: Promise<{ id: strin
               />
               <button className="w-full rounded-xl bg-sun px-4 py-3 font-semibold text-ink">Schedule and ship</button>
             </form>
+            )}
           </section>
           <div className="space-y-2">
             {card.assets.map((asset) => (

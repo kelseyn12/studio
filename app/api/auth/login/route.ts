@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { hashPin, pinsMatch, studioPin } from "@/lib/auth";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
+import { homeFor } from "@/lib/access";
 import { writeSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 
@@ -39,5 +40,5 @@ export async function POST(request: Request) {
     email: user.email,
     role: user.role,
   });
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, home: homeFor(user.role) });
 }

@@ -30,7 +30,8 @@ function LoginForm() {
       setPending(false);
       return;
     }
-    router.push(params.get("next") || "/");
+    const body = await response.json().catch(() => ({}));
+    router.push(params.get("next") || body.home || "/");
     router.refresh();
   }
 
@@ -39,21 +40,24 @@ function LoginForm() {
       <div>
         <p className="text-sm text-mute">One place for the whole week</p>
         <h1 className="mt-1 text-3xl font-semibold tracking-tight">System Studio</h1>
-        <p className="mt-2 text-mute">Film the batch. Multiply it. Drop the CapCut. Ship the calendar.</p>
+        <p className="mt-2 text-mute">Use the email from Team. Your role is already set there.</p>
       </div>
       <input name="name" required placeholder="Your name" className="field" />
-      <input name="email" type="email" required placeholder="Email" className="field" />
+      <input name="email" type="email" required placeholder="Email from Team" className="field" />
       <select name="role" className="field" defaultValue="CREATOR">
-        <option value="CREATOR">Creator</option>
-        <option value="EDITOR">Editor</option>
-        <option value="OPERATOR">Operator / VA</option>
+        <option value="CREATOR">Creator — first setup only</option>
+        <option value="EDITOR">Editor — first setup only</option>
+        <option value="OPERATOR">Operator — first setup only</option>
       </select>
       <input name="pin" required placeholder="Studio PIN" className="field" />
       {error ? <p className="text-sm text-review">{error}</p> : null}
       <button disabled={pending} className="w-full rounded-xl bg-sun py-3 font-semibold text-ink">
         {pending ? "Opening…" : "Enter studio"}
       </button>
-      <p className="text-xs text-mute">Default PIN is 4242 until you change STUDIO_PIN in .env.</p>
+      <p className="text-xs text-mute">
+        Add people on Team first. After that, email + PIN loads their desk. Role on this screen is ignored if the email
+        already exists.
+      </p>
     </form>
   );
 }

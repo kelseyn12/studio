@@ -20,7 +20,10 @@ export default async function TeamPage() {
   return (
     <Shell>
       <h1 className="text-3xl font-semibold tracking-tight">Team</h1>
-      <p className="mt-1 mb-6 text-mute">Creator films. Editor cuts. Operator schedules.</p>
+      <p className="mt-1 mb-6 max-w-2xl text-mute">
+        Add Maya as Editor. She logs in with that email and the studio PIN. Then open a card, Assign editor, Save.
+        She only sees CapCut in and her cards.
+      </p>
       <form action={addMember} className="mb-8 flex flex-wrap gap-2">
         <input name="name" placeholder="Name" className="rounded-xl border border-line bg-lift px-3 py-2" />
         <input name="email" placeholder="Email" className="rounded-xl border border-line bg-lift px-3 py-2" />
