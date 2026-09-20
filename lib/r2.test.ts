@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
+import { localRoot, UPLOAD_ROOT } from "@/lib/files";
 import { hasR2, r2PublicUrl } from "@/lib/r2";
 
 describe("r2", () => {
   it("stays off without credentials", () => {
     expect(hasR2()).toBe(false);
+    expect(localRoot()).toBe(UPLOAD_ROOT);
   });
 
   it("joins a public base and key", () => {

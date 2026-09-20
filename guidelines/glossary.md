@@ -16,8 +16,8 @@
 - `assembleVideo` — `lib/ffmpeg.ts` — concatenates hook × body × CTA, keeps audio, optional music, applies a per-copy Variation.
 - `variationFor` — `lib/variations.ts` — unique speed / light / crop amounts for each copy of a mix.
 - `plannedMixes` — `lib/variations.ts` — live mix count from clip piles and the all-combos cap.
-- `saveUpload` — `lib/files.ts` — writes raws, voice notes, deliveries under `data/uploads` and dual-writes to R2 when configured.
-- `ensureLocal` — `lib/files.ts` — pulls a file from R2 onto disk so ffmpeg / Outstand can read it.
+- `saveUpload` — `lib/files.ts` — writes to R2 when configured; otherwise `data/uploads` on this Mac.
+- `ensureLocal` — `lib/files.ts` — pulls a file from R2 into a temp folder only when ffmpeg needs it.
 - `hasR2` — `lib/r2.ts` — true when Cloudflare R2 credentials are set.
 - `hasClerk` — `lib/clerk-mode.ts` — true when Clerk keys are set. PIN login is then refused.
 - `readClerkSession` — `lib/clerk-user.ts` — maps a Clerk user onto Prisma (`clerkId` + role from publicMetadata).

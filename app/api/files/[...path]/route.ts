@@ -1,7 +1,7 @@
 import { readFile } from "fs/promises";
-import path from "path";
 import { NextResponse } from "next/server";
-import { ensureLocal, mimeFromName, UPLOAD_ROOT } from "@/lib/files";
+import { ensureLocal, mimeFromName } from "@/lib/files";
+import { getR2, hasR2 } from "@/lib/r2";
 import { readSession } from "@/lib/session";
 
 export async function GET(
@@ -12,16 +12,13 @@ export async function GET(
   if (!user) return NextResponse.json({ error: "Auth required" }, { status: 401 });
   const { path: parts } = await context.params;
   const relative = parts.join("/");
-  const root = path.resolve(UPLOAD_ROOT);
-  const absolute = path.resolve(root, relative);
-  if (!absolute.startsWith(root)) {
+  if (!relative || relative.includes("..")) {
     return NextResponse.json({ error: "Invalid path" }, { status: 400 });
   }
+  const name = relative.split("/").pop() || "file";
   try {
-    const local = await ensureLocal(relative);
-    const bytes = await readFile(local);
-    const name = path.basename(relative);
-    return new NextResponse(bytes, {
+    const bytes = hasR2() ? await getR2(relative) : await readFile(await ensureLocal(relative));
+    return new NextResponse(new Uint8Array(bytes), {
       headers: {
         "Content-Type": mimeFromName(relative),
         "Content-Disposition": `attachment; filename="${name}"`,

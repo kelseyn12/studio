@@ -1,7 +1,7 @@
 import { spawn } from "child_process";
 import { mkdir } from "fs/promises";
 import path from "path";
-import { UPLOAD_ROOT } from "@/lib/files";
+import { localRoot } from "@/lib/files";
 
 function runCommand(cmd: string, args: string[]): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -57,7 +57,7 @@ export function escapeDrawText(text: string): string {
 }
 
 export async function writeThumb(inputAbs: string, outputRel: string): Promise<string> {
-  const outputAbs = path.join(UPLOAD_ROOT, outputRel);
+  const outputAbs = path.join(localRoot(), outputRel);
   await mkdir(path.dirname(outputAbs), { recursive: true });
   await runFfmpeg(["-i", inputAbs, "-vframes", "1", "-q:v", "3", outputAbs]);
   return outputRel;
@@ -114,9 +114,9 @@ export async function assembleVideo(input: {
   crop: number;
   musicPath?: string;
 }): Promise<string> {
-  await mkdir(path.join(UPLOAD_ROOT, "generated"), { recursive: true });
+  await mkdir(path.join(localRoot(), "generated"), { recursive: true });
   const outputRel = path.join("generated", input.outputName);
-  const outputAbs = path.join(UPLOAD_ROOT, outputRel);
+  const outputAbs = path.join(localRoot(), outputRel);
   const n = input.clips.length;
   if (n === 0) throw new Error("No clips to assemble");
 

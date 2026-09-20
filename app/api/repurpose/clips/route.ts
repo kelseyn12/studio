@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { writeThumb } from "@/lib/ffmpeg";
-import { absoluteUpload, saveUpload } from "@/lib/files";
+import { ensureLocal, saveUpload, uploadLocalToR2 } from "@/lib/files";
+import { hasR2 } from "@/lib/r2";
 import { prisma } from "@/lib/prisma";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
 import { readSession } from "@/lib/session";
@@ -21,7 +22,9 @@ export async function POST(request: Request) {
   const saved = await saveUpload(file, `repurpose/${batchId}`);
   let thumbPath = "";
   try {
-    thumbPath = await writeThumb(absoluteUpload(saved.path), `thumbs/${saved.path}.jpg`);
+    const local = await ensureLocal(saved.path);
+    thumbPath = await writeThumb(local, `thumbs/${saved.path}.jpg`);
+    if (hasR2()) await uploadLocalToR2(thumbPath, "image/jpeg");
   } catch {
     thumbPath = "";
   }
