@@ -3,40 +3,36 @@ export type Variation = {
   saturation: number;
   contrast: number;
   hue: number;
-  zoom: boolean;
+  crop: number;
   label: string;
 };
 
-const LIGHT_SPEEDS = [1, 1.02, 0.98, 1.03, 0.97];
-const HARD_SPEEDS = [1, 1.05, 0.95, 1.06, 0.94];
-const LIGHT_SAT = [1, 1.06, 0.94, 1.1, 0.9];
-const HARD_SAT = [1, 1.14, 0.86, 1.18, 0.82];
-const HUES = [0, 8, -8, 14, -12];
+const STEPS = [1, -1, 0.55, -0.7, 1.15];
 
-export function variationFor(index: number, input: {
-  speedOn: boolean;
-  colorOn: boolean;
-  zoomOn: boolean;
-  intensity: string;
-}): Variation {
-  const hard = input.intensity === "hard";
-  const speeds = hard ? HARD_SPEEDS : LIGHT_SPEEDS;
-  const sats = hard ? HARD_SAT : LIGHT_SAT;
-  const speed = input.speedOn ? speeds[index % speeds.length] : 1;
-  const saturation = input.colorOn ? sats[index % sats.length] : 1;
-  const hue = input.colorOn ? HUES[index % HUES.length] : 0;
-  const zoom = input.zoomOn ? index % 2 === 1 : false;
+export function variationFor(
+  index: number,
+  input: { speedAmt: number; colorAmt: number; cropAmt: number },
+): Variation {
+  const step = STEPS[index % STEPS.length];
+  const speedAmt = Math.max(0, input.speedAmt);
+  const colorAmt = Math.max(0, input.colorAmt);
+  const cropAmt = Math.max(0, input.cropAmt);
+  const speed = speedAmt ? Number((1 + (speedAmt / 100) * step).toFixed(3)) : 1;
+  const saturation = colorAmt ? Number((1 + (colorAmt / 100) * step).toFixed(3)) : 1;
+  const contrast = colorAmt ? Number((1 + (colorAmt / 200) * Math.abs(step)).toFixed(3)) : 1;
+  const hue = colorAmt ? Math.round(colorAmt * step * 1.2) : 0;
+  const crop = cropAmt ? Number((cropAmt * Math.abs(step)).toFixed(1)) : 0;
   const bits = [
-    input.speedOn ? `${Math.round(speed * 100)}%` : null,
-    input.colorOn ? `sat ${saturation.toFixed(2)}` : null,
-    zoom ? "crop" : null,
+    speedAmt ? `${Math.round(speed * 100)}% speed` : null,
+    colorAmt ? `sat ${saturation.toFixed(2)}` : null,
+    crop ? `crop ${crop}%` : null,
   ].filter(Boolean);
   return {
     speed,
     saturation,
-    contrast: input.colorOn ? (hard ? 1.06 : 1.03) : 1,
+    contrast,
     hue,
-    zoom,
+    crop,
     label: bits.length ? bits.join(" · ") : "clean",
   };
 }

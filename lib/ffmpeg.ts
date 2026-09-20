@@ -67,17 +67,18 @@ function videoFilter(input: {
   saturation: number;
   contrast: number;
   hue: number;
-  zoom: boolean;
+  crop: number;
   hookText?: string;
 }): string {
-  const parts = input.zoom
-    ? ["scale=1166:2074:flags=lanczos", "crop=1080:1920", "fps=30", "setsar=1"]
-    : [
-        "scale=1080:1920:force_original_aspect_ratio=decrease:flags=lanczos",
-        "pad=1080:1920:(ow-iw)/2:(oh-ih)/2",
-        "fps=30",
-        "setsar=1",
-      ];
+  const crop = Math.max(0, input.crop);
+  const width = Math.round(1080 * (1 + crop / 100));
+  const height = Math.round(1920 * (1 + crop / 100));
+  const parts = [
+    `scale=${width}:${height}:force_original_aspect_ratio=increase:flags=lanczos`,
+    "crop=1080:1920",
+    "fps=30",
+    "setsar=1",
+  ];
   if (input.speed !== 1) parts.push(`setpts=PTS/${input.speed}`);
   if (input.saturation !== 1 || input.contrast !== 1 || input.hue !== 0) {
     parts.push(`eq=saturation=${input.saturation}:contrast=${input.contrast}`);
@@ -92,6 +93,16 @@ function videoFilter(input: {
   return parts.join(",");
 }
 
+export function uniquenessFilter(input: {
+  speed: number;
+  saturation: number;
+  contrast: number;
+  hue: number;
+  crop: number;
+}): string {
+  return videoFilter(input);
+}
+
 export async function assembleVideo(input: {
   clips: Array<{ path: string; hookText?: string }>;
   outputName: string;
@@ -99,7 +110,7 @@ export async function assembleVideo(input: {
   saturation: number;
   contrast: number;
   hue: number;
-  zoom: boolean;
+  crop: number;
   musicPath?: string;
 }): Promise<string> {
   await mkdir(path.join(UPLOAD_ROOT, "generated"), { recursive: true });
@@ -124,7 +135,7 @@ export async function assembleVideo(input: {
       saturation: input.saturation,
       contrast: input.contrast,
       hue: input.hue,
-      zoom: input.zoom,
+      crop: input.crop,
       hookText: index === 0 ? input.clips[index].hookText : undefined,
     });
     chains.push(`[${index}:v]${vf}[v${index}]`);

@@ -24,10 +24,12 @@ export async function POST(
         count: Number(form.get("count") || 12),
         variants: Math.max(1, Number(form.get("variants") || 1)),
         allCombos: form.get("allCombos") === "on",
-        speedOn: form.get("speedOn") === "on",
-        colorOn: form.get("colorOn") === "on",
-        zoomOn: form.get("zoomOn") === "on",
-        intensity: String(form.get("intensity") || "light"),
+        speedAmt: Math.max(0, Number(form.get("speedAmt") || 0)),
+        colorAmt: Math.max(0, Number(form.get("colorAmt") || 0)),
+        cropAmt: Math.max(0, Number(form.get("cropAmt") || 0)),
+        speedOn: Number(form.get("speedAmt") || 0) > 0,
+        colorOn: Number(form.get("colorAmt") || 0) > 0,
+        zoomOn: Number(form.get("cropAmt") || 0) > 0,
         campaignId: String(form.get("campaignId") || "") || null,
         accountId: String(form.get("accountId") || "") || null,
       },
@@ -55,6 +57,7 @@ export async function POST(
     for (const combo of combos) {
       for (let copy = 0; copy < copies; copy += 1) {
         const variation = variationFor(fileNumber, batch);
+        const { label, ...filters } = variation;
         const music = batch.tracks[fileNumber % Math.max(batch.tracks.length, 1)];
         fileNumber += 1;
         const outputRel = await assembleVideo({
@@ -63,7 +66,7 @@ export async function POST(
             hookText: clip.hookText || undefined,
           })),
           outputName: `${id}-${fileNumber}.mp4`,
-          ...variation,
+          ...filters,
           musicPath: music ? absoluteUpload(music.path) : undefined,
         });
         const title = `${batch.name} · ${fileNumber}`;

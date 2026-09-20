@@ -8,8 +8,8 @@
   Cards carry script, reference, raws, voice note, deadline, and schedule.
   Deals score hourly rate and daily slots, not just base pay.
 
-- [ ] Paste Outstand org id
-  API key is in `.env` and @kelseynocekugc synced. Still need `OUTSTAND_ORG_ID` to connect new networks.
+- [X] Outstand key + org id in `.env`
+  @kelseynocekugc synced. Connect new campaign accounts on Accounts, then Sync. Never commit `.env`.
 
 - [ ] Clerk or managed auth for production
   Studio PIN is a local lock so the machine can run today.

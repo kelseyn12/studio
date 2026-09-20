@@ -106,15 +106,19 @@ export default async function BatchPage({ params }: { params: Promise<{ id: stri
           allCombos: batch.allCombos,
           count: batch.count,
           variants: batch.variants,
-          speedOn: batch.speedOn,
-          colorOn: batch.colorOn,
-          zoomOn: batch.zoomOn,
-          intensity: batch.intensity,
+          speedAmt: batch.speedAmt,
+          colorAmt: batch.colorAmt,
+          cropAmt: batch.cropAmt,
           campaignId: batch.campaignId ?? "",
           accountId: batch.accountId ?? "",
         }}
         campaigns={campaigns.map((campaign) => ({ id: campaign.id, name: campaign.name }))}
-        accounts={accounts.map((account) => ({ id: account.id, name: `@${account.username}` }))}
+        accounts={accounts.map((account) => ({
+          id: account.id,
+          name: account.nickname
+            ? `${account.nickname} · @${account.username}`
+            : `${account.network} · @${account.username}`,
+        }))}
       />
 
       {batch.status === "rendering" ? (
