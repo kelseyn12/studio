@@ -3,47 +3,37 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
+import { nextStatusFor, type DeskStage } from "@/lib/card-desk";
+import { cardPatch } from "@/lib/card-patch";
 import { saveUpload } from "@/lib/files";
 import { isPipelineStatus } from "@/lib/pipeline";
 import { prisma } from "@/lib/prisma";
 import { queueCard } from "@/lib/publish";
 
-export async function updateCard(formData: FormData) {
+async function saveCard(formData: FormData) {
   await requireUser();
   const id = String(formData.get("id"));
-  const status = String(formData.get("status"));
-  await prisma.card.update({
-    where: { id },
-    data: {
-      title: String(formData.get("title") || "Untitled"),
-      status: isPipelineStatus(status) ? status : undefined,
-      campaignId: String(formData.get("campaignId") || "") || null,
-      formatId: String(formData.get("formatId") || "") || null,
-      accountId: String(formData.get("accountId") || "") || null,
-      editorId: String(formData.get("editorId") || "") || null,
-      premise: String(formData.get("premise") || ""),
-      hook: String(formData.get("hook") || ""),
-      body: String(formData.get("body") || ""),
-      plug: String(formData.get("plug") || ""),
-      script: String(formData.get("script") || ""),
-      caption: String(formData.get("caption") || ""),
-      referenceUrl: String(formData.get("referenceUrl") || ""),
-      rawsUrl: String(formData.get("rawsUrl") || ""),
-      editorNote: String(formData.get("editorNote") || ""),
-      captionStyle: String(formData.get("captionStyle") || ""),
-      plannedDate: formData.get("plannedDate") ? new Date(String(formData.get("plannedDate"))) : null,
-      scheduledAt: formData.get("scheduledAt") ? new Date(String(formData.get("scheduledAt"))) : null,
-      deadlineAt: formData.get("deadlineAt") ? new Date(String(formData.get("deadlineAt"))) : null,
-      payoutCents: Math.round(Number(formData.get("payout") || 0) * 100),
-      views: Number(formData.get("views") || 0),
-      likes: Number(formData.get("likes") || 0),
-      comments: Number(formData.get("comments") || 0),
-      approved: formData.get("approved") === "on",
-    },
-  });
+  await prisma.card.update({ where: { id }, data: cardPatch(formData) });
   revalidatePath(`/cards/${id}`);
   revalidatePath("/");
-  revalidatePath("/pipeline");
+  revalidatePath("/plan");
+  return id;
+}
+
+export async function updateCard(formData: FormData) {
+  await saveCard(formData);
+}
+
+export async function finishStage(stage: DeskStage, formData: FormData) {
+  const id = await saveCard(formData);
+  const card = await prisma.card.findUnique({ where: { id } });
+  const next = card ? nextStatusFor(stage, card.status) : null;
+  if (next) {
+    await prisma.card.update({ where: { id }, data: { status: next } });
+  }
+  const onward = stage === "brief" ? "footage" : stage === "footage" ? "editor" : "editor";
+  revalidatePath(`/cards/${id}`);
+  redirect(`/cards/${id}?step=${onward}`);
 }
 
 export async function uploadAsset(formData: FormData) {
@@ -82,7 +72,14 @@ export async function scheduleCard(formData: FormData) {
   const id = String(formData.get("id"));
   const when = formData.get("scheduledAt") ? new Date(String(formData.get("scheduledAt"))) : new Date();
   const accountId = String(formData.get("accountId") || "") || null;
+  if (formData.has("caption")) {
+    await prisma.card.update({
+      where: { id },
+      data: { caption: String(formData.get("caption") || "") },
+    });
+  }
   await queueCard(id, when, accountId);
   revalidatePath(`/cards/${id}`);
   revalidatePath("/calendar");
+  redirect("/calendar");
 }

@@ -44,7 +44,7 @@ export function Nav({ role }: { role: Role }) {
           href="/repurposer"
           className="mt-6 rounded-xl bg-sun px-3 py-3 text-center text-sm font-semibold text-ink"
         >
-          New batch
+          Multiply
         </Link>
       ) : null}
     </aside>

@@ -1,0 +1,66 @@
+import { finishStage, updateCard } from "@/app/cards/[id]/actions";
+import { toInputDate } from "@/lib/dates";
+
+type Option = { id: string; name?: string; username?: string; nickname?: string };
+
+export function CardBrief({
+  card,
+  campaigns,
+  accounts,
+}: {
+  card: {
+    id: string;
+    title: string;
+    premise: string;
+    hook: string;
+    body: string;
+    plug: string;
+    script: string;
+    referenceUrl: string;
+    campaignId: string | null;
+    accountId: string | null;
+    plannedDate: Date | null;
+  };
+  campaigns: Option[];
+  accounts: Array<{ id: string; username: string; nickname: string }>;
+}) {
+  return (
+    <form action={finishStage.bind(null, "brief")} className="space-y-3">
+      <input type="hidden" name="id" value={card.id} />
+      <p className="text-sm text-mute">Write it. Pick the day you will film and which account it is for. This does not publish.</p>
+      <input name="title" defaultValue={card.title} className="field" placeholder="Title" />
+      <select name="accountId" defaultValue={card.accountId ?? ""} className="field">
+        <option value="">Which account</option>
+        {accounts.map((account) => (
+          <option key={account.id} value={account.id}>
+            {account.nickname ? `${account.nickname} · ` : ""}@{account.username}
+          </option>
+        ))}
+      </select>
+      <select name="campaignId" defaultValue={card.campaignId ?? ""} className="field">
+        <option value="">Personal — no deal</option>
+        {campaigns.map((campaign) => (
+          <option key={campaign.id} value={campaign.id}>
+            {campaign.name}
+          </option>
+        ))}
+      </select>
+      <label>
+        <span className="label">Film this day</span>
+        <input name="plannedDate" type="date" defaultValue={card.plannedDate ? toInputDate(card.plannedDate) : ""} className="field" />
+      </label>
+      <input name="referenceUrl" defaultValue={card.referenceUrl} placeholder="Reference link (optional)" className="field" />
+      <textarea name="premise" defaultValue={card.premise} placeholder="Payoff — why would someone watch" className="field min-h-16" />
+      <textarea name="hook" defaultValue={card.hook} placeholder="Hook — first line + first visual" className="field min-h-16" />
+      <textarea name="body" defaultValue={card.body} placeholder="Body / demo" className="field min-h-16" />
+      <textarea name="plug" defaultValue={card.plug} placeholder="CTA / plug" className="field min-h-16" />
+      <textarea name="script" defaultValue={card.script} placeholder="Full script and shot notes" className="field min-h-32" />
+      <div className="flex gap-2">
+        <button formAction={updateCard} className="flex-1 rounded-xl border border-line py-3">
+          Save
+        </button>
+        <button className="flex-1 rounded-xl bg-sun py-3 font-semibold text-ink">Finish brief</button>
+      </div>
+    </form>
+  );
+}

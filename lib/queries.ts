@@ -20,6 +20,7 @@ export async function machineCounts(): Promise<MachineCounts> {
     where: { status: { in: ["ACTIVE", "TRIAL"] } },
     select: { postsPerDay: true, accountsAllowed: true },
   });
+  counts.ready = await prisma.card.count({ where: { status: "READY", scheduledAt: null } });
   counts.totalCards = await prisma.card.count();
   counts.activeDeals = deals.length;
   counts.paidSlotsToday = deals.reduce(

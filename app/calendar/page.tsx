@@ -53,8 +53,8 @@ export default async function CalendarPage({
     <Shell>
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Calendar</h1>
-          <p className="mt-1 text-mute">The post already knows where it is going and when it goes live.</p>
+          <h1 className="text-3xl font-semibold tracking-tight">Live</h1>
+          <p className="mt-1 text-mute">Ready files only. Plan month is for filming, not publishing.</p>
         </div>
         <div className="flex gap-2">
           <Link href="/library" className="rounded-xl border border-line px-3 py-2 text-sm">

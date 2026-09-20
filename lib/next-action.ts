@@ -36,7 +36,7 @@ export function pickNextAction(counts: MachineCounts): StudioAction {
     return {
       kind: "review",
       title: `Review ${counts.review} edit${counts.review === 1 ? "" : "s"}`,
-      detail: "Approve or send back. This is the only creator work after filming.",
+      detail: "Watch the cut. If it is right, Live is the next room.",
       href: "/edits",
       count: counts.review,
     };
@@ -44,8 +44,8 @@ export function pickNextAction(counts: MachineCounts): StudioAction {
   if (counts.ready > 0) {
     return {
       kind: "schedule",
-      title: `Schedule ${counts.ready} ready video${counts.ready === 1 ? "" : "s"}`,
-      detail: "Operator job. Pick a time and ship through Outstand.",
+      title: `Park ${counts.ready} ready video${counts.ready === 1 ? "" : "s"} on Live`,
+      detail: "The file is done. Pick a day and it ships. Nothing goes out until you park it.",
       href: "/calendar",
       count: counts.ready,
     };
@@ -53,8 +53,8 @@ export function pickNextAction(counts: MachineCounts): StudioAction {
   if (counts.filmed > 0) {
     return {
       kind: "handoff",
-      title: `Drop ${counts.filmed} CapCut export${counts.filmed === 1 ? "" : "s"}`,
-      detail: "Cut in CapCut. Put the file on the card. Then you are done.",
+      title: `Send ${counts.filmed} filmed card${counts.filmed === 1 ? "" : "s"} to CapCut`,
+      detail: "Voice + Drive folder + assign. You do not cut in Studio.",
       href: "/edits",
       count: counts.filmed,
     };
@@ -64,7 +64,7 @@ export function pickNextAction(counts: MachineCounts): StudioAction {
       kind: "film",
       title: `Film ${counts.scripted} scripted card${counts.scripted === 1 ? "" : "s"}`,
       detail: "Batch by mode. Film the whole block in one sitting.",
-      href: "/pipeline?status=SCRIPTED",
+      href: "/plan",
       count: counts.scripted,
     };
   }
@@ -73,7 +73,7 @@ export function pickNextAction(counts: MachineCounts): StudioAction {
       kind: "script",
       title: `Script ${counts.idea} idea${counts.idea === 1 ? "" : "s"}`,
       detail: "Premise, hook, body, plug. Do not film until the batch is written.",
-      href: "/pipeline?status=IDEA",
+      href: "/plan",
       count: counts.idea,
     };
   }

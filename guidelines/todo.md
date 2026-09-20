@@ -36,3 +36,7 @@
 
 - [X] Editor desk is a slice, not the whole studio
   Add them on Team as Editor. Assign on the card. They only see CapCut in and their jobs.
+
+- [X] One path: Plan month → make file → Live
+  Base44 put publish time on every card step and then had a second calendar.
+  Cards are now Brief / Footage / Editor / Live. Only Live ships. Today is one next step.

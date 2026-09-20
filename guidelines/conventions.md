@@ -4,6 +4,7 @@
 - Prisma + SQLite locally. Postgres can replace the datasource later without changing page code.
 - Roles: CREATOR films and reviews. EDITOR cuts. OPERATOR schedules through Outstand.
 - Cards move through IDEA → SCRIPTED → FILMED → EDITING → REVIEW → READY → POSTED → DATA.
+- The card desk is Brief → Footage → Editor → Live. Plan month books a film day. Live is the only publish room.
 - No fake dashboard numbers. Empty states tell the next action.
 - Palette is warm charcoal + honey, not neon yellow. Status colors stay muted.
 - CapCut is the editor. Studio takes the export and ships.

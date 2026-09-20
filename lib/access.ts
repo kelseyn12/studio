@@ -29,43 +29,35 @@ export function navFor(role: Role): Array<{ label: string; items: Array<{ href: 
   }
   if (role === "OPERATOR") {
     return [
-      { label: "Now", items: [{ href: "/", label: "Today" }, { href: "/pipeline", label: "Pipeline" }] },
+      { label: "Do", items: [{ href: "/", label: "Today" }, { href: "/calendar", label: "Live" }] },
       {
-        label: "Ship",
+        label: "Desk",
         items: [
           { href: "/edits", label: "CapCut in" },
           { href: "/library", label: "Library" },
-          { href: "/calendar", label: "Calendar" },
           { href: "/connections", label: "Accounts" },
         ],
       },
     ];
   }
   return [
-    { label: "Now", items: [{ href: "/", label: "Today" }, { href: "/pipeline", label: "Pipeline" }] },
     {
-      label: "Make",
+      label: "Do",
       items: [
-        { href: "/plan", label: "Plan" },
-        { href: "/repurposer", label: "Repurpose" },
-        { href: "/transcriber", label: "Transcribe" },
+        { href: "/", label: "Today" },
+        { href: "/plan", label: "Plan month" },
+        { href: "/repurposer", label: "Multiply" },
+        { href: "/calendar", label: "Live" },
       ],
     },
     {
-      label: "Ship",
+      label: "Desk",
       items: [
         { href: "/edits", label: "CapCut in" },
         { href: "/library", label: "Library" },
-        { href: "/calendar", label: "Calendar" },
         { href: "/connections", label: "Accounts" },
-      ],
-    },
-    {
-      label: "Money",
-      items: [
-        { href: "/campaigns", label: "Deals" },
-        { href: "/analytics", label: "Numbers" },
         { href: "/team", label: "Team" },
+        { href: "/campaigns", label: "Deals" },
       ],
     },
   ];
