@@ -6,16 +6,18 @@ import { DropZone } from "@/components/drop-zone";
 import { Shell } from "@/components/shell";
 import { publicFileUrl } from "@/lib/urls";
 import { prisma } from "@/lib/prisma";
+import { createBatch } from "../actions";
 
 export default async function BatchPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [batch, campaigns, accounts] = await Promise.all([
+  const [batch, campaigns, accounts, batches] = await Promise.all([
     prisma.repurposeBatch.findUnique({
       where: { id },
       include: { clips: true, tracks: true, outputs: true },
     }),
     prisma.campaign.findMany({ orderBy: { name: "asc" } }),
     prisma.socialAccount.findMany({ where: { isActive: true } }),
+    prisma.repurposeBatch.findMany({ orderBy: { createdAt: "desc" }, take: 8 }),
   ]);
   if (!batch) notFound();
   const hooks = batch.clips.filter((clip) => clip.slot === "HOOK");
@@ -24,14 +26,33 @@ export default async function BatchPage({ params }: { params: Promise<{ id: stri
 
   return (
     <Shell>
-      <p className="text-sm text-mute">
-        <Link href="/repurposer">Repurpose</Link>
-      </p>
-      <h1 className="mt-1 text-3xl font-semibold tracking-tight">{batch.name}</h1>
-      <p className="mt-2 max-w-2xl text-mute">
-        You tell Studio which clip is which by the row you drop it in. It does not guess. Mix settings
-        sit under the rows — same page, no extra API.
-      </p>
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-semibold tracking-tight">{batch.name}</h1>
+          <p className="mt-2 max-w-2xl text-mute">
+            Drop openings in Hooks, middles in Bodies, endings in CTAs. Mix settings are under the rows.
+          </p>
+        </div>
+        <form action={createBatch} className="flex gap-2">
+          <input name="name" placeholder="Another batch" className="field w-44" />
+          <button className="shrink-0 rounded-xl border border-line px-4 py-2 text-sm">New batch</button>
+        </form>
+      </div>
+      {batches.length > 1 ? (
+        <div className="mb-6 flex flex-wrap gap-2">
+          {batches.map((item) => (
+            <Link
+              key={item.id}
+              href={`/repurposer/${item.id}`}
+              className={`rounded-full px-3 py-1 text-sm ${
+                item.id === batch.id ? "bg-sun text-ink" : "bg-lift text-mute"
+              }`}
+            >
+              {item.name}
+            </Link>
+          ))}
+        </div>
+      ) : null}
 
       <section className="my-8">
         <p className="label">Clips · drop into the right row</p>
