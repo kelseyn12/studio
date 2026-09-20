@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ActionCard } from "@/components/action-card";
 import { Shell } from "@/components/shell";
 import { Spark } from "@/components/spark";
+import { StudioMap } from "@/components/studio-map";
 import { Stat } from "@/components/stat";
 import { StatusPill } from "@/components/status-pill";
 import { formatCompact, formatMoney } from "@/lib/deals";
@@ -42,6 +43,7 @@ export default async function TodayPage() {
           <h1 className="mt-1 text-3xl font-semibold tracking-tight">Today</h1>
         </div>
         <ActionCard action={action} />
+        <StudioMap />
         <section className="grid gap-3 md:grid-cols-4">
           <Stat
             label="Paid slots today"
@@ -100,7 +102,7 @@ export default async function TodayPage() {
           <div className="space-y-2">
             {todayCards.length === 0 ? (
               <p className="rounded-2xl border border-dashed border-line px-5 py-8 text-mute">
-                Nothing in motion. Plan a batch or add a deal.
+                Nothing in motion. Drop clips in Repurpose, or plan a card if this is a new original.
               </p>
             ) : (
               todayCards.map((card) => (

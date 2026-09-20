@@ -19,6 +19,10 @@
 - [ ] Outstand webhooks for publish + analytics
   Polling can wait. Wire `post.published` when the key is in.
 
+- [X] Clarify repurposer: mixes vs unique copies
+  Hooks × bodies × CTAs is the story mix. Variants change speed/light/crop per copy.
+  Live math updates as you change unique copies. Today starts at clips, not a deal.
+
 - [X] Volume pass: repurposer, library, bulk calendar, calmer palette
   Hooks × demos × CTAs now keep audio, optional music, hook text, and land as Ready cards.
   Skipped students and an in-app editor. CapCut stays the cutter.

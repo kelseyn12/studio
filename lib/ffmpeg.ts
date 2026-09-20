@@ -63,15 +63,14 @@ export async function writeThumb(inputAbs: string, outputRel: string): Promise<s
 }
 
 function videoFilter(input: {
-  speedOn: boolean;
-  colorOn: boolean;
-  zoomOn: boolean;
-  intensity: string;
+  speed: number;
+  saturation: number;
+  contrast: number;
+  hue: number;
+  zoom: boolean;
   hookText?: string;
 }): string {
-  const hue = input.intensity === "hard" ? 16 : 7;
-  const speed = input.speedOn ? (input.intensity === "hard" ? 1.06 : 1.03) : 1;
-  const parts = input.zoomOn
+  const parts = input.zoom
     ? ["scale=1166:2074", "crop=1080:1920", "fps=30", "setsar=1"]
     : [
         "scale=1080:1920:force_original_aspect_ratio=decrease",
@@ -79,8 +78,11 @@ function videoFilter(input: {
         "fps=30",
         "setsar=1",
       ];
-  if (input.speedOn) parts.push(`setpts=PTS/${speed}`);
-  if (input.colorOn) parts.push(`eq=saturation=${1 + hue / 40}:contrast=1.04`);
+  if (input.speed !== 1) parts.push(`setpts=PTS/${input.speed}`);
+  if (input.saturation !== 1 || input.contrast !== 1 || input.hue !== 0) {
+    parts.push(`eq=saturation=${input.saturation}:contrast=${input.contrast}`);
+    if (input.hue !== 0) parts.push(`hue=h=${input.hue}`);
+  }
   if (input.hookText) {
     const text = escapeDrawText(input.hookText.slice(0, 80));
     parts.push(
@@ -93,10 +95,11 @@ function videoFilter(input: {
 export async function assembleVideo(input: {
   clips: Array<{ path: string; hookText?: string }>;
   outputName: string;
-  speedOn: boolean;
-  colorOn: boolean;
-  zoomOn: boolean;
-  intensity: string;
+  speed: number;
+  saturation: number;
+  contrast: number;
+  hue: number;
+  zoom: boolean;
   musicPath?: string;
 }): Promise<string> {
   await mkdir(path.join(UPLOAD_ROOT, "generated"), { recursive: true });
@@ -113,12 +116,15 @@ export async function assembleVideo(input: {
   const silentIndex = n;
   const musicIndex = input.musicPath ? n + 1 : -1;
 
-  const speed = input.speedOn ? (input.intensity === "hard" ? 1.06 : 1.03) : 1;
-  const tempo = input.speedOn ? `atempo=${speed},` : "";
+  const tempo = input.speed !== 1 ? `atempo=${input.speed},` : "";
   const chains: string[] = [];
   for (let index = 0; index < n; index += 1) {
     const vf = videoFilter({
-      ...input,
+      speed: input.speed,
+      saturation: input.saturation,
+      contrast: input.contrast,
+      hue: input.hue,
+      zoom: input.zoom,
       hookText: index === 0 ? input.clips[index].hookText : undefined,
     });
     chains.push(`[${index}:v]${vf}[v${index}]`);

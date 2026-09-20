@@ -1,11 +1,11 @@
 import type { PipelineStatus } from "@/lib/pipeline";
 
-const STEPS: PipelineStatus[] = ["IDEA", "SCRIPTED", "FILMED", "POSTED"];
+const STEPS = ["Write", "Make", "Ready", "Posted"] as const;
 
 function stepIndex(status: PipelineStatus): number {
-  if (status === "IDEA") return 0;
-  if (status === "SCRIPTED") return 1;
-  if (status === "FILMED" || status === "EDITING" || status === "REVIEW" || status === "READY") return 2;
+  if (status === "IDEA" || status === "SCRIPTED") return 0;
+  if (status === "FILMED" || status === "EDITING" || status === "REVIEW") return 1;
+  if (status === "READY") return 2;
   return 3;
 }
 
@@ -20,7 +20,7 @@ export function Stepper({ status }: { status: PipelineStatus }) {
             index === current ? "bg-sun text-ink" : index < current ? "bg-lift text-paper" : "bg-panel text-mute"
           }`}
         >
-          {step === "IDEA" ? "Idea" : step === "SCRIPTED" ? "Scripted" : step === "FILMED" ? "Filmed" : "Posted"}
+          {step}
         </li>
       ))}
     </ol>

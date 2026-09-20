@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import { emptyCounts, pickNextAction } from "@/lib/next-action";
 
 describe("pickNextAction", () => {
-  it("asks for a deal when none are active", () => {
-    expect(pickNextAction(emptyCounts()).kind).toBe("deal");
+  it("opens the multiplier when the board is empty", () => {
+    expect(pickNextAction(emptyCounts()).kind).toBe("batch");
   });
 
   it("reviews before filming", () => {
@@ -12,7 +12,7 @@ describe("pickNextAction", () => {
     expect(action.count).toBe(3);
   });
 
-  it("plans when the board is clear", () => {
-    expect(pickNextAction({ ...emptyCounts(), activeDeals: 2 }).kind).toBe("plan");
+  it("schedules ready inventory", () => {
+    expect(pickNextAction({ ...emptyCounts(), ready: 4 }).kind).toBe("schedule");
   });
 });

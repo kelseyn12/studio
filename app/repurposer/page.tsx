@@ -14,9 +14,13 @@ export default async function RepurposerPage() {
       <div className="mb-8 max-w-2xl">
         <h1 className="text-3xl font-semibold tracking-tight">Repurpose</h1>
         <p className="mt-2 text-mute">
-          Film hooks together, demos together, CTAs together. Studio multiplies them into unique videos —
-          small speed and color changes so each one can stand alone.
+          Not a timeline editor. You already filmed the parts. This multiplies them.
         </p>
+        <ol className="mt-4 space-y-1 text-sm text-mute">
+          <li>1. Drop many hooks, bodies, and CTAs.</li>
+          <li>2. Studio builds every mix — hook 1 + body 1 + CTA 2, and so on.</li>
+          <li>3. Each mix can get extra copies with different speed, light, and crop so platforms do not see the same video.</li>
+        </ol>
       </div>
       <form action={createBatch} className="mb-8 flex max-w-xl gap-2">
         <input name="name" placeholder="Batch name — e.g. OpenArt week 3" className="field" />
@@ -25,12 +29,12 @@ export default async function RepurposerPage() {
       <div className="space-y-2">
         {batches.length === 0 ? (
           <p className="rounded-card border border-dashed border-line px-5 py-10 text-mute">
-            No batches yet. One sitting of clips can cover the whole week.
+            Start a batch. One sitting of clips can cover the week.
           </p>
         ) : (
           batches.map((batch) => {
             const hooks = batch.clips.filter((clip) => clip.slot === "HOOK").length;
-            const demos = batch.clips.filter((clip) => clip.slot === "DEMO").length;
+            const bodies = batch.clips.filter((clip) => clip.slot === "DEMO").length;
             const ctas = batch.clips.filter((clip) => clip.slot === "CTA").length;
             return (
               <Link
@@ -41,7 +45,7 @@ export default async function RepurposerPage() {
                 <div>
                   <p className="font-medium">{batch.name}</p>
                   <p className="text-sm text-mute">
-                    {hooks} × {demos} × {ctas} clips · {batch.outputs.length} videos
+                    {hooks} hooks · {bodies} bodies · {ctas} CTAs · {batch.outputs.length} videos out
                   </p>
                 </div>
                 <span className="text-sm capitalize text-mute">{batch.status}</span>

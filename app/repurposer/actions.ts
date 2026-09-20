@@ -17,6 +17,7 @@ export async function saveBatch(formData: FormData) {
     data: {
       name: String(formData.get("name") || "Untitled"),
       count: Number(formData.get("count") || 12),
+      variants: Math.max(1, Number(formData.get("variants") || 1)),
       allCombos: formData.get("allCombos") === "on",
       speedOn: formData.get("speedOn") === "on",
       colorOn: formData.get("colorOn") === "on",

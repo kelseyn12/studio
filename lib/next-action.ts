@@ -7,7 +7,8 @@ export type ActionKind =
   | "review"
   | "schedule"
   | "plan"
-  | "deal";
+  | "deal"
+  | "batch";
 
 export type StudioAction = {
   kind: ActionKind;
@@ -27,18 +28,10 @@ export type MachineCounts = {
   postedToday: number;
   paidSlotsToday: number;
   activeDeals: number;
+  totalCards: number;
 };
 
 export function pickNextAction(counts: MachineCounts): StudioAction {
-  if (counts.activeDeals === 0) {
-    return {
-      kind: "deal",
-      title: "Add a deep deal",
-      detail: "Score a campaign before you film. Volume and hourly rate first.",
-      href: "/campaigns",
-      count: 0,
-    };
-  }
   if (counts.review > 0) {
     return {
       kind: "review",
@@ -60,9 +53,9 @@ export function pickNextAction(counts: MachineCounts): StudioAction {
   if (counts.filmed > 0) {
     return {
       kind: "handoff",
-      title: `Send ${counts.filmed} filmed card${counts.filmed === 1 ? "" : "s"} to edit`,
-      detail: "Raws, voice note, reference, deadline. Then you are done.",
-      href: "/pipeline?status=FILMED",
+      title: `Drop ${counts.filmed} CapCut export${counts.filmed === 1 ? "" : "s"}`,
+      detail: "Cut in CapCut. Put the file on the card. Then you are done.",
+      href: "/edits",
       count: counts.filmed,
     };
   }
@@ -85,10 +78,10 @@ export function pickNextAction(counts: MachineCounts): StudioAction {
     };
   }
   return {
-    kind: "plan",
-    title: "Plan the next batch",
-    detail: "70% winners, 20% challengers, 10% tests. Plan the week in one sitting.",
-    href: "/plan",
+    kind: "batch",
+    title: "Drop clips and multiply",
+    detail: "Hooks × bodies × CTAs, then unique copies so platforms do not see the same file.",
+    href: "/repurposer",
     count: 0,
   };
 }
@@ -104,6 +97,7 @@ export function emptyCounts(): MachineCounts {
     postedToday: 0,
     paidSlotsToday: 0,
     activeDeals: 0,
+    totalCards: 0,
   };
 }
 

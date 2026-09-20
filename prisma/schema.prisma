@@ -214,6 +214,7 @@ model RepurposeBatch {
   intensity   String           @default("light")
   allCombos   Boolean          @default(true)
   count       Int              @default(12)
+  variants    Int              @default(2)
   campaignId  String?
   accountId   String?
   createdAt   DateTime         @default(now())

@@ -72,10 +72,10 @@ export function Nav() {
         ))}
       </nav>
       <Link
-        href="/cards/new"
+        href="/repurposer"
         className="mt-6 rounded-xl bg-sun px-3 py-3 text-center text-sm font-semibold text-ink"
       >
-        New card
+        New batch
       </Link>
     </aside>
   );
