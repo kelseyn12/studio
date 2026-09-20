@@ -1,4 +1,5 @@
 import { finishStage, updateCard } from "@/app/cards/[id]/actions";
+import { HookRewrite } from "@/components/hook-rewrite";
 import { DEAL_KIND_LABEL } from "@/lib/deal-kind";
 import { toInputDate } from "@/lib/dates";
 import type { DealKind } from "@prisma/client";
@@ -20,6 +21,7 @@ export function CardBrief({
     campaignId: string | null;
     accountId: string | null;
     plannedDate: Date | null;
+    deadlineAt: Date | null;
   };
   campaigns: Array<{ id: string; name: string; brand: string; kind: DealKind }>;
   accounts: Array<{ id: string; username: string; nickname: string }>;
@@ -49,9 +51,14 @@ export function CardBrief({
         <span className="label">Film this day</span>
         <input name="plannedDate" type="date" defaultValue={card.plannedDate ? toInputDate(card.plannedDate) : ""} className="field" />
       </label>
+      <label>
+        <span className="label">Editor deadline</span>
+        <input name="deadlineAt" type="date" defaultValue={card.deadlineAt ? toInputDate(card.deadlineAt) : ""} className="field" />
+      </label>
       <input name="referenceUrl" defaultValue={card.referenceUrl} placeholder="Reference link (optional)" className="field" />
       <textarea name="premise" defaultValue={card.premise} placeholder="Payoff — why would someone watch" className="field min-h-16" />
       <textarea name="hook" defaultValue={card.hook} placeholder="Hook — first line + first visual" className="field min-h-16" />
+      <HookRewrite />
       <textarea name="body" defaultValue={card.body} placeholder="Body / demo" className="field min-h-16" />
       <textarea name="plug" defaultValue={card.plug} placeholder="CTA / plug" className="field min-h-16" />
       <textarea name="script" defaultValue={card.script} placeholder="Full script and shot notes" className="field min-h-32" />

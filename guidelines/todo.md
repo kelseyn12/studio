@@ -47,3 +47,7 @@
 - [X] Today holds money, both deal types, and the handoff
   Canvas/tech and traditional UGC are one Deals room with a kind. Numbers stays real.
   Send to editor lands on CapCut in. Default editor is set on Team.
+
+- [X] Full 20k machine loop
+  Accounts opens Outstand. Plan month drags film dates. Brief rewrites hooks and stores editor deadline.
+  Today chases due-in-2-days. Numbers pulls Outstand stats. DMs opens ManyChat. ChatGPT Plus is not the API.

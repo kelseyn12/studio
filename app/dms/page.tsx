@@ -36,14 +36,24 @@ export default async function DmsPage() {
     <Shell>
       <h1 className="text-3xl font-semibold tracking-tight">DMs</h1>
       <p className="mt-2 mb-6 max-w-2xl text-mute">
-        Nikolai’s point: do not sit in comments typing the same reply. ManyChat still watches Instagram.
-        Studio holds the copy and can send a test (or ping your editor) through the API.
+        Do not sit in comments typing the same reply. Save the recipe here, then turn the same keyword on in ManyChat so Instagram actually sends it.
       </p>
+      <div className="mb-6 flex flex-wrap gap-2">
+        <a
+          href="https://app.manychat.com/"
+          target="_blank"
+          rel="noreferrer"
+          className="rounded-xl bg-sun px-4 py-2 text-sm font-semibold text-ink"
+        >
+          Open ManyChat
+        </a>
+      </div>
       {hasManychat() ? (
         <p className="mb-6 text-sm text-sun">ManyChat key is on.</p>
       ) : (
         <p className="mb-6 rounded-card border border-line bg-panel px-4 py-3 text-sm">
-          Add <code>MANYCHAT_API_KEY</code> to <code>.env</code>. Optional: <code>MANYCHAT_EDITOR_ID</code> and{" "}
+          ManyChat Free is 25 contacts and a handful of automations — not enough for comment DMs at volume. Paid starts when you
+          outgrow that. Add <code>MANYCHAT_API_KEY</code> to <code>.env</code>. Optional: <code>MANYCHAT_EDITOR_ID</code> and{" "}
           <code>MANYCHAT_CREATOR_ID</code> so Send to editor / Live also pings you.
         </p>
       )}

@@ -48,5 +48,9 @@ export function cardPatch(form: FormData): Prisma.CardUncheckedUpdateInput {
     const raw = String(form.get("plannedDate") || "");
     data.plannedDate = raw ? parseLocalDate(raw) : null;
   }
+  if (form.has("deadlineAt")) {
+    const raw = String(form.get("deadlineAt") || "");
+    data.deadlineAt = raw ? parseLocalDate(raw) : null;
+  }
   return data;
 }

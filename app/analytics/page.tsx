@@ -1,3 +1,4 @@
+import { RefreshStats } from "@/components/refresh-stats";
 import { Shell } from "@/components/shell";
 import { Spark } from "@/components/spark";
 import { Stat } from "@/components/stat";
@@ -21,8 +22,13 @@ export default async function AnalyticsPage() {
 
   return (
     <Shell>
-      <h1 className="text-3xl font-semibold tracking-tight">Numbers</h1>
-      <p className="mt-1 mb-6 text-mute">Real posted videos only. Zeros mean nothing has shipped yet.</p>
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-semibold tracking-tight">Numbers</h1>
+          <p className="mt-1 text-mute">Real posted videos only. Pull Outstand so campaigns cannot leak what you are owed.</p>
+        </div>
+        <RefreshStats />
+      </div>
       <section className="mb-8 grid gap-3 md:grid-cols-4">
         <Stat label="Collected" value={formatMoney(totals.revenue)} />
         <Stat label="Canvas / tech" value={formatMoney(snap.techCollected)} />

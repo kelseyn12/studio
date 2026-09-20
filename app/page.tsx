@@ -7,23 +7,33 @@ import { TodayBoard } from "@/components/today-board";
 import { pickNextAction } from "@/lib/next-action";
 import { machineCounts, studioSnapshot } from "@/lib/queries";
 import { prisma } from "@/lib/prisma";
-import { startOfDay } from "@/lib/dates";
+import { addDays, startOfDay } from "@/lib/dates";
 
 export default async function TodayPage() {
-  const [counts, snap, todayCards] = await Promise.all([
+  const today = startOfDay(new Date());
+  const soon = addDays(today, 2);
+  const [counts, snap, todayCards, chase] = await Promise.all([
     machineCounts(),
     studioSnapshot(),
     prisma.card.findMany({
       where: {
         OR: [
-          { plannedDate: { gte: startOfDay(new Date()) } },
-          { scheduledAt: { gte: startOfDay(new Date()) } },
+          { plannedDate: { gte: today } },
+          { scheduledAt: { gte: today } },
           { status: { in: ["REVIEW", "READY", "FILMED", "SCRIPTED", "IDEA", "EDITING"] } },
         ],
       },
       include: { campaign: true, editor: true },
       orderBy: { updatedAt: "desc" },
       take: 8,
+    }),
+    prisma.card.findMany({
+      where: {
+        deadlineAt: { not: null, lte: soon },
+        status: { notIn: ["READY", "POSTED", "DATA"] },
+      },
+      include: { editor: true },
+      orderBy: { deadlineAt: "asc" },
     }),
   ]);
 
@@ -45,6 +55,26 @@ export default async function TodayPage() {
           ugc={snap.ugc}
         />
         <StudioMap />
+        {chase.length > 0 ? (
+          <section>
+            <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-mute">Due in 2 days</p>
+            <div className="space-y-2">
+              {chase.map((card) => (
+                <Link
+                  key={card.id}
+                  href={`/cards/${card.id}`}
+                  className="flex items-center justify-between rounded-2xl border border-line bg-panel px-5 py-4"
+                >
+                  <div>
+                    <p className="font-medium">{card.title}</p>
+                    <p className="text-sm text-mute">{card.editor?.name ?? "No editor"}</p>
+                  </div>
+                  <StatusPill status={card.status} />
+                </Link>
+              ))}
+            </div>
+          </section>
+        ) : null}
         <section>
           <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-mute">Needs you</p>
           <div className="space-y-2">

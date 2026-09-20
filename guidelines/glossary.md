@@ -16,3 +16,5 @@
 - `plannedMixes` — `lib/variations.ts` — live mix count from clip piles and the all-combos cap.
 - `saveUpload` — `lib/files.ts` — writes raws, voice notes, deliveries under `data/uploads`.
 - `requireUser` — `lib/auth.ts` — session gate for pages.
+- `rewriteHook` — `lib/rewrite.ts` — gpt-4o-mini hook rewrite. Used by `/api/ai/hook` and the Brief Rewrite hook button.
+- `parseAnalytics` — `lib/analytics.ts` — maps Outstand stats onto card views/likes/comments. Used by `/api/analytics/sync`.

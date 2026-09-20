@@ -15,7 +15,11 @@ export default async function TranscriberPage() {
       </p>
       {ready ? null : (
         <p className="mb-6 rounded-card border border-line bg-panel px-4 py-3 text-sm">
-          Add <code>OPENAI_API_KEY</code> to <code>.env</code> and restart. Then drop a file.
+          ChatGPT Plus does not include this. Create a key at{" "}
+          <a href="https://platform.openai.com/api-keys" className="text-sun" target="_blank" rel="noreferrer">
+            platform.openai.com/api-keys
+          </a>
+          , paste <code>OPENAI_API_KEY</code> into <code>.env</code>, restart. Whisper is about $0.006 per audio minute.
         </p>
       )}
       <form
