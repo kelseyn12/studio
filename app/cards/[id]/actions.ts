@@ -101,6 +101,20 @@ export async function advanceCard(id: string, status: string) {
   redirect(`/cards/${id}`);
 }
 
+export async function approveCut(formData: FormData) {
+  await requireUser();
+  const id = String(formData.get("id"));
+  const card = await prisma.card.findUnique({ where: { id }, include: { assets: true } });
+  const hasFile = card?.assets.some((asset) => asset.kind === "EDITED" || asset.kind === "GENERATED");
+  if (!id || !hasFile) redirect(id ? `/cards/${id}?step=live` : "/");
+  await prisma.card.update({ where: { id }, data: { status: "READY" } });
+  revalidatePath(`/cards/${id}`);
+  revalidatePath("/edits");
+  revalidatePath("/library");
+  revalidatePath("/");
+  redirect("/library");
+}
+
 export async function scheduleCard(formData: FormData) {
   await requireUser();
   const id = String(formData.get("id"));

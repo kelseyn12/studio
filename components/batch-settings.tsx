@@ -62,7 +62,7 @@ export function BatchSettings({
       <section className="rounded-card border border-line bg-panel p-5">
         <p className="label">Mix settings</p>
         <p className="mt-2 text-sm text-mute">
-          Mixes change the story. Sliders change the file so platforms do not match copies.
+          Mixes change the story. If every mix is off, we shuffle and take that many. Sliders change the file so platforms do not match copies.
         </p>
         <div className="mt-5 space-y-4">
           <Row label="Every mix">

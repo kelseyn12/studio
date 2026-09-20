@@ -6,6 +6,7 @@ describe("card desk", () => {
     expect(deskStage("IDEA")).toBe("brief");
     expect(deskStage("SCRIPTED")).toBe("footage");
     expect(deskStage("FILMED")).toBe("editor");
+    expect(deskStage("REVIEW")).toBe("live");
     expect(deskStage("READY")).toBe("live");
     expect(deskStage("POSTED")).toBe("live");
   });

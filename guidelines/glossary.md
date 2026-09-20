@@ -24,5 +24,7 @@
 - `isDirectMediaUrl` — `lib/media-url.ts` — accepts a direct mp4 URL; rejects a Drive folder.
 - `requireUser` — `lib/auth.ts` — session gate for pages.
 - `rewriteHook` — `lib/rewrite.ts` — gpt-4o-mini hook rewrite. Used by `/api/ai/hook` and Brief.
+- `pullMedia` — `lib/pull-media.ts` — fetches a direct mp4 or yt-dlp page URL for Transcribe. Blocks private hosts.
+- `approveCut` — `app/cards/[id]/actions.ts` — REVIEW → READY without a Live time. Used on Live as Looks good.
 - `generateScript` — `lib/script.ts` — spoken hook/body/plug/script from the brief plus reference clips. Used by `/api/ai/script`.
 - `parseAnalytics` — `lib/analytics.ts` — maps Outstand stats onto card views/likes/comments. Used by `/api/analytics/sync`.

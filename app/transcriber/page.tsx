@@ -10,8 +10,8 @@ export default async function TranscriberPage() {
     <Shell>
       <h1 className="text-3xl font-semibold tracking-tight">Transcribe</h1>
       <p className="mt-2 mb-6 max-w-2xl text-mute">
-        Voice is faster than typing. Whisper turns a voice note or a reference clip into text so the brief is not stuck in WhatsApp.
-        Record on the card and it writes the editor note. Use this page for competitor videos and leftover audio.
+        Voice is faster than typing. Paste a TikTok, Reel, YouTube, or direct mp4 link, or upload a file.
+        Record or drop a voice file on the card and it writes the editor note.
       </p>
       {ready ? null : (
         <p className="mb-6 rounded-card border border-line bg-panel px-4 py-3 text-sm">
@@ -29,7 +29,7 @@ export default async function TranscriberPage() {
         className="mb-8 max-w-2xl space-y-3 rounded-card border border-line bg-panel p-5"
       >
         <input name="title" placeholder="Title" className="field" />
-        <input name="sourceUrl" placeholder="Optional link to remember" className="field" />
+        <input name="sourceUrl" placeholder="TikTok, Reel, YouTube, or https://…/file.mp4" className="field" />
         <input name="file" type="file" accept="audio/*,video/*" className="text-sm" />
         <button className="rounded-xl bg-sun px-4 py-2 font-semibold text-ink">Transcribe</button>
       </form>

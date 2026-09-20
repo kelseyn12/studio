@@ -49,6 +49,13 @@ export function CardFootage({
       <VoiceBox cardId={card.id} />
       <DropZone
         action="/api/assets"
+        extra={{ id: card.id, kind: "VOICE" }}
+        label="Drop a voice note"
+        hint="Audio file. Whisper writes the editor note."
+        accept="audio/*"
+      />
+      <DropZone
+        action="/api/assets"
         extra={{ id: card.id, kind: "RAW" }}
         label="Upload small raws / clips"
         hint="Phone clips and stills. Not 4K days."

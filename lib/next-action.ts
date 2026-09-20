@@ -38,7 +38,7 @@ export function pickNextAction(counts: MachineCounts): StudioAction {
     return {
       kind: "review",
       title: `Review ${counts.review} edit${counts.review === 1 ? "" : "s"}`,
-      detail: "Watch the cut. If it is right, Live is the next room.",
+      detail: "Watch the cut. Looks good sends it to the Library. Park on Live when you pick a time.",
       href: "/edits",
       count: counts.review,
     };

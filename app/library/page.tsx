@@ -37,8 +37,12 @@ export default async function LibraryPage() {
                 </div>
                 <StatusPill status={asset.card.status} />
               </div>
-              <Link href={`/cards/${asset.card.id}`} className="mt-3 inline-block text-sm text-sun">
-                Open card
+              <Link href={`/cards/${asset.card.id}?step=live`} className="mt-3 inline-block text-sm text-sun">
+                {asset.card.status === "REVIEW"
+                  ? "Looks good / park"
+                  : asset.card.status === "READY"
+                    ? "Park on Live"
+                    : "Open card"}
               </Link>
             </article>
           ))

@@ -1,5 +1,6 @@
 # Refactoring log
 
+- 2026-09-20 — Transcribe accepts a TikTok/Reel/YouTube URL. Looks good marks READY without a Live time. Mix shuffle. Voice file drop on Footage.
 - 2026-09-20 — Brief Generate script fills spoken lines from short reference clips. 4K days stay out.
 - 2026-09-20 — UGC work OS: `cutBy` SELF vs EDITOR on Footage, editor packet downloads, 1080 drop or direct mp4 URL, R2 dual-write, Clerk+Fly so a VA is not on this Mac.
 - 2026-09-20 — Close the 20k loop: park no longer overwrites film dates, Pull marks Posted/Data, winners Multiply, formats promote.

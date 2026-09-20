@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { readSession } from "@/lib/session";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
-import { hasOpenAI, transcribeFile } from "@/lib/whisper";
+import { pullMedia } from "@/lib/pull-media";
+import { transcribeFile } from "@/lib/whisper";
 
 export const maxDuration = 60;
 
@@ -21,11 +22,10 @@ export async function POST(request: Request) {
     if (file instanceof File && file.size > 0) {
       text = await transcribeFile(file);
     } else if (sourceUrl) {
-      text = hasOpenAI()
-        ? "A link is only a reminder. Upload the mp4 or audio so Whisper can hear it."
-        : "Add OPENAI_API_KEY to .env, restart, then upload the file.";
+      const pulled = await pullMedia(sourceUrl);
+      text = await transcribeFile(pulled);
     } else {
-      text = "Drop an audio or video file.";
+      text = "Drop an audio or video file, or paste a TikTok / Reel / YouTube / mp4 link.";
     }
   } catch (error) {
     text = error instanceof Error ? error.message : "Transcription failed";
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     data: {
       title,
       sourceUrl,
-      filename: file instanceof File ? file.name : "",
+      filename: file instanceof File && file.size > 0 ? file.name : sourceUrl,
       text,
     },
   });

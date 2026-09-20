@@ -57,3 +57,6 @@
 
 - [X] Brief generates a spoken script from references
   Generate script fills hook/body/plug/script. Short reference clips (under 40MB) get transcribed plus one still. 4K days stay in Drive.
+
+- [X] Transcribe URL, Looks good, shuffle mixes, drop voice
+  Transcribe pulls TikTok/Reel/YouTube via yt-dlp or a direct mp4. Looks good parks the cut in Library without a Live time. Multiply shuffles when not every mix. Footage accepts a voice file.

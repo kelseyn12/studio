@@ -17,7 +17,10 @@ describe("product", () => {
 });
 
 describe("pickCombos", () => {
-  it("caps random runs", () => {
-    expect(pickCombos([[1, 2], [3, 4]], 2, false)).toHaveLength(2);
+  it("caps random runs to the asked count", () => {
+    const picked = pickCombos([[1, 2], [3, 4]], 2, false);
+    expect(picked).toHaveLength(2);
+    const allowed = new Set(["1,3", "1,4", "2,3", "2,4"]);
+    for (const row of picked) expect(allowed.has(row.join(","))).toBe(true);
   });
 });
