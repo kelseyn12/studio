@@ -44,7 +44,7 @@ export default async function TeamPage() {
       <h1 className="text-3xl font-semibold tracking-tight">Team</h1>
       <p className="mt-1 mb-6 max-w-2xl text-mute">
         {clerk
-          ? "Invite sends a Clerk email. They open CapCut in from their computer. Mark one editor as default for Send."
+          ? "Invite sends a Clerk email. They open Studio → Cuts on their computer. Mark one editor as default for Send."
           : "Add an editor here. PIN is local-only — a remote VA needs Clerk on the always-on URL."}
       </p>
       <form action={addMember} className="mb-8 flex flex-wrap gap-2">

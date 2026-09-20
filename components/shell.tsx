@@ -12,7 +12,7 @@ export async function Shell({ children }: { children: React.ReactNode }) {
         <header className="flex items-center justify-between border-b border-line px-8 py-4">
           <p className="text-sm text-mute">
             {user.role === "EDITOR"
-              ? "Download the packet. Cut on your machine. Drop the 1080."
+              ? "Your jobs are in this app. Drop the 1080 here when it is done."
               : "One next action. Then you can close the laptop."}
           </p>
           <SignOutControl name={user.name} role={user.role} clerk={hasClerk()} />

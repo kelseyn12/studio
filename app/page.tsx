@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ActionCard } from "@/components/action-card";
+import { LiveRefresh } from "@/components/live-refresh";
 import { Shell } from "@/components/shell";
 import { StudioMap } from "@/components/studio-map";
 import { StatusPill } from "@/components/status-pill";
@@ -48,6 +48,9 @@ export default async function TodayPage() {
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">Today</h1>
           <p className="mt-1 text-mute">Work, money, and both deal types. One next step on top.</p>
+          <div className="mt-2">
+            <LiveRefresh />
+          </div>
         </div>
         <ActionCard action={pickNextAction(counts)} />
         <TodayBoard

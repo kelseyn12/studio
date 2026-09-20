@@ -58,7 +58,7 @@ export async function finishStage(stage: DeskStage, formData: FormData) {
   const sent = stage === "editor" || (stage === "footage" && cutBy === "EDITOR" && patch.status === "EDITING");
   if (sent && cutBy !== "SELF") {
     try {
-      await pingStudio("editor", `New job: ${card?.title || "a video"}. Open CapCut in.`);
+      await pingStudio("editor", `New job: ${card?.title || "a video"}. Open Cuts in Studio.`);
     } catch {
       /* ManyChat must not block the handoff */
     }

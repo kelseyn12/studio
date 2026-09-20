@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { EditorNeed } from "@/components/editor-need";
+import { LiveRefresh } from "@/components/live-refresh";
 import { Shell } from "@/components/shell";
 import { StatusPill } from "@/components/status-pill";
 import { requireUser } from "@/lib/auth";
@@ -23,15 +23,18 @@ export default async function EditsPage() {
   return (
     <Shell>
       <h1 className="text-3xl font-semibold tracking-tight">{user.role === "EDITOR" ? "Your cuts" : "Cuts"}</h1>
-      <p className="mt-2 mb-6 max-w-2xl text-mute">
+      <p className="mt-2 mb-2 max-w-2xl text-mute">
         {user.role === "EDITOR"
-          ? "Download the packet, cut on your machine, drop the 1080."
-          : "I’ll cut this stays here. Send to editor is the VA queue."}
+          ? "Jobs appear here when she sends them. Watch or listen in this page. Drop the 1080 here when you are done — it moves to Needs review for her."
+          : "Send lives in this app. With the editor means they have it. When they drop the 1080 here, it moves to Needs review. You never leave Studio to see that."}
       </p>
+      <div className="mb-6">
+        <LiveRefresh />
+      </div>
       {user.role === "EDITOR" ? null : <Bucket title="You cut" items={selfCut} empty="Nothing you assigned to yourself." />}
-      <Bucket title={user.role === "EDITOR" ? "To cut" : "Send / VA"} items={send} empty="Nothing waiting to send." />
-      <Bucket title="With the editor" items={cutting} empty="No active VA cuts." />
-      <Bucket title="Review" items={review} empty="No drafts waiting." />
+      <Bucket title={user.role === "EDITOR" ? "To cut" : "Send"} items={send} empty="Nothing waiting to send." />
+      <Bucket title="With the editor" items={cutting} empty="Nothing with the editor." />
+      <Bucket title="Needs review" items={review} empty="Nothing waiting for you." />
     </Shell>
   );
 }

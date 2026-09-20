@@ -32,9 +32,9 @@ export function TodayBoard({
           <p className="mt-1 text-2xl font-semibold">{formatMoney(pending)}</p>
         </Link>
         <Link href="/edits" className="rounded-card border border-line bg-panel px-4 py-3">
-          <p className="text-xs uppercase text-mute">CapCut in</p>
+          <p className="text-xs uppercase text-mute">Cuts</p>
           <p className="mt-1 text-2xl font-semibold">{capcut + review}</p>
-          <p className="text-xs text-mute">{review} to review</p>
+          <p className="text-xs text-mute">{review} need review</p>
         </Link>
         <Link href="/calendar" className="rounded-card border border-line bg-panel px-4 py-3">
           <p className="text-xs uppercase text-mute">Ready to park</p>

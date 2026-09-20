@@ -26,7 +26,7 @@ export function canVisit(role: Role, pathname: string): boolean {
 
 export function navFor(role: Role): Array<{ label: string; items: Array<{ href: string; label: string }> }> {
   if (role === "EDITOR") {
-    return [{ label: "Your work", items: [{ href: "/edits", label: "CapCut in" }] }];
+    return [{ label: "Your work", items: [{ href: "/edits", label: "Cuts" }] }];
   }
   if (role === "OPERATOR") {
     return [
@@ -34,7 +34,7 @@ export function navFor(role: Role): Array<{ label: string; items: Array<{ href: 
       {
         label: "Desk",
         items: [
-          { href: "/edits", label: "CapCut in" },
+          { href: "/edits", label: "Cuts" },
           { href: "/library", label: "Library" },
           { href: "/connections", label: "Accounts" },
         ],
@@ -56,7 +56,7 @@ export function navFor(role: Role): Array<{ label: string; items: Array<{ href: 
     {
       label: "Desk",
       items: [
-        { href: "/edits", label: "CapCut in" },
+        { href: "/edits", label: "Cuts" },
         { href: "/library", label: "Library" },
         { href: "/transcriber", label: "Transcribe" },
         { href: "/dms", label: "DMs" },

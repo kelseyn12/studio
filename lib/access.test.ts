@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { canVisit, homeFor } from "@/lib/access";
 
 describe("access", () => {
-  it("sends editors to CapCut in", () => {
+  it("sends editors to Cuts", () => {
     expect(homeFor("EDITOR")).toBe("/edits");
     expect(canVisit("EDITOR", "/edits")).toBe(true);
     expect(canVisit("EDITOR", "/cards/abc")).toBe(true);
