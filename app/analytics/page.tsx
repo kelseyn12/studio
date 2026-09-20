@@ -1,3 +1,4 @@
+import { multiplyWinner } from "@/app/analytics/actions";
 import { RefreshStats } from "@/components/refresh-stats";
 import { Shell } from "@/components/shell";
 import { Spark } from "@/components/spark";
@@ -11,7 +12,7 @@ export default async function AnalyticsPage() {
     dashboardTotals(),
     viewsByDay(90),
     prisma.card.findMany({
-      where: { status: { in: ["POSTED", "DATA"] } },
+      where: { OR: [{ status: { in: ["POSTED", "DATA"] } }, { postedAt: { not: null } }] },
       include: { campaign: true },
       orderBy: { views: "desc" },
       take: 8,
@@ -46,12 +47,17 @@ export default async function AnalyticsPage() {
               <p className="text-sm text-mute">Post, then log views on the card or sync from Outstand.</p>
             ) : (
               videos.map((video, index) => (
-                <a key={video.id} href={`/cards/${video.id}`} className="flex items-center justify-between rounded-2xl border border-line bg-panel px-4 py-3">
-                  <span>
+                <div key={video.id} className="flex items-center justify-between gap-3 rounded-2xl border border-line bg-panel px-4 py-3">
+                  <a href={`/cards/${video.id}`} className="min-w-0 flex-1">
                     {index + 1}. {video.title}
-                  </span>
-                  <span className="text-sm text-mute">{formatCompact(video.views)}</span>
-                </a>
+                    {video.hook ? <p className="truncate text-xs text-mute">{video.hook}</p> : null}
+                  </a>
+                  <span className="shrink-0 text-sm text-mute">{formatCompact(video.views)}</span>
+                  <form action={multiplyWinner}>
+                    <input type="hidden" name="cardId" value={video.id} />
+                    <button className="rounded-lg border border-line px-2 py-1 text-xs">Multiply</button>
+                  </form>
+                </div>
               ))
             )}
           </div>

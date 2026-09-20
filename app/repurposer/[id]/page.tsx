@@ -8,8 +8,16 @@ import { publicFileUrl } from "@/lib/urls";
 import { prisma } from "@/lib/prisma";
 import { createBatch } from "../actions";
 
-export default async function BatchPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function BatchPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ hook?: string }>;
+}) {
   const { id } = await params;
+  const query = await searchParams;
+  const winningHook = (query.hook || "").trim();
   const [batch, campaigns, accounts, batches] = await Promise.all([
     prisma.repurposeBatch.findUnique({
       where: { id },
@@ -32,6 +40,11 @@ export default async function BatchPage({ params }: { params: Promise<{ id: stri
           <p className="mt-2 max-w-2xl text-mute">
             Drop openings in Hooks, middles in Bodies, endings in CTAs. Mix settings are under the rows.
           </p>
+          {winningHook ? (
+            <p className="mt-3 max-w-2xl rounded-card border border-line bg-panel px-4 py-3 text-sm">
+              Winner hook to match: {winningHook}
+            </p>
+          ) : null}
         </div>
         <form action={createBatch} className="flex gap-2">
           <input name="name" placeholder="Another batch" className="field w-44" />
@@ -65,6 +78,7 @@ export default async function BatchPage({ params }: { params: Promise<{ id: stri
             hint="Openings. Drop every hook take here."
             clips={hooks}
             showHook
+            hookText={winningHook}
           />
           <SlotBlock
             id={batch.id}
@@ -153,6 +167,7 @@ function SlotBlock({
   hint,
   clips,
   showHook,
+  hookText,
 }: {
   id: string;
   slot: string;
@@ -160,6 +175,7 @@ function SlotBlock({
   meta: string;
   hint: string;
   showHook?: boolean;
+  hookText?: string;
   clips: Array<{ id: string; filename: string; thumbPath: string; hookText: string }>;
 }) {
   return (
@@ -180,7 +196,7 @@ function SlotBlock({
       </div>
       <DropZone
         action="/api/repurpose/clips"
-        extra={{ batchId: id, slot }}
+        extra={{ batchId: id, slot, ...(hookText ? { hookText } : {}) }}
         label={`Add ${title.toLowerCase()}`}
         accept="video/*"
       />

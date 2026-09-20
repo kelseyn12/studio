@@ -77,6 +77,15 @@ export function pickNextAction(counts: MachineCounts): StudioAction {
       count: counts.idea,
     };
   }
+  if (counts.activeDeals > 0 && counts.totalCards === 0) {
+    return {
+      kind: "deal",
+      title: "Add the first card for a live deal",
+      detail: "A deal is on. One card starts the month. Multiply can wait.",
+      href: "/campaigns",
+      count: counts.activeDeals,
+    };
+  }
   return {
     kind: "batch",
     title: "Drop clips and multiply",

@@ -9,7 +9,9 @@
 - `pingStudio` — `lib/manychat.ts` — optional DM when a job is sent or parked. Recipes live on `/dms`.
 - `deskStage` — `lib/card-desk.ts` — maps pipeline status to Brief / Footage / Editor / Live. Used on the card page.
 - `cardPatch` — `lib/card-patch.ts` — writes only fields present on the form so a Brief save cannot wipe editor notes.
-- `queueCard` — `lib/publish.ts` — schedule a card and ship the file through Outstand. Used by card Live, Live **Add slot**, and Live bulk.
+- `queueCard` — `lib/publish.ts` — parks a card on Live and ships through Outstand. Never overwrites `plannedDate`. Marks Posted only if Outstand already published.
+- `closeLoop` — `lib/analytics.ts` — Posted when live, Data when views exist. Used by `/api/analytics/sync`.
+- `nextLanes` — `lib/formats.ts` — 70/20/10 winner promotion after stats land.
 - `canVisit` — `lib/access.ts` — rooms a role may open. Used by middleware and nav.
 - `assembleVideo` — `lib/ffmpeg.ts` — concatenates hook × body × CTA, keeps audio, optional music, applies a per-copy Variation.
 - `variationFor` — `lib/variations.ts` — unique speed / light / crop amounts for each copy of a mix.

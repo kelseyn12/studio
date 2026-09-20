@@ -18,12 +18,12 @@
 - [X] Whisper + ManyChat in the loop
   Voice on the card becomes the editor note. DMs store comment recipes. Optional pings when a job is sent.
 
+- [X] Outstand publish + analytics close the loop
+  Pull from Outstand marks Posted/Data. Film dates stay on Plan. Winning hooks Multiply.
+
 - [ ] Clerk or managed auth for production
   Studio PIN is a local lock so the machine can run today.
   Replace it before this is on the public internet.
-
-- [ ] Outstand webhooks for publish + analytics
-  Polling can wait. Wire `post.published` when the key is in.
 
 - [X] Clarify repurposer: mixes vs unique copies
   Hooks × bodies × CTAs is the story mix. Variants change speed/light/crop per copy.

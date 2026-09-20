@@ -11,7 +11,7 @@ export function RefreshStats() {
     setNote("Pulling…");
     const response = await fetch("/api/analytics/sync", { method: "POST" });
     const body = await response.json();
-    setNote(response.ok ? `Updated ${body.updated} posts` : body.error || "Failed");
+    setNote(response.ok ? `Updated ${body.updated}. ${body.posted || 0} posted.` : body.error || "Failed");
     router.refresh();
   }
 

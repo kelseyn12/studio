@@ -25,7 +25,7 @@ function asView(value: string | undefined): View {
 export default async function CalendarPage({
   searchParams,
 }: {
-  searchParams: Promise<{ view?: string; from?: string }>;
+  searchParams: Promise<{ view?: string; from?: string; ship?: string }>;
 }) {
   const params = await searchParams;
   const view = asView(params.view);
@@ -101,6 +101,17 @@ export default async function CalendarPage({
           {thisWeek.length} this week · {parked.length} scheduled · {posted.length} posted
         </p>
       </div>
+
+      {params.ship === "ok" ? (
+        <p className="mb-4 rounded-card border border-line bg-panel px-4 py-3 text-sm">
+          Parked. Pull from Outstand on Numbers after it goes live so this card becomes Posted.
+        </p>
+      ) : null}
+      {params.ship === "fail" ? (
+        <p className="mb-4 rounded-card border border-line bg-panel px-4 py-3 text-sm">
+          Time is saved on Live. Outstand did not take the file — check Accounts and the finished mp4.
+        </p>
+      ) : null}
 
       {accounts.length === 0 ? (
         <p className="mb-4 rounded-card border border-line bg-panel px-4 py-3 text-sm">

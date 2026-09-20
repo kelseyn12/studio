@@ -15,4 +15,8 @@ describe("pickNextAction", () => {
   it("schedules ready inventory", () => {
     expect(pickNextAction({ ...emptyCounts(), ready: 4 }).kind).toBe("schedule");
   });
+
+  it("opens the deal when nothing is on the board", () => {
+    expect(pickNextAction({ ...emptyCounts(), activeDeals: 2, totalCards: 0 }).kind).toBe("deal");
+  });
 });

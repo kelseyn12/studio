@@ -39,7 +39,9 @@ export async function weekHours(): Promise<number> {
 
 export async function dashboardTotals() {
   const posted = await prisma.card.findMany({
-    where: { status: { in: ["POSTED", "DATA"] } },
+    where: {
+      OR: [{ status: { in: ["POSTED", "DATA"] } }, { postedAt: { not: null } }],
+    },
     select: {
       payoutCents: true,
       views: true,

@@ -1,9 +1,25 @@
-import { startOfDay } from "@/lib/dates";
+import { postedAtFromPost, createPost, hasOutstand, uploadMedia, type OutstandPost } from "@/lib/outstand";
 import { absoluteUpload } from "@/lib/files";
-import { createPost, hasOutstand, uploadMedia } from "@/lib/outstand";
 import { prisma } from "@/lib/prisma";
+import type { CardStatus } from "@prisma/client";
 
 export type QueueResult = { ok: true; shipped: boolean } | { ok: false; error: string; scheduled: boolean };
+
+export function parkWrite(input: {
+  when: Date;
+  accountId: string | null;
+  outstandPostId: string | null;
+  publishedAt: Date | null;
+}): { status: CardStatus; scheduledAt: Date; accountId: string | null; outstandPostId: string | null; postedAt?: Date } {
+  const live = Boolean(input.publishedAt);
+  return {
+    status: live ? "POSTED" : "READY",
+    scheduledAt: input.when,
+    accountId: input.accountId,
+    outstandPostId: input.outstandPostId,
+    ...(live && input.publishedAt ? { postedAt: input.publishedAt } : {}),
+  };
+}
 
 export async function queueCard(
   cardId: string,
@@ -21,7 +37,7 @@ export async function queueCard(
   const edited = card.assets.find((asset) => asset.kind === "EDITED" || asset.kind === "GENERATED");
 
   let publicUrl = edited?.publicUrl || "";
-  let outstandPostId = card.outstandPostId;
+  let outstandPost: OutstandPost | null = null;
   let shipped = false;
   let error = "";
 
@@ -36,21 +52,22 @@ export async function queueCard(
       await prisma.asset.update({ where: { id: edited.id }, data: { publicUrl } });
     }
     if (hasOutstand() && account && publicUrl) {
-      const post = await createPost({
+      outstandPost = await createPost({
         accounts: [account.outstandAccountId],
         content: card.caption || card.title,
         scheduledAt: when.toISOString(),
         media: [{ url: publicUrl, filename: edited?.filename || "video.mp4" }],
       });
-      outstandPostId = post.id;
       shipped = true;
+      const publishedAt = postedAtFromPost(outstandPost);
       await prisma.publishJob.create({
         data: {
           cardId,
           accountId: account.id,
-          outstandPostId: post.id,
-          status: "QUEUED",
+          outstandPostId: outstandPost.id,
+          status: publishedAt ? "PUBLISHED" : "QUEUED",
           scheduledAt: when,
+          publishedAt,
         },
       });
     } else if (hasOutstand() && account && !publicUrl) {
@@ -64,13 +81,12 @@ export async function queueCard(
 
   await prisma.card.update({
     where: { id: cardId },
-    data: {
-      status: "READY",
-      scheduledAt: when,
-      plannedDate: startOfDay(when),
+    data: parkWrite({
+      when,
       accountId: account?.id ?? card.accountId,
-      outstandPostId,
-    },
+      outstandPostId: outstandPost?.id ?? card.outstandPostId,
+      publishedAt: outstandPost ? postedAtFromPost(outstandPost) : null,
+    }),
   });
   if (error) return { ok: false, error, scheduled: true };
   return { ok: true, shipped };

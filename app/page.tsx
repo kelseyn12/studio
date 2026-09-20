@@ -12,7 +12,7 @@ import { addDays, startOfDay } from "@/lib/dates";
 export default async function TodayPage() {
   const today = startOfDay(new Date());
   const soon = addDays(today, 2);
-  const [counts, snap, todayCards, chase] = await Promise.all([
+  const [counts, snap, todayCards, chase, cutting] = await Promise.all([
     machineCounts(),
     studioSnapshot(),
     prisma.card.findMany({
@@ -35,6 +35,11 @@ export default async function TodayPage() {
       include: { editor: true },
       orderBy: { deadlineAt: "asc" },
     }),
+    prisma.card.findMany({
+      where: { status: "EDITING" },
+      include: { editor: true },
+      orderBy: { updatedAt: "desc" },
+    }),
   ]);
 
   return (
@@ -55,6 +60,26 @@ export default async function TodayPage() {
           ugc={snap.ugc}
         />
         <StudioMap />
+        {cutting.length > 0 ? (
+          <section>
+            <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-mute">With the editor</p>
+            <div className="space-y-2">
+              {cutting.map((card) => (
+                <Link
+                  key={card.id}
+                  href={`/cards/${card.id}?step=editor`}
+                  className="flex items-center justify-between rounded-2xl border border-line bg-panel px-5 py-4"
+                >
+                  <div>
+                    <p className="font-medium">{card.title}</p>
+                    <p className="text-sm text-mute">{card.editor?.name ?? "No editor"}</p>
+                  </div>
+                  <StatusPill status={card.status} />
+                </Link>
+              ))}
+            </div>
+          </section>
+        ) : null}
         {chase.length > 0 ? (
           <section>
             <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-mute">Due in 2 days</p>

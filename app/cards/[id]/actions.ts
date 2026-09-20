@@ -98,7 +98,7 @@ export async function scheduleCard(formData: FormData) {
       data: { caption: String(formData.get("caption") || "") },
     });
   }
-  await queueCard(id, when, accountId);
+  const result = await queueCard(id, when, accountId);
   try {
     await pingStudio("creator", `Parked on Live: ${id}`);
   } catch {
@@ -106,5 +106,7 @@ export async function scheduleCard(formData: FormData) {
   }
   revalidatePath(`/cards/${id}`);
   revalidatePath("/calendar");
-  redirect("/calendar");
+  revalidatePath("/");
+  revalidatePath("/analytics");
+  redirect(result.ok ? "/calendar?ship=ok" : "/calendar?ship=fail");
 }

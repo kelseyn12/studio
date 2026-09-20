@@ -9,3 +9,14 @@ export function parseAnalytics(body: Record<string, unknown>): { views: number; 
     comments: Number.isFinite(comments) ? comments : 0,
   };
 }
+
+export function closeLoop(input: {
+  publishedAt: Date | null;
+  views: number;
+}): { status: "POSTED" | "DATA"; postedAt: Date } | null {
+  if (!input.publishedAt) return null;
+  return {
+    status: input.views > 0 ? "DATA" : "POSTED",
+    postedAt: input.publishedAt,
+  };
+}

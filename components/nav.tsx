@@ -39,14 +39,6 @@ export function Nav({ role }: { role: Role }) {
           </div>
         ))}
       </nav>
-      {role === "CREATOR" ? (
-        <Link
-          href="/repurposer"
-          className="mt-6 rounded-xl bg-sun px-3 py-3 text-center text-sm font-semibold text-ink"
-        >
-          Multiply
-        </Link>
-      ) : null}
     </aside>
   );
 }

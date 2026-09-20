@@ -23,6 +23,18 @@ export type OutstandPost = {
   }>;
 };
 
+export function postedAtFromPost(post: OutstandPost): Date | null {
+  const stamps = [post.publishedAt, ...(post.socialAccounts ?? []).map((row) => row.publishedAt)].filter(
+    (value): value is string => Boolean(value),
+  );
+  if (stamps.length) {
+    const date = new Date(stamps[0]);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+  const live = (post.socialAccounts ?? []).some((row) => String(row.status || "").toLowerCase() === "published");
+  return live ? new Date() : null;
+}
+
 function apiKey(): string {
   const key = process.env.OUTSTAND_API_KEY;
   if (!key) throw new Error("Add OUTSTAND_API_KEY to .env");
