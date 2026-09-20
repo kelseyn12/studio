@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { readSession } from "@/lib/session";
-import { saveUpload } from "@/lib/files";
+import { saveUpload, REFERENCE_MAX_BYTES } from "@/lib/files";
 import { prisma } from "@/lib/prisma";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
 import { hasOpenAI, transcribeFile } from "@/lib/whisper";
@@ -19,6 +19,9 @@ export async function POST(request: Request) {
   const file = form.get("file");
   if (!id || !(file instanceof File)) {
     return NextResponse.json({ error: "Missing file" }, { status: 400 });
+  }
+  if (kind === "REFERENCE" && file.size > REFERENCE_MAX_BYTES) {
+    return NextResponse.json({ error: "Reference too big. Use a phone clip, not a camera day." }, { status: 400 });
   }
   const saved = await saveUpload(file, `cards/${id}`);
   await prisma.asset.create({ data: { cardId: id, kind, ...saved } });

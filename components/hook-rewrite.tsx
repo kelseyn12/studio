@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 
-export function HookRewrite() {
+export function BriefAi({ cardId }: { cardId: string }) {
   const [note, setNote] = useState("");
 
-  async function run() {
+  async function rewriteHook() {
     const form = document.querySelector("form");
     if (!form) return;
     const data = new FormData(form);
@@ -29,12 +29,50 @@ export function HookRewrite() {
     setNote("Hook updated — Save or Finish brief");
   }
 
+  async function generateScript() {
+    const form = document.querySelector("form");
+    if (!form) return;
+    const data = new FormData(form);
+    setNote("Writing script…");
+    const response = await fetch("/api/ai/script", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: cardId,
+        title: data.get("title"),
+        premise: data.get("premise"),
+        hook: data.get("hook"),
+        body: data.get("body"),
+        plug: data.get("plug"),
+        script: data.get("script"),
+        referenceUrl: data.get("referenceUrl"),
+      }),
+    });
+    const body = await response.json();
+    if (!response.ok) {
+      setNote(body.error || "Add OPENAI_API_KEY to .env");
+      return;
+    }
+    const fill = (name: string, value: string) => {
+      const field = form.querySelector<HTMLTextAreaElement>(`textarea[name="${name}"]`);
+      if (field && value) field.value = value;
+    };
+    fill("hook", body.hook);
+    fill("body", body.body);
+    fill("plug", body.plug);
+    fill("script", body.script);
+    setNote("Script filled — Save or Finish brief");
+  }
+
   return (
-    <div>
-      <button type="button" onClick={run} className="rounded-xl border border-line px-3 py-2 text-sm">
+    <div className="flex flex-wrap items-center gap-2">
+      <button type="button" onClick={rewriteHook} className="rounded-xl border border-line px-3 py-2 text-sm">
         Rewrite hook
       </button>
-      {note ? <p className="mt-2 text-xs text-mute">{note}</p> : null}
+      <button type="button" onClick={generateScript} className="rounded-xl border border-line px-3 py-2 text-sm">
+        Generate script
+      </button>
+      {note ? <p className="basis-full text-xs text-mute">{note}</p> : null}
     </div>
   );
 }

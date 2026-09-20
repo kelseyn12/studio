@@ -9,12 +9,14 @@ export function DropZone({
   label,
   hint,
   accept,
+  maxBytes,
 }: {
   action: string;
   extra?: Record<string, string>;
   label: string;
   hint?: string;
   accept?: string;
+  maxBytes?: number;
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -24,12 +26,18 @@ export function DropZone({
     if (!files?.length) return;
     setBusy(true);
     for (const file of Array.from(files).slice(0, 12)) {
+      if (maxBytes && file.size > maxBytes) {
+        setNote("Too big. Phone clip or still, not a 4K day.");
+        setBusy(false);
+        return;
+      }
       const body = new FormData();
       body.set("file", file);
       for (const [key, value] of Object.entries(extra ?? {})) body.set(key, value);
       const response = await fetch(action, { method: "POST", body });
       if (!response.ok) {
-        setNote("Upload failed");
+        const body = await response.json().catch(() => ({}));
+        setNote(body.error || "Upload failed");
         setBusy(false);
         return;
       }

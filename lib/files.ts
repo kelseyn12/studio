@@ -3,6 +3,7 @@ import path from "path";
 import { randomUUID } from "crypto";
 import { getR2, hasR2, putR2, type SavedFile } from "@/lib/r2";
 
+export const REFERENCE_MAX_BYTES = 40 * 1024 * 1024;
 export const UPLOAD_ROOT = process.env.UPLOAD_ROOT || path.join(process.cwd(), "data", "uploads");
 
 export async function saveUpload(file: File, folder: string): Promise<SavedFile> {

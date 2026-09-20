@@ -54,3 +54,6 @@
 - [X] Full 20k machine loop
   Accounts opens Outstand. Plan month drags film dates. Brief rewrites hooks and stores editor deadline.
   Today chases due-in-2-days. Numbers pulls Outstand stats. DMs opens ManyChat. ChatGPT Plus is not the API.
+
+- [X] Brief generates a spoken script from references
+  Generate script fills hook/body/plug/script. Short reference clips (under 40MB) get transcribed plus one still. 4K days stay in Drive.
