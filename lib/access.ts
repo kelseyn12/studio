@@ -57,6 +57,8 @@ export function navFor(role: Role): Array<{ label: string; items: Array<{ href: 
       items: [
         { href: "/edits", label: "CapCut in" },
         { href: "/library", label: "Library" },
+        { href: "/transcriber", label: "Transcribe" },
+        { href: "/dms", label: "DMs" },
         { href: "/connections", label: "Accounts" },
         { href: "/team", label: "Team" },
       ],

@@ -1,6 +1,6 @@
 # File system map
 
-- `app/` routes: Today, pipeline, plan, calendar, campaigns, cards, CapCut in, library, repurposer, transcriber, analytics, connections, team
+- `app/` routes: Today, pipeline, plan, calendar, campaigns, cards, CapCut in, library, repurposer, transcriber, dms, analytics, connections, team
 - `app/api/` auth, files, assets, Outstand connect/sync, transcribe, repurpose generate
 - `components/` shell, nav, pills, action card, studio map, today board, batch settings, clip tile, editor need, calendar board, day slot, post chip, card brief/footage/editor/live
 - `lib/` prisma, pipeline, deals, next-action, session, Outstand, ffmpeg, variations, combinations, editor-packet, queries

@@ -272,3 +272,11 @@ model WeeklyReview {
   hours     Int      @default(0)
   createdAt DateTime @default(now())
 }
+
+model DmRecipe {
+  id        String   @id @default(cuid())
+  trigger   String
+  message   String
+  channel   String   @default("instagram")
+  createdAt DateTime @default(now())
+}

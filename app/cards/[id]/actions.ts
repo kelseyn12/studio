@@ -8,6 +8,7 @@ import { cardPatch } from "@/lib/card-patch";
 import { saveUpload } from "@/lib/files";
 import { isPipelineStatus, type PipelineStatus } from "@/lib/pipeline";
 import { prisma } from "@/lib/prisma";
+import { pingStudio } from "@/lib/manychat";
 import { queueCard } from "@/lib/publish";
 
 async function saveCard(formData: FormData) {
@@ -41,7 +42,14 @@ export async function finishStage(stage: DeskStage, formData: FormData) {
   }
   revalidatePath(`/cards/${id}`);
   revalidatePath("/edits");
-  if (stage === "editor") redirect("/edits");
+  if (stage === "editor") {
+    try {
+      await pingStudio("editor", `New job: ${card?.title || "a video"}. Open CapCut in.`);
+    } catch {
+      /* ManyChat must not block the handoff */
+    }
+    redirect("/edits");
+  }
   const onward = stage === "brief" ? "footage" : "editor";
   redirect(`/cards/${id}?step=${onward}`);
 }
@@ -91,6 +99,11 @@ export async function scheduleCard(formData: FormData) {
     });
   }
   await queueCard(id, when, accountId);
+  try {
+    await pingStudio("creator", `Parked on Live: ${id}`);
+  } catch {
+    /* optional ping */
+  }
   revalidatePath(`/cards/${id}`);
   revalidatePath("/calendar");
   redirect("/calendar");

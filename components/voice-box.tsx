@@ -20,8 +20,9 @@ export function VoiceBox({ cardId }: { cardId: string }) {
       body.set("id", cardId);
       body.set("kind", "VOICE");
       body.set("file", file);
-      await fetch("/api/assets", { method: "POST", body });
-      setStatus("Voice note saved");
+      const response = await fetch("/api/assets", { method: "POST", body });
+      const payload = (await response.json().catch(() => ({}))) as { transcript?: string };
+      setStatus(payload.transcript ? `Editor note: ${payload.transcript.slice(0, 80)}` : "Voice note saved");
       stream.getTracks().forEach((track) => track.stop());
       router.refresh();
     };

@@ -10,7 +10,8 @@ export function CardFootage({
   return (
     <div className="space-y-4">
       <p className="text-sm text-mute">
-        4K stays in Drive. Studio only needs the folder link and a short voice note for the editor.{" "}
+        4K stays in Drive. Studio only needs the folder link and a short voice note for the editor.
+        Record it here and Whisper writes the editor note.{" "}
         <a href="/transcriber" className="text-sun">
           Transcribe a file
         </a>

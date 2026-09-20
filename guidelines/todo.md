@@ -15,6 +15,9 @@
   Week / month / scheduled / posted. Add slot on a day, or auto-space the batch.
   Each slot picks the account and time, then `queueCard` ships through Outstand.
 
+- [X] Whisper + ManyChat in the loop
+  Voice on the card becomes the editor note. DMs store comment recipes. Optional pings when a job is sent.
+
 - [ ] Clerk or managed auth for production
   Studio PIN is a local lock so the machine can run today.
   Replace it before this is on the public internet.
