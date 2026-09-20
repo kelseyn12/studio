@@ -35,7 +35,7 @@ export function CardEditorStage({
           {self
             ? "You are the editor. Download if you need it, cut 1080×1920, drop the export."
             : desk
-              ? "Download the packet, cut 1080×1920 in CapCut, drop the export or paste a direct mp4 URL."
+              ? "Download the packet, cut 1080×1920, drop the export or paste a direct mp4 URL."
               : "Send only if a VA cuts this. I’ll cut this lives on Footage."}
         </p>
         <EditorNeed items={packet} />
@@ -87,7 +87,7 @@ export function CardEditorStage({
       <DropZone
         action="/api/assets"
         extra={{ id: card.id, kind: "EDITED" }}
-        label="Drop the CapCut export"
+        label="Drop the 1080 export"
         hint="Finished 1080×1920. This is what ships."
         accept="video/*"
       />

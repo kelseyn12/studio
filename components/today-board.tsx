@@ -6,7 +6,7 @@ import type { Campaign } from "@prisma/client";
 export function TodayBoard({
   collected,
   pending,
-  capcut,
+  cutting,
   review,
   ready,
   tech,
@@ -14,7 +14,7 @@ export function TodayBoard({
 }: {
   collected: number;
   pending: number;
-  capcut: number;
+  cutting: number;
   review: number;
   ready: number;
   tech: Campaign[];
@@ -33,7 +33,7 @@ export function TodayBoard({
         </Link>
         <Link href="/edits" className="rounded-card border border-line bg-panel px-4 py-3">
           <p className="text-xs uppercase text-mute">Cuts</p>
-          <p className="mt-1 text-2xl font-semibold">{capcut + review}</p>
+          <p className="mt-1 text-2xl font-semibold">{cutting + review}</p>
           <p className="text-xs text-mute">{review} need review</p>
         </Link>
         <Link href="/calendar" className="rounded-card border border-line bg-panel px-4 py-3">

@@ -20,7 +20,7 @@ export default async function LibraryPage() {
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {assets.length === 0 ? (
           <p className="rounded-card border border-dashed border-line px-5 py-10 text-mute md:col-span-2">
-            Nothing finished yet. Generate a batch or drop a CapCut export on a card.
+            Nothing finished yet. Generate a batch or drop a 1080 on a card.
           </p>
         ) : (
           assets.map((asset) => (

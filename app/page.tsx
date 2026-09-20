@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ActionCard } from "@/components/action-card";
 import { LiveRefresh } from "@/components/live-refresh";
 import { Shell } from "@/components/shell";
 import { StudioMap } from "@/components/studio-map";
@@ -56,7 +57,7 @@ export default async function TodayPage() {
         <TodayBoard
           collected={snap.collected}
           pending={snap.pending}
-          capcut={snap.capcut}
+          cutting={snap.cutting}
           review={snap.review}
           ready={counts.ready}
           tech={snap.tech}

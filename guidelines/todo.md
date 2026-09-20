@@ -22,7 +22,7 @@
   Pull from Outstand marks Posted/Data. Film dates stay on Plan. Winning hooks Multiply.
 
 - [X] Clerk or managed auth for production
-  Clerk keys turn PIN off. Team invite emails the VA. CapCut in is their only room. Fly.io hosts the always-on URL with a disk volume.
+  Clerk keys turn PIN off. Team invite emails the VA. Cuts is their only room. Fly.io hosts the always-on URL with a disk volume.
   Self-cut still works on this laptop with PIN until those keys exist. A remote editor does not.
 
 - [X] Self-cut vs VA
@@ -34,14 +34,14 @@
 
 - [X] Volume pass: repurposer, library, bulk calendar, calmer palette
   Hooks × demos × CTAs now keep audio, optional music, hook text, and land as Ready cards.
-  Skipped students and an in-app editor. CapCut stays the cutter.
+  Skipped students and an in-app NLE. They cut in their own editor. Studio takes the 1080.
 
 - [X] Repurposer rows + mix settings + editor packet
   Clips are labeled by the row you drop them in. Mix settings sit on the same batch page.
-  CapCut cards now show a missing-packet list. ffmpeg exports at CRF 18.
+  Cuts cards now show a missing-packet list. ffmpeg exports at CRF 18.
 
 - [X] Editor desk is a slice, not the whole studio
-  Add them on Team as Editor. Assign on the card. They only see CapCut in and their jobs.
+  Add them on Team as Editor. Assign on the card. They only see Cuts and their jobs.
 
 - [X] One path: Plan month → make file → Live
   Base44 put publish time on every card step and then had a second calendar.
@@ -49,7 +49,7 @@
 
 - [X] Today holds money, both deal types, and the handoff
   Canvas/tech and traditional UGC are one Deals room with a kind. Numbers stays real.
-  Send to editor lands on CapCut in. Default editor is set on Team.
+  Send to editor lands on Cuts. Default editor is set on Team.
 
 - [X] Full 20k machine loop
   Accounts opens Outstand. Plan month drags film dates. Brief rewrites hooks and stores editor deadline.

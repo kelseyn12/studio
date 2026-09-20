@@ -89,7 +89,7 @@ export async function viewsByDay(days = 90) {
 }
 
 export async function studioSnapshot() {
-  const [deals, payouts, capcut, review] = await Promise.all([
+  const [deals, payouts, cutting, review] = await Promise.all([
     prisma.campaign.findMany({
       where: { status: { in: ["ACTIVE", "TRIAL"] } },
       orderBy: { createdAt: "desc" },
@@ -110,7 +110,7 @@ export async function studioSnapshot() {
     pending,
     techCollected: kindPay("TECH"),
     ugcCollected: kindPay("UGC"),
-    capcut,
+    cutting,
     review,
     tech: deals.filter((deal) => deal.kind === "TECH"),
     ugc: deals.filter((deal) => deal.kind === "UGC"),

@@ -20,7 +20,7 @@ export function CardLive({
   if (!edited) {
     return (
       <p className="rounded-card border border-dashed border-line bg-panel px-5 py-8 text-sm text-mute">
-        Nothing publishes from here until a finished file exists. Generate in Multiply, or drop a CapCut export on Editor.
+        Nothing publishes from here until a finished file exists. Generate in Multiply, or drop the 1080 on Cuts.
       </p>
     );
   }

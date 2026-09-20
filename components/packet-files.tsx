@@ -11,7 +11,7 @@ export function PacketFiles({
   return (
     <section className="space-y-2 rounded-card border border-line bg-panel p-5">
       <h2 className="font-semibold">Download packet</h2>
-      <p className="text-sm text-mute">Get the files onto your machine. Cut in CapCut. Come back and drop the 1080.</p>
+      <p className="text-sm text-mute">Get the files onto your machine. Cut it. Come back and drop the 1080 here.</p>
       {rawsUrl ? (
         <a href={rawsUrl} target="_blank" rel="noreferrer" className="block rounded-xl bg-sun px-4 py-3 text-center font-semibold text-ink">
           Open 4K folder
