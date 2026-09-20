@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseConfirm, parseUploadTicket } from "@/lib/outstand";
+import { parseConfirm, parsePost, parseUploadTicket } from "@/lib/outstand";
 
 describe("Outstand media parsers", () => {
   it("reads a nested upload ticket", () => {
@@ -15,5 +15,9 @@ describe("Outstand media parsers", () => {
     expect(parseConfirm({ data: { url: "https://media.outstand.so/x.mp4" } })).toEqual({
       url: "https://media.outstand.so/x.mp4",
     });
+  });
+
+  it("reads a nested scheduled post", () => {
+    expect(parsePost({ success: true, post: { id: "pst_1", scheduledAt: "2026-09-03T10:00:00.000Z" } }).id).toBe("pst_1");
   });
 });

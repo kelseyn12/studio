@@ -54,3 +54,16 @@ export function toInputDateTime(date: Date): string {
   const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
   return local.toISOString().slice(0, 16);
 }
+
+export function parseLocalDate(value: string): Date {
+  const [year, month, day] = value.split("-").map(Number);
+  if (!year || !month || !day) return startOfDay(new Date());
+  return new Date(year, month - 1, day);
+}
+
+export function labelWeekRange(start: Date): string {
+  const end = addDays(start, 6);
+  const left = start.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const right = end.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  return `${left} – ${right}`;
+}

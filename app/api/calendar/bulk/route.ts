@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { addDays, startOfDay } from "@/lib/dates";
+import { addDays, parseLocalDate, startOfDay } from "@/lib/dates";
 import { prisma } from "@/lib/prisma";
 import { queueCard } from "@/lib/publish";
 import { readSession } from "@/lib/session";
@@ -13,7 +13,7 @@ export async function POST(request: Request) {
   const perDay = Math.max(1, Number(body.perDay || 5));
   const intervalMin = Math.max(15, Number(body.intervalMin || 90));
   const startHour = Number(body.startHour ?? 10);
-  const start = body.startDate ? startOfDay(new Date(body.startDate)) : startOfDay(new Date());
+  const start = body.startDate ? startOfDay(parseLocalDate(String(body.startDate))) : startOfDay(new Date());
   const accountId = body.accountId ? String(body.accountId) : null;
   const cards = await prisma.card.findMany({
     where: { status: "READY", scheduledAt: null },

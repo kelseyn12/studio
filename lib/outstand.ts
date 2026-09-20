@@ -64,13 +64,21 @@ export async function listAccounts(): Promise<OutstandAccount[]> {
   return payload.data ?? [];
 }
 
+export function parsePost(body: Record<string, unknown>): OutstandPost {
+  const nested = (body.post as Record<string, unknown> | undefined) || (body.data as Record<string, unknown> | undefined);
+  const data = nested && typeof nested.id === "string" ? nested : body;
+  const id = String(data.id || "");
+  if (!id) throw new Error("Outstand did not return a post");
+  return data as unknown as OutstandPost;
+}
+
 export async function createPost(input: {
   accounts: string[];
   content: string;
   scheduledAt?: string;
   media?: Array<{ url: string; filename: string }>;
 }): Promise<OutstandPost> {
-  const payload = await outstand<{ post: OutstandPost }>("/posts/", {
+  const payload = await outstand<Record<string, unknown>>("/posts/", {
     method: "POST",
     body: JSON.stringify({
       containers: [{ content: input.content, media: input.media ?? [] }],
@@ -78,12 +86,12 @@ export async function createPost(input: {
       scheduledAt: input.scheduledAt,
     }),
   });
-  return payload.post;
+  return parsePost(payload);
 }
 
 export async function getPost(id: string): Promise<OutstandPost> {
-  const payload = await outstand<{ post: OutstandPost }>(`/posts/${id}`);
-  return payload.post;
+  const payload = await outstand<Record<string, unknown>>(`/posts/${id}`);
+  return parsePost(payload);
 }
 
 export async function cancelPost(id: string): Promise<void> {

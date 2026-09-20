@@ -183,7 +183,16 @@ export default async function CardPage({ params }: { params: Promise<{ id: strin
                 type="datetime-local"
                 defaultValue={card.scheduledAt ? toInputDateTime(card.scheduledAt) : ""}
                 className="field"
+                required
               />
+              <select name="accountId" defaultValue={card.accountId ?? ""} className="field" required>
+                <option value="">Post as</option>
+                {accounts.map((account) => (
+                  <option key={account.id} value={account.id}>
+                    {account.nickname ? `${account.nickname} · ` : ""}@{account.username}
+                  </option>
+                ))}
+              </select>
               <button className="w-full rounded-xl bg-sun px-4 py-3 font-semibold text-ink">Schedule and ship</button>
             </form>
             )}

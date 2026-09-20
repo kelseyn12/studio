@@ -11,6 +11,10 @@
 - [X] Outstand key + org id in `.env`
   @kelseynocekugc synced. Connect new campaign accounts on Accounts, then Sync. Never commit `.env`.
 
+- [X] Posting calendar parks and ships
+  Week / month / scheduled / posted. Add slot on a day, or auto-space the batch.
+  Each slot picks the account and time, then `queueCard` ships through Outstand.
+
 - [ ] Clerk or managed auth for production
   Studio PIN is a local lock so the machine can run today.
   Replace it before this is on the public internet.

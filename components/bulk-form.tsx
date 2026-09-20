@@ -6,9 +6,11 @@ import { useState, type FormEvent } from "react";
 export function BulkForm({
   waiting,
   accounts,
+  startDate,
 }: {
   waiting: number;
   accounts: Array<{ id: string; username: string; network: string; nickname?: string }>;
+  startDate: string;
 }) {
   const router = useRouter();
   const [note, setNote] = useState("");
@@ -40,7 +42,7 @@ export function BulkForm({
     <form onSubmit={onSubmit} className="grid gap-3 rounded-card border border-line bg-panel p-5 md:grid-cols-5">
       <label>
         <span className="label">Start</span>
-        <input name="startDate" type="date" className="field" required />
+        <input name="startDate" type="date" defaultValue={startDate} className="field" required />
       </label>
       <label>
         <span className="label">Per day</span>
