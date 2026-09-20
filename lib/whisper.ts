@@ -8,6 +8,8 @@ export function parseTranscript(body: Record<string, unknown>): string {
   throw new Error("Whisper returned no text");
 }
 
+export const TRANSCRIBE_MODEL = "gpt-4o-transcribe";
+
 export function hasOpenAI(): boolean {
   return Boolean(process.env.OPENAI_API_KEY);
 }
@@ -16,7 +18,7 @@ export async function transcribeFile(file: File): Promise<string> {
   const key = process.env.OPENAI_API_KEY;
   if (!key) throw new Error("Add OPENAI_API_KEY to .env");
   const body = new FormData();
-  body.set("model", "whisper-1");
+  body.set("model", TRANSCRIBE_MODEL);
   body.set("file", file);
   const response = await fetch("https://api.openai.com/v1/audio/transcriptions", {
     method: "POST",

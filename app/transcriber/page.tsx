@@ -19,7 +19,7 @@ export default async function TranscriberPage() {
           <a href="https://platform.openai.com/api-keys" className="text-sun" target="_blank" rel="noreferrer">
             platform.openai.com/api-keys
           </a>
-          , paste <code>OPENAI_API_KEY</code> into <code>.env</code>, restart. Whisper is about $0.006 per audio minute.
+          , paste <code>OPENAI_API_KEY</code> into <code>.env</code>, restart. Transcription is billed by the minute.
         </p>
       )}
       <form
