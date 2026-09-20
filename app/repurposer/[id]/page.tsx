@@ -29,16 +29,38 @@ export default async function BatchPage({ params }: { params: Promise<{ id: stri
       </p>
       <h1 className="mt-1 text-3xl font-semibold tracking-tight">{batch.name}</h1>
       <p className="mt-2 max-w-2xl text-mute">
-        Two jobs. First, mix clips into different videos. Then make extra copies of each mix with
-        slightly different speed, light, and crop so the platform does not treat them as the same file.
+        You tell Studio which clip is which by the row you drop it in. It does not guess. Mix settings
+        sit under the rows — same page, no extra API.
       </p>
 
       <section className="my-8">
-        <p className="label">Step 1 · Drop clips</p>
+        <p className="label">Clips · drop into the right row</p>
         <div className="mt-3 space-y-5">
-          <SlotBlock id={batch.id} slot="HOOK" title="Hooks" hint="Openings. One hook per video." clips={hooks} showHook />
-          <SlotBlock id={batch.id} slot="DEMO" title="Bodies" hint="Middle / product. Same body can sit under many hooks." clips={bodies} />
-          <SlotBlock id={batch.id} slot="CTA" title="CTAs" hint="Endings. Film a few closes without rebuilding the scene." clips={ctas} />
+          <SlotBlock
+            id={batch.id}
+            slot="HOOK"
+            title="Hooks"
+            meta={`${hooks.length} options · first clip · one picked per video`}
+            hint="Openings. Drop every hook take here."
+            clips={hooks}
+            showHook
+          />
+          <SlotBlock
+            id={batch.id}
+            slot="DEMO"
+            title="Bodies"
+            meta={`${bodies.length} options · middle clip · usually one, can be more`}
+            hint="Product / demo. Same body can sit under many hooks."
+            clips={bodies}
+          />
+          <SlotBlock
+            id={batch.id}
+            slot="CTA"
+            title="CTAs"
+            meta={`${ctas.length} options · last clip · one picked per video`}
+            hint="Endings. Film a few closes without rebuilding the scene."
+            clips={ctas}
+          />
         </div>
       </section>
 
@@ -102,6 +124,7 @@ function SlotBlock({
   id,
   slot,
   title,
+  meta,
   hint,
   clips,
   showHook,
@@ -109,18 +132,26 @@ function SlotBlock({
   id: string;
   slot: string;
   title: string;
+  meta: string;
   hint: string;
   showHook?: boolean;
   clips: Array<{ id: string; filename: string; thumbPath: string; hookText: string }>;
 }) {
   return (
     <div className="rounded-card border border-line bg-panel p-5">
-      <h2 className="text-lg font-semibold">{title}</h2>
-      <p className="mb-3 text-sm text-mute">{hint}</p>
+      <div className="mb-1 flex flex-wrap items-baseline justify-between gap-2">
+        <h2 className="text-lg font-semibold">{title}</h2>
+        <p className="text-xs uppercase tracking-[0.12em] text-mute">{meta}</p>
+      </div>
+      <p className="mb-4 text-sm text-mute">{hint}</p>
       <div className="mb-4 flex gap-3 overflow-x-auto pb-2">
-        {clips.map((clip) => (
-          <ClipTile key={clip.id} {...clip} showHook={Boolean(showHook)} />
-        ))}
+        {clips.length === 0 ? (
+          <p className="rounded-xl border border-dashed border-line px-4 py-8 text-sm text-mute">
+            Nothing in this row yet.
+          </p>
+        ) : (
+          clips.map((clip) => <ClipTile key={clip.id} {...clip} showHook={Boolean(showHook)} />)
+        )}
       </div>
       <DropZone
         action="/api/repurpose/clips"

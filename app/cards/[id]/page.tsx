@@ -9,6 +9,8 @@ import { toInputDate, toInputDateTime } from "@/lib/dates";
 import { publicFileUrl } from "@/lib/urls";
 import { PIPELINE_META, PIPELINE_STATUSES } from "@/lib/pipeline";
 import { prisma } from "@/lib/prisma";
+import { EditorNeed } from "@/components/editor-need";
+import { editorNeeds } from "@/lib/editor-packet";
 import { advanceCard, scheduleCard, updateCard } from "./actions";
 
 export default async function CardPage({ params }: { params: Promise<{ id: string }> }) {
@@ -25,6 +27,7 @@ export default async function CardPage({ params }: { params: Promise<{ id: strin
   if (!card) notFound();
   const next = PIPELINE_META[card.status].next;
   const edited = card.assets.find((asset) => asset.kind === "EDITED" || asset.kind === "GENERATED");
+  const packet = editorNeeds(card);
 
   return (
     <Shell>
@@ -85,8 +88,11 @@ export default async function CardPage({ params }: { params: Promise<{ id: strin
             ))}
           </select>
           <input name="referenceUrl" defaultValue={card.referenceUrl} placeholder="Reference link" className="field" />
-          <textarea name="hook" defaultValue={card.hook} placeholder="Hook" className="field min-h-16" />
-          <textarea name="script" defaultValue={card.script} placeholder="Script" className="field min-h-32" />
+          <textarea name="premise" defaultValue={card.premise} placeholder="Premise — what payoff does the viewer get?" className="field min-h-16" />
+          <textarea name="hook" defaultValue={card.hook} placeholder="Hook — visual + spoken line" className="field min-h-16" />
+          <textarea name="body" defaultValue={card.body} placeholder="Body / demo" className="field min-h-16" />
+          <textarea name="plug" defaultValue={card.plug} placeholder="Plug — how the brand shows up" className="field min-h-16" />
+          <textarea name="script" defaultValue={card.script} placeholder="Full script" className="field min-h-32" />
           <textarea name="caption" defaultValue={card.caption} placeholder="Caption" className="field min-h-16" />
           <textarea name="editorNote" defaultValue={card.editorNote} placeholder="Note for CapCut / editor" className="field min-h-20" />
           <input name="plannedDate" type="date" defaultValue={card.plannedDate ? toInputDate(card.plannedDate) : ""} className="field" />
@@ -95,14 +101,16 @@ export default async function CardPage({ params }: { params: Promise<{ id: strin
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" name="approved" defaultChecked={card.approved} /> Paid / approved
           </label>
-          <input name="premise" type="hidden" defaultValue={card.premise} />
-          <input name="body" type="hidden" defaultValue={card.body} />
-          <input name="plug" type="hidden" defaultValue={card.plug} />
           <input name="captionStyle" type="hidden" defaultValue={card.captionStyle} />
           <button className="w-full rounded-xl border border-line py-3">Save</button>
         </form>
 
         <div className="space-y-4">
+          <section className="rounded-card border border-line bg-panel p-5">
+            <h2 className="mb-1 font-semibold">Editor packet</h2>
+            <p className="mb-3 text-sm text-mute">CapCut should not have to guess. Fill the gaps before you hand off.</p>
+            <EditorNeed items={packet} />
+          </section>
           <section className="rounded-card border border-line bg-panel p-5">
             <h2 className="mb-1 font-semibold">Raws + brief</h2>
             <p className="mb-4 text-sm text-mute">Drop footage. Talk the brief. CapCut can wait.</p>

@@ -27,5 +27,9 @@
   Hooks × demos × CTAs now keep audio, optional music, hook text, and land as Ready cards.
   Skipped students and an in-app editor. CapCut stays the cutter.
 
+- [X] Repurposer rows + mix settings + editor packet
+  Clips are labeled by the row you drop them in. Mix settings sit on the same batch page.
+  CapCut cards now show a missing-packet list. ffmpeg exports at CRF 18.
+
 - [ ] Screenshot-parity pass
   Still open: live Outstand posting, URL download/transcribe, month calendar filters.

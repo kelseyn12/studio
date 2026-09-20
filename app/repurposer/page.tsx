@@ -14,12 +14,12 @@ export default async function RepurposerPage() {
       <div className="mb-8 max-w-2xl">
         <h1 className="text-3xl font-semibold tracking-tight">Repurpose</h1>
         <p className="mt-2 text-mute">
-          Not a timeline editor. You already filmed the parts. This multiplies them.
+          Not a timeline editor. You already filmed the parts. You sort them. Studio multiplies them.
         </p>
         <ol className="mt-4 space-y-1 text-sm text-mute">
-          <li>1. Drop many hooks, bodies, and CTAs.</li>
-          <li>2. Studio builds every mix — hook 1 + body 1 + CTA 2, and so on.</li>
-          <li>3. Each mix can get extra copies with different speed, light, and crop so platforms do not see the same video.</li>
+          <li>1. Drop openings into Hooks, middles into Bodies, endings into CTAs. The row is the label.</li>
+          <li>2. Mix settings on the batch page stitch every combo, then make unique copies.</li>
+          <li>3. ffmpeg does this on this machine. No CapCut API. Outstand is only for posting later.</li>
         </ol>
       </div>
       <form action={createBatch} className="mb-8 flex max-w-xl gap-2">

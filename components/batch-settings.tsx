@@ -37,6 +37,9 @@ export function BatchSettings({
   const [allCombos, setAllCombos] = useState(defaults.allCombos);
   const [count, setCount] = useState(defaults.count);
   const [variants, setVariants] = useState(defaults.variants);
+  const [speedOn, setSpeedOn] = useState(defaults.speedOn);
+  const [colorOn, setColorOn] = useState(defaults.colorOn);
+  const [zoomOn, setZoomOn] = useState(defaults.zoomOn);
   const mixes = useMemo(
     () => plannedMixes(hooks, bodies, ctas, allCombos, count),
     [hooks, bodies, ctas, allCombos, count],
@@ -46,6 +49,10 @@ export function BatchSettings({
   return (
     <form action={`/api/repurpose/${batchId}/generate`} method="post" className="space-y-6">
       <input type="hidden" name="name" value={name} />
+      {allCombos ? <input type="hidden" name="allCombos" value="on" /> : null}
+      {speedOn ? <input type="hidden" name="speedOn" value="on" /> : null}
+      {colorOn ? <input type="hidden" name="colorOn" value="on" /> : null}
+      {zoomOn ? <input type="hidden" name="zoomOn" value="on" /> : null}
 
       <div className="rounded-card bg-sun px-5 py-4 text-ink">
         <p className="text-xs font-semibold uppercase tracking-[0.16em]">This batch will make</p>
@@ -56,43 +63,25 @@ export function BatchSettings({
       </div>
 
       <section className="rounded-card border border-line bg-panel p-5">
-        <p className="label">Step 2 · Mixes — different stories</p>
+        <p className="label">Mix settings</p>
         <p className="mt-2 text-sm text-mute">
-          Each mix is a new video: hook A + body 1 + CTA 2. Same body can sit under many hooks.
+          Mixes change the story. Unique copies change the file so platforms do not match them.
         </p>
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
-          <label className="flex items-center gap-3 text-sm md:col-span-2">
-            <input
-              type="checkbox"
-              name="allCombos"
-              checked={allCombos}
-              onChange={(event) => setAllCombos(event.target.checked)}
-            />
-            Use every hook × body × CTA mix
-          </label>
-          <label>
-            <span className="label">If not every mix, stop after</span>
+        <div className="mt-5 space-y-4">
+          <Row label="Every mix">
+            <Toggle on={allCombos} onClick={() => setAllCombos(!allCombos)} />
+          </Row>
+          <Row label="If not every mix, stop after">
             <input
               name="count"
               type="number"
               min={1}
               value={count}
               onChange={(event) => setCount(Number(event.target.value) || 1)}
-              className="field"
+              className="field max-w-28"
             />
-          </label>
-        </div>
-      </section>
-
-      <section className="rounded-card border border-line bg-panel p-5">
-        <p className="label">Step 3 · Unique copies — same story, different file</p>
-        <p className="mt-2 text-sm text-mute">
-          Platforms match identical files. Each copy gets a slightly different speed, light, or crop so
-          the same mix can post more than once.
-        </p>
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
-          <label>
-            <span className="label">Copies of each mix</span>
+          </Row>
+          <Row label="Unique copies of each mix">
             <input
               name="variants"
               type="number"
@@ -100,38 +89,26 @@ export function BatchSettings({
               max={8}
               value={variants}
               onChange={(event) => setVariants(Number(event.target.value) || 1)}
-              className="field"
+              className="field max-w-28"
             />
-          </label>
-          <label>
-            <span className="label">How hard</span>
-            <select name="intensity" defaultValue={defaults.intensity} className="field">
+          </Row>
+          <Row label="Speed variation">
+            <Toggle on={speedOn} onClick={() => setSpeedOn(!speedOn)} />
+          </Row>
+          <Row label="Light / color">
+            <Toggle on={colorOn} onClick={() => setColorOn(!colorOn)} />
+          </Row>
+          <Row label="Crop / zoom jitter">
+            <Toggle on={zoomOn} onClick={() => setZoomOn(!zoomOn)} />
+          </Row>
+          <Row label="How hard">
+            <select name="intensity" defaultValue={defaults.intensity} className="field max-w-xs">
               <option value="light">Light — harder for you to notice</option>
               <option value="hard">Hard — easier for the algorithm to see as new</option>
             </select>
-          </label>
-          <label className="flex items-center gap-3 text-sm">
-            <input type="checkbox" name="speedOn" defaultChecked={defaults.speedOn} /> Speed
-          </label>
-          <label className="flex items-center gap-3 text-sm">
-            <input type="checkbox" name="colorOn" defaultChecked={defaults.colorOn} /> Light / color
-          </label>
-          <label className="flex items-center gap-3 text-sm md:col-span-2">
-            <input type="checkbox" name="zoomOn" defaultChecked={defaults.zoomOn} /> Crop / zoom jitter
-          </label>
-          <p className="text-sm text-mute md:col-span-2">
-            Example: 3 hooks, 1 body, 2 CTAs, 2 copies = 12 videos. Copy 1 might be 102% speed. Copy 2
-            might be 98% and a little warmer.
-          </p>
-        </div>
-      </section>
-
-      <section className="rounded-card border border-line bg-panel p-5">
-        <p className="label">Where they land</p>
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
-          <label>
-            <span className="label">Deal</span>
-            <select name="campaignId" defaultValue={defaults.campaignId} className="field">
+          </Row>
+          <Row label="Deal">
+            <select name="campaignId" defaultValue={defaults.campaignId} className="field max-w-xs">
               <option value="">None</option>
               {campaigns.map((campaign) => (
                 <option key={campaign.id} value={campaign.id}>
@@ -139,10 +116,9 @@ export function BatchSettings({
                 </option>
               ))}
             </select>
-          </label>
-          <label>
-            <span className="label">Account</span>
-            <select name="accountId" defaultValue={defaults.accountId} className="field">
+          </Row>
+          <Row label="Account">
+            <select name="accountId" defaultValue={defaults.accountId} className="field max-w-xs">
               <option value="">None</option>
               {accounts.map((account) => (
                 <option key={account.id} value={account.id}>
@@ -150,20 +126,39 @@ export function BatchSettings({
                 </option>
               ))}
             </select>
-          </label>
+          </Row>
         </div>
+        <button
+          className="mt-6 rounded-xl bg-sun px-6 py-3 font-semibold text-ink disabled:opacity-40"
+          disabled={files < 1}
+        >
+          Generate {files || ""} video{files === 1 ? "" : "s"}
+        </button>
+        <p className="mt-3 text-sm text-mute">
+          Each file becomes a Ready card. Calendar can space the week. Renders can take a few minutes.
+        </p>
       </section>
-
-      <button
-        className="rounded-xl bg-sun px-6 py-3 font-semibold text-ink disabled:opacity-40"
-        disabled={files < 1}
-      >
-        Generate {files || ""} video{files === 1 ? "" : "s"} into Library
-      </button>
-      <p className="text-sm text-mute">
-        Each file becomes a Ready card. Then Calendar can auto-space the week. Renders can take a few
-        minutes.
-      </p>
     </form>
+  );
+}
+
+function Row({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4 first:border-t-0 first:pt-0">
+      <p className="text-sm">{label}</p>
+      {children}
+    </div>
+  );
+}
+
+function Toggle({ on, onClick }: { on: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-full px-4 py-1.5 text-sm font-semibold ${on ? "bg-sun text-ink" : "bg-lift text-mute"}`}
+    >
+      {on ? "On" : "Off"}
+    </button>
   );
 }

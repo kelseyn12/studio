@@ -71,9 +71,9 @@ function videoFilter(input: {
   hookText?: string;
 }): string {
   const parts = input.zoom
-    ? ["scale=1166:2074", "crop=1080:1920", "fps=30", "setsar=1"]
+    ? ["scale=1166:2074:flags=lanczos", "crop=1080:1920", "fps=30", "setsar=1"]
     : [
-        "scale=1080:1920:force_original_aspect_ratio=decrease",
+        "scale=1080:1920:force_original_aspect_ratio=decrease:flags=lanczos",
         "pad=1080:1920:(ow-iw)/2:(oh-ih)/2",
         "fps=30",
         "setsar=1",
@@ -142,7 +142,24 @@ export async function assembleVideo(input: {
   }
   args.push("-filter_complex", chains.join(";"));
   args.push("-map", "[outv]", "-map", input.musicPath ? "[mix]" : "[outa]");
-  args.push("-c:v", "libx264", "-preset", "veryfast", "-crf", "23", "-c:a", "aac", "-shortest", outputAbs);
+  args.push(
+    "-c:v",
+    "libx264",
+    "-preset",
+    "medium",
+    "-crf",
+    "18",
+    "-pix_fmt",
+    "yuv420p",
+    "-movflags",
+    "+faststart",
+    "-c:a",
+    "aac",
+    "-b:a",
+    "192k",
+    "-shortest",
+    outputAbs,
+  );
   await runFfmpeg(args);
   return outputRel;
 }
