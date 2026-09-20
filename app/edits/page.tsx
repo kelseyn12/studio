@@ -8,7 +8,7 @@ import { prisma } from "@/lib/prisma";
 export default async function EditsPage() {
   const cards = await prisma.card.findMany({
     where: { status: { in: ["FILMED", "EDITING", "REVIEW"] } },
-    include: { campaign: true, assets: true },
+    include: { campaign: true, assets: true, editor: true },
     orderBy: { updatedAt: "desc" },
   });
 
@@ -16,8 +16,8 @@ export default async function EditsPage() {
     <Shell>
       <h1 className="text-3xl font-semibold tracking-tight">CapCut in</h1>
       <p className="mt-2 mb-6 max-w-2xl text-mute">
-        You cut in CapCut. Studio only needs the export. Open a card, grab the packet, drop the file.
-        Generated Repurpose videos skip this room — they already land Ready.
+        You cut in CapCut. Studio is the ticket, not the hard drive. Open the raws folder, cut 1080×1920, drop the
+        export. Repurpose videos skip this room.
       </p>
       <div className="space-y-3">
         {cards.length === 0 ? (
@@ -34,6 +34,10 @@ export default async function EditsPage() {
                     <h2 className="text-lg font-semibold">{card.title}</h2>
                     <p className="text-sm text-mute">{card.campaign?.name ?? "No deal"}</p>
                     {card.hook ? <p className="mt-2 text-sm">Hook: {card.hook}</p> : null}
+                    {card.editor ? <p className="mt-1 text-sm text-mute">Editor: {card.editor.name}</p> : null}
+                    {card.rawsUrl ? (
+                      <p className="mt-1 text-sm text-sun">Raws folder is on the card</p>
+                    ) : null}
                     {card.editorNote ? <p className="mt-1 text-sm text-mute">{card.editorNote}</p> : null}
                   </div>
                   <StatusPill status={card.status} />

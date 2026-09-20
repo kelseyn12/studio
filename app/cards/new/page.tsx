@@ -25,6 +25,7 @@ async function createCard(formData: FormData) {
           plug: String(formData.get("plug") || ""),
           script: String(formData.get("script") || ""),
           referenceUrl: String(formData.get("referenceUrl") || ""),
+          rawsUrl: String(formData.get("rawsUrl") || ""),
           caption: String(formData.get("caption") || ""),
           status: formData.get("script") ? "SCRIPTED" : "IDEA",
         },
@@ -66,7 +67,8 @@ export default async function NewCardPage() {
           </select>
           <input name="count" type="number" defaultValue={1} min={1} max={40} className="rounded-xl border border-line bg-lift px-3 py-2" />
         </div>
-        <input name="referenceUrl" placeholder="Reference video URL" className="rounded-xl border border-line bg-lift px-3 py-2" />
+        <input name="rawsUrl" placeholder="Raws folder — Google Drive or Dropbox link" className="rounded-xl border border-line bg-lift px-3 py-2" />
+        <input name="referenceUrl" placeholder="Reference video URL (optional)" className="rounded-xl border border-line bg-lift px-3 py-2" />
         <textarea name="premise" rows={2} placeholder="Premise — what payoff does the viewer get?" className="rounded-xl border border-line bg-lift px-3 py-2" />
         <textarea name="hook" rows={2} placeholder="Hook — visual + text + spoken line" className="rounded-xl border border-line bg-lift px-3 py-2" />
         <textarea name="body" rows={2} placeholder="Body" className="rounded-xl border border-line bg-lift px-3 py-2" />

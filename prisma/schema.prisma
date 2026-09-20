@@ -134,6 +134,7 @@ model Card {
   script           String          @default("")
   caption          String          @default("")
   referenceUrl     String          @default("")
+  rawsUrl          String          @default("")
   editorNote       String          @default("")
   captionStyle     String          @default("")
   plannedDate      DateTime?

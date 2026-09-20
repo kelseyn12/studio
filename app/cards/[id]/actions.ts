@@ -28,6 +28,7 @@ export async function updateCard(formData: FormData) {
       script: String(formData.get("script") || ""),
       caption: String(formData.get("caption") || ""),
       referenceUrl: String(formData.get("referenceUrl") || ""),
+      rawsUrl: String(formData.get("rawsUrl") || ""),
       editorNote: String(formData.get("editorNote") || ""),
       captionStyle: String(formData.get("captionStyle") || ""),
       plannedDate: formData.get("plannedDate") ? new Date(String(formData.get("plannedDate"))) : null,

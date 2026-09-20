@@ -8,21 +8,21 @@ describe("editorNeeds", () => {
       body: "",
       script: "",
       editorNote: "",
-      referenceUrl: "",
+      rawsUrl: "",
       assets: [],
     });
     expect(packetReady(items)).toBe(false);
     expect(items.every((item) => !item.ok)).toBe(true);
   });
 
-  it("is ready when the packet is full", () => {
+  it("accepts a Drive folder instead of dumped files", () => {
     const items = editorNeeds({
       hook: "Stop scrolling",
       body: "Here is the demo",
       script: "",
       editorNote: "Keep captions big",
-      referenceUrl: "https://example.com",
-      assets: [{ kind: "RAW" }],
+      rawsUrl: "https://drive.google.com/drive/folders/abc",
+      assets: [],
     });
     expect(packetReady(items)).toBe(true);
   });

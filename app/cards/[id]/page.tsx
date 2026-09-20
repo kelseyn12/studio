@@ -15,14 +15,15 @@ import { advanceCard, scheduleCard, updateCard } from "./actions";
 
 export default async function CardPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [card, campaigns, formats, accounts] = await Promise.all([
+  const [card, campaigns, formats, accounts, editors] = await Promise.all([
     prisma.card.findUnique({
       where: { id },
-      include: { campaign: true, format: true, account: true, assets: true },
+      include: { campaign: true, format: true, account: true, assets: true, editor: true },
     }),
     prisma.campaign.findMany(),
     prisma.format.findMany(),
     prisma.socialAccount.findMany({ where: { isActive: true } }),
+    prisma.user.findMany({ where: { role: { in: ["EDITOR", "CREATOR"] } }, orderBy: { name: "asc" } }),
   ]);
   if (!card) notFound();
   const next = PIPELINE_META[card.status].next;
@@ -52,7 +53,6 @@ export default async function CardPage({ params }: { params: Promise<{ id: strin
       <div className="grid gap-8 xl:grid-cols-2">
         <form action={updateCard} className="space-y-3">
           <input type="hidden" name="id" value={card.id} />
-          <input type="hidden" name="editorId" value={card.editorId ?? ""} />
           <input type="hidden" name="likes" value={card.likes} />
           <input type="hidden" name="comments" value={card.comments} />
           <input name="title" defaultValue={card.title} className="field" />
@@ -83,11 +83,20 @@ export default async function CardPage({ params }: { params: Promise<{ id: strin
             <option value="">Account</option>
             {accounts.map((account) => (
               <option key={account.id} value={account.id}>
-                {account.network} · @{account.username}
+                {account.nickname ? `${account.nickname} · ` : ""}@{account.username}
               </option>
             ))}
           </select>
-          <input name="referenceUrl" defaultValue={card.referenceUrl} placeholder="Reference link" className="field" />
+          <select name="editorId" defaultValue={card.editorId ?? ""} className="field">
+            <option value="">Editor</option>
+            {editors.map((person) => (
+              <option key={person.id} value={person.id}>
+                {person.name} · {person.role.toLowerCase()}
+              </option>
+            ))}
+          </select>
+          <input name="rawsUrl" defaultValue={card.rawsUrl} placeholder="Raws folder — Drive or Dropbox" className="field" />
+          <input name="referenceUrl" defaultValue={card.referenceUrl} placeholder="Reference video (optional)" className="field" />
           <textarea name="premise" defaultValue={card.premise} placeholder="Premise — what payoff does the viewer get?" className="field min-h-16" />
           <textarea name="hook" defaultValue={card.hook} placeholder="Hook — visual + spoken line" className="field min-h-16" />
           <textarea name="body" defaultValue={card.body} placeholder="Body / demo" className="field min-h-16" />
@@ -108,24 +117,51 @@ export default async function CardPage({ params }: { params: Promise<{ id: strin
         <div className="space-y-4">
           <section className="rounded-card border border-line bg-panel p-5">
             <h2 className="mb-1 font-semibold">Editor packet</h2>
-            <p className="mb-3 text-sm text-mute">CapCut should not have to guess. Fill the gaps before you hand off.</p>
+            <p className="mb-3 text-sm text-mute">
+              Editor works from the folder, not this laptop. Hook, script, raws link, and a note. Then they drop a 1080
+              CapCut export.
+            </p>
             <EditorNeed items={packet} />
           </section>
           <section className="rounded-card border border-line bg-panel p-5">
-            <h2 className="mb-1 font-semibold">Raws + brief</h2>
-            <p className="mb-4 text-sm text-mute">Drop footage. Talk the brief. CapCut can wait.</p>
-            <DropZone action="/api/assets" extra={{ id: card.id, kind: "RAW" }} label="Drop raws" accept="video/*,image/*,audio/*" />
+            <h2 className="mb-1 font-semibold">Raws live here</h2>
+            <p className="mb-4 text-sm text-mute">
+              Put 4K camera files in Drive. Do not dump them into Studio. A link is enough.
+            </p>
+            {card.rawsUrl ? (
+              <a href={card.rawsUrl} target="_blank" rel="noreferrer" className="mb-4 block rounded-xl bg-sun px-4 py-3 text-center font-semibold text-ink">
+                Open raws folder
+              </a>
+            ) : null}
+            <DropZone
+              action="/api/assets"
+              extra={{ id: card.id, kind: "RAW" }}
+              label="Tiny stills / voice only"
+              hint="Not for 4K. Prefer the folder link above."
+              accept="image/*,audio/*"
+            />
             <div className="mt-3">
-              <DropZone action="/api/assets" extra={{ id: card.id, kind: "REFERENCE" }} label="Reference / stills" />
+              <DropZone action="/api/assets" extra={{ id: card.id, kind: "REFERENCE" }} label="Reference stills" hint="Optional screenshots" />
             </div>
             <VoiceBox cardId={card.id} />
           </section>
           <section className="rounded-card border border-line bg-panel p-5">
-            <h2 className="mb-1 font-semibold">CapCut delivery</h2>
-            <p className="mb-4 text-sm text-mute">Export from CapCut, drop it here, schedule.</p>
-            <DropZone action="/api/assets" extra={{ id: card.id, kind: "EDITED" }} label="Drop the cut" accept="video/*" />
+            <h2 className="mb-1 font-semibold">Editor drops the draft</h2>
+            <p className="mb-4 text-sm text-mute">
+              CapCut export: 1080×1920, high bitrate. This small file is what ships. Calendar makes it public.
+            </p>
+            <DropZone
+              action="/api/assets"
+              extra={{ id: card.id, kind: "EDITED" }}
+              label="Drop the CapCut export"
+              hint="Finished cut only"
+              accept="video/*"
+            />
             {edited ? (
-              <a href={publicFileUrl(edited.path)} className="mt-4 block rounded-xl bg-sun px-4 py-3 text-center font-semibold text-ink">
+              <a
+                href={edited.publicUrl || publicFileUrl(edited.path)}
+                className="mt-4 block rounded-xl bg-sun px-4 py-3 text-center font-semibold text-ink"
+              >
                 Open the delivered video
               </a>
             ) : null}
@@ -142,7 +178,14 @@ export default async function CardPage({ params }: { params: Promise<{ id: strin
           </section>
           <div className="space-y-2">
             {card.assets.map((asset) => (
-              <MediaRow key={asset.id} kind={asset.kind} filename={asset.filename} path={asset.path} mime={asset.mime} />
+              <MediaRow
+                key={asset.id}
+                kind={asset.kind}
+                filename={asset.filename}
+                path={asset.path}
+                mime={asset.mime}
+                publicUrl={asset.publicUrl}
+              />
             ))}
           </div>
         </div>

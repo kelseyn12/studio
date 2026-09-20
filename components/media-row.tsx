@@ -5,13 +5,15 @@ export function MediaRow({
   filename,
   path,
   mime,
+  publicUrl,
 }: {
   kind: string;
   filename: string;
   path: string;
   mime: string;
+  publicUrl?: string;
 }) {
-  const href = publicFileUrl(path);
+  const href = publicUrl || publicFileUrl(path);
   const audio = mime.startsWith("audio") || filename.endsWith(".webm") || filename.endsWith(".mp3");
   const video = mime.startsWith("video") || filename.endsWith(".mp4") || filename.endsWith(".mov");
   return (

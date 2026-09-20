@@ -7,11 +7,13 @@ export function DropZone({
   action,
   extra,
   label,
+  hint,
   accept,
 }: {
   action: string;
   extra?: Record<string, string>;
   label: string;
+  hint?: string;
   accept?: string;
 }) {
   const router = useRouter();
@@ -40,7 +42,7 @@ export function DropZone({
   return (
     <label className="block cursor-pointer rounded-card border border-dashed border-line bg-lift/40 px-4 py-6 text-center">
       <p className="text-sm text-paper">{busy ? "Uploading…" : label}</p>
-      <p className="mt-1 text-xs text-mute">Drop or click · up to 12</p>
+      <p className="mt-1 text-xs text-mute">{hint ?? "Drop or click · up to 12"}</p>
       {note ? <p className="mt-2 text-xs text-sun">{note}</p> : null}
       <input
         type="file"
