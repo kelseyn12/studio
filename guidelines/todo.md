@@ -21,9 +21,12 @@
 - [X] Outstand publish + analytics close the loop
   Pull from Outstand marks Posted/Data. Film dates stay on Plan. Winning hooks Multiply.
 
-- [ ] Clerk or managed auth for production
-  Studio PIN is a local lock so the machine can run today.
-  Replace it before this is on the public internet.
+- [X] Clerk or managed auth for production
+  Clerk keys turn PIN off. Team invite emails the VA. CapCut in is their only room. Fly.io hosts the always-on URL with a disk volume.
+  Self-cut still works on this laptop with PIN until those keys exist. A remote editor does not.
+
+- [X] Self-cut vs VA
+  Footage: I’ll cut this (`cutBy=SELF`) or Send to editor (`cutBy=EDITOR`). Today says Cut N vs Send N. SELF never pings ManyChat.
 
 - [X] Clarify repurposer: mixes vs unique copies
   Hooks × bodies × CTAs is the story mix. Variants change speed/light/crop per copy.

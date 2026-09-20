@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "64mb",
     },
   },
+  serverExternalPackages: ["@aws-sdk/client-s3"],
 };
 
 export default nextConfig;

@@ -10,6 +10,7 @@ describe("access", () => {
     expect(canVisit("EDITOR", "/campaigns")).toBe(false);
     expect(canVisit("EDITOR", "/calendar")).toBe(false);
     expect(canVisit("EDITOR", "/api/assets")).toBe(true);
+    expect(canVisit("EDITOR", "/api/files/cards/a.mp4")).toBe(true);
   });
 
   it("lets creators into every room", () => {

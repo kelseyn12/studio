@@ -15,6 +15,18 @@ describe("editorNeeds", () => {
     expect(items.every((item) => !item.ok)).toBe(true);
   });
 
+  it("accepts uploaded raw files without a Drive folder", () => {
+    const items = editorNeeds({
+      hook: "Stop scrolling",
+      body: "Here is the demo",
+      script: "",
+      editorNote: "Keep captions big",
+      rawsUrl: "",
+      assets: [{ kind: "RAW" }],
+    });
+    expect(packetReady(items)).toBe(true);
+  });
+
   it("accepts a Drive folder instead of dumped files", () => {
     const items = editorNeeds({
       hook: "Stop scrolling",

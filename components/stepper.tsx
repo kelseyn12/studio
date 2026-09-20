@@ -1,15 +1,14 @@
 import Link from "next/link";
 import { DESK_STAGES, type DeskStage } from "@/lib/card-desk";
 
-const LABELS: Record<DeskStage, string> = {
-  brief: "Brief",
-  footage: "Footage",
-  editor: "Editor",
-  live: "Live",
-};
-
-export function Stepper({ cardId, stage }: { cardId: string; stage: DeskStage }) {
+export function Stepper({ cardId, stage, cutBy }: { cardId: string; stage: DeskStage; cutBy?: "SELF" | "EDITOR" }) {
   const current = DESK_STAGES.indexOf(stage);
+  const labels: Record<DeskStage, string> = {
+    brief: "Brief",
+    footage: "Footage",
+    editor: cutBy === "SELF" ? "Cut" : "Editor",
+    live: "Live",
+  };
   return (
     <ol className="grid grid-cols-4 gap-2">
       {DESK_STAGES.map((item, index) => (
@@ -20,7 +19,7 @@ export function Stepper({ cardId, stage }: { cardId: string; stage: DeskStage })
               index === current ? "bg-sun text-ink" : index < current ? "bg-lift text-paper" : "bg-panel text-mute"
             }`}
           >
-            {index + 1} {LABELS[item]}
+            {index + 1} {labels[item]}
           </Link>
         </li>
       ))}

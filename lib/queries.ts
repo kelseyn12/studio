@@ -21,6 +21,8 @@ export async function machineCounts(): Promise<MachineCounts> {
     select: { postsPerDay: true, accountsAllowed: true },
   });
   counts.ready = await prisma.card.count({ where: { status: "READY", scheduledAt: null } });
+  counts.filmed = await prisma.card.count({ where: { status: "FILMED", cutBy: "EDITOR" } });
+  counts.cutSelf = await prisma.card.count({ where: { status: "FILMED", cutBy: "SELF" } });
   counts.totalCards = await prisma.card.count();
   counts.activeDeals = deals.length;
   counts.paidSlotsToday = deals.reduce(

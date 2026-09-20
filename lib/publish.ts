@@ -1,5 +1,5 @@
 import { postedAtFromPost, createPost, hasOutstand, uploadMedia, type OutstandPost } from "@/lib/outstand";
-import { absoluteUpload } from "@/lib/files";
+import { ensureLocal } from "@/lib/files";
 import { prisma } from "@/lib/prisma";
 import type { CardStatus } from "@prisma/client";
 
@@ -44,7 +44,7 @@ export async function queueCard(
   try {
     if (edited && !publicUrl && hasOutstand()) {
       const uploaded = await uploadMedia(
-        absoluteUpload(edited.path),
+        await ensureLocal(edited.path),
         edited.filename || "video.mp4",
         edited.mime || "video/mp4",
       );

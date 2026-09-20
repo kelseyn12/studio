@@ -1,0 +1,35 @@
+# fly.toml app configuration file generated for System Studio
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = "system-studio"
+primary_region = "ord"
+
+[build]
+
+[env]
+  NODE_ENV = "production"
+  UPLOAD_ROOT = "/data/uploads"
+  DATABASE_URL = "file:/data/studio.db"
+  HOOK_FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+  NEXT_PUBLIC_CLERK_SIGN_IN_URL = "/sign-in"
+  NEXT_PUBLIC_CLERK_SIGN_UP_URL = "/sign-up"
+  NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL = "/"
+  NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL = "/"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
+
+[[mounts]]
+  source = "studio_data"
+  destination = "/data"

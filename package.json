@@ -13,6 +13,8 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1136.0",
+    "@clerk/nextjs": "^7.9.4",
     "@prisma/client": "^6.16.2",
     "jose": "^6.1.0",
     "next": "^15.5.4",

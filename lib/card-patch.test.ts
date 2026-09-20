@@ -10,4 +10,10 @@ describe("cardPatch", () => {
     expect(patch.payoutCents).toBeUndefined();
     expect(patch.editorNote).toBeUndefined();
   });
+
+  it("stores cutBy from Footage", () => {
+    const form = new FormData();
+    form.set("cutBy", "SELF");
+    expect(cardPatch(form).cutBy).toBe("SELF");
+  });
 });

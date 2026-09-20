@@ -26,6 +26,10 @@ export function cardPatch(form: FormData): Prisma.CardUncheckedUpdateInput {
   if (accountId !== undefined) data.accountId = accountId;
   const editorId = idOrNull(form, "editorId");
   if (editorId !== undefined) data.editorId = editorId;
+  if (form.has("cutBy")) {
+    const cutBy = String(form.get("cutBy") || "");
+    if (cutBy === "SELF" || cutBy === "EDITOR") data.cutBy = cutBy;
+  }
   const premise = text(form, "premise");
   if (premise !== undefined) data.premise = premise;
   const hook = text(form, "hook");

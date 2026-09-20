@@ -8,7 +8,8 @@ export type ActionKind =
   | "schedule"
   | "plan"
   | "deal"
-  | "batch";
+  | "batch"
+  | "cut";
 
 export type StudioAction = {
   kind: ActionKind;
@@ -22,6 +23,7 @@ export type MachineCounts = {
   idea: number;
   scripted: number;
   filmed: number;
+  cutSelf: number;
   editing: number;
   review: number;
   ready: number;
@@ -53,10 +55,19 @@ export function pickNextAction(counts: MachineCounts): StudioAction {
   if (counts.filmed > 0) {
     return {
       kind: "handoff",
-      title: `Send ${counts.filmed} filmed card${counts.filmed === 1 ? "" : "s"} to CapCut`,
-      detail: "Voice + Drive folder + assign. You do not cut in Studio.",
+      title: `Send ${counts.filmed} filmed card${counts.filmed === 1 ? "" : "s"} to the editor`,
+      detail: "They download the packet on their machine. You only review.",
       href: "/edits",
       count: counts.filmed,
+    };
+  }
+  if (counts.cutSelf > 0) {
+    return {
+      kind: "cut",
+      title: `Cut ${counts.cutSelf} video${counts.cutSelf === 1 ? "" : "s"}`,
+      detail: "You are the editor. Drop the 1080 export. Nothing to send.",
+      href: "/edits",
+      count: counts.cutSelf,
     };
   }
   if (counts.scripted > 0) {
@@ -100,6 +111,7 @@ export function emptyCounts(): MachineCounts {
     idea: 0,
     scripted: 0,
     filmed: 0,
+    cutSelf: 0,
     editing: 0,
     review: 0,
     ready: 0,
@@ -117,7 +129,7 @@ export function statusToCountKey(status: PipelineStatus): keyof MachineCounts | 
     case "SCRIPTED":
       return "scripted";
     case "FILMED":
-      return "filmed";
+      return null;
     case "EDITING":
       return "editing";
     case "REVIEW":

@@ -1,6 +1,8 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import type { Role } from "@prisma/client";
+import { hasClerk } from "@/lib/clerk-mode";
+import { readClerkSession } from "@/lib/clerk-user";
 
 const COOKIE = "studio_session";
 
@@ -41,6 +43,7 @@ export async function clearSession() {
 }
 
 export async function readSession(): Promise<SessionUser | null> {
+  if (hasClerk()) return readClerkSession();
   const jar = await cookies();
   const token = jar.get(COOKIE)?.value;
   if (!token) return null;

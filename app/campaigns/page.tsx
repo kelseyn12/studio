@@ -11,7 +11,8 @@ export default async function CampaignsPage({
   searchParams: Promise<{ kind?: string }>;
 }) {
   const params = await searchParams;
-  const kind = isDealKind(params.kind || "") ? params.kind : undefined;
+  const rawKind = params.kind || "";
+  const kind = isDealKind(rawKind) ? rawKind : undefined;
   const [campaigns, snap] = await Promise.all([
     prisma.campaign.findMany({
       where: kind ? { kind } : undefined,

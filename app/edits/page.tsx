@@ -15,19 +15,23 @@ export default async function EditsPage() {
     include: { campaign: true, assets: true, editor: true },
     orderBy: { updatedAt: "desc" },
   });
-  const send = cards.filter((card) => card.status === "FILMED");
+  const selfCut = user.role === "EDITOR" ? [] : cards.filter((card) => card.status === "FILMED" && card.cutBy === "SELF");
+  const send = cards.filter((card) => card.status === "FILMED" && card.cutBy === "EDITOR");
   const cutting = cards.filter((card) => card.status === "EDITING");
   const review = cards.filter((card) => card.status === "REVIEW");
 
   return (
     <Shell>
-      <h1 className="text-3xl font-semibold tracking-tight">{user.role === "EDITOR" ? "Your cuts" : "CapCut in"}</h1>
+      <h1 className="text-3xl font-semibold tracking-tight">{user.role === "EDITOR" ? "Your cuts" : "Cuts"}</h1>
       <p className="mt-2 mb-6 max-w-2xl text-mute">
-        Send to editor on the card and it lands here. Drop the export and it moves to Review, then Live.
+        {user.role === "EDITOR"
+          ? "Download the packet, cut on your machine, drop the 1080."
+          : "I’ll cut this stays here. Send to editor is the VA queue."}
       </p>
-      <Bucket title="Send / filmed" items={send} empty="Nothing waiting to send." />
-      <Bucket title="With the editor" items={cutting} empty="No active cuts." />
-      <Bucket title="Your review" items={review} empty="No drafts waiting." />
+      {user.role === "EDITOR" ? null : <Bucket title="You cut" items={selfCut} empty="Nothing you assigned to yourself." />}
+      <Bucket title={user.role === "EDITOR" ? "To cut" : "Send / VA"} items={send} empty="Nothing waiting to send." />
+      <Bucket title="With the editor" items={cutting} empty="No active VA cuts." />
+      <Bucket title="Review" items={review} empty="No drafts waiting." />
     </Shell>
   );
 }
@@ -42,6 +46,8 @@ function Bucket({
     id: string;
     title: string;
     hook: string;
+    body: string;
+    script: string;
     editorNote: string;
     rawsUrl: string;
     status: Parameters<typeof StatusPill>[0]["status"];
@@ -71,7 +77,7 @@ function Bucket({
                       {card.campaign
                         ? `${DEAL_KIND_LABEL[card.campaign.kind]} · ${card.campaign.brand || card.campaign.name}`
                         : "Personal"}
-                      {card.editor ? ` · ${card.editor.name}` : " · unassigned"}
+                      {card.editor ? ` · ${card.editor.name}` : ""}
                     </p>
                   </div>
                   <StatusPill status={card.status} />
@@ -79,7 +85,7 @@ function Bucket({
                 <div className="mt-4">
                   <EditorNeed items={packet} />
                   <p className="mt-3 text-sm text-mute">
-                    {packetReady(packet) ? "Packet is full. Cut it." : "Do not cut yet — packet is incomplete."}
+                    {packetReady(packet) ? "Packet is full. Cut it." : "Packet is incomplete."}
                   </p>
                 </div>
               </Link>

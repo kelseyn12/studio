@@ -1,5 +1,6 @@
 # Refactoring log
 
+- 2026-09-20 — UGC work OS: `cutBy` SELF vs EDITOR on Footage, editor packet downloads, 1080 drop or direct mp4 URL, R2 dual-write, Clerk+Fly so a VA is not on this Mac.
 - 2026-09-20 — Close the 20k loop: park no longer overwrites film dates, Pull marks Posted/Data, winners Multiply, formats promote.
 - 2026-09-20 — Accounts always links Outstand. Plan month drags film dates. Brief can rewrite hooks and set editor deadlines. Today chases due-soon cards. Numbers pulls Outstand stats.
 - 2026-09-20 — Whisper writes the voice note onto the card. DMs hold ManyChat comment recipes and can ping editor/creator when work moves.

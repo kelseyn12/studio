@@ -49,14 +49,21 @@ export default async function CardPage({
       </div>
       {desk ? null : (
         <div className="mb-6 max-w-xl">
-          <Stepper cardId={card.id} stage={stage} />
+          <Stepper cardId={card.id} stage={stage} cutBy={card.cutBy} />
         </div>
       )}
       <div className="max-w-2xl">
         {stage === "brief" ? <CardBrief card={card} campaigns={campaigns} accounts={accounts} /> : null}
-        {stage === "footage" ? <CardFootage card={card} /> : null}
+        {stage === "footage" ? <CardFootage card={card} editors={editors} /> : null}
         {stage === "editor" ? (
-          <CardEditorStage card={card} editors={editors} packet={packet} edited={edited} desk={desk} />
+          <CardEditorStage
+            card={card}
+            editors={editors}
+            packet={packet}
+            files={card.assets}
+            edited={edited}
+            desk={desk}
+          />
         ) : null}
         {stage === "live" ? <CardLive card={card} accounts={accounts} edited={edited} /> : null}
         <div className="mt-6 space-y-2">

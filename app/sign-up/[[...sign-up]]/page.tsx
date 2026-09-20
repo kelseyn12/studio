@@ -1,12 +1,12 @@
+import { SignUp } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
-import { LoginForm } from "@/app/login/login-form";
 import { hasClerk } from "@/lib/clerk-mode";
 
-export default function LoginPage() {
-  if (hasClerk()) redirect("/sign-in");
+export default function SignUpPage() {
+  if (!hasClerk()) redirect("/login");
   return (
     <div className="flex min-h-screen items-center justify-center bg-ink px-6">
-      <LoginForm />
+      <SignUp />
     </div>
   );
 }

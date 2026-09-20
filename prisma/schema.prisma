@@ -71,12 +71,18 @@ enum ClipSlot {
   CTA
 }
 
+enum CutBy {
+  SELF
+  EDITOR
+}
+
 model User {
   id             String   @id @default(cuid())
   name           String
   email          String   @unique
   role           Role
   pinHash        String?
+  clerkId        String?  @unique
   defaultEditor  Boolean  @default(false)
   createdAt      DateTime @default(now())
   cards          Card[]   @relation("CreatedCards")
@@ -137,6 +143,7 @@ model Card {
   createdBy        User?           @relation("CreatedCards", fields: [createdById], references: [id], onDelete: SetNull)
   editorId         String?
   editor           User?           @relation("EditorCards", fields: [editorId], references: [id], onDelete: SetNull)
+  cutBy            CutBy           @default(SELF)
   premise          String          @default("")
   hook             String          @default("")
   body             String          @default("")

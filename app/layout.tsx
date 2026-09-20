@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
+import { AppAuth } from "@/components/app-auth";
 import "./globals.css";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
@@ -12,7 +13,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={geist.variable}>
-      <body className="min-h-screen bg-ink font-sans antialiased">{children}</body>
+      <body className="min-h-screen bg-ink font-sans antialiased">
+        <AppAuth>{children}</AppAuth>
+      </body>
     </html>
   );
 }

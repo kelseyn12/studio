@@ -22,7 +22,8 @@ function runCommand(cmd: string, args: string[]): Promise<string> {
   });
 }
 
-export const HOOK_FONT = "/System/Library/Fonts/Supplemental/Arial Bold.ttf";
+export const HOOK_FONT =
+  process.env.HOOK_FONT || "/System/Library/Fonts/Supplemental/Arial Bold.ttf";
 
 export async function runFfmpeg(args: string[]): Promise<void> {
   await runCommand("ffmpeg", ["-y", ...args]);

@@ -19,4 +19,9 @@ describe("pickNextAction", () => {
   it("opens the deal when nothing is on the board", () => {
     expect(pickNextAction({ ...emptyCounts(), activeDeals: 2, totalCards: 0 }).kind).toBe("deal");
   });
+
+  it("sends VA jobs before self-cuts", () => {
+    expect(pickNextAction({ ...emptyCounts(), filmed: 2, cutSelf: 5 }).kind).toBe("handoff");
+    expect(pickNextAction({ ...emptyCounts(), cutSelf: 3 }).kind).toBe("cut");
+  });
 });

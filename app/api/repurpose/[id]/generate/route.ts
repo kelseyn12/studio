@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { pickCombos } from "@/lib/combinations";
 import { assembleVideo } from "@/lib/ffmpeg";
-import { absoluteUpload } from "@/lib/files";
+import { ensureLocal, uploadLocalToR2 } from "@/lib/files";
 import { prisma } from "@/lib/prisma";
 import { readSession } from "@/lib/session";
 import { variationFor } from "@/lib/variations";
@@ -61,14 +61,17 @@ export async function POST(
         const music = batch.tracks[fileNumber % Math.max(batch.tracks.length, 1)];
         fileNumber += 1;
         const outputRel = await assembleVideo({
-          clips: combo.map((clip) => ({
-            path: absoluteUpload(clip.path),
-            hookText: clip.hookText || undefined,
-          })),
+          clips: await Promise.all(
+            combo.map(async (clip) => ({
+              path: await ensureLocal(clip.path),
+              hookText: clip.hookText || undefined,
+            })),
+          ),
           outputName: `${id}-${fileNumber}.mp4`,
           ...filters,
-          musicPath: music ? absoluteUpload(music.path) : undefined,
+          musicPath: music ? await ensureLocal(music.path) : undefined,
         });
+        const publicUrl = await uploadLocalToR2(outputRel, "video/mp4");
         const title = `${batch.name} · ${fileNumber}`;
         const card = await prisma.card.create({
           data: {
@@ -87,6 +90,7 @@ export async function POST(
                 path: outputRel,
                 mime: "video/mp4",
                 size: 0,
+                publicUrl,
               },
             },
           },

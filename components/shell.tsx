@@ -1,5 +1,7 @@
 import { Nav } from "@/components/nav";
+import { SignOutControl } from "@/components/sign-out";
 import { requireUser } from "@/lib/auth";
+import { hasClerk } from "@/lib/clerk-mode";
 
 export async function Shell({ children }: { children: React.ReactNode }) {
   const user = await requireUser();
@@ -10,15 +12,10 @@ export async function Shell({ children }: { children: React.ReactNode }) {
         <header className="flex items-center justify-between border-b border-line px-8 py-4">
           <p className="text-sm text-mute">
             {user.role === "EDITOR"
-              ? "Your cards. Open the folder. Drop the 1080 export."
+              ? "Download the packet. Cut on your machine. Drop the 1080."
               : "One next action. Then you can close the laptop."}
           </p>
-          <form action="/api/auth/logout" method="post" className="flex items-center gap-3">
-            <p className="text-sm text-paper">
-              {user.name} · {user.role.toLowerCase()}
-            </p>
-            <button className="text-sm text-mute">Switch person</button>
-          </form>
+          <SignOutControl name={user.name} role={user.role} clerk={hasClerk()} />
         </header>
         <main className="flex-1 px-8 py-8">{children}</main>
       </div>

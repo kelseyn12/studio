@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { hashPin, pinsMatch, studioPin } from "@/lib/auth";
+import { hasClerk } from "@/lib/clerk-mode";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
 import { homeFor } from "@/lib/access";
 import { writeSession } from "@/lib/session";
@@ -14,6 +15,9 @@ const schema = z.object({
 });
 
 export async function POST(request: Request) {
+  if (hasClerk()) {
+    return NextResponse.json({ error: "PIN is off. Sign in with Clerk." }, { status: 410 });
+  }
   if (!rateLimit(clientKey(request, "login"), 10, 60_000)) {
     return NextResponse.json({ error: "Too many attempts" }, { status: 429 });
   }

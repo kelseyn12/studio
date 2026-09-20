@@ -9,6 +9,7 @@ export function homeFor(role: Role): string {
 export function canVisit(role: Role, pathname: string): boolean {
   if (role === "CREATOR") return true;
   if (pathname.startsWith("/api/auth") || pathname.startsWith("/api/files")) return true;
+  if (pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up") || pathname === "/login") return true;
   if (role === "EDITOR") {
     if (pathname === "/edits" || pathname.startsWith("/edits/")) return true;
     if (pathname.startsWith("/api/assets")) return true;

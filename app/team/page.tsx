@@ -1,17 +1,30 @@
 import { redirect } from "next/navigation";
 import { Shell } from "@/components/shell";
+import { hasClerk } from "@/lib/clerk-mode";
 import { prisma } from "@/lib/prisma";
 import type { Role } from "@prisma/client";
 
 async function addMember(formData: FormData) {
   "use server";
+  const name = String(formData.get("name") || "Member");
+  const email = String(formData.get("email") || `${Date.now()}@studio.local`);
+  const role = (formData.get("role") as Role) || "EDITOR";
   await prisma.user.create({
-    data: {
-      name: String(formData.get("name") || "Member"),
-      email: String(formData.get("email") || `${Date.now()}@studio.local`),
-      role: (formData.get("role") as Role) || "EDITOR",
-    },
+    data: { name, email, role },
   });
+  if (hasClerk() && email.includes("@") && !email.endsWith("@studio.local")) {
+    try {
+      const { clerkClient } = await import("@clerk/nextjs/server");
+      const client = await clerkClient();
+      await client.invitations.createInvitation({
+        emailAddress: email,
+        publicMetadata: { role },
+        ignoreExisting: true,
+      });
+    } catch {
+      /* Prisma user still exists; they can sign up with that email */
+    }
+  }
   redirect("/team");
 }
 
@@ -25,11 +38,14 @@ async function setDefaultEditor(formData: FormData) {
 
 export default async function TeamPage() {
   const users = await prisma.user.findMany({ orderBy: { createdAt: "asc" } });
+  const clerk = hasClerk();
   return (
     <Shell>
       <h1 className="text-3xl font-semibold tracking-tight">Team</h1>
       <p className="mt-1 mb-6 max-w-2xl text-mute">
-        Add an editor. Mark one as default so Send to editor can go in one click. They log in with that email and PIN 4242.
+        {clerk
+          ? "Invite sends a Clerk email. They open CapCut in from their computer. Mark one editor as default for Send."
+          : "Add an editor here. PIN is local-only — a remote VA needs Clerk on the always-on URL."}
       </p>
       <form action={addMember} className="mb-8 flex flex-wrap gap-2">
         <input name="name" placeholder="Name" className="rounded-xl border border-line bg-lift px-3 py-2" />
@@ -39,7 +55,7 @@ export default async function TeamPage() {
           <option value="OPERATOR">Operator</option>
           <option value="CREATOR">Creator</option>
         </select>
-        <button className="rounded-xl bg-sun px-4 py-2 font-semibold text-ink">Add</button>
+        <button className="rounded-xl bg-sun px-4 py-2 font-semibold text-ink">{clerk ? "Invite" : "Add"}</button>
       </form>
       <div className="space-y-2">
         {users.map((user) => (

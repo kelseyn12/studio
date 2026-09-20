@@ -1,28 +1,50 @@
-import { mkdir, writeFile } from "fs/promises";
+import { mkdir, readFile, writeFile } from "fs/promises";
 import path from "path";
 import { randomUUID } from "crypto";
+import { getR2, hasR2, putR2, type SavedFile } from "@/lib/r2";
 
-export const UPLOAD_ROOT = path.join(process.cwd(), "data", "uploads");
+export const UPLOAD_ROOT = process.env.UPLOAD_ROOT || path.join(process.cwd(), "data", "uploads");
 
-export async function saveUpload(file: File, folder: string): Promise<{
-  filename: string;
-  path: string;
-  mime: string;
-  size: number;
-}> {
+export async function saveUpload(file: File, folder: string): Promise<SavedFile> {
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
   const filename = `${randomUUID()}-${safeName}`;
-  const relative = path.join(folder, filename);
+  const relative = path.join(folder, filename).replace(/\\/g, "/");
+  const bytes = Buffer.from(await file.arrayBuffer());
+  const mime = file.type || "application/octet-stream";
   const absolute = path.join(UPLOAD_ROOT, relative);
   await mkdir(path.dirname(absolute), { recursive: true });
-  const bytes = Buffer.from(await file.arrayBuffer());
   await writeFile(absolute, bytes);
+  let publicUrl = "";
+  if (hasR2()) {
+    publicUrl = await putR2(relative, bytes, mime);
+  }
   return {
     filename: file.name,
     path: relative,
-    mime: file.type || "application/octet-stream",
+    mime,
     size: bytes.length,
+    publicUrl,
   };
+}
+
+export async function uploadLocalToR2(relative: string, mime: string): Promise<string> {
+  if (!hasR2()) return "";
+  const bytes = await readFile(path.join(UPLOAD_ROOT, relative));
+  return putR2(relative.replace(/\\/g, "/"), bytes, mime);
+}
+
+export async function ensureLocal(relative: string): Promise<string> {
+  const absolute = path.join(UPLOAD_ROOT, relative);
+  try {
+    await readFile(absolute);
+    return absolute;
+  } catch {
+    if (!hasR2()) throw new Error("Missing file");
+    const bytes = await getR2(relative.replace(/\\/g, "/"));
+    await mkdir(path.dirname(absolute), { recursive: true });
+    await writeFile(absolute, bytes);
+    return absolute;
+  }
 }
 
 export function publicFileUrl(relative: string): string {
