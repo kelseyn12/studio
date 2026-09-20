@@ -8,7 +8,7 @@ export function BulkForm({
   accounts,
 }: {
   waiting: number;
-  accounts: Array<{ id: string; username: string; network: string }>;
+  accounts: Array<{ id: string; username: string; network: string; nickname?: string }>;
 }) {
   const router = useRouter();
   const [note, setNote] = useState("");
@@ -28,7 +28,11 @@ export function BulkForm({
       }),
     });
     const body = await response.json();
-    setNote(response.ok ? `Spaced ${body.scheduled} posts` : body.error || "Failed");
+    setNote(
+      response.ok
+        ? `Spaced ${body.scheduled} · shipped ${body.shipped ?? 0} through Outstand`
+        : body.error || "Failed",
+    );
     router.refresh();
   }
 
@@ -56,13 +60,13 @@ export function BulkForm({
           <option value="">Keep current</option>
           {accounts.map((account) => (
             <option key={account.id} value={account.id}>
-              @{account.username}
+              {account.nickname ? `${account.nickname} · ` : ""}@{account.username}
             </option>
           ))}
         </select>
       </label>
       <button className="rounded-xl bg-sun px-4 py-3 font-semibold text-ink md:col-span-5">
-        Auto-space {waiting} ready video{waiting === 1 ? "" : "s"}
+        Auto-space and ship {waiting} ready video{waiting === 1 ? "" : "s"}
       </button>
       {note ? <p className="text-sm text-sun md:col-span-5">{note}</p> : null}
     </form>

@@ -4,9 +4,9 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { saveUpload } from "@/lib/files";
-import { createPost, hasOutstand } from "@/lib/outstand";
 import { isPipelineStatus } from "@/lib/pipeline";
 import { prisma } from "@/lib/prisma";
+import { queueCard } from "@/lib/publish";
 
 export async function updateCard(formData: FormData) {
   await requireUser();
@@ -79,43 +79,9 @@ export async function advanceCard(id: string, status: string) {
 export async function scheduleCard(formData: FormData) {
   await requireUser();
   const id = String(formData.get("id"));
-  const card = await prisma.card.findUnique({
-    where: { id },
-    include: { account: true, assets: true },
-  });
-  if (!card) return;
   const when = formData.get("scheduledAt") ? new Date(String(formData.get("scheduledAt"))) : new Date();
-  const edited = card.assets.find((asset) => asset.kind === "EDITED" || asset.kind === "GENERATED");
-  if (hasOutstand() && card.account) {
-    const origin = process.env.OUTSTAND_REDIRECT_URI?.replace("/connections/callback", "") || "http://localhost:3000";
-    const media = edited
-      ? [{ url: `${origin}/api/files/${edited.path}`, filename: edited.filename }]
-      : [];
-    const post = await createPost({
-      accounts: [card.account.outstandAccountId],
-      content: card.caption || card.title,
-      scheduledAt: when.toISOString(),
-      media,
-    });
-    await prisma.publishJob.create({
-      data: {
-        cardId: id,
-        accountId: card.account.id,
-        outstandPostId: post.id,
-        status: "QUEUED",
-        scheduledAt: when,
-      },
-    });
-    await prisma.card.update({
-      where: { id },
-      data: { status: "READY", scheduledAt: when, outstandPostId: post.id },
-    });
-  } else {
-    await prisma.card.update({
-      where: { id },
-      data: { status: "READY", scheduledAt: when },
-    });
-  }
+  const accountId = String(formData.get("accountId") || "") || null;
+  await queueCard(id, when, accountId);
   revalidatePath(`/cards/${id}`);
   revalidatePath("/calendar");
 }

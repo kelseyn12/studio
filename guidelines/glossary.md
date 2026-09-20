@@ -3,7 +3,8 @@
 - `scoreDeal` — `lib/deals.ts` — ranks a campaign by economics, capacity, operations. Used on campaign list and detail.
 - `pickNextAction` — `lib/next-action.ts` — chooses the single Today action. Used on `app/page.tsx`.
 - `machineCounts` — `lib/queries.ts` — pipeline and slot totals for Today.
-- `createPost` — `lib/outstand.ts` — schedules or publishes through Outstand. Used by `scheduleCard`.
+- `uploadMedia` — `lib/outstand.ts` — PUT the mp4 into Outstand storage, returns the public URL.
+- `queueCard` — `lib/publish.ts` — schedule a card and ship the file through Outstand. Used by card schedule and Calendar bulk.
 - `editorNeeds` — `lib/editor-packet.ts` — checklist for a CapCut handoff. Used on the card and CapCut in.
 - `assembleVideo` — `lib/ffmpeg.ts` — concatenates hook × body × CTA, keeps audio, optional music, applies a per-copy Variation.
 - `variationFor` — `lib/variations.ts` — unique speed / light / crop amounts for each copy of a mix.

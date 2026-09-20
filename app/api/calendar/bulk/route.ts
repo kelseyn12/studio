@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { addDays, startOfDay } from "@/lib/dates";
 import { prisma } from "@/lib/prisma";
+import { queueCard } from "@/lib/publish";
 import { readSession } from "@/lib/session";
+
+export const maxDuration = 300;
 
 export async function POST(request: Request) {
   const user = await readSession();
@@ -16,20 +19,26 @@ export async function POST(request: Request) {
     where: { status: "READY", scheduledAt: null },
     orderBy: { createdAt: "asc" },
   });
+  let shipped = 0;
+  const errors: string[] = [];
   for (const [index, card] of cards.entries()) {
     const dayOffset = Math.floor(index / perDay);
     const slot = index % perDay;
     const when = addDays(start, dayOffset);
     when.setHours(startHour, 0, 0, 0);
     when.setMinutes(slot * intervalMin);
-    await prisma.card.update({
-      where: { id: card.id },
-      data: {
-        scheduledAt: when,
-        plannedDate: startOfDay(when),
-        accountId: accountId || card.accountId,
-      },
-    });
+    try {
+      const result = await queueCard(card.id, when, accountId);
+      if (result.ok && result.shipped) shipped += 1;
+      if (!result.ok) errors.push(`${card.title}: ${result.error}`);
+    } catch (error) {
+      errors.push(`${card.title}: ${error instanceof Error ? error.message : "failed"}`);
+    }
   }
-  return NextResponse.json({ ok: true, scheduled: cards.length });
+  return NextResponse.json({
+    ok: errors.length === 0,
+    scheduled: cards.length,
+    shipped,
+    error: errors[0],
+  });
 }

@@ -30,5 +30,6 @@
   Clips are labeled by the row you drop them in. Mix settings sit on the same batch page.
   CapCut cards now show a missing-packet list. ffmpeg exports at CRF 18.
 
-- [ ] Screenshot-parity pass
-  Still open: live Outstand posting, URL download/transcribe, month calendar filters.
+- [X] Ship through Outstand from Calendar
+  Generate stays on this Mac. Calendar uploads the mp4 to Outstand and schedules it.
+  No extra host. Media lives 60 days on Outstand.

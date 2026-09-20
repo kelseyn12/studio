@@ -137,7 +137,7 @@ export default async function CardPage({ params }: { params: Promise<{ id: strin
                 defaultValue={card.scheduledAt ? toInputDateTime(card.scheduledAt) : ""}
                 className="field"
               />
-              <button className="w-full rounded-xl bg-sun px-4 py-3 font-semibold text-ink">Schedule it</button>
+              <button className="w-full rounded-xl bg-sun px-4 py-3 font-semibold text-ink">Schedule and ship</button>
             </form>
           </section>
           <div className="space-y-2">

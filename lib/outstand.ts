@@ -94,6 +94,48 @@ export async function getPostAnalytics(id: string): Promise<Record<string, unkno
   return outstand(`/posts/${id}/analytics`);
 }
 
+export function parseUploadTicket(body: Record<string, unknown>): { id: string; uploadUrl: string } {
+  const data = (body.data as Record<string, unknown> | undefined) ?? body;
+  const id = String(data.id || "");
+  const uploadUrl = String(data.upload_url || data.uploadUrl || "");
+  if (!id || !uploadUrl) throw new Error("Outstand did not return an upload URL");
+  return { id, uploadUrl };
+}
+
+export function parseConfirm(body: Record<string, unknown>): { url: string } {
+  const data = (body.data as Record<string, unknown> | undefined) ?? body;
+  const url = String(data.url || "");
+  if (!url) throw new Error("Outstand confirm returned no public URL");
+  return { url };
+}
+
+export async function uploadMedia(
+  fileAbs: string,
+  filename: string,
+  contentType = "video/mp4",
+): Promise<{ id: string; url: string; size: number }> {
+  const { readFile, stat } = await import("fs/promises");
+  const size = (await stat(fileAbs)).size;
+  const ticketBody = await outstand<Record<string, unknown>>("/media/upload", {
+    method: "POST",
+    body: JSON.stringify({ filename, content_type: contentType }),
+  });
+  const ticket = parseUploadTicket(ticketBody);
+  const bytes = await readFile(fileAbs);
+  const put = await fetch(ticket.uploadUrl, {
+    method: "PUT",
+    headers: { "Content-Type": contentType },
+    body: bytes,
+  });
+  if (!put.ok) throw new Error(`Outstand storage PUT failed (${put.status})`);
+  const confirmed = await outstand<Record<string, unknown>>(`/media/${ticket.id}/confirm`, {
+    method: "POST",
+    body: JSON.stringify({ size }),
+  });
+  const { url } = parseConfirm(confirmed);
+  return { id: ticket.id, url, size };
+}
+
 export const MANAGED_NETWORKS = [
   "instagram",
   "facebook",

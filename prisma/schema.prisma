@@ -165,6 +165,7 @@ model Asset {
   path      String
   mime      String
   size      Int
+  publicUrl String    @default("")
   createdAt DateTime  @default(now())
 }
 

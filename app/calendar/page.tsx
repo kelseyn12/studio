@@ -21,7 +21,9 @@ export default async function CalendarPage() {
     <Shell>
       <div className="mb-6">
         <h1 className="text-3xl font-semibold tracking-tight">Calendar</h1>
-        <p className="mt-1 text-mute">The post already knows the account and the time. Space a whole batch in one click.</p>
+        <p className="mt-1 text-mute">
+          One click spaces the week and ships the file through Outstand. Stay on this laptop — they host the mp4.
+        </p>
       </div>
       <BulkForm waiting={waiting.length} accounts={accounts} />
       <div className="mt-8 grid gap-3 md:grid-cols-7">
