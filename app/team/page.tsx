@@ -15,14 +15,21 @@ async function addMember(formData: FormData) {
   redirect("/team");
 }
 
+async function setDefaultEditor(formData: FormData) {
+  "use server";
+  const id = String(formData.get("id"));
+  await prisma.user.updateMany({ data: { defaultEditor: false } });
+  await prisma.user.update({ where: { id }, data: { defaultEditor: true } });
+  redirect("/team");
+}
+
 export default async function TeamPage() {
   const users = await prisma.user.findMany({ orderBy: { createdAt: "asc" } });
   return (
     <Shell>
       <h1 className="text-3xl font-semibold tracking-tight">Team</h1>
       <p className="mt-1 mb-6 max-w-2xl text-mute">
-        Add Maya as Editor. She logs in with that email and the studio PIN. Then open a card, Assign editor, Save.
-        She only sees CapCut in and her cards.
+        Add an editor. Mark one as default so Send to editor can go in one click. They log in with that email and PIN 4242.
       </p>
       <form action={addMember} className="mb-8 flex flex-wrap gap-2">
         <input name="name" placeholder="Name" className="rounded-xl border border-line bg-lift px-3 py-2" />
@@ -41,7 +48,19 @@ export default async function TeamPage() {
               <p className="font-medium">{user.name}</p>
               <p className="text-sm text-mute">{user.email}</p>
             </div>
-            <p className="text-sm capitalize text-mute">{user.role.toLowerCase()}</p>
+            <div className="flex items-center gap-3">
+              <p className="text-sm capitalize text-mute">{user.role.toLowerCase()}</p>
+              {user.role === "EDITOR" ? (
+                user.defaultEditor ? (
+                  <p className="text-sm text-sun">Default</p>
+                ) : (
+                  <form action={setDefaultEditor}>
+                    <input type="hidden" name="id" value={user.id} />
+                    <button className="text-sm text-mute">Make default</button>
+                  </form>
+                )
+              ) : null}
+            </div>
           </div>
         ))}
       </div>

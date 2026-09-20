@@ -1,4 +1,6 @@
 export type DealInput = {
+  kind?: "TECH" | "UGC";
+  videoCount?: number;
   basePayCents: number;
   postsPerDay: number;
   accountsAllowed: number;
@@ -30,7 +32,46 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
+function scoreUgc(deal: DealInput): DealScore {
+  const videos = Math.max(deal.videoCount || 1, 1);
+  const monthlyPayoutCents = deal.basePayCents;
+  const hours = Math.max(deal.monthlyHoursEstimate, 1);
+  const hourlyCents = Math.round(monthlyPayoutCents / hours);
+  const perVideo = Math.round(monthlyPayoutCents / videos);
+  const reasons: string[] = [];
+  let economics = 20;
+  if (perVideo >= 25000) economics += 20;
+  else if (perVideo >= 15000) economics += 12;
+  else reasons.push("Per-video fee is thin for traditional UGC.");
+  if (monthlyPayoutCents >= 150000) economics += 10;
+  if (hourlyCents >= 15000) economics += 10;
+  let capacity = 20;
+  if (videos >= 3 && videos <= 12) capacity += 15;
+  else if (videos > 12) reasons.push("That many videos will stall without a batch plan.");
+  let operations = 20;
+  if (deal.approvalFriction === "NONE") operations += 15;
+  else if (deal.approvalFriction === "LOW") operations += 8;
+  else {
+    operations -= 5;
+    reasons.push("Strict brand approval will stall the cut.");
+  }
+  if (deal.managerResponsive) operations += 8;
+  else reasons.push("Slow manager is a payout risk.");
+  const total = clamp(Math.round(economics + capacity + operations), 0, 100);
+  return {
+    monthlyPayoutCents,
+    hourlyCents,
+    economics: clamp(economics, 0, 40),
+    capacity: clamp(capacity, 0, 35),
+    operations: clamp(operations, 0, 35),
+    total,
+    verdict: total >= 65 ? "pass" : total >= 45 ? "shallow" : "skip",
+    reasons,
+  };
+}
+
 export function scoreDeal(deal: DealInput): DealScore {
+  if (deal.kind === "UGC") return scoreUgc(deal);
   const dailySlots = deal.postsPerDay * deal.accountsAllowed;
   const monthlyPayoutCents = deal.basePayCents * dailySlots * 30;
   const hours = Math.max(deal.monthlyHoursEstimate, 1);

@@ -40,3 +40,7 @@
 - [X] One path: Plan month → make file → Live
   Base44 put publish time on every card step and then had a second calendar.
   Cards are now Brief / Footage / Editor / Live. Only Live ships. Today is one next step.
+
+- [X] Today holds money, both deal types, and the handoff
+  Canvas/tech and traditional UGC are one Deals room with a kind. Numbers stays real.
+  Send to editor lands on CapCut in. Default editor is set on Team.

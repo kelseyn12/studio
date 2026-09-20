@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { Shell } from "@/components/shell";
 import { requireUser } from "@/lib/auth";
+import { DEAL_KIND_LABEL } from "@/lib/deal-kind";
 import { parseLocalDate } from "@/lib/dates";
 import { prisma } from "@/lib/prisma";
 
@@ -28,6 +29,7 @@ async function createCard(formData: FormData) {
 
 export default async function NewCardPage() {
   const campaigns = await prisma.campaign.findMany({ orderBy: { name: "asc" } });
+  const { DEAL_KIND_LABEL } = await import("@/lib/deal-kind");
   return (
     <Shell>
       <h1 className="mb-2 text-3xl font-semibold tracking-tight">Add one</h1>
@@ -39,7 +41,7 @@ export default async function NewCardPage() {
           <option value="">Personal — no deal</option>
           {campaigns.map((campaign) => (
             <option key={campaign.id} value={campaign.id}>
-              {campaign.name}
+              {DEAL_KIND_LABEL[campaign.kind]} · {campaign.brand || campaign.name}
             </option>
           ))}
         </select>

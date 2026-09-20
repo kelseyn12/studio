@@ -1,7 +1,7 @@
 import { finishStage, updateCard } from "@/app/cards/[id]/actions";
+import { DEAL_KIND_LABEL } from "@/lib/deal-kind";
 import { toInputDate } from "@/lib/dates";
-
-type Option = { id: string; name?: string; username?: string; nickname?: string };
+import type { DealKind } from "@prisma/client";
 
 export function CardBrief({
   card,
@@ -21,7 +21,7 @@ export function CardBrief({
     accountId: string | null;
     plannedDate: Date | null;
   };
-  campaigns: Option[];
+  campaigns: Array<{ id: string; name: string; brand: string; kind: DealKind }>;
   accounts: Array<{ id: string; username: string; nickname: string }>;
 }) {
   return (
@@ -41,7 +41,7 @@ export function CardBrief({
         <option value="">Personal — no deal</option>
         {campaigns.map((campaign) => (
           <option key={campaign.id} value={campaign.id}>
-            {campaign.name}
+            {DEAL_KIND_LABEL[campaign.kind]} · {campaign.brand || campaign.name}
           </option>
         ))}
       </select>

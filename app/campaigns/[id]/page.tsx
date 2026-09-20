@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Shell } from "@/components/shell";
 import { StatusPill } from "@/components/status-pill";
+import { DEAL_KIND_LABEL } from "@/lib/deal-kind";
 import { formatMoney, scoreDeal } from "@/lib/deals";
 import { prisma } from "@/lib/prisma";
 
@@ -30,8 +31,11 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
   return (
     <Shell>
       <div className="mb-8">
-        <p className="text-sm text-mute">{campaign.brand}</p>
+        <p className="text-sm text-mute">
+          {DEAL_KIND_LABEL[campaign.kind]} · {campaign.brand}
+        </p>
         <h1 className="text-3xl font-semibold tracking-tight">{campaign.name}</h1>
+        {campaign.deliverables ? <p className="mt-2 text-sm text-mute">{campaign.deliverables}</p> : null}
       </div>
       <section className="mb-8 grid gap-3 md:grid-cols-4">
         <div className="rounded-2xl bg-sun px-5 py-4 text-ink">

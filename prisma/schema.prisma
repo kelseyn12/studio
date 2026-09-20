@@ -39,6 +39,11 @@ enum AssetKind {
   GENERATED
 }
 
+enum DealKind {
+  TECH
+  UGC
+}
+
 enum CampaignStatus {
   TRIAL
   ACTIVE
@@ -67,21 +72,26 @@ enum ClipSlot {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
-  role      Role
-  pinHash   String?
-  createdAt DateTime @default(now())
-  cards     Card[]   @relation("CreatedCards")
-  edits     Card[]   @relation("EditorCards")
+  id             String   @id @default(cuid())
+  name           String
+  email          String   @unique
+  role           Role
+  pinHash        String?
+  defaultEditor  Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  cards          Card[]   @relation("CreatedCards")
+  edits          Card[]   @relation("EditorCards")
 }
 
 model Campaign {
   id                    String           @id @default(cuid())
   name                  String
   brand                 String
+  kind                  DealKind         @default(UGC)
   status                CampaignStatus   @default(TRIAL)
+  videoCount            Int              @default(3)
+  deadlineAt            DateTime?
+  deliverables          String           @default("")
   basePayCents          Int
   postsPerDay           Int
   accountsAllowed       Int              @default(1)

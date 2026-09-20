@@ -12,7 +12,7 @@ export function CardEditorStage({
   desk,
 }: {
   card: { id: string; editorId: string | null; editorNote: string };
-  editors: Array<{ id: string; name: string }>;
+  editors: Array<{ id: string; name: string; defaultEditor?: boolean }>;
   packet: PacketItem[];
   edited?: { path: string; publicUrl: string | null };
   desk: boolean;
@@ -31,11 +31,16 @@ export function CardEditorStage({
       {desk ? null : (
         <form action={finishStage.bind(null, "editor")} className="space-y-3">
           <input type="hidden" name="id" value={card.id} />
-          <select name="editorId" defaultValue={card.editorId ?? ""} className="field" required={editors.length > 0}>
+          <select
+            name="editorId"
+            defaultValue={card.editorId ?? editors.find((person) => person.defaultEditor)?.id ?? ""}
+            className="field"
+            required={editors.length > 0}
+          >
             <option value="">Choose editor</option>
             {editors.map((person) => (
               <option key={person.id} value={person.id}>
-                {person.name}
+                {person.defaultEditor ? `${person.name} · default` : person.name}
               </option>
             ))}
           </select>

@@ -26,6 +26,20 @@ describe("scoreDeal", () => {
     expect(score.hourlyCents).toBeGreaterThan(30000);
   });
 
+  it("scores a traditional UGC retainer without demanding daily volume", () => {
+    const score = scoreDeal({
+      ...deep,
+      kind: "UGC",
+      basePayCents: 150000,
+      videoCount: 3,
+      monthlyHoursEstimate: 8,
+      postsPerDay: 1,
+      accountsAllowed: 1,
+    });
+    expect(score.verdict).toBe("pass");
+    expect(score.monthlyPayoutCents).toBe(150000);
+  });
+
   it("flags a high-pay low-volume deal as shallow or skip", () => {
     const score = scoreDeal({
       ...deep,

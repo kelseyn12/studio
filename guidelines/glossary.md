@@ -1,9 +1,10 @@
 # Glossary
 
-- `scoreDeal` — `lib/deals.ts` — ranks a campaign by economics, capacity, operations. Used on campaign list and detail.
 - `pickNextAction` — `lib/next-action.ts` — chooses the single Today action. Used on `app/page.tsx`.
 - `machineCounts` — `lib/queries.ts` — pipeline and slot totals for Today.
 - `uploadMedia` — `lib/outstand.ts` — PUT the mp4 into Outstand storage, returns the public URL.
+- `scoreDeal` — `lib/deals.ts` — TECH scores volume; UGC scores fee per video. Used on Deals and deal detail.
+- `studioSnapshot` — `lib/queries.ts` — money + active deals by kind + CapCut counts. Used on Today, Deals, Numbers.
 - `deskStage` — `lib/card-desk.ts` — maps pipeline status to Brief / Footage / Editor / Live. Used on the card page.
 - `cardPatch` — `lib/card-patch.ts` — writes only fields present on the form so a Brief save cannot wipe editor notes.
 - `queueCard` — `lib/publish.ts` — schedule a card and ship the file through Outstand. Used by card Live, Live **Add slot**, and Live bulk.

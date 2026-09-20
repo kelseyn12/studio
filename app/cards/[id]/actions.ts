@@ -6,7 +6,7 @@ import { requireUser } from "@/lib/auth";
 import { nextStatusFor, type DeskStage } from "@/lib/card-desk";
 import { cardPatch } from "@/lib/card-patch";
 import { saveUpload } from "@/lib/files";
-import { isPipelineStatus } from "@/lib/pipeline";
+import { isPipelineStatus, type PipelineStatus } from "@/lib/pipeline";
 import { prisma } from "@/lib/prisma";
 import { queueCard } from "@/lib/publish";
 
@@ -17,6 +17,8 @@ async function saveCard(formData: FormData) {
   revalidatePath(`/cards/${id}`);
   revalidatePath("/");
   revalidatePath("/plan");
+  revalidatePath("/edits");
+  revalidatePath("/campaigns");
   return id;
 }
 
@@ -28,11 +30,19 @@ export async function finishStage(stage: DeskStage, formData: FormData) {
   const id = await saveCard(formData);
   const card = await prisma.card.findUnique({ where: { id } });
   const next = card ? nextStatusFor(stage, card.status) : null;
-  if (next) {
-    await prisma.card.update({ where: { id }, data: { status: next } });
+  const patch: { status?: PipelineStatus; editorId?: string } = {};
+  if (next) patch.status = next;
+  if (stage === "editor" && card && !card.editorId) {
+    const fallback = await prisma.user.findFirst({ where: { defaultEditor: true, role: "EDITOR" } });
+    if (fallback) patch.editorId = fallback.id;
   }
-  const onward = stage === "brief" ? "footage" : stage === "footage" ? "editor" : "editor";
+  if (Object.keys(patch).length) {
+    await prisma.card.update({ where: { id }, data: patch });
+  }
   revalidatePath(`/cards/${id}`);
+  revalidatePath("/edits");
+  if (stage === "editor") redirect("/edits");
+  const onward = stage === "brief" ? "footage" : "editor";
   redirect(`/cards/${id}?step=${onward}`);
 }
 
@@ -55,6 +65,8 @@ export async function uploadAsset(formData: FormData) {
     }
   }
   revalidatePath(`/cards/${id}`);
+  revalidatePath("/edits");
+  revalidatePath("/library");
 }
 
 export async function advanceCard(id: string, status: string) {

@@ -83,3 +83,32 @@ export async function viewsByDay(days = 90) {
     };
   });
 }
+
+export async function studioSnapshot() {
+  const [deals, payouts, capcut, review] = await Promise.all([
+    prisma.campaign.findMany({
+      where: { status: { in: ["ACTIVE", "TRIAL"] } },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.card.findMany({
+      where: { payoutCents: { gt: 0 } },
+      select: { approved: true, payoutCents: true, campaign: { select: { kind: true } } },
+    }),
+    prisma.card.count({ where: { status: { in: ["FILMED", "EDITING"] } } }),
+    prisma.card.count({ where: { status: "REVIEW" } }),
+  ]);
+  const collected = payouts.filter((row) => row.approved).reduce((sum, row) => sum + row.payoutCents, 0);
+  const pending = payouts.filter((row) => !row.approved).reduce((sum, row) => sum + row.payoutCents, 0);
+  const kindPay = (kind: "TECH" | "UGC") =>
+    payouts.filter((row) => row.approved && row.campaign?.kind === kind).reduce((sum, row) => sum + row.payoutCents, 0);
+  return {
+    collected,
+    pending,
+    techCollected: kindPay("TECH"),
+    ugcCollected: kindPay("UGC"),
+    capcut,
+    review,
+    tech: deals.filter((deal) => deal.kind === "TECH"),
+    ugc: deals.filter((deal) => deal.kind === "UGC"),
+  };
+}

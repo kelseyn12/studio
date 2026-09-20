@@ -1,13 +1,20 @@
 import { redirect } from "next/navigation";
 import { Shell } from "@/components/shell";
+import { isDealKind } from "@/lib/deal-kind";
+import { parseLocalDate } from "@/lib/dates";
 import { prisma } from "@/lib/prisma";
 
 async function createCampaign(formData: FormData) {
   "use server";
+  const kind = isDealKind(String(formData.get("kind") || "")) ? String(formData.get("kind")) : "UGC";
   const campaign = await prisma.campaign.create({
     data: {
       name: String(formData.get("name") || "Untitled deal"),
       brand: String(formData.get("brand") || ""),
+      kind: kind as "TECH" | "UGC",
+      videoCount: Number(formData.get("videoCount") || 3),
+      deadlineAt: formData.get("deadlineAt") ? parseLocalDate(String(formData.get("deadlineAt"))) : null,
+      deliverables: String(formData.get("deliverables") || ""),
       status: (formData.get("status") as "TRIAL" | "ACTIVE") || "TRIAL",
       basePayCents: Math.round(Number(formData.get("basePay") || 0) * 100),
       postsPerDay: Number(formData.get("postsPerDay") || 1),
@@ -57,10 +64,24 @@ function Field({
 export default function NewCampaignPage() {
   return (
     <Shell>
-      <h1 className="mb-6 text-3xl font-semibold tracking-tight">Score a deal</h1>
+      <h1 className="mb-2 text-3xl font-semibold tracking-tight">Add a deal</h1>
+      <p className="mb-6 text-mute">Canvas / tech is volume. Traditional UGC is a fee and a video count.</p>
       <form action={createCampaign} className="grid max-w-3xl gap-4 md:grid-cols-2">
+        <label className="block md:col-span-2">
+          <span className="mb-1 block text-xs font-semibold uppercase tracking-[0.14em] text-mute">Deal type</span>
+          <select name="kind" className="w-full rounded-xl border border-line bg-lift px-3 py-2" defaultValue="UGC">
+            <option value="TECH">Canvas / tech</option>
+            <option value="UGC">Traditional UGC</option>
+          </select>
+        </label>
         <Field name="name" label="Campaign" />
         <Field name="brand" label="Brand" />
+        <Field name="videoCount" label="Videos owed" type="number" defaultValue={3} />
+        <Field name="deadlineAt" label="Deadline" type="date" />
+        <label className="md:col-span-2">
+          <span className="mb-1 block text-xs font-semibold uppercase tracking-[0.14em] text-mute">Deliverables</span>
+          <textarea name="deliverables" rows={2} placeholder="3 TikToks, 1 Reel, raws…" className="w-full rounded-xl border border-line bg-lift px-3 py-2" />
+        </label>
         <label className="block">
           <span className="mb-1 block text-xs font-semibold uppercase tracking-[0.14em] text-mute">Status</span>
           <select name="status" className="w-full rounded-xl border border-line bg-lift px-3 py-2">

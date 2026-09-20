@@ -3,46 +3,76 @@ import { EditorNeed } from "@/components/editor-need";
 import { Shell } from "@/components/shell";
 import { StatusPill } from "@/components/status-pill";
 import { requireUser } from "@/lib/auth";
+import { DEAL_KIND_LABEL } from "@/lib/deal-kind";
 import { editorNeeds, packetReady } from "@/lib/editor-packet";
 import { prisma } from "@/lib/prisma";
 
 export default async function EditsPage() {
   const user = await requireUser();
+  const mine = user.role === "EDITOR" ? { editorId: user.id } : {};
   const cards = await prisma.card.findMany({
-    where: {
-      status: { in: ["FILMED", "EDITING", "REVIEW"] },
-      ...(user.role === "EDITOR" ? { editorId: user.id } : {}),
-    },
+    where: { status: { in: ["FILMED", "EDITING", "REVIEW"] }, ...mine },
     include: { campaign: true, assets: true, editor: true },
     orderBy: { updatedAt: "desc" },
   });
+  const send = cards.filter((card) => card.status === "FILMED");
+  const cutting = cards.filter((card) => card.status === "EDITING");
+  const review = cards.filter((card) => card.status === "REVIEW");
 
   return (
     <Shell>
       <h1 className="text-3xl font-semibold tracking-tight">{user.role === "EDITOR" ? "Your cuts" : "CapCut in"}</h1>
       <p className="mt-2 mb-6 max-w-2xl text-mute">
-        {user.role === "EDITOR"
-          ? "Only cards assigned to you. Open the raws folder, export 1080×1920, drop the draft."
-          : "Assign an editor on the card first. They will only see their own queue."}
+        Send to editor on the card and it lands here. Drop the export and it moves to Review, then Live.
       </p>
+      <Bucket title="Send / filmed" items={send} empty="Nothing waiting to send." />
+      <Bucket title="With the editor" items={cutting} empty="No active cuts." />
+      <Bucket title="Your review" items={review} empty="No drafts waiting." />
+    </Shell>
+  );
+}
+
+function Bucket({
+  title,
+  items,
+  empty,
+}: {
+  title: string;
+  items: Array<{
+    id: string;
+    title: string;
+    hook: string;
+    editorNote: string;
+    rawsUrl: string;
+    status: Parameters<typeof StatusPill>[0]["status"];
+    campaign: { name: string; brand: string; kind: "TECH" | "UGC" } | null;
+    editor: { name: string } | null;
+    assets: Array<{ kind: string }>;
+  }>;
+  empty: string;
+}) {
+  return (
+    <section className="mb-8">
+      <h2 className="mb-3 text-lg font-semibold">
+        {title} · {items.length}
+      </h2>
       <div className="space-y-3">
-        {cards.length === 0 ? (
-          <p className="rounded-card border border-dashed border-line px-5 py-10 text-mute">
-            {user.role === "EDITOR" ? "Nothing assigned to you yet." : "Nothing waiting on a cut."}
-          </p>
+        {items.length === 0 ? (
+          <p className="rounded-card border border-dashed border-line px-5 py-6 text-sm text-mute">{empty}</p>
         ) : (
-          cards.map((card) => {
+          items.map((card) => {
             const packet = editorNeeds(card);
             return (
-              <Link key={card.id} href={`/cards/${card.id}`} className="block rounded-card border border-line bg-panel p-5">
+              <Link key={card.id} href={`/cards/${card.id}?step=editor`} className="block rounded-card border border-line bg-panel p-5">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <h2 className="text-lg font-semibold">{card.title}</h2>
-                    <p className="text-sm text-mute">{card.campaign?.name ?? "No deal"}</p>
-                    {card.hook ? <p className="mt-2 text-sm">Hook: {card.hook}</p> : null}
-                    {card.editor ? <p className="mt-1 text-sm text-mute">Editor: {card.editor.name}</p> : null}
-                    {card.rawsUrl ? <p className="mt-1 text-sm text-sun">Raws folder is on the card</p> : null}
-                    {card.editorNote ? <p className="mt-1 text-sm text-mute">{card.editorNote}</p> : null}
+                    <h3 className="text-lg font-semibold">{card.title}</h3>
+                    <p className="text-sm text-mute">
+                      {card.campaign
+                        ? `${DEAL_KIND_LABEL[card.campaign.kind]} · ${card.campaign.brand || card.campaign.name}`
+                        : "Personal"}
+                      {card.editor ? ` · ${card.editor.name}` : " · unassigned"}
+                    </p>
                   </div>
                   <StatusPill status={card.status} />
                 </div>
@@ -57,6 +87,6 @@ export default async function EditsPage() {
           })
         )}
       </div>
-    </Shell>
+    </section>
   );
 }

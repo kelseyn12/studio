@@ -48,6 +48,8 @@ export function navFor(role: Role): Array<{ label: string; items: Array<{ href: 
         { href: "/plan", label: "Plan month" },
         { href: "/repurposer", label: "Multiply" },
         { href: "/calendar", label: "Live" },
+        { href: "/campaigns", label: "Deals" },
+        { href: "/analytics", label: "Numbers" },
       ],
     },
     {
@@ -57,7 +59,6 @@ export function navFor(role: Role): Array<{ label: string; items: Array<{ href: 
         { href: "/library", label: "Library" },
         { href: "/connections", label: "Accounts" },
         { href: "/team", label: "Team" },
-        { href: "/campaigns", label: "Deals" },
       ],
     },
   ];
