@@ -119,5 +119,8 @@
 - [X] Quick cut inside Studio
   Trim on any Multiply clip tile: play, Start here, End here, Cut it — replaces the clip so every video built from it uses the cut. Same tool on Live for finished videos (makes a new cut; newest ships). Files stream with byte ranges so scrubbing works.
 
-- [ ] Background render with progress for big Multiply batches
-  Generate still holds the page open. Fine on this Mac; do not run 18-video batches on the Fly machine.
+- [X] Background render with progress for big Multiply batches
+  Generate returns immediately. Progress bar on the batch page. Run big batches on this Mac, not Fly (512MB).
+
+- [X] Spoken words on screen in Multiply
+  Toggle on Mix settings. Whisper timestamps → 2–3 word phrases burned through the whole video. Cached per clip. Needs ffmpeg-full + OPENAI_API_KEY.

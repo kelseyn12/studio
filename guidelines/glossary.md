@@ -13,7 +13,9 @@
 - `closeLoop` — `lib/analytics.ts` — Posted when live, Data when views exist. Used by `/api/analytics/sync`.
 - `nextLanes` — `lib/formats.ts` — 70/20/10 winner promotion after stats land.
 - `canVisit` — `lib/access.ts` — rooms a role may open. Used by middleware and nav.
-- `assembleVideo` — `lib/ffmpeg.ts` — concatenates hook × body × CTA, keeps audio, optional music, applies a per-copy Variation.
+- `assembleVideo` — `lib/ffmpeg.ts` — concatenates hook × body × CTA, keeps audio, optional music, applies a per-copy Variation, optional hook text + spoken caption filters.
+- `ffmpegBin` / `canBurnText` — `lib/ffmpeg.ts` — prefers Homebrew ffmpeg-full so drawtext exists; Generate refuses text if it does not.
+- `groupWords` / `captionFilters` / `transcribeWords` — `lib/captions.ts` — Whisper word timestamps → 2–3 word on-screen phrases.
 - `variationFor` — `lib/variations.ts` — unique speed / light / crop amounts for each copy of a mix.
 - `pickTracks` — `lib/combinations.ts` — random music per video; uses every track before repeating. Used by Multiply generate.
 - `parseHookLines` — `lib/variations.ts` — batch text hooks, one per line, max 12. Each line multiplies the Multiply batch.

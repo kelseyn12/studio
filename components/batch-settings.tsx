@@ -15,6 +15,7 @@ export function BatchSettings({
   campaigns,
   formats,
   accounts,
+  textBurnWorks = true,
 }: {
   batchId: string;
   name: string;
@@ -31,6 +32,7 @@ export function BatchSettings({
     mirrorOn: boolean;
     trimOn: boolean;
     hookColorOn: boolean;
+    captionsOn: boolean;
     hookLines: string;
     caption: string;
     campaignId: string;
@@ -40,6 +42,7 @@ export function BatchSettings({
   campaigns: Option[];
   formats: Array<{ id: string; name: string; campaignId: string }>;
   accounts: Option[];
+  textBurnWorks?: boolean;
 }) {
   const [allCombos, setAllCombos] = useState(defaults.allCombos);
   const [count, setCount] = useState(defaults.count);
@@ -50,6 +53,7 @@ export function BatchSettings({
   const [mirrorOn, setMirrorOn] = useState(defaults.mirrorOn);
   const [trimOn, setTrimOn] = useState(defaults.trimOn);
   const [hookColorOn, setHookColorOn] = useState(defaults.hookColorOn);
+  const [captionsOn, setCaptionsOn] = useState(defaults.captionsOn);
   const [hookLines, setHookLines] = useState(defaults.hookLines);
   const [campaignId, setCampaignId] = useState(defaults.campaignId);
   const dealFormats = formats.filter((format) => format.campaignId === campaignId);
@@ -68,6 +72,14 @@ export function BatchSettings({
       {mirrorOn ? <input type="hidden" name="mirrorOn" value="on" /> : null}
       {trimOn ? <input type="hidden" name="trimOn" value="on" /> : null}
       {hookColorOn ? <input type="hidden" name="hookColorOn" value="on" /> : null}
+      {captionsOn ? <input type="hidden" name="captionsOn" value="on" /> : null}
+
+      {textBurnWorks ? null : (
+        <p className="rounded-card border border-line bg-panel px-5 py-4 text-sm text-review">
+          This computer cannot burn text onto videos (ffmpeg is missing drawtext). Mixes still work. Spoken words and
+          text hooks will fail until you run <code>brew install ffmpeg-full</code>.
+        </p>
+      )}
 
       <div className="rounded-card bg-sun px-5 py-4 text-ink">
         <p className="text-xs font-semibold uppercase tracking-[0.16em]">This batch will make</p>
@@ -179,6 +191,20 @@ export function BatchSettings({
             >
               {mirrorOn ? "On" : "Off"}
             </button>
+          </Row>
+          <Row label="Spoken words on screen">
+            <div className="flex items-center gap-3">
+              <p className="max-w-56 text-right text-xs text-mute">
+                We listen to your clips and burn what you say as big text, phrase by phrase, through the whole video.
+              </p>
+              <button
+                type="button"
+                onClick={() => setCaptionsOn(!captionsOn)}
+                className={`rounded-full px-4 py-1.5 text-sm font-semibold ${captionsOn ? "bg-sun text-ink" : "bg-lift text-mute"}`}
+              >
+                {captionsOn ? "On" : "Off"}
+              </button>
+            </div>
           </Row>
           <Row label="Text color changes per copy">
             <button

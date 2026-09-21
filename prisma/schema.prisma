@@ -241,6 +241,7 @@ model RepurposeBatch {
   mirrorOn    Boolean          @default(false)
   trimOn      Boolean          @default(false)
   hookColorOn Boolean          @default(false)
+  captionsOn  Boolean          @default(false)
   formatId    String?
   format      Format?          @relation(fields: [formatId], references: [id], onDelete: SetNull)
   hookLines   String           @default("")
@@ -263,6 +264,7 @@ model RepurposeClip {
   hookText String         @default("")
   thumbPath String        @default("")
   size     Int            @default(0)
+  captionsJson String     @default("")
 }
 
 model RepurposeTrack {

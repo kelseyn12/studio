@@ -1,7 +1,47 @@
 import { spawn } from "child_process";
+import { accessSync, constants } from "fs";
 import { mkdir } from "fs/promises";
 import path from "path";
 import { localRoot } from "@/lib/files";
+
+const FFMPEG_FULL = "/opt/homebrew/opt/ffmpeg-full/bin/ffmpeg";
+const FFPROBE_FULL = "/opt/homebrew/opt/ffmpeg-full/bin/ffprobe";
+
+function exists(file: string): boolean {
+  try {
+    accessSync(file, constants.X_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Homebrew's default `ffmpeg` dropped text. Prefer the full build, then PATH. */
+export function ffmpegBin(): string {
+  if (process.env.FFMPEG_BIN) return process.env.FFMPEG_BIN;
+  if (process.platform === "darwin" && exists(FFMPEG_FULL)) return FFMPEG_FULL;
+  return "ffmpeg";
+}
+
+export function ffprobeBin(): string {
+  if (process.env.FFPROBE_BIN) return process.env.FFPROBE_BIN;
+  if (process.platform === "darwin" && exists(FFPROBE_FULL)) return FFPROBE_FULL;
+  return "ffprobe";
+}
+
+let burnTextKnown: boolean | null = null;
+
+/** False when this ffmpeg cannot burn hook text or spoken captions. */
+export async function canBurnText(): Promise<boolean> {
+  if (burnTextKnown !== null) return burnTextKnown;
+  try {
+    const out = await runCommand(ffmpegBin(), ["-hide_banner", "-filters"]);
+    burnTextKnown = out.includes(" drawtext ");
+  } catch {
+    burnTextKnown = false;
+  }
+  return burnTextKnown;
+}
 
 function runCommand(cmd: string, args: string[]): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -120,7 +160,7 @@ export function trimFromSilence(log: string, duration: number): ClipTrim {
 }
 
 export async function clipDuration(file: string): Promise<number> {
-  const out = await runCommand("ffprobe", [
+  const out = await runCommand(ffprobeBin(), [
     "-v",
     "error",
     "-show_entries",
@@ -136,7 +176,7 @@ export async function clipDuration(file: string): Promise<number> {
 export async function quietEnds(file: string): Promise<ClipTrim> {
   try {
     const [log, duration] = await Promise.all([
-      runForStderr("ffmpeg", [
+      runForStderr(ffmpegBin(), [
         "-i",
         file,
         "-af",
@@ -155,12 +195,12 @@ export async function quietEnds(file: string): Promise<ClipTrim> {
 }
 
 export async function runFfmpeg(args: string[]): Promise<void> {
-  await runCommand("ffmpeg", ["-y", ...args]);
+  await runCommand(ffmpegBin(), ["-y", ...args]);
 }
 
 export async function clipHasAudio(file: string): Promise<boolean> {
   try {
-    const out = await runCommand("ffprobe", [
+    const out = await runCommand(ffprobeBin(), [
       "-v",
       "error",
       "-select_streams",
@@ -182,7 +222,10 @@ export function escapeDrawText(text: string): string {
     .replace(/\\/g, "\\\\")
     .replace(/:/g, "\\:")
     .replace(/'/g, "\u2019")
-    .replace(/\n/g, " ");
+    .replace(/[,;\[\]%]/g, " ")
+    .replace(/\n/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 export async function writeThumb(inputAbs: string, outputRel: string): Promise<string> {
@@ -201,6 +244,7 @@ function videoFilter(input: {
   mirror?: boolean;
   hookText?: string;
   hookColor?: string;
+  captionFilters?: string[];
 }): string {
   const crop = Math.max(0, input.crop);
   const width = Math.round(1080 * (1 + crop / 100));
@@ -212,6 +256,8 @@ function videoFilter(input: {
     "setsar=1",
   ];
   if (input.mirror) parts.push("hflip");
+  // Spoken captions go in before the speed change so their timing stays true.
+  if (input.captionFilters?.length) parts.push(...input.captionFilters);
   if (input.speed !== 1) parts.push(`setpts=PTS/${input.speed}`);
   if (input.saturation !== 1 || input.contrast !== 1 || input.hue !== 0) {
     parts.push(`eq=saturation=${input.saturation}:contrast=${input.contrast}`);
@@ -239,7 +285,7 @@ export function uniquenessFilter(input: {
 }
 
 export async function assembleVideo(input: {
-  clips: Array<{ path: string; hookText?: string; trim?: ClipTrim }>;
+  clips: Array<{ path: string; hookText?: string; trim?: ClipTrim; captionFilters?: string[] }>;
   outputName: string;
   speed: number;
   saturation: number;
@@ -281,6 +327,7 @@ export async function assembleVideo(input: {
       mirror: input.mirror,
       hookText: index === 0 ? input.clips[index].hookText : undefined,
       hookColor: input.hookColor,
+      captionFilters: input.clips[index].captionFilters,
     });
     chains.push(`[${index}:v]${vf}[v${index}]`);
     if (audioFlags[index]) {

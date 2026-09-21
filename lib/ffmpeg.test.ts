@@ -74,3 +74,46 @@ function omitLabel(variation: ReturnType<typeof variationFor>) {
   const { label: _label, ...filters } = variation;
   return filters;
 }
+
+describe("text burn-in", () => {
+  it("uses an ffmpeg that has drawtext", async () => {
+    const { canBurnText, ffmpegBin } = await import("@/lib/ffmpeg");
+    expect(ffmpegBin()).toContain("ffmpeg");
+    expect(await canBurnText()).toBe(true);
+  });
+
+  it(
+    "burns hook text onto a real frame",
+    async () => {
+      const dir = await mkdtemp(path.join(os.tmpdir(), "studio-text-"));
+      const clip = path.join(dir, "hook.mp4");
+      await runFfmpeg([
+        "-f",
+        "lavfi",
+        "-i",
+        "color=c=black:s=1080x1920:d=0.5",
+        "-pix_fmt",
+        "yuv420p",
+        clip,
+      ]);
+      const { assembleVideo } = await import("@/lib/ffmpeg");
+      const outputRel = await assembleVideo({
+        clips: [{ path: clip, hookText: "I QUIT MY 9-5" }],
+        outputName: `test-text-${Date.now()}.mp4`,
+        speed: 1,
+        saturation: 1,
+        contrast: 1,
+        hue: 0,
+        crop: 0,
+        hookColor: "yellow",
+      });
+      const { stat } = await import("fs/promises");
+      const { absoluteUpload } = await import("@/lib/files");
+      const file = absoluteUpload(outputRel);
+      expect((await stat(file)).size).toBeGreaterThan(1000);
+      await rm(file, { force: true });
+      await rm(dir, { recursive: true, force: true });
+    },
+    30_000,
+  );
+});

@@ -8,6 +8,7 @@ import { REFERENCE_MAX_BYTES } from "@/lib/files";
 import { STUDIO_FILE_MAX_BYTES } from "@/lib/storage";
 import { publicFileUrl } from "@/lib/urls";
 import { isRendering } from "@/lib/render-batch";
+import { canBurnText } from "@/lib/ffmpeg";
 import { LiveRefresh } from "@/components/live-refresh";
 import { prisma } from "@/lib/prisma";
 import { createBatch, resetBatch } from "../actions";
@@ -22,7 +23,7 @@ export default async function BatchPage({
   const { id } = await params;
   const query = await searchParams;
   const winningHook = (query.hook || "").trim();
-  const [batch, campaigns, accounts, batches] = await Promise.all([
+  const [batch, campaigns, accounts, batches, textBurnWorks] = await Promise.all([
     prisma.repurposeBatch.findUnique({
       where: { id },
       include: { clips: true, tracks: true, outputs: true },
@@ -30,6 +31,7 @@ export default async function BatchPage({
     prisma.campaign.findMany({ orderBy: { name: "asc" }, include: { formats: true } }),
     prisma.socialAccount.findMany({ where: { isActive: true } }),
     prisma.repurposeBatch.findMany({ orderBy: { createdAt: "desc" }, take: 8 }),
+    canBurnText(),
   ]);
   if (!batch) notFound();
   const hooks = batch.clips.filter((clip) => clip.slot === "HOOK");
@@ -141,12 +143,14 @@ export default async function BatchPage({
           mirrorOn: batch.mirrorOn,
           trimOn: batch.trimOn,
           hookColorOn: batch.hookColorOn,
+          captionsOn: batch.captionsOn,
           hookLines: batch.hookLines,
           caption: batch.caption,
           campaignId: batch.campaignId ?? "",
           formatId: batch.formatId ?? "",
           accountId: batch.accountId ?? "",
         }}
+        textBurnWorks={textBurnWorks}
         campaigns={campaigns.map((campaign) => ({ id: campaign.id, name: campaign.name }))}
         formats={campaigns.flatMap((campaign) =>
           campaign.formats.map((format) => ({ id: format.id, name: format.name, campaignId: campaign.id })),

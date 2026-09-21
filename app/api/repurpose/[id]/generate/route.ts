@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { isRendering, renderBatch, renderStatus } from "@/lib/render-batch";
 import { readSession } from "@/lib/session";
 import { parseHookLines } from "@/lib/variations";
+import { canBurnText } from "@/lib/ffmpeg";
+import { hasOpenAI } from "@/lib/whisper";
 
 export const maxDuration = 300;
 
@@ -32,6 +34,7 @@ export async function POST(
         mirrorOn: form.get("mirrorOn") === "on",
         trimOn: form.get("trimOn") === "on",
         hookColorOn: form.get("hookColorOn") === "on",
+        captionsOn: form.get("captionsOn") === "on",
         hookLines: String(form.get("hookLines") || ""),
         caption: String(form.get("caption") || ""),
         campaignId: String(form.get("campaignId") || "") || null,
@@ -57,6 +60,22 @@ export async function POST(
   }
   if (!batch.accountId) {
     return NextResponse.json({ error: "Pick an account so these post to the right @" }, { status: 400 });
+  }
+  if (batch.captionsOn && !hasOpenAI()) {
+    return NextResponse.json(
+      { error: "Spoken words on screen needs OPENAI_API_KEY in .env. Turn it off or add the key." },
+      { status: 400 },
+    );
+  }
+  const wantsText = batch.captionsOn || parseHookLines(batch.hookLines).length > 0;
+  if (wantsText && !(await canBurnText())) {
+    return NextResponse.json(
+      {
+        error:
+          "This computer's ffmpeg cannot burn text. Install ffmpeg-full (brew install ffmpeg-full) or turn off Spoken words and leave Text hooks empty.",
+      },
+      { status: 400 },
+    );
   }
   const campaign = batch.campaignId
     ? await prisma.campaign.findUnique({ where: { id: batch.campaignId } })

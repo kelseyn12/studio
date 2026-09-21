@@ -1,5 +1,6 @@
 import { stat } from "fs/promises";
 import path from "path";
+import { captionFilters, groupWords, parseCaptionWords, transcribeWords, type CaptionPhrase } from "@/lib/captions";
 import { assembleVideo, quietEnds, NO_TRIM, type ClipTrim } from "@/lib/ffmpeg";
 import { ensureLocal, localRoot, uploadLocalToR2 } from "@/lib/files";
 import { prisma } from "@/lib/prisma";
@@ -43,6 +44,22 @@ export async function renderBatch(input: {
         trims.set(clip.path, await quietEnds(local));
       }
     }
+    // Spoken captions: listen to each clip once, remember the words on the clip.
+    const phrasesByClip = new Map<string, CaptionPhrase[]>();
+    if (batch.captionsOn) {
+      for (const clip of batch.clips) {
+        let words = parseCaptionWords(clip.captionsJson);
+        if (words.length === 0) {
+          const local = await ensureLocal(clip.path);
+          words = await transcribeWords(local);
+          await prisma.repurposeClip.update({
+            where: { id: clip.id },
+            data: { captionsJson: JSON.stringify(words) },
+          });
+        }
+        phrasesByClip.set(clip.path, groupWords(words));
+      }
+    }
     let fileNumber = 0;
     for (const combo of combos) {
       for (const line of lines) {
@@ -53,11 +70,16 @@ export async function renderBatch(input: {
           fileNumber += 1;
           const outputRel = await assembleVideo({
             clips: await Promise.all(
-              combo.map(async (clip, index) => ({
-                path: await ensureLocal(clip.path),
-                hookText: index === 0 ? line || clip.hookText || undefined : undefined,
-                trim: trims.get(clip.path) ?? NO_TRIM,
-              })),
+              combo.map(async (clip, index) => {
+                const trim = trims.get(clip.path) ?? NO_TRIM;
+                const phrases = phrasesByClip.get(clip.path);
+                return {
+                  path: await ensureLocal(clip.path),
+                  hookText: index === 0 ? line || clip.hookText || undefined : undefined,
+                  trim,
+                  captionFilters: phrases?.length ? captionFilters(phrases, trim.start) : undefined,
+                };
+              }),
             ),
             outputName: `${id}-${fileNumber}.mp4`,
             ...filters,
