@@ -13,6 +13,7 @@ export function BatchSettings({
   ctas,
   defaults,
   campaigns,
+  formats,
   accounts,
 }: {
   batchId: string;
@@ -33,9 +34,11 @@ export function BatchSettings({
     hookLines: string;
     caption: string;
     campaignId: string;
+    formatId: string;
     accountId: string;
   };
   campaigns: Option[];
+  formats: Array<{ id: string; name: string; campaignId: string }>;
   accounts: Option[];
 }) {
   const [allCombos, setAllCombos] = useState(defaults.allCombos);
@@ -48,6 +51,8 @@ export function BatchSettings({
   const [trimOn, setTrimOn] = useState(defaults.trimOn);
   const [hookColorOn, setHookColorOn] = useState(defaults.hookColorOn);
   const [hookLines, setHookLines] = useState(defaults.hookLines);
+  const [campaignId, setCampaignId] = useState(defaults.campaignId);
+  const dealFormats = formats.filter((format) => format.campaignId === campaignId);
   const textCount = useMemo(() => parseHookLines(hookLines).length, [hookLines]);
   const mixes = useMemo(
     () => plannedMixes(hooks, bodies, ctas, allCombos, count),
@@ -194,7 +199,12 @@ export function BatchSettings({
             </button>
           </Row>
           <Row label="Deal">
-            <select name="campaignId" defaultValue={defaults.campaignId} className="field max-w-xs">
+            <select
+              name="campaignId"
+              value={campaignId}
+              onChange={(event) => setCampaignId(event.target.value)}
+              className="field max-w-xs"
+            >
               <option value="">None — shows as No deal in Library</option>
               {campaigns.map((campaign) => (
                 <option key={campaign.id} value={campaign.id}>
@@ -203,6 +213,18 @@ export function BatchSettings({
               ))}
             </select>
           </Row>
+          {dealFormats.length > 0 ? (
+            <Row label="Format — so Numbers can score this batch">
+              <select name="formatId" defaultValue={defaults.formatId} className="field max-w-xs">
+                <option value="">No format</option>
+                {dealFormats.map((format) => (
+                  <option key={format.id} value={format.id}>
+                    {format.name}
+                  </option>
+                ))}
+              </select>
+            </Row>
+          ) : null}
           <Row label="Account">
             <select name="accountId" defaultValue={defaults.accountId} className="field max-w-xs" required>
               <option value="" disabled>

@@ -21,11 +21,18 @@ export function CardBrief({
     script: string;
     referenceUrl: string;
     campaignId: string | null;
+    formatId: string | null;
     accountId: string | null;
     plannedDate: Date | null;
     deadlineAt: Date | null;
   };
-  campaigns: Array<{ id: string; name: string; brand: string; kind: DealKind }>;
+  campaigns: Array<{
+    id: string;
+    name: string;
+    brand: string;
+    kind: DealKind;
+    formats: Array<{ id: string; name: string; lane: string }>;
+  }>;
   accounts: Array<{ id: string; username: string; nickname: string }>;
 }) {
   return (
@@ -50,6 +57,22 @@ export function CardBrief({
             </option>
           ))}
         </select>
+        {campaigns.some((campaign) => campaign.formats.length > 0) ? (
+          <select name="formatId" defaultValue={card.formatId ?? ""} className="field">
+            <option value="">Which format — so Numbers can score it</option>
+            {campaigns
+              .filter((campaign) => campaign.formats.length > 0)
+              .map((campaign) => (
+                <optgroup key={campaign.id} label={campaign.brand || campaign.name}>
+                  {campaign.formats.map((format) => (
+                    <option key={format.id} value={format.id}>
+                      {format.name} · {format.lane.toLowerCase()}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+          </select>
+        ) : null}
         <label>
           <span className="label">Film this day</span>
           <input name="plannedDate" type="date" defaultValue={card.plannedDate ? toInputDate(card.plannedDate) : ""} className="field" />

@@ -25,7 +25,7 @@ export default async function BatchPage({
       where: { id },
       include: { clips: true, tracks: true, outputs: true },
     }),
-    prisma.campaign.findMany({ orderBy: { name: "asc" } }),
+    prisma.campaign.findMany({ orderBy: { name: "asc" }, include: { formats: true } }),
     prisma.socialAccount.findMany({ where: { isActive: true } }),
     prisma.repurposeBatch.findMany({ orderBy: { createdAt: "desc" }, take: 8 }),
   ]);
@@ -142,9 +142,13 @@ export default async function BatchPage({
           hookLines: batch.hookLines,
           caption: batch.caption,
           campaignId: batch.campaignId ?? "",
+          formatId: batch.formatId ?? "",
           accountId: batch.accountId ?? "",
         }}
         campaigns={campaigns.map((campaign) => ({ id: campaign.id, name: campaign.name }))}
+        formats={campaigns.flatMap((campaign) =>
+          campaign.formats.map((format) => ({ id: format.id, name: format.name, campaignId: campaign.id })),
+        )}
         accounts={accounts.map((account) => ({
           id: account.id,
           name: account.nickname

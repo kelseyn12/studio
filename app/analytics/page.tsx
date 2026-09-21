@@ -4,11 +4,12 @@ import { Shell } from "@/components/shell";
 import { Spark } from "@/components/spark";
 import { Stat } from "@/components/stat";
 import { formatCompact, formatMoney } from "@/lib/deals";
+import { scoreFormats, WIN_VIEWS } from "@/lib/formats";
 import { dashboardTotals, studioSnapshot, viewsByDay } from "@/lib/queries";
 import { prisma } from "@/lib/prisma";
 
 export default async function AnalyticsPage() {
-  const [totals, series, videos, accounts, snap, byAccount] = await Promise.all([
+  const [totals, series, videos, accounts, snap, byAccount, formats] = await Promise.all([
     dashboardTotals(),
     viewsByDay(90),
     prisma.card.findMany({
@@ -25,7 +26,25 @@ export default async function AnalyticsPage() {
       _count: { _all: true },
       _sum: { views: true },
     }),
+    prisma.format.findMany({
+      include: {
+        campaign: { select: { brand: true, name: true } },
+        cards: {
+          where: { OR: [{ status: { in: ["POSTED", "DATA"] } }, { postedAt: { not: null } }] },
+          select: { views: true },
+        },
+      },
+    }),
   ]);
+  const formatRows = scoreFormats(
+    formats.map((format) => ({
+      id: format.id,
+      name: format.name,
+      lane: format.lane,
+      deal: format.campaign.brand || format.campaign.name,
+      views: format.cards.map((card) => card.views),
+    })),
+  );
   const accountStats = accounts
     .map((account) => {
       const row = byAccount.find((group) => group.accountId === account.id);
@@ -60,6 +79,41 @@ export default async function AnalyticsPage() {
       <div className="mb-8">
         <Spark points={series.map((row) => row.views)} label="Views · last 90 days" />
       </div>
+      <section className="mb-8">
+        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="font-semibold">Format scorecard</h2>
+          <p className="text-xs text-mute">A win = {formatCompact(WIN_VIEWS)}+ views. Sunday check: keep winners, cut losers.</p>
+        </div>
+        {formatRows.length === 0 ? (
+          <p className="text-sm text-mute">
+            Add formats on a deal page, then pick the format on each video (or on a Multiply batch). Results land here.
+          </p>
+        ) : (
+          <div className="space-y-2">
+            {formatRows.map((row) => (
+              <div
+                key={row.id}
+                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-panel px-4 py-3"
+              >
+                <div className="min-w-0">
+                  <p className="truncate font-medium">{row.name}</p>
+                  <p className="text-xs text-mute">
+                    {row.deal} · {row.lane.toLowerCase()}
+                  </p>
+                </div>
+                <div className="flex shrink-0 gap-5 text-sm">
+                  <span className="text-mute">{row.posts} posted</span>
+                  <span className={row.posts > 0 && row.winRate >= 50 ? "text-live" : "text-mute"}>
+                    {row.posts > 0 ? `${row.winRate}% win` : "no posts yet"}
+                  </span>
+                  {row.posts > 0 ? <span className="text-mute">avg {formatCompact(row.avgViews)}</span> : null}
+                  {row.posts > 0 ? <span className="text-mute">best {formatCompact(row.bestViews)}</span> : null}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
       <div className="grid gap-6 lg:grid-cols-2">
         <section>
           <h2 className="mb-3 font-semibold">Top videos</h2>

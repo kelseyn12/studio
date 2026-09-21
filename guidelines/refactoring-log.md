@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-09-21 — Format scorecard on Numbers (Nickolai weekly review): posts, win rate (10k+ views = win), avg and best views per format. Format picker added to video brief and Multiply batch so results actually get tagged.
 - 2026-09-21 — Text color per copy in Multiply (Sasha trick): white → yellow → green → red cycling on the burned hook text, one more variation axis. Toggle on Mix settings.
 - 2026-09-21 — Tracked links on DMs: system-studio.fly.dev/l/word redirects and counts clicks, so DM links are measurable with any sender. Deal page shows They owe you (base + CPM) per deal as the receipt when brands miscount.
 - 2026-09-21 — Quick cut inside Studio: trim any Multiply clip in place, or cut the start/end off a finished video on Live (new EDITED asset ships). Files API now serves byte ranges so video scrubbing works in Safari.

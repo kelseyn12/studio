@@ -38,6 +38,7 @@ export async function POST(
         hookLines: String(form.get("hookLines") || ""),
         caption: String(form.get("caption") || ""),
         campaignId: String(form.get("campaignId") || "") || null,
+        formatId: String(form.get("formatId") || "") || null,
         accountId: String(form.get("accountId") || "") || null,
       },
     });
@@ -101,6 +102,7 @@ export async function POST(
             title,
             status: "READY",
             campaignId: batch.campaignId,
+            formatId: batch.formatId,
             accountId: batch.accountId,
             createdById: user.id,
             hook: line || combo.find((clip) => clip.slot === "HOOK")?.hookText || "",

@@ -28,7 +28,7 @@ export default async function CardPage({
       where: { id },
       include: { campaign: true, account: true, assets: true, editor: true },
     }),
-    prisma.campaign.findMany(),
+    prisma.campaign.findMany({ include: { formats: true } }),
     prisma.socialAccount.findMany({ where: { isActive: true } }),
     prisma.user.findMany({ where: { role: "EDITOR" }, orderBy: { name: "asc" } }),
   ]);
