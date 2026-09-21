@@ -10,15 +10,15 @@ export function PacketFiles({
   const packet = files.filter((file) => file.kind === "RAW" || file.kind === "VOICE" || file.kind === "REFERENCE");
   return (
     <section className="space-y-2 rounded-card border border-line bg-panel p-5">
-      <h2 className="font-semibold">Download packet</h2>
-      <p className="text-sm text-mute">Get the files onto your machine. Cut it. Come back and drop the 1080 here.</p>
+      <h2 className="font-semibold">Download files</h2>
+      <p className="text-sm text-mute">Get the clips onto your computer. Cut the finished video. Drop it back here.</p>
       {rawsUrl ? (
         <a href={rawsUrl} target="_blank" rel="noreferrer" className="block rounded-xl bg-sun px-4 py-3 text-center font-semibold text-ink">
           Open 4K folder
         </a>
       ) : null}
       {packet.length === 0 && !rawsUrl ? (
-        <p className="text-sm text-mute">No files yet. Footage needs a Drive folder or uploaded clips.</p>
+        <p className="text-sm text-mute">No files yet. Add a Drive folder or clips on the Clips step.</p>
       ) : (
         packet.map((file) => (
           <a

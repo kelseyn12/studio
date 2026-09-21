@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { BulkForm } from "@/components/bulk-form";
+import { FailedPosts } from "@/components/failed-posts";
+import { PaidButton } from "@/components/paid-button";
 import { CalendarBoard } from "@/components/calendar-board";
 import { PostChip } from "@/components/post-chip";
 import { Shell } from "@/components/shell";
@@ -33,13 +35,18 @@ export default async function CalendarPage({
   const weekStart = startOfWeek(anchor);
   const days = view === "month" ? monthGrid(anchor) : weekGrid(anchor);
   const weekEnd = addDays(weekStart, 7);
-  const [cards, accounts] = await Promise.all([
+  const [cards, accounts, failedJobs] = await Promise.all([
     prisma.card.findMany({
       where: { OR: [{ scheduledAt: { not: null } }, { status: "READY" }] },
       include: { account: true },
       orderBy: { scheduledAt: "asc" },
     }),
     prisma.socialAccount.findMany({ where: { isActive: true } }),
+    prisma.publishJob.findMany({
+      where: { status: "FAILED" },
+      include: { card: { select: { id: true, title: true } }, account: { select: { username: true } } },
+      orderBy: { createdAt: "desc" },
+    }),
   ]);
   const waiting = cards.filter((card) => card.status === "READY" && !card.scheduledAt);
   const parked = cards.filter((card) => card.scheduledAt && card.status !== "POSTED" && card.status !== "DATA");
@@ -54,14 +61,14 @@ export default async function CalendarPage({
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">Live</h1>
-          <p className="mt-1 text-mute">Ready files only. Plan month is for filming, not publishing.</p>
+          <p className="mt-1 text-mute">Only finished videos. Film days is for filming, not posting.</p>
         </div>
         <div className="flex gap-2">
           <Link href="/library" className="rounded-xl border border-line px-3 py-2 text-sm">
             Add videos
           </Link>
           <Link href="/cards/new" className="rounded-xl bg-sun px-3 py-2 text-sm font-semibold text-ink">
-            New post
+            New video
           </Link>
         </div>
       </div>
@@ -104,14 +111,22 @@ export default async function CalendarPage({
 
       {params.ship === "ok" ? (
         <p className="mb-4 rounded-card border border-line bg-panel px-4 py-3 text-sm">
-          Parked. Pull from Outstand on Numbers after it goes live so this card becomes Posted.
+          Scheduled. After it posts, Pull from Outstand on Numbers so it shows as Posted.
+        </p>
+      ) : null}
+      {params.ship === "batch" ? (
+        <p className="mb-4 rounded-card border border-line bg-panel px-4 py-3 text-sm">
+          These videos are ready and already tagged with the account you picked. Schedule them below. Leave Account on
+          “already on each video” unless you want a different @.
         </p>
       ) : null}
       {params.ship === "fail" ? (
         <p className="mb-4 rounded-card border border-line bg-panel px-4 py-3 text-sm">
-          Time is saved on Live. Outstand did not take the file — check Accounts and the finished mp4.
+          Time is saved. Outstand did not take the file — check Accounts and that a finished video exists.
         </p>
       ) : null}
+
+      <FailedPosts jobs={failedJobs} />
 
       {accounts.length === 0 ? (
         <p className="mb-4 rounded-card border border-line bg-panel px-4 py-3 text-sm">
@@ -134,21 +149,24 @@ export default async function CalendarPage({
       ) : (
         <section className="mt-8 space-y-2">
           {(view === "scheduled" ? parked : posted).map((card) => (
-            <div key={card.id} className="flex items-center justify-between rounded-card border border-line bg-panel px-4 py-3">
+            <div key={card.id} className="flex items-center justify-between gap-3 rounded-card border border-line bg-panel px-4 py-3">
               <PostChip card={card} />
-              <StatusPill status={card.status} />
+              <div className="flex items-center gap-2">
+                {view === "posted" ? <PaidButton card={card} /> : null}
+                <StatusPill status={card.status} />
+              </div>
             </div>
           ))}
           {(view === "scheduled" ? parked : posted).length === 0 ? (
-            <p className="text-sm text-mute">Nothing in this list yet. Park a ready video on a day.</p>
+            <p className="text-sm text-mute">Nothing in this list yet. Schedule a finished video on a day.</p>
           ) : null}
         </section>
       )}
 
       {waiting.length > 0 && view === "week" ? (
         <section className="mt-8">
-          <h2 className="mb-3 text-lg font-semibold">{waiting.length} ready, no time yet</h2>
-          <p className="mb-3 text-sm text-mute">Pick a video on a day, or auto-space the whole batch above.</p>
+          <h2 className="mb-3 text-lg font-semibold">{waiting.length} finished, no day yet</h2>
+          <p className="mb-3 text-sm text-mute">Pick a video on a day, or schedule the whole batch above.</p>
         </section>
       ) : null}
     </Shell>

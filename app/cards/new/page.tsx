@@ -32,8 +32,8 @@ export default async function NewCardPage() {
   const { DEAL_KIND_LABEL } = await import("@/lib/deal-kind");
   return (
     <Shell>
-      <h1 className="mb-2 text-3xl font-semibold tracking-tight">Add one</h1>
-      <p className="mb-6 text-mute">A card is a promise to film. The script comes next, on Brief.</p>
+      <h1 className="mb-2 text-3xl font-semibold tracking-tight">Add a video</h1>
+      <p className="mb-6 text-mute">Name it. Pick the deal. Write the script next.</p>
       <form action={createCard} className="grid max-w-xl gap-4">
         <input name="title" required placeholder="Title" className="field" />
         <input name="plannedDate" type="date" className="field" />
@@ -49,7 +49,7 @@ export default async function NewCardPage() {
           <span className="label">How many</span>
           <input name="count" type="number" defaultValue={1} min={1} max={40} className="field" />
         </label>
-        <button className="rounded-xl bg-sun px-4 py-3 font-semibold text-ink">Create</button>
+        <button className="rounded-xl bg-sun px-4 py-3 font-semibold text-ink">Create video</button>
       </form>
     </Shell>
   );

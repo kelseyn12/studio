@@ -3,12 +3,14 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
-import { nextStatusFor, type DeskStage } from "@/lib/card-desk";
+import { nextStatusFor, sendBackStatus, type DeskStage } from "@/lib/card-desk";
 import { cardPatch } from "@/lib/card-patch";
-import { saveUpload, mimeFromName } from "@/lib/files";
+import { deleteUpload, saveUpload, mimeFromName } from "@/lib/files";
 import { isDirectMediaUrl } from "@/lib/media-url";
+import { rejectStudioFile } from "@/lib/storage";
 import { isPipelineStatus, type PipelineStatus } from "@/lib/pipeline";
 import { prisma } from "@/lib/prisma";
+import { markCutReady } from "@/lib/cut-ready";
 import { pingStudio } from "@/lib/manychat";
 import { queueCard } from "@/lib/publish";
 
@@ -79,7 +81,7 @@ export async function uploadAsset(formData: FormData) {
     data: { cardId: id, kind, ...saved },
   });
   if (kind === "EDITED") {
-    await prisma.card.update({ where: { id }, data: { status: "REVIEW" } });
+    await markCutReady(id);
   } else if (kind === "RAW" || kind === "VOICE") {
     const card = await prisma.card.findUnique({ where: { id } });
     if (card && (card.status === "IDEA" || card.status === "SCRIPTED")) {
@@ -101,6 +103,28 @@ export async function advanceCard(id: string, status: string) {
   redirect(`/cards/${id}`);
 }
 
+export async function requestChanges(formData: FormData) {
+  await requireUser();
+  const id = String(formData.get("id"));
+  const card = await prisma.card.findUnique({ where: { id } });
+  const next = card ? sendBackStatus(card.status) : null;
+  if (!id || !next) redirect(id ? `/cards/${id}?step=live` : "/");
+  const note = String(formData.get("editorNote") || "").trim();
+  await prisma.card.update({
+    where: { id },
+    data: { status: next, editorNote: note || card?.editorNote || "" },
+  });
+  try {
+    await pingStudio("editor", `Changes on ${card?.title || "a video"}. Open Cuts.`);
+  } catch {
+    /* optional ping */
+  }
+  revalidatePath(`/cards/${id}`);
+  revalidatePath("/edits");
+  revalidatePath("/");
+  redirect("/edits");
+}
+
 export async function approveCut(formData: FormData) {
   await requireUser();
   const id = String(formData.get("id"));
@@ -113,6 +137,20 @@ export async function approveCut(formData: FormData) {
   revalidatePath("/library");
   revalidatePath("/");
   redirect("/library");
+}
+
+export async function togglePaid(formData: FormData) {
+  const user = await requireUser();
+  if (user.role === "EDITOR") return;
+  const id = String(formData.get("id"));
+  const card = await prisma.card.findUnique({ where: { id } });
+  if (!card) return;
+  await prisma.card.update({ where: { id }, data: { approved: !card.approved } });
+  revalidatePath(`/cards/${id}`);
+  revalidatePath("/calendar");
+  revalidatePath("/analytics");
+  revalidatePath("/campaigns");
+  revalidatePath("/");
 }
 
 export async function scheduleCard(formData: FormData) {
@@ -128,7 +166,7 @@ export async function scheduleCard(formData: FormData) {
   }
   const result = await queueCard(id, when, accountId);
   try {
-    await pingStudio("creator", `Parked on Live: ${id}`);
+    await pingStudio("creator", `Scheduled: ${id}`);
   } catch {
     /* optional ping */
   }
@@ -148,15 +186,37 @@ export async function attachEditedUrl(formData: FormData) {
   }
   const response = await fetch(url);
   if (!response.ok) redirect(`/cards/${id}?step=editor`);
+  const length = Number(response.headers.get("content-length") || 0);
+  if (length > 0 && rejectStudioFile(length, "EDITED")) redirect(`/cards/${id}?step=editor`);
   const bytes = Buffer.from(await response.arrayBuffer());
+  if (rejectStudioFile(bytes.length, "EDITED")) redirect(`/cards/${id}?step=editor`);
   const name = url.split("?")[0].split("/").pop() || "export.mp4";
   const type = response.headers.get("content-type") || mimeFromName(name);
   const saved = await saveUpload(new File([new Uint8Array(bytes)], name, { type }), `cards/${id}`);
   await prisma.asset.create({
     data: { cardId: id, kind: "EDITED", ...saved, publicUrl: saved.publicUrl || url },
   });
-  await prisma.card.update({ where: { id }, data: { status: "REVIEW" } });
+  await markCutReady(id);
   revalidatePath(`/cards/${id}`);
   revalidatePath("/edits");
   redirect(`/cards/${id}?step=live`);
+}
+
+export async function deleteVideo(formData: FormData) {
+  const user = await requireUser();
+  if (user.role === "EDITOR") redirect("/edits");
+  const id = String(formData.get("id") || "");
+  if (!id) redirect("/plan");
+  const card = await prisma.card.findUnique({ where: { id }, include: { assets: true } });
+  if (!card) redirect("/plan");
+  for (const asset of card.assets) {
+    await deleteUpload(asset.path);
+  }
+  await prisma.card.delete({ where: { id } });
+  revalidatePath("/plan");
+  revalidatePath("/calendar");
+  revalidatePath("/edits");
+  revalidatePath("/library");
+  revalidatePath("/");
+  redirect("/plan");
 }

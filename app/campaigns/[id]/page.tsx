@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { DealEdit } from "@/components/deal-edit";
 import { Shell } from "@/components/shell";
 import { StatusPill } from "@/components/status-pill";
 import { DEAL_KIND_LABEL } from "@/lib/deal-kind";
@@ -21,12 +22,19 @@ async function addFormat(formData: FormData) {
 
 export default async function CampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const campaign = await prisma.campaign.findUnique({
-    where: { id },
-    include: { formats: true, cards: { orderBy: { updatedAt: "desc" }, take: 20 } },
-  });
+  const [campaign, delivered] = await Promise.all([
+    prisma.campaign.findUnique({
+      where: { id },
+      include: { formats: true, cards: { orderBy: { updatedAt: "desc" }, take: 20 } },
+    }),
+    prisma.card.count({
+      where: { campaignId: id, OR: [{ status: { in: ["POSTED", "DATA"] } }, { postedAt: { not: null } }] },
+    }),
+  ]);
   if (!campaign) notFound();
   const score = scoreDeal(campaign);
+  const promised = Math.max(campaign.videoCount, 1);
+  const deliveredPct = Math.min(100, Math.round((delivered / promised) * 100));
 
   return (
     <Shell>
@@ -37,7 +45,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
         <h1 className="text-3xl font-semibold tracking-tight">{campaign.name}</h1>
         {campaign.deliverables ? <p className="mt-2 text-sm text-mute">{campaign.deliverables}</p> : null}
       </div>
-      <section className="mb-8 grid gap-3 md:grid-cols-4">
+      <section className="mb-8 grid gap-3 md:grid-cols-5">
         <div className="rounded-2xl bg-sun px-5 py-4 text-ink">
           <p className="text-xs font-semibold uppercase tracking-[0.16em]">Score</p>
           <p className="mt-2 text-4xl font-semibold">{score.total}</p>
@@ -55,7 +63,17 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
           <p className="text-xs text-mute">Daily slots</p>
           <p className="mt-2 text-2xl font-semibold">{campaign.postsPerDay * campaign.accountsAllowed}</p>
         </div>
+        <div className="rounded-2xl border border-line bg-panel px-5 py-4">
+          <p className="text-xs text-mute">Delivered</p>
+          <p className="mt-2 text-2xl font-semibold">
+            {delivered} / {promised}
+          </p>
+          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-lift">
+            <div className="h-full rounded-full bg-sun" style={{ width: `${deliveredPct}%` }} />
+          </div>
+        </div>
       </section>
+      <DealEdit deal={campaign} />
       {score.reasons.length > 0 ? (
         <ul className="mb-8 space-y-2 text-sm text-mute">
           {score.reasons.map((reason) => (
@@ -87,7 +105,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
         </div>
       </section>
       <section>
-        <h2 className="mb-3 text-lg font-semibold">Cards</h2>
+        <h2 className="mb-3 text-lg font-semibold">Videos</h2>
         <div className="space-y-2">
           {campaign.cards.map((card) => (
             <Link key={card.id} href={`/cards/${card.id}`} className="flex items-center justify-between rounded-2xl border border-line bg-panel px-4 py-3">

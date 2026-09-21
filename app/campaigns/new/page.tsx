@@ -80,7 +80,7 @@ export default function NewCampaignPage() {
         <Field name="deadlineAt" label="Deadline" type="date" />
         <label className="md:col-span-2">
           <span className="mb-1 block text-xs font-semibold uppercase tracking-[0.14em] text-mute">Deliverables</span>
-          <textarea name="deliverables" rows={2} placeholder="3 TikToks, 1 Reel, raws…" className="w-full rounded-xl border border-line bg-lift px-3 py-2" />
+          <textarea name="deliverables" rows={2} placeholder="3 TikToks, 1 Reel…" className="w-full rounded-xl border border-line bg-lift px-3 py-2" />
         </label>
         <label className="block">
           <span className="mb-1 block text-xs font-semibold uppercase tracking-[0.14em] text-mute">Status</span>

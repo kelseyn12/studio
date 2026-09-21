@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { comboCount, outputCount, plannedMixes, variationFor } from "@/lib/variations";
+import { comboCount, outputCount, parseHookLines, plannedMixes, variationFor } from "@/lib/variations";
 
 describe("variationFor", () => {
   it("makes later copies different when amounts are set", () => {
@@ -15,7 +15,23 @@ describe("variationFor", () => {
     expect(clean.speed).toBe(1);
     expect(clean.saturation).toBe(1);
     expect(clean.crop).toBe(0);
+    expect(clean.mirror).toBe(false);
     expect(clean.label).toBe("clean");
+  });
+
+  it("mirrors every second copy when mirror is on", () => {
+    const first = variationFor(0, { speedAmt: 0, colorAmt: 0, cropAmt: 0, mirrorOn: true });
+    const second = variationFor(1, { speedAmt: 0, colorAmt: 0, cropAmt: 0, mirrorOn: true });
+    expect(first.mirror).toBe(false);
+    expect(second.mirror).toBe(true);
+    expect(second.label).toContain("mirrored");
+  });
+});
+
+describe("parseHookLines", () => {
+  it("splits lines, trims, drops blanks", () => {
+    expect(parseHookLines("one\n\n  two  \nthree\n")).toEqual(["one", "two", "three"]);
+    expect(parseHookLines("")).toEqual([]);
   });
 });
 

@@ -34,11 +34,11 @@ export default async function PlanPage({
     <Shell>
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Plan month</h1>
-          <p className="mt-1 text-mute">Drag a card onto a day. That is a film date, not a publish time.</p>
+          <h1 className="text-3xl font-semibold tracking-tight">Film days</h1>
+          <p className="mt-1 text-mute">Drag a video onto a day. That is when you film, not when it posts. Open a video to delete it, or hit × on the chip.</p>
         </div>
         <Link href="/cards/new" className="rounded-xl bg-sun px-4 py-2 text-sm font-semibold text-ink">
-          Add one
+          Add a video
         </Link>
       </div>
       <div className="mb-6">

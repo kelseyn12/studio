@@ -32,7 +32,7 @@ export function BulkForm({
     const body = await response.json();
     setNote(
       response.ok
-        ? `Spaced ${body.scheduled} · shipped ${body.shipped ?? 0} through Outstand`
+        ? `Scheduled ${body.scheduled} · posted ${body.shipped ?? 0} through Outstand`
         : body.error || "Failed",
     );
     router.refresh();
@@ -59,7 +59,7 @@ export function BulkForm({
       <label>
         <span className="label">Account</span>
         <select name="accountId" className="field">
-          <option value="">Keep current</option>
+          <option value="">Already on each video</option>
           {accounts.map((account) => (
             <option key={account.id} value={account.id}>
               {account.nickname ? `${account.nickname} · ` : ""}@{account.username}
@@ -68,7 +68,7 @@ export function BulkForm({
         </select>
       </label>
       <button className="rounded-xl bg-sun px-4 py-3 font-semibold text-ink md:col-span-5">
-        Auto-space and ship {waiting} ready video{waiting === 1 ? "" : "s"}
+        Schedule {waiting} video{waiting === 1 ? "" : "s"} on these days
       </button>
       {note ? <p className="text-sm text-sun md:col-span-5">{note}</p> : null}
     </form>

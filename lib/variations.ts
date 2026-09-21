@@ -4,6 +4,7 @@ export type Variation = {
   contrast: number;
   hue: number;
   crop: number;
+  mirror: boolean;
   label: string;
 };
 
@@ -11,7 +12,7 @@ const STEPS = [1, -1, 0.55, -0.7, 1.15];
 
 export function variationFor(
   index: number,
-  input: { speedAmt: number; colorAmt: number; cropAmt: number },
+  input: { speedAmt: number; colorAmt: number; cropAmt: number; mirrorOn?: boolean },
 ): Variation {
   const step = STEPS[index % STEPS.length];
   const speedAmt = Math.max(0, input.speedAmt);
@@ -22,10 +23,12 @@ export function variationFor(
   const contrast = colorAmt ? Number((1 + (colorAmt / 200) * Math.abs(step)).toFixed(3)) : 1;
   const hue = colorAmt ? Math.round(colorAmt * step * 1.2) : 0;
   const crop = cropAmt ? Number((cropAmt * Math.abs(step)).toFixed(1)) : 0;
+  const mirror = Boolean(input.mirrorOn) && index % 2 === 1;
   const bits = [
     speedAmt ? `${Math.round(speed * 100)}% speed` : null,
     colorAmt ? `sat ${saturation.toFixed(2)}` : null,
     crop ? `crop ${crop}%` : null,
+    mirror ? "mirrored" : null,
   ].filter(Boolean);
   return {
     speed,
@@ -33,8 +36,17 @@ export function variationFor(
     contrast,
     hue,
     crop,
+    mirror,
     label: bits.length ? bits.join(" · ") : "clean",
   };
+}
+
+export function parseHookLines(raw: string): string[] {
+  return raw
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .slice(0, 12);
 }
 
 export function comboCount(hooks: number, bodies: number, ctas: number): number {

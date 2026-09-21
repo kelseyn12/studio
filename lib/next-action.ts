@@ -37,8 +37,8 @@ export function pickNextAction(counts: MachineCounts): StudioAction {
   if (counts.review > 0) {
     return {
       kind: "review",
-      title: `Review ${counts.review} edit${counts.review === 1 ? "" : "s"}`,
-      detail: "Watch the cut. Looks good sends it to the Library. Park on Live when you pick a time.",
+      title: `Approve ${counts.review} video${counts.review === 1 ? "" : "s"}`,
+      detail: "Watch the cut. Approve or Needs changes. You can send it back more than once.",
       href: "/edits",
       count: counts.review,
     };
@@ -46,8 +46,8 @@ export function pickNextAction(counts: MachineCounts): StudioAction {
   if (counts.ready > 0) {
     return {
       kind: "schedule",
-      title: `Park ${counts.ready} ready video${counts.ready === 1 ? "" : "s"} on Live`,
-      detail: "The file is done. Pick a day and it ships. Nothing goes out until you park it.",
+      title: `Schedule ${counts.ready} video${counts.ready === 1 ? "" : "s"}`,
+      detail: "The file is done. Pick a day and the account. Then it posts.",
       href: "/calendar",
       count: counts.ready,
     };
@@ -55,8 +55,8 @@ export function pickNextAction(counts: MachineCounts): StudioAction {
   if (counts.filmed > 0) {
     return {
       kind: "handoff",
-      title: `Send ${counts.filmed} filmed card${counts.filmed === 1 ? "" : "s"} to the editor`,
-      detail: "They download the packet on their machine. You only review.",
+      title: `Send ${counts.filmed} video${counts.filmed === 1 ? "" : "s"} to the editor`,
+      detail: "They download the files here. You only approve later.",
       href: "/edits",
       count: counts.filmed,
     };
@@ -65,7 +65,7 @@ export function pickNextAction(counts: MachineCounts): StudioAction {
     return {
       kind: "cut",
       title: `Cut ${counts.cutSelf} video${counts.cutSelf === 1 ? "" : "s"}`,
-      detail: "You are the editor. Drop the 1080 export. Nothing to send.",
+      detail: "You are the editor. Drop the finished video. Nothing to send.",
       href: "/edits",
       count: counts.cutSelf,
     };
@@ -73,7 +73,7 @@ export function pickNextAction(counts: MachineCounts): StudioAction {
   if (counts.scripted > 0) {
     return {
       kind: "film",
-      title: `Film ${counts.scripted} scripted card${counts.scripted === 1 ? "" : "s"}`,
+      title: `Film ${counts.scripted} video${counts.scripted === 1 ? "" : "s"}`,
       detail: "Batch by mode. Film the whole block in one sitting.",
       href: "/plan",
       count: counts.scripted,
@@ -91,8 +91,8 @@ export function pickNextAction(counts: MachineCounts): StudioAction {
   if (counts.activeDeals > 0 && counts.totalCards === 0) {
     return {
       kind: "deal",
-      title: "Add the first card for a live deal",
-      detail: "A deal is on. One card starts the month. Multiply can wait.",
+      title: "Add the first video for a live deal",
+      detail: "A deal is on. One video starts the month. Multiply can wait.",
       href: "/campaigns",
       count: counts.activeDeals,
     };
@@ -100,7 +100,7 @@ export function pickNextAction(counts: MachineCounts): StudioAction {
   return {
     kind: "batch",
     title: "Drop clips and multiply",
-    detail: "Hooks × bodies × CTAs, then unique copies so platforms do not see the same file.",
+    detail: "Hooks, bodies, CTAs become many finished videos. Then you schedule the accounts.",
     href: "/repurposer",
     count: 0,
   };

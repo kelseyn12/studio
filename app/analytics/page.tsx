@@ -44,7 +44,7 @@ export default async function AnalyticsPage() {
           <h2 className="mb-3 font-semibold">Top videos</h2>
           <div className="space-y-2">
             {videos.length === 0 ? (
-              <p className="text-sm text-mute">Post, then log views on the card or sync from Outstand.</p>
+              <p className="text-sm text-mute">Post, then log views on the video or sync from Outstand.</p>
             ) : (
               videos.map((video, index) => (
                 <div key={video.id} className="flex items-center justify-between gap-3 rounded-2xl border border-line bg-panel px-4 py-3">

@@ -34,10 +34,10 @@ export function TodayBoard({
         <Link href="/edits" className="rounded-card border border-line bg-panel px-4 py-3">
           <p className="text-xs uppercase text-mute">Cuts</p>
           <p className="mt-1 text-2xl font-semibold">{cutting + review}</p>
-          <p className="text-xs text-mute">{review} need review</p>
+          <p className="text-xs text-mute">{review} to approve</p>
         </Link>
         <Link href="/calendar" className="rounded-card border border-line bg-panel px-4 py-3">
-          <p className="text-xs uppercase text-mute">Ready to park</p>
+          <p className="text-xs uppercase text-mute">To schedule</p>
           <p className="mt-1 text-2xl font-semibold">{ready}</p>
         </Link>
       </section>

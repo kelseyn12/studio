@@ -26,7 +26,7 @@ export function BriefAi({ cardId }: { cardId: string }) {
     }
     const field = form.querySelector<HTMLTextAreaElement>('textarea[name="hook"]');
     if (field) field.value = body.hook;
-    setNote("Hook updated — Save or Finish brief");
+    setNote("Hook updated — Save or Done writing");
   }
 
   async function generateScript() {
@@ -61,7 +61,7 @@ export function BriefAi({ cardId }: { cardId: string }) {
     fill("body", body.body);
     fill("plug", body.plug);
     fill("script", body.script);
-    setNote("Script filled — Save or Finish brief");
+    setNote("Script filled — Save or Done writing");
   }
 
   return (

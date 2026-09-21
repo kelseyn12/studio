@@ -30,9 +30,9 @@ export function navFor(role: Role): Array<{ label: string; items: Array<{ href: 
   }
   if (role === "OPERATOR") {
     return [
-      { label: "Do", items: [{ href: "/", label: "Today" }, { href: "/calendar", label: "Live" }] },
+      { label: "Work", items: [{ href: "/", label: "Today" }, { href: "/calendar", label: "Live" }] },
       {
-        label: "Desk",
+        label: "More",
         items: [
           { href: "/edits", label: "Cuts" },
           { href: "/library", label: "Library" },
@@ -43,10 +43,10 @@ export function navFor(role: Role): Array<{ label: string; items: Array<{ href: 
   }
   return [
     {
-      label: "Do",
+      label: "Work",
       items: [
         { href: "/", label: "Today" },
-        { href: "/plan", label: "Plan month" },
+        { href: "/plan", label: "Film days" },
         { href: "/repurposer", label: "Multiply" },
         { href: "/calendar", label: "Live" },
         { href: "/campaigns", label: "Deals" },
@@ -54,7 +54,7 @@ export function navFor(role: Role): Array<{ label: string; items: Array<{ href: 
       ],
     },
     {
-      label: "Desk",
+      label: "More",
       items: [
         { href: "/edits", label: "Cuts" },
         { href: "/library", label: "Library" },

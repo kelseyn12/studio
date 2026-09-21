@@ -4,6 +4,7 @@ import { EditorNeed } from "@/components/editor-need";
 import { PacketFiles } from "@/components/packet-files";
 import type { PacketItem } from "@/lib/editor-packet";
 import { publicFileUrl } from "@/lib/urls";
+import { STUDIO_FILE_MAX_BYTES } from "@/lib/storage";
 
 export function CardEditorStage({
   card,
@@ -30,14 +31,17 @@ export function CardEditorStage({
   return (
     <div className="space-y-4">
       <section className="rounded-card border border-line bg-panel p-5">
-        <h2 className="mb-1 font-semibold">{self ? "Cut it" : desk ? "Your job" : "Editor packet"}</h2>
+        <h2 className="mb-1 font-semibold">{self ? "You cut this" : desk ? "Your job" : "Files for the editor"}</h2>
         <p className="mb-3 text-sm text-mute">
           {self
-            ? "You are the editor. Download if you need it, cut 1080×1920, drop the export."
+            ? "Download if you need the clips. Cut the finished video. Drop it below."
             : desk
-              ? "Download the packet, cut 1080×1920, drop the export or paste a direct mp4 URL."
-              : "Send only if a VA cuts this. I’ll cut this lives on Footage."}
+              ? "Download the files, cut the finished video, drop it here or paste a direct mp4 link."
+              : "Send only if someone else cuts this. I’ll cut this is on Clips."}
         </p>
+        {desk && card.editorNote ? (
+          <p className="mb-3 rounded-xl bg-lift px-4 py-3 text-sm">{card.editorNote}</p>
+        ) : null}
         <EditorNeed items={packet} />
       </section>
       <PacketFiles rawsUrl={card.rawsUrl} files={files} />
@@ -87,13 +91,14 @@ export function CardEditorStage({
       <DropZone
         action="/api/assets"
         extra={{ id: card.id, kind: "EDITED" }}
-        label="Drop the 1080 export"
-        hint="Finished 1080×1920. This is what ships."
+        label="Drop the finished video"
+        hint="The export that posts. Under 250MB. Not a 4K day."
         accept="video/*"
+        maxBytes={STUDIO_FILE_MAX_BYTES}
       />
       <form action={attachEditedUrl} className="space-y-2 rounded-card border border-line bg-panel p-5">
         <input type="hidden" name="id" value={card.id} />
-        <p className="text-sm text-mute">Or paste a direct mp4 URL. Not a Drive folder.</p>
+        <p className="text-sm text-mute">Or paste a direct video link. Not a Drive folder.</p>
         <input name="editedUrl" placeholder="https://…/export.mp4" className="field" />
         <button className="rounded-xl border border-line px-4 py-2 text-sm">Attach URL</button>
       </form>
@@ -102,7 +107,7 @@ export function CardEditorStage({
           href={edited.publicUrl || publicFileUrl(edited.path)}
           className="block rounded-xl bg-sun px-4 py-3 text-center font-semibold text-ink"
         >
-          Open the delivered video
+          Open the finished video
         </a>
       ) : null}
     </div>

@@ -1,8 +1,8 @@
-import { mkdir, readFile, writeFile } from "fs/promises";
+import { mkdir, readFile, rm, writeFile } from "fs/promises";
 import os from "os";
 import path from "path";
 import { randomUUID } from "crypto";
-import { getR2, hasR2, putR2, type SavedFile } from "@/lib/r2";
+import { deleteR2, getR2, hasR2, putR2, type SavedFile } from "@/lib/r2";
 
 export const REFERENCE_MAX_BYTES = 40 * 1024 * 1024;
 export const UPLOAD_ROOT = process.env.UPLOAD_ROOT || path.join(process.cwd(), "data", "uploads");
@@ -52,6 +52,19 @@ export async function ensureLocal(relative: string): Promise<string> {
     await writeFile(absolute, bytes);
     return absolute;
   }
+}
+
+export async function deleteUpload(relative: string): Promise<void> {
+  const key = relative.replace(/\\/g, "/");
+  if (hasR2()) {
+    try {
+      await deleteR2(key);
+    } catch {
+      /* gone from the bucket already */
+    }
+  }
+  await rm(path.join(UPLOAD_ROOT, key), { force: true });
+  if (hasR2()) await rm(path.join(localRoot(), key), { force: true });
 }
 
 export function publicFileUrl(relative: string): string {

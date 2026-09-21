@@ -4,10 +4,10 @@ import { DESK_STAGES, type DeskStage } from "@/lib/card-desk";
 export function Stepper({ cardId, stage, cutBy }: { cardId: string; stage: DeskStage; cutBy?: "SELF" | "EDITOR" }) {
   const current = DESK_STAGES.indexOf(stage);
   const labels: Record<DeskStage, string> = {
-    brief: "Brief",
-    footage: "Footage",
+    brief: "Write",
+    footage: "Clips",
     editor: cutBy === "SELF" ? "Cut" : "Editor",
-    live: "Live",
+    live: "Schedule",
   };
   return (
     <ol className="grid grid-cols-4 gap-2">

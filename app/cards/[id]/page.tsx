@@ -1,3 +1,4 @@
+import { DeleteVideoButton } from "@/components/delete-video";
 import { notFound } from "next/navigation";
 import { CardBrief } from "@/components/card-brief";
 import { CardEditorStage } from "@/components/card-editor-stage";
@@ -45,8 +46,15 @@ export default async function CardPage({
           <p className="text-sm text-mute">{card.campaign?.name ?? "Personal"}</p>
           <h1 className="text-3xl font-semibold tracking-tight">{card.title}</h1>
         </div>
-        <StatusPill status={card.status} />
+        <div className="flex items-start gap-3">
+          <StatusPill status={card.status} />
+        </div>
       </div>
+      {desk ? null : (
+        <div className="mb-6 max-w-xl">
+          <DeleteVideoButton id={card.id} />
+        </div>
+      )}
       {desk ? null : (
         <div className="mb-6 max-w-xl">
           <Stepper cardId={card.id} stage={stage} cutBy={card.cutBy} />

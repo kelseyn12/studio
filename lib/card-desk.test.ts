@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { deskStage, nextStatusFor } from "@/lib/card-desk";
+import { deskStage, nextStatusFor, sendBackStatus } from "@/lib/card-desk";
 
 describe("card desk", () => {
   it("keeps publish off the card until a file exists", () => {
@@ -16,5 +16,10 @@ describe("card desk", () => {
     expect(nextStatusFor("footage", "SCRIPTED")).toBe("FILMED");
     expect(nextStatusFor("editor", "FILMED")).toBe("EDITING");
     expect(nextStatusFor("live", "READY")).toBeNull();
+  });
+
+  it("sends a cut back to the editor from To approve", () => {
+    expect(sendBackStatus("REVIEW")).toBe("EDITING");
+    expect(sendBackStatus("READY")).toBeNull();
   });
 });

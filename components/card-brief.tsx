@@ -69,7 +69,7 @@ export function CardBrief({
           <button formAction={updateCard} className="flex-1 rounded-xl border border-line py-3">
             Save
           </button>
-          <button className="flex-1 rounded-xl bg-sun py-3 font-semibold text-ink">Finish brief</button>
+          <button className="flex-1 rounded-xl bg-sun py-3 font-semibold text-ink">Done writing</button>
         </div>
       </form>
       <DropZone

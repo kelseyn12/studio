@@ -22,8 +22,96 @@ function runCommand(cmd: string, args: string[]): Promise<string> {
   });
 }
 
+function runForStderr(cmd: string, args: string[]): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const child = spawn(cmd, args, { stdio: "pipe" });
+    let stderr = "";
+    child.stderr.on("data", (chunk) => {
+      stderr += String(chunk);
+    });
+    child.on("error", reject);
+    child.on("close", (code) => {
+      if (code === 0) resolve(stderr);
+      else reject(new Error(stderr.slice(-900) || `${cmd} exited ${code}`));
+    });
+  });
+}
+
 export const HOOK_FONT =
   process.env.HOOK_FONT || "/System/Library/Fonts/Supplemental/Arial Bold.ttf";
+
+/** Quiet below this counts as dead air. */
+const SILENCE_NOISE_DB = -35;
+/** Dead air must last this long (seconds) before we trim it. */
+const SILENCE_MIN_SECONDS = 0.3;
+/** Silence touching the first/last tenth of a second counts as an edge. */
+const SILENCE_EDGE_SECONDS = 0.1;
+/** Breathing room kept around the cut (seconds). */
+const TRIM_PAD_SECONDS = 0.05;
+/** Never trim a clip below this length (seconds). */
+const MIN_CLIP_SECONDS = 0.5;
+
+export type ClipTrim = { start: number; end: number | null };
+
+export const NO_TRIM: ClipTrim = { start: 0, end: null };
+
+/** Turns ffmpeg silencedetect log lines into a safe start/end trim for one clip. */
+export function trimFromSilence(log: string, duration: number): ClipTrim {
+  const starts = [...log.matchAll(/silence_start: (-?[\d.]+)/g)].map((match) => Number(match[1]));
+  const ends = [...log.matchAll(/silence_end: (-?[\d.]+)/g)].map((match) => Number(match[1]));
+  let start = 0;
+  let end: number | null = null;
+  if (starts.length && starts[0] <= SILENCE_EDGE_SECONDS && ends.length) {
+    start = Math.max(0, ends[0] - TRIM_PAD_SECONDS);
+  }
+  if (starts.length) {
+    const lastStart = starts[starts.length - 1];
+    const lastEnd = ends.length >= starts.length ? ends[ends.length - 1] : null;
+    const runsToEnd = lastEnd === null || lastEnd >= duration - SILENCE_EDGE_SECONDS;
+    if (lastStart > start && runsToEnd) {
+      end = Math.min(duration, lastStart + TRIM_PAD_SECONDS);
+    }
+  }
+  const keptSeconds = (end ?? duration) - start;
+  if (keptSeconds < MIN_CLIP_SECONDS) return NO_TRIM;
+  if (start === 0 && end === null) return NO_TRIM;
+  return { start, end };
+}
+
+export async function clipDuration(file: string): Promise<number> {
+  const out = await runCommand("ffprobe", [
+    "-v",
+    "error",
+    "-show_entries",
+    "format=duration",
+    "-of",
+    "csv=p=0",
+    file,
+  ]);
+  return Number(out.trim()) || 0;
+}
+
+/** Finds dead air at the start and end of a clip. Returns NO_TRIM when unsure. */
+export async function quietEnds(file: string): Promise<ClipTrim> {
+  try {
+    const [log, duration] = await Promise.all([
+      runForStderr("ffmpeg", [
+        "-i",
+        file,
+        "-af",
+        `silencedetect=noise=${SILENCE_NOISE_DB}dB:d=${SILENCE_MIN_SECONDS}`,
+        "-f",
+        "null",
+        "-",
+      ]),
+      clipDuration(file),
+    ]);
+    if (!duration) return NO_TRIM;
+    return trimFromSilence(log, duration);
+  } catch {
+    return NO_TRIM;
+  }
+}
 
 export async function runFfmpeg(args: string[]): Promise<void> {
   await runCommand("ffmpeg", ["-y", ...args]);
@@ -69,6 +157,7 @@ function videoFilter(input: {
   contrast: number;
   hue: number;
   crop: number;
+  mirror?: boolean;
   hookText?: string;
 }): string {
   const crop = Math.max(0, input.crop);
@@ -80,6 +169,7 @@ function videoFilter(input: {
     "fps=30",
     "setsar=1",
   ];
+  if (input.mirror) parts.push("hflip");
   if (input.speed !== 1) parts.push(`setpts=PTS/${input.speed}`);
   if (input.saturation !== 1 || input.contrast !== 1 || input.hue !== 0) {
     parts.push(`eq=saturation=${input.saturation}:contrast=${input.contrast}`);
@@ -100,18 +190,20 @@ export function uniquenessFilter(input: {
   contrast: number;
   hue: number;
   crop: number;
+  mirror?: boolean;
 }): string {
   return videoFilter(input);
 }
 
 export async function assembleVideo(input: {
-  clips: Array<{ path: string; hookText?: string }>;
+  clips: Array<{ path: string; hookText?: string; trim?: ClipTrim }>;
   outputName: string;
   speed: number;
   saturation: number;
   contrast: number;
   hue: number;
   crop: number;
+  mirror?: boolean;
   musicPath?: string;
 }): Promise<string> {
   await mkdir(path.join(localRoot(), "generated"), { recursive: true });
@@ -122,7 +214,12 @@ export async function assembleVideo(input: {
 
   const audioFlags = await Promise.all(input.clips.map((clip) => clipHasAudio(clip.path)));
   const args: string[] = [];
-  for (const clip of input.clips) args.push("-i", clip.path);
+  for (const clip of input.clips) {
+    const trim = clip.trim ?? NO_TRIM;
+    if (trim.start > 0) args.push("-ss", trim.start.toFixed(2));
+    if (trim.end !== null) args.push("-t", (trim.end - trim.start).toFixed(2));
+    args.push("-i", clip.path);
+  }
   args.push("-f", "lavfi", "-i", "anullsrc=channel_layout=stereo:sample_rate=44100");
   if (input.musicPath) args.push("-i", input.musicPath);
   const silentIndex = n;
@@ -137,6 +234,7 @@ export async function assembleVideo(input: {
       contrast: input.contrast,
       hue: input.hue,
       crop: input.crop,
+      mirror: input.mirror,
       hookText: index === 0 ? input.clips[index].hookText : undefined,
     });
     chains.push(`[${index}:v]${vf}[v${index}]`);

@@ -1,10 +1,12 @@
+import { stat } from "fs/promises";
+import path from "path";
 import { NextResponse } from "next/server";
-import { pickCombos } from "@/lib/combinations";
-import { assembleVideo } from "@/lib/ffmpeg";
-import { ensureLocal, uploadLocalToR2 } from "@/lib/files";
+import { pickCombos, pickTracks } from "@/lib/combinations";
+import { assembleVideo, quietEnds, NO_TRIM, type ClipTrim } from "@/lib/ffmpeg";
+import { ensureLocal, localRoot, uploadLocalToR2 } from "@/lib/files";
 import { prisma } from "@/lib/prisma";
 import { readSession } from "@/lib/session";
-import { variationFor } from "@/lib/variations";
+import { parseHookLines, variationFor } from "@/lib/variations";
 
 export const maxDuration = 300;
 
@@ -30,6 +32,10 @@ export async function POST(
         speedOn: Number(form.get("speedAmt") || 0) > 0,
         colorOn: Number(form.get("colorAmt") || 0) > 0,
         zoomOn: Number(form.get("cropAmt") || 0) > 0,
+        mirrorOn: form.get("mirrorOn") === "on",
+        trimOn: form.get("trimOn") === "on",
+        hookLines: String(form.get("hookLines") || ""),
+        caption: String(form.get("caption") || ""),
         campaignId: String(form.get("campaignId") || "") || null,
         accountId: String(form.get("accountId") || "") || null,
       },
@@ -47,30 +53,46 @@ export async function POST(
   if (combos.length === 0) {
     return NextResponse.json({ error: "Add clips first" }, { status: 400 });
   }
+  if (!batch.accountId) {
+    return NextResponse.json({ error: "Pick an account so these post to the right @" }, { status: 400 });
+  }
   const campaign = batch.campaignId
     ? await prisma.campaign.findUnique({ where: { id: batch.campaignId } })
     : null;
   const copies = Math.max(batch.variants, 1);
+  const textLines = parseHookLines(batch.hookLines);
+  const lines: Array<string | null> = textLines.length ? textLines : [null];
+  const musicQueue = pickTracks(batch.tracks, combos.length * lines.length * copies);
   await prisma.repurposeBatch.update({ where: { id }, data: { status: "rendering" } });
   try {
+    const trims = new Map<string, ClipTrim>();
+    if (batch.trimOn) {
+      for (const clip of batch.clips) {
+        const local = await ensureLocal(clip.path);
+        trims.set(clip.path, await quietEnds(local));
+      }
+    }
     let fileNumber = 0;
     for (const combo of combos) {
-      for (let copy = 0; copy < copies; copy += 1) {
+      for (const line of lines) {
+        for (let copy = 0; copy < copies; copy += 1) {
         const variation = variationFor(fileNumber, batch);
         const { label, ...filters } = variation;
-        const music = batch.tracks[fileNumber % Math.max(batch.tracks.length, 1)];
+        const music = musicQueue[fileNumber];
         fileNumber += 1;
         const outputRel = await assembleVideo({
           clips: await Promise.all(
-            combo.map(async (clip) => ({
+            combo.map(async (clip, index) => ({
               path: await ensureLocal(clip.path),
-              hookText: clip.hookText || undefined,
+              hookText: index === 0 ? line || clip.hookText || undefined : undefined,
+              trim: trims.get(clip.path) ?? NO_TRIM,
             })),
           ),
           outputName: `${id}-${fileNumber}.mp4`,
           ...filters,
           musicPath: music ? await ensureLocal(music.path) : undefined,
         });
+        const outputBytes = (await stat(path.join(localRoot(), outputRel))).size;
         const publicUrl = await uploadLocalToR2(outputRel, "video/mp4");
         const title = `${batch.name} · ${fileNumber}`;
         const card = await prisma.card.create({
@@ -80,7 +102,8 @@ export async function POST(
             campaignId: batch.campaignId,
             accountId: batch.accountId,
             createdById: user.id,
-            hook: combo.find((clip) => clip.slot === "HOOK")?.hookText || "",
+            hook: line || combo.find((clip) => clip.slot === "HOOK")?.hookText || "",
+            caption: batch.caption,
             editorNote: `Uniqueness: ${variation.label}`,
             payoutCents: campaign?.basePayCents ?? 0,
             assets: {
@@ -89,7 +112,7 @@ export async function POST(
                 filename: `${title}.mp4`,
                 path: outputRel,
                 mime: "video/mp4",
-                size: 0,
+                size: outputBytes,
                 publicUrl,
               },
             },
@@ -103,6 +126,7 @@ export async function POST(
             label: `${title} · ${variation.label}`,
           },
         });
+        }
       }
     }
     await prisma.repurposeBatch.update({ where: { id }, data: { status: "ready" } });
@@ -116,5 +140,5 @@ export async function POST(
       { status: 500 },
     );
   }
-  return NextResponse.redirect(new URL(`/repurposer/${id}`, request.url));
+  return NextResponse.redirect(new URL("/calendar?ship=batch", request.url));
 }

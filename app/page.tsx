@@ -5,15 +5,18 @@ import { Shell } from "@/components/shell";
 import { StudioMap } from "@/components/studio-map";
 import { StatusPill } from "@/components/status-pill";
 import { TodayBoard } from "@/components/today-board";
+import { StorageMeter } from "@/components/storage-meter";
 import { pickNextAction } from "@/lib/next-action";
-import { machineCounts, studioSnapshot } from "@/lib/queries";
+import { machineCounts, studioBytes, studioSnapshot } from "@/lib/queries";
+import { hasR2 } from "@/lib/r2";
+import { studioUsage } from "@/lib/storage";
 import { prisma } from "@/lib/prisma";
 import { addDays, startOfDay } from "@/lib/dates";
 
 export default async function TodayPage() {
   const today = startOfDay(new Date());
   const soon = addDays(today, 2);
-  const [counts, snap, todayCards, chase, cutting] = await Promise.all([
+  const [counts, snap, todayCards, chase, cutting, fileBytes] = await Promise.all([
     machineCounts(),
     studioSnapshot(),
     prisma.card.findMany({
@@ -41,7 +44,9 @@ export default async function TodayPage() {
       include: { editor: true },
       orderBy: { updatedAt: "desc" },
     }),
+    studioBytes(),
   ]);
+  const files = studioUsage(fileBytes);
 
   return (
     <Shell>
@@ -54,6 +59,11 @@ export default async function TodayPage() {
           </div>
         </div>
         <ActionCard action={pickNextAction(counts)} />
+        {files.hot ? (
+          <div className="max-w-xl">
+            <StorageMeter bytes={files.bytes} r2={hasR2()} />
+          </div>
+        ) : null}
         <TodayBoard
           collected={snap.collected}
           pending={snap.pending}
@@ -109,7 +119,7 @@ export default async function TodayPage() {
           <div className="space-y-2">
             {todayCards.length === 0 ? (
               <p className="rounded-2xl border border-dashed border-line px-5 py-8 text-mute">
-                Board is empty. Multiply a batch, or add a deal and one card.
+                Board is empty. Multiply a batch, or add a deal and one video.
               </p>
             ) : (
               todayCards.map((card) => (

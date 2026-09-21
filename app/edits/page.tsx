@@ -26,8 +26,8 @@ export default async function EditsPage() {
       <h1 className="text-3xl font-semibold tracking-tight">{user.role === "EDITOR" ? "Your cuts" : "Cuts"}</h1>
       <p className="mt-2 mb-2 max-w-2xl text-mute">
         {user.role === "EDITOR"
-          ? "Jobs appear here when she sends them. Watch or listen in this page. Drop the 1080 here when you are done — it moves to Needs review for her."
-          : "Send lives in this app. With the editor means they have it. When they drop the 1080 here, it moves to Needs review. You never leave Studio to see that."}
+          ? "Jobs show up here when she sends them. Watch here. Drop the finished video here when you are done — it goes to To approve for her."
+          : "Send them a job. When they drop the finished video it lands in To approve. Needs changes sends it back. Repeat until you Approve."}
       </p>
       <div className="mb-6">
         <LiveRefresh />
@@ -35,7 +35,7 @@ export default async function EditsPage() {
       {user.role === "EDITOR" ? null : <Bucket title="You cut" items={selfCut} empty="Nothing you assigned to yourself." />}
       <Bucket title={user.role === "EDITOR" ? "To cut" : "Send"} items={send} empty="Nothing waiting to send." />
       <Bucket title="With the editor" items={cutting} empty="Nothing with the editor." />
-      <Bucket title="Needs review" items={review} empty="Nothing waiting for you." />
+      <Bucket title="To approve" items={review} empty="Nothing waiting for you." />
     </Shell>
   );
 }
@@ -89,7 +89,7 @@ function Bucket({
                 <div className="mt-4">
                   <EditorNeed items={packet} />
                   <p className="mt-3 text-sm text-mute">
-                    {packetReady(packet) ? "Packet is full. Cut it." : "Packet is incomplete."}
+                    {packetReady(packet) ? "Files are ready. Cut it." : "Still missing files."}
                   </p>
                 </div>
               </Link>

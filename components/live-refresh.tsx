@@ -9,5 +9,5 @@ export function LiveRefresh({ seconds = 8 }: { seconds?: number }) {
     const timer = window.setInterval(() => router.refresh(), seconds * 1000);
     return () => window.clearInterval(timer);
   }, [router, seconds]);
-  return <p className="text-xs text-mute">Live in this app · Send, with editor, needs review</p>;
+  return <p className="text-xs text-mute">This page updates by itself. Send, with editor, and to approve stay in this app.</p>;
 }

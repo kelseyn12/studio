@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { outputCount, plannedMixes, variationFor } from "@/lib/variations";
+import { outputCount, parseHookLines, plannedMixes, variationFor } from "@/lib/variations";
 
 type Option = { id: string; name: string };
 
@@ -27,6 +27,10 @@ export function BatchSettings({
     speedAmt: number;
     colorAmt: number;
     cropAmt: number;
+    mirrorOn: boolean;
+    trimOn: boolean;
+    hookLines: string;
+    caption: string;
     campaignId: string;
     accountId: string;
   };
@@ -39,25 +43,65 @@ export function BatchSettings({
   const [speedAmt, setSpeedAmt] = useState(defaults.speedAmt);
   const [colorAmt, setColorAmt] = useState(defaults.colorAmt);
   const [cropAmt, setCropAmt] = useState(defaults.cropAmt);
+  const [mirrorOn, setMirrorOn] = useState(defaults.mirrorOn);
+  const [trimOn, setTrimOn] = useState(defaults.trimOn);
+  const [hookLines, setHookLines] = useState(defaults.hookLines);
+  const textCount = useMemo(() => parseHookLines(hookLines).length, [hookLines]);
   const mixes = useMemo(
     () => plannedMixes(hooks, bodies, ctas, allCombos, count),
     [hooks, bodies, ctas, allCombos, count],
   );
-  const files = outputCount(mixes, variants);
-  const preview = variationFor(1, { speedAmt, colorAmt, cropAmt });
+  const files = outputCount(mixes, variants) * Math.max(textCount, 1);
+  const preview = variationFor(1, { speedAmt, colorAmt, cropAmt, mirrorOn });
 
   return (
     <form action={`/api/repurpose/${batchId}/generate`} method="post" className="space-y-6">
       <input type="hidden" name="name" value={name} />
       {allCombos ? <input type="hidden" name="allCombos" value="on" /> : null}
+      {mirrorOn ? <input type="hidden" name="mirrorOn" value="on" /> : null}
+      {trimOn ? <input type="hidden" name="trimOn" value="on" /> : null}
 
       <div className="rounded-card bg-sun px-5 py-4 text-ink">
         <p className="text-xs font-semibold uppercase tracking-[0.16em]">This batch will make</p>
         <p className="mt-1 text-2xl font-semibold">
           {hooks} hooks × {bodies} bodies × {ctas} CTAs = {mixes} mixes
-          {variants > 1 ? ` × ${variants} unique copies = ${files} videos` : ` = ${files} videos`}
+          {textCount > 0 ? ` × ${textCount} text hook${textCount === 1 ? "" : "s"}` : ""}
+          {variants > 1 ? ` × ${variants} unique copies` : ""} = {files} videos
         </p>
       </div>
+
+      <section className="rounded-card border border-line bg-panel p-5">
+        <p className="label">Text hooks · optional</p>
+        <p className="mt-2 text-sm text-mute">
+          One line per hook. Each line is burned onto the first clip — big, bold, top-center — and multiplies the
+          batch. 6 mixes × 4 lines = 24 videos. Leave empty to skip.
+        </p>
+        <textarea
+          name="hookLines"
+          value={hookLines}
+          onChange={(event) => setHookLines(event.target.value)}
+          placeholder={"I quit my 9-5 for this\nNobody talks about this\nPOV: you found the hack"}
+          className="field mt-3 min-h-24"
+        />
+        {textCount > 0 ? (
+          <p className="mt-2 text-sm text-mute">
+            {textCount} line{textCount === 1 ? "" : "s"} · every mix gets each line once
+          </p>
+        ) : null}
+      </section>
+
+      <section className="rounded-card border border-line bg-panel p-5">
+        <p className="label">Caption</p>
+        <p className="mt-2 text-sm text-mute">
+          Ships with every video in this batch. Leave it empty and videos post with no caption text.
+        </p>
+        <textarea
+          name="caption"
+          defaultValue={defaults.caption}
+          placeholder="Caption + hashtags for every video in this batch"
+          className="field mt-3 min-h-20"
+        />
+      </section>
 
       <section className="rounded-card border border-line bg-panel p-5">
         <p className="label">Mix settings</p>
@@ -84,7 +128,7 @@ export function BatchSettings({
               className="field max-w-28"
             />
           </Row>
-          <Row label="Unique copies of each mix">
+          <Row label="Different copies of each mix">
             <input
               name="variants"
               type="number"
@@ -119,9 +163,27 @@ export function BatchSettings({
             max={12}
             onChange={setCropAmt}
           />
+          <Row label="Mirror later copies">
+            <button
+              type="button"
+              onClick={() => setMirrorOn(!mirrorOn)}
+              className={`rounded-full px-4 py-1.5 text-sm font-semibold ${mirrorOn ? "bg-sun text-ink" : "bg-lift text-mute"}`}
+            >
+              {mirrorOn ? "On" : "Off"}
+            </button>
+          </Row>
+          <Row label="Cut dead air off clip ends">
+            <button
+              type="button"
+              onClick={() => setTrimOn(!trimOn)}
+              className={`rounded-full px-4 py-1.5 text-sm font-semibold ${trimOn ? "bg-sun text-ink" : "bg-lift text-mute"}`}
+            >
+              {trimOn ? "On" : "Off"}
+            </button>
+          </Row>
           <Row label="Deal">
             <select name="campaignId" defaultValue={defaults.campaignId} className="field max-w-xs">
-              <option value="">None</option>
+              <option value="">None — shows as No deal in Library</option>
               {campaigns.map((campaign) => (
                 <option key={campaign.id} value={campaign.id}>
                   {campaign.name}
@@ -129,9 +191,11 @@ export function BatchSettings({
               ))}
             </select>
           </Row>
-          <Row label="Post as">
-            <select name="accountId" defaultValue={defaults.accountId} className="field max-w-xs">
-              <option value="">Pick later</option>
+          <Row label="Account">
+            <select name="accountId" defaultValue={defaults.accountId} className="field max-w-xs" required>
+              <option value="" disabled>
+                Required — which account
+              </option>
               {accounts.map((account) => (
                 <option key={account.id} value={account.id}>
                   {account.name}
@@ -148,7 +212,8 @@ export function BatchSettings({
           Generate {files || ""} video{files === 1 ? "" : "s"}
         </button>
         <p className="mt-3 text-sm text-mute">
-          ffmpeg applies these on this machine. Each file becomes a Ready card.
+          Then you land on Live. Schedule the days. Outstand posts at those times. Leave Account on “already on each
+          video” if you already picked it.
         </p>
       </section>
     </form>

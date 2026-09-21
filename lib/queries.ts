@@ -32,6 +32,16 @@ export async function machineCounts(): Promise<MachineCounts> {
   return counts;
 }
 
+/** Every stored byte: card files plus Multiply clips and music. */
+export async function studioBytes(): Promise<number> {
+  const [assets, clips, tracks] = await Promise.all([
+    prisma.asset.aggregate({ _sum: { size: true } }),
+    prisma.repurposeClip.aggregate({ _sum: { size: true } }),
+    prisma.repurposeTrack.aggregate({ _sum: { size: true } }),
+  ]);
+  return (assets._sum.size ?? 0) + (clips._sum.size ?? 0) + (tracks._sum.size ?? 0);
+}
+
 export async function weekHours(): Promise<number> {
   const review = await prisma.weeklyReview.findFirst({
     where: { weekStart: startOfWeek(new Date()) },

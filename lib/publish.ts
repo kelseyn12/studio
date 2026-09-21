@@ -79,6 +79,20 @@ export async function queueCard(
     error = caught instanceof Error ? caught.message : "Outstand failed";
   }
 
+  if (shipped) {
+    await prisma.publishJob.deleteMany({ where: { cardId, status: "FAILED" } });
+  } else if (error && account) {
+    await prisma.publishJob.create({
+      data: {
+        cardId,
+        accountId: account.id,
+        status: "FAILED",
+        error,
+        scheduledAt: when,
+      },
+    });
+  }
+
   await prisma.card.update({
     where: { id: cardId },
     data: parkWrite({

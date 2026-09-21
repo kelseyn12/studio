@@ -19,7 +19,7 @@ export function MediaRow({
   return (
     <div className="rounded-card border border-line bg-panel p-3">
       <div className="mb-2 flex items-center justify-between text-sm">
-        <span className="text-mute">{kind}</span>
+        <span className="text-mute">{kind === "RAW" ? "Clip" : kind === "EDITED" || kind === "GENERATED" ? "Finished" : kind === "VOICE" ? "Voice" : kind === "REFERENCE" ? "Reference" : kind}</span>
         <a href={href} className="text-sun" download={filename}>
           Download
         </a>

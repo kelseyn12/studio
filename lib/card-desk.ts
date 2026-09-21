@@ -20,3 +20,8 @@ export function nextStatusFor(stage: DeskStage, status: PipelineStatus): Pipelin
   if (stage === "editor" && status === "FILMED") return "EDITING";
   return null;
 }
+
+export function sendBackStatus(status: PipelineStatus): PipelineStatus | null {
+  if (status === "REVIEW") return "EDITING";
+  return null;
+}

@@ -15,7 +15,8 @@
 - `canVisit` — `lib/access.ts` — rooms a role may open. Used by middleware and nav.
 - `assembleVideo` — `lib/ffmpeg.ts` — concatenates hook × body × CTA, keeps audio, optional music, applies a per-copy Variation.
 - `variationFor` — `lib/variations.ts` — unique speed / light / crop amounts for each copy of a mix.
-- `plannedMixes` — `lib/variations.ts` — live mix count from clip piles and the all-combos cap.
+- `pickTracks` — `lib/combinations.ts` — random music per video; uses every track before repeating. Used by Multiply generate.
+- `parseHookLines` — `lib/variations.ts` — batch text hooks, one per line, max 12. Each line multiplies the Multiply batch.
 - `saveUpload` — `lib/files.ts` — writes to R2 when configured; otherwise `data/uploads` on this Mac.
 - `ensureLocal` — `lib/files.ts` — pulls a file from R2 into a temp folder only when ffmpeg needs it.
 - `hasR2` — `lib/r2.ts` — true when Cloudflare R2 credentials are set.
@@ -25,6 +26,18 @@
 - `requireUser` — `lib/auth.ts` — session gate for pages.
 - `rewriteHook` — `lib/rewrite.ts` — gpt-4o-mini hook rewrite. Used by `/api/ai/hook` and Brief.
 - `pullMedia` — `lib/pull-media.ts` — fetches a direct mp4 or yt-dlp page URL for Transcribe. Blocks private hosts.
-- `approveCut` — `app/cards/[id]/actions.ts` — REVIEW → READY without a Live time. Used on Live as Looks good.
+- `approveCut` — `app/cards/[id]/actions.ts` — To approve → ready. Used on Live as Approve.
+- `requestChanges` — `app/cards/[id]/actions.ts` — To approve → With editor. Used on Live as Needs changes.
+- `sendBackStatus` — `lib/card-desk.ts` — REVIEW maps to EDITING. Used by requestChanges.
+- `markCutReady` — `lib/cut-ready.ts` — finished drop → To approve and pings you. Used by Cuts drop and URL attach.
+- `deleteVideo` — `app/cards/[id]/actions.ts` — removes a video and its files. Used on Film days (×) and the video page.
 - `generateScript` — `lib/script.ts` — spoken hook/body/plug/script from the brief plus reference clips. Used by `/api/ai/script`.
-- `parseAnalytics` — `lib/analytics.ts` — maps Outstand stats onto card views/likes/comments. Used by `/api/analytics/sync`.
+- `deleteUpload` — `lib/files.ts` — removes a Studio file from R2 and local disk. Used by Library cleanup.
+- `rejectStudioFile` — `lib/storage.ts` — blocks camera-day files. Phone clips/1080s cap at 250MB. Voice/reference 40MB.
+- `groupByDeal` — `lib/library-groups.ts` — piles finished Library videos under the deal name.
+- `togglePaid` — `app/cards/[id]/actions.ts` — flips `approved` so Collected on Today counts real money. Used by PaidButton on Live posted list and the video page.
+- `retryFailedPost` / `clearFailedPost` — `app/calendar/actions.ts` — re-ship or dismiss a failed Outstand post. Used by FailedPosts on Live.
+- `updateDeal` — `app/campaigns/[id]/actions.ts` — edits a deal after creation. Used by DealEdit on the deal page.
+- `studioBytes` — `lib/queries.ts` — every stored byte: card files + Multiply clips + music. Used by the storage meter on Today and Library.
+- `quietEnds` / `trimFromSilence` — `lib/ffmpeg.ts` — finds dead air at clip ends via silencedetect; safe parse tested in `lib/trim.test.ts`. Used by Multiply generate when Cut dead air is on.
+- `clipDuration` — `lib/ffmpeg.ts` — ffprobe duration in seconds. Used by quietEnds.

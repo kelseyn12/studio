@@ -1,5 +1,8 @@
 # Refactoring log
+- 2026-09-21 — Close the money + failure loops: Got paid? button feeds Collected, failed Outstand posts show on Live with Try again, deals are editable with a delivered-vs-promised bar, Multiply gets a batch caption and a dead-air trimmer, storage meter counts Multiply clips/music and real generated sizes, yt-dlp in Docker.
 
+- 2026-09-20 — Library Finished is grouped by deal. Multiply Generate requires Post as and opens Live to auto-space.
+- 2026-09-20 — Library is the cleanup desk: meter, watch, delete. Uploads over 250MB are refused so 4K cannot enter R2.
 - 2026-09-20 — Transcribe accepts a TikTok/Reel/YouTube URL. Looks good marks READY without a Live time. Mix shuffle. Voice file drop on Footage.
 - 2026-09-20 — Brief Generate script fills spoken lines from short reference clips. 4K days stay out.
 - 2026-09-20 — UGC work OS: `cutBy` SELF vs EDITOR on Footage, editor packet downloads, 1080 drop or direct mp4 URL, R2 dual-write, Clerk+Fly so a VA is not on this Mac.

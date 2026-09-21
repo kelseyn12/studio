@@ -14,7 +14,7 @@ export function editorNeeds(card: {
     { label: "Hook written", ok: card.hook.trim().length > 0 },
     { label: "Body or script written", ok: card.body.trim().length > 0 || card.script.trim().length > 0 },
     {
-      label: folder ? "Raws folder linked" : raws ? `${raws} raw file${raws === 1 ? "" : "s"}` : "Raws folder or files",
+      label: folder ? "Drive folder linked" : raws ? `${raws} clip${raws === 1 ? "" : "s"}` : "Drive folder or clips",
       ok: folder || raws > 0,
     },
     {

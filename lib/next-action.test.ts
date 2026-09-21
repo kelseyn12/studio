@@ -10,6 +10,7 @@ describe("pickNextAction", () => {
     const action = pickNextAction({ ...emptyCounts(), activeDeals: 1, review: 3, filmed: 9 });
     expect(action.kind).toBe("review");
     expect(action.count).toBe(3);
+    expect(action.detail).toMatch(/Needs changes/);
   });
 
   it("schedules ready inventory", () => {

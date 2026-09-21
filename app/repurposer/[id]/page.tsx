@@ -4,6 +4,8 @@ import { BatchSettings } from "@/components/batch-settings";
 import { ClipTile } from "@/components/clip-tile";
 import { DropZone } from "@/components/drop-zone";
 import { Shell } from "@/components/shell";
+import { REFERENCE_MAX_BYTES } from "@/lib/files";
+import { STUDIO_FILE_MAX_BYTES } from "@/lib/storage";
 import { publicFileUrl } from "@/lib/urls";
 import { prisma } from "@/lib/prisma";
 import { createBatch } from "../actions";
@@ -101,9 +103,20 @@ export default async function BatchPage({
 
       <section className="mb-8 rounded-card border border-line bg-panel p-5">
         <p className="label">Music · optional</p>
-        <p className="mb-3 text-sm text-mute">Sits under the original voice. Voice stays loud.</p>
-        <DropZone action="/api/repurpose/music" extra={{ batchId: batch.id }} label="Add tracks" accept="audio/*" />
+        <p className="mb-3 text-sm text-mute">
+          Each video picks a random track from this list. Voice stays loud — music sits under it. Drop more than one
+          song if you want different music on each video. One song = every video gets that song.
+        </p>
+        <DropZone
+          action="/api/repurpose/music"
+          extra={{ batchId: batch.id }}
+          label="Add music"
+          accept="audio/*"
+          maxBytes={REFERENCE_MAX_BYTES}
+          hint="mp3 / wav under 40MB"
+        />
         <ul className="mt-3 text-sm text-mute">
+          {batch.tracks.length === 0 ? <li>No tracks yet — videos keep only your voice.</li> : null}
           {batch.tracks.map((track) => (
             <li key={track.id}>{track.filename}</li>
           ))}
@@ -123,6 +136,10 @@ export default async function BatchPage({
           speedAmt: batch.speedAmt,
           colorAmt: batch.colorAmt,
           cropAmt: batch.cropAmt,
+          mirrorOn: batch.mirrorOn,
+          trimOn: batch.trimOn,
+          hookLines: batch.hookLines,
+          caption: batch.caption,
           campaignId: batch.campaignId ?? "",
           accountId: batch.accountId ?? "",
         }}
@@ -149,7 +166,7 @@ export default async function BatchPage({
             </a>
             {output.cardId ? (
               <Link href={`/cards/${output.cardId}`} className="text-sm text-mute">
-                Open card
+                Open video
               </Link>
             ) : null}
           </div>
@@ -199,6 +216,8 @@ function SlotBlock({
         extra={{ batchId: id, slot, ...(hookText ? { hookText } : {}) }}
         label={`Add ${title.toLowerCase()}`}
         accept="video/*"
+        maxBytes={STUDIO_FILE_MAX_BYTES}
+        hint="Phone clip under 250MB. Not a 4K day."
       />
     </div>
   );

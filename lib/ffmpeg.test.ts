@@ -14,6 +14,13 @@ describe("uniquenessFilter", () => {
     expect(filter).toContain("crop=1080:1920");
     expect(filter).toMatch(/scale=\d+:\d+/);
   });
+
+  it("flips the frame when mirror is on", () => {
+    const mirrored = variationFor(1, { speedAmt: 0, colorAmt: 0, cropAmt: 0, mirrorOn: true });
+    expect(uniquenessFilter(mirrored)).toContain("hflip");
+    const clean = variationFor(0, { speedAmt: 0, colorAmt: 0, cropAmt: 0, mirrorOn: true });
+    expect(uniquenessFilter(clean)).not.toContain("hflip");
+  });
 });
 
 describe("assemble uniqueness", () => {

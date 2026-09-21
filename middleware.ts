@@ -1,5 +1,5 @@
 import { clerkMiddleware, clerkClient, type ClerkMiddlewareAuth } from "@clerk/nextjs/server";
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse, type NextFetchEvent, type NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 import { canVisit, homeFor } from "@/lib/access";
 import { hasClerk, parseStudioRole } from "@/lib/clerk-mode";
@@ -38,11 +38,11 @@ async function clerkHandler(auth: ClerkMiddlewareAuth, request: NextRequest) {
   return NextResponse.next();
 }
 
-export default function middleware(...args: Parameters<typeof clerkMiddleware>) {
+export default function middleware(request: NextRequest, event: NextFetchEvent) {
   if (hasClerk()) {
-    return clerkMiddleware(clerkHandler)(...args);
+    return clerkMiddleware(clerkHandler)(request, event);
   }
-  return pinGate(args[0]);
+  return pinGate(request);
 }
 
 async function pinGate(request: NextRequest) {

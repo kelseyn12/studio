@@ -236,6 +236,10 @@ model RepurposeBatch {
   allCombos   Boolean          @default(true)
   count       Int              @default(12)
   variants    Int              @default(2)
+  mirrorOn    Boolean          @default(false)
+  trimOn      Boolean          @default(false)
+  hookLines   String           @default("")
+  caption     String           @default("")
   campaignId  String?
   accountId   String?
   createdAt   DateTime         @default(now())
@@ -253,6 +257,7 @@ model RepurposeClip {
   filename String
   hookText String         @default("")
   thumbPath String        @default("")
+  size     Int            @default(0)
 }
 
 model RepurposeTrack {
@@ -261,6 +266,7 @@ model RepurposeTrack {
   batch    RepurposeBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
   path     String
   filename String
+  size     Int            @default(0)
 }
 
 model RepurposeOut {

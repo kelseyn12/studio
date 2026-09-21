@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { writeThumb } from "@/lib/ffmpeg";
 import { ensureLocal, saveUpload, uploadLocalToR2 } from "@/lib/files";
+import { rejectStudioFile } from "@/lib/storage";
 import { hasR2 } from "@/lib/r2";
 import { prisma } from "@/lib/prisma";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
@@ -19,6 +20,8 @@ export async function POST(request: Request) {
   if (!batchId || !(file instanceof File)) {
     return NextResponse.json({ error: "Missing file" }, { status: 400 });
   }
+  const blocked = rejectStudioFile(file.size, "RAW");
+  if (blocked) return NextResponse.json({ error: blocked }, { status: 400 });
   const saved = await saveUpload(file, `repurpose/${batchId}`);
   let thumbPath = "";
   try {
@@ -34,6 +37,7 @@ export async function POST(request: Request) {
       slot,
       path: saved.path,
       filename: saved.filename,
+      size: saved.size,
       hookText: String(form.get("hookText") || ""),
       thumbPath,
     },

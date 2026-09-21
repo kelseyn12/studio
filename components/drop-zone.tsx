@@ -27,7 +27,7 @@ export function DropZone({
     setBusy(true);
     for (const file of Array.from(files).slice(0, 12)) {
       if (maxBytes && file.size > maxBytes) {
-        setNote("Too big. Phone clip or still, not a 4K day.");
+        setNote("Too big for Studio. Phone clip or finished video under the limit — 4K days go in Drive.");
         setBusy(false);
         return;
       }

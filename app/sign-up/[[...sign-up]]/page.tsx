@@ -6,7 +6,7 @@ export default function SignUpPage() {
   if (!hasClerk()) redirect("/login");
   return (
     <div className="flex min-h-screen items-center justify-center bg-ink px-6">
-      <SignUp />
+      <SignUp path="/sign-up" routing="path" signInUrl="/sign-in" fallbackRedirectUrl="/" />
     </div>
   );
 }

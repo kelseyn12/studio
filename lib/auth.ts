@@ -1,6 +1,7 @@
 import { createHash, timingSafeEqual } from "crypto";
 import { prisma } from "@/lib/prisma";
 import { readSession, type SessionUser } from "@/lib/session";
+import { hasClerk } from "@/lib/clerk-mode";
 import { redirect } from "next/navigation";
 
 export function hashPin(pin: string): string {
@@ -20,7 +21,7 @@ export function studioPin(): string {
 
 export async function requireUser(): Promise<SessionUser> {
   const user = await readSession();
-  if (!user) redirect("/login");
+  if (!user) redirect(hasClerk() ? "/sign-in" : "/login");
   return user;
 }
 

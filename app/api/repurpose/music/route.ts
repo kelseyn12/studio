@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { saveUpload } from "@/lib/files";
+import { rejectStudioFile } from "@/lib/storage";
 import { prisma } from "@/lib/prisma";
 import { readSession } from "@/lib/session";
 
@@ -12,9 +13,11 @@ export async function POST(request: Request) {
   if (!batchId || !(file instanceof File)) {
     return NextResponse.json({ error: "Missing file" }, { status: 400 });
   }
+  const blocked = rejectStudioFile(file.size, "VOICE");
+  if (blocked) return NextResponse.json({ error: blocked }, { status: 400 });
   const saved = await saveUpload(file, `music/${batchId}`);
   await prisma.repurposeTrack.create({
-    data: { batchId, path: saved.path, filename: saved.filename },
+    data: { batchId, path: saved.path, filename: saved.filename, size: saved.size },
   });
   return NextResponse.json({ ok: true });
 }

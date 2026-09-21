@@ -1,6 +1,8 @@
 import { finishStage, updateCard } from "@/app/cards/[id]/actions";
 import { DropZone } from "@/components/drop-zone";
 import { VoiceBox } from "@/components/voice-box";
+import { REFERENCE_MAX_BYTES } from "@/lib/files";
+import { STUDIO_FILE_MAX_BYTES } from "@/lib/storage";
 
 export function CardFootage({
   card,
@@ -13,15 +15,14 @@ export function CardFootage({
   return (
     <div className="space-y-4">
       <p className="text-sm text-mute">
-        Phone clips and voice live here. 4K days stay a Drive folder — paste the link. Then pick: you cut, or a VA
-        downloads the packet on their machine.
+        Phone clips and voice live here. A 4K day stays a Drive folder — paste the link. Then pick: you cut, or send to the editor.
       </p>
       <form action={finishStage.bind(null, "footage")} className="space-y-3">
         <input type="hidden" name="id" value={card.id} />
         <input name="rawsUrl" defaultValue={card.rawsUrl} placeholder="4K folder — Drive or Dropbox" className="field" />
         {card.rawsUrl ? (
           <a href={card.rawsUrl} target="_blank" rel="noreferrer" className="block rounded-xl border border-line px-4 py-3 text-center">
-            Open raws folder
+            Open Drive folder
           </a>
         ) : null}
         {editors.length > 0 ? (
@@ -51,17 +52,25 @@ export function CardFootage({
         action="/api/assets"
         extra={{ id: card.id, kind: "VOICE" }}
         label="Drop a voice note"
-        hint="Audio file. Whisper writes the editor note."
+        hint="Audio file under 40MB. Whisper writes the editor note."
         accept="audio/*"
+        maxBytes={REFERENCE_MAX_BYTES}
       />
       <DropZone
         action="/api/assets"
         extra={{ id: card.id, kind: "RAW" }}
-        label="Upload small raws / clips"
-        hint="Phone clips and stills. Not 4K days."
+        label="Upload small clips"
+        hint="Phone clips and stills under 250MB. Not a 4K day — that is the Drive link above."
         accept="video/*,image/*,audio/*"
+        maxBytes={STUDIO_FILE_MAX_BYTES}
       />
-      <DropZone action="/api/assets" extra={{ id: card.id, kind: "REFERENCE" }} label="Reference stills" hint="Optional screenshots" />
+      <DropZone
+        action="/api/assets"
+        extra={{ id: card.id, kind: "REFERENCE" }}
+        label="Reference stills"
+        hint="Optional screenshots under 40MB"
+        maxBytes={REFERENCE_MAX_BYTES}
+      />
     </div>
   );
 }

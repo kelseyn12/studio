@@ -11,7 +11,7 @@ export default async function TranscriberPage() {
       <h1 className="text-3xl font-semibold tracking-tight">Transcribe</h1>
       <p className="mt-2 mb-6 max-w-2xl text-mute">
         Voice is faster than typing. Paste a TikTok, Reel, YouTube, or direct mp4 link, or upload a file.
-        Record or drop a voice file on the card and it writes the editor note.
+        Record or drop a voice file on a video and it writes the editor note.
       </p>
       {ready ? null : (
         <p className="mb-6 rounded-card border border-line bg-panel px-4 py-3 text-sm">

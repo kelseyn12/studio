@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 
 export type SavedFile = {
   filename: string;
@@ -54,4 +54,13 @@ export async function getR2(key: string): Promise<Buffer> {
   );
   const bytes = await out.Body?.transformToByteArray();
   return Buffer.from(bytes || []);
+}
+
+export async function deleteR2(key: string): Promise<void> {
+  await client().send(
+    new DeleteObjectCommand({
+      Bucket: process.env.R2_BUCKET,
+      Key: key,
+    }),
+  );
 }

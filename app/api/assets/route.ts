@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { readSession } from "@/lib/session";
-import { saveUpload, REFERENCE_MAX_BYTES } from "@/lib/files";
+import { saveUpload } from "@/lib/files";
+import { rejectStudioFile } from "@/lib/storage";
+import { markCutReady } from "@/lib/cut-ready";
 import { prisma } from "@/lib/prisma";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
 import { hasOpenAI, transcribeFile } from "@/lib/whisper";
@@ -20,14 +22,13 @@ export async function POST(request: Request) {
   if (!id || !(file instanceof File)) {
     return NextResponse.json({ error: "Missing file" }, { status: 400 });
   }
-  if (kind === "REFERENCE" && file.size > REFERENCE_MAX_BYTES) {
-    return NextResponse.json({ error: "Reference too big. Use a phone clip, not a camera day." }, { status: 400 });
-  }
+  const blocked = rejectStudioFile(file.size, kind);
+  if (blocked) return NextResponse.json({ error: blocked }, { status: 400 });
   const saved = await saveUpload(file, `cards/${id}`);
   await prisma.asset.create({ data: { cardId: id, kind, ...saved } });
   let transcript = "";
   if (kind === "EDITED") {
-    await prisma.card.update({ where: { id }, data: { status: "REVIEW" } });
+    await markCutReady(id);
   } else if (kind === "RAW" || kind === "VOICE") {
     const card = await prisma.card.findUnique({ where: { id } });
     if (card && (card.status === "IDEA" || card.status === "SCRIPTED")) {
