@@ -7,8 +7,10 @@ import { Shell } from "@/components/shell";
 import { REFERENCE_MAX_BYTES } from "@/lib/files";
 import { STUDIO_FILE_MAX_BYTES } from "@/lib/storage";
 import { publicFileUrl } from "@/lib/urls";
+import { isRendering } from "@/lib/render-batch";
+import { LiveRefresh } from "@/components/live-refresh";
 import { prisma } from "@/lib/prisma";
-import { createBatch } from "../actions";
+import { createBatch, resetBatch } from "../actions";
 
 export default async function BatchPage({
   params,
@@ -157,8 +159,15 @@ export default async function BatchPage({
         }))}
       />
 
-      {batch.status === "rendering" ? (
-        <p className="mt-6 text-sm text-sun">Rendering. Keep this tab open — ffmpeg is building the files.</p>
+      {isRendering(batch.status) ? (
+        <RenderProgress status={batch.status} batchId={batch.id} />
+      ) : batch.status === "ready" && batch.outputs.length > 0 ? (
+        <p className="mt-6 text-sm text-live">
+          All built.{" "}
+          <Link href="/calendar?ship=batch" className="underline">
+            Schedule them on Live →
+          </Link>
+        </p>
       ) : batch.status !== "draft" && batch.status !== "ready" ? (
         <p className="mt-6 text-sm text-review">{batch.status}</p>
       ) : null}
@@ -178,6 +187,30 @@ export default async function BatchPage({
         ))}
       </div>
     </Shell>
+  );
+}
+
+function RenderProgress({ status, batchId }: { status: string; batchId: string }) {
+  const match = status.match(/rendering (\d+)\/(\d+)/);
+  const done = match ? Number(match[1]) : 0;
+  const total = match ? Math.max(Number(match[2]), 1) : 1;
+  const pct = Math.min(100, Math.round((done / total) * 100));
+  return (
+    <div className="mt-6 rounded-card border border-line bg-panel px-5 py-4">
+      <p className="text-sm font-semibold text-sun">
+        Building your videos · {done} of {total} done
+      </p>
+      <div className="mt-3 h-2 overflow-hidden rounded-full bg-lift">
+        <div className="h-full rounded-full bg-sun transition-all" style={{ width: `${pct}%` }} />
+      </div>
+      <div className="mt-3 flex items-center justify-between gap-3">
+        <LiveRefresh message="You can leave this page — the videos keep building. Finished ones appear below." />
+        <form action={resetBatch}>
+          <input type="hidden" name="id" value={batchId} />
+          <button className="text-xs text-mute hover:text-review">Stuck? Reset</button>
+        </form>
+      </div>
+    </div>
   );
 }
 

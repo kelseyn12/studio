@@ -10,6 +10,12 @@ export async function createBatch(formData: FormData) {
   redirect(`/repurposer/${batch.id}`);
 }
 
+export async function resetBatch(formData: FormData) {
+  const id = String(formData.get("id"));
+  await prisma.repurposeBatch.update({ where: { id }, data: { status: "draft" } });
+  redirect(`/repurposer/${id}`);
+}
+
 export async function saveBatch(formData: FormData) {
   const id = String(formData.get("id"));
   await prisma.repurposeBatch.update({

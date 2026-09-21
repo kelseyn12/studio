@@ -246,8 +246,8 @@ export function BatchSettings({
           Generate {files || ""} video{files === 1 ? "" : "s"}
         </button>
         <p className="mt-3 text-sm text-mute">
-          Then you land on Live. Schedule the days. Outstand posts at those times. Leave Account on “already on each
-          video” if you already picked it.
+          Videos build in the background — a progress bar shows here and you can leave the page. When they are done,
+          schedule them on Live and Outstand posts at those times.
         </p>
       </section>
     </form>

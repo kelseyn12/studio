@@ -1,12 +1,9 @@
-import { stat } from "fs/promises";
-import path from "path";
 import { NextResponse } from "next/server";
-import { pickCombos, pickTracks } from "@/lib/combinations";
-import { assembleVideo, quietEnds, NO_TRIM, type ClipTrim } from "@/lib/ffmpeg";
-import { ensureLocal, localRoot, uploadLocalToR2 } from "@/lib/files";
+import { pickCombos } from "@/lib/combinations";
 import { prisma } from "@/lib/prisma";
+import { isRendering, renderBatch, renderStatus } from "@/lib/render-batch";
 import { readSession } from "@/lib/session";
-import { parseHookLines, variationFor } from "@/lib/variations";
+import { parseHookLines } from "@/lib/variations";
 
 export const maxDuration = 300;
 
@@ -48,6 +45,9 @@ export async function POST(
     include: { clips: true, tracks: true },
   });
   if (!batch) return NextResponse.json({ error: "Missing batch" }, { status: 404 });
+  if (isRendering(batch.status)) {
+    return NextResponse.redirect(new URL(`/repurposer/${id}`, request.url), 303);
+  }
   const hooks = batch.clips.filter((clip) => clip.slot === "HOOK");
   const bodies = batch.clips.filter((clip) => clip.slot === "DEMO");
   const ctas = batch.clips.filter((clip) => clip.slot === "CTA");
@@ -62,86 +62,14 @@ export async function POST(
     ? await prisma.campaign.findUnique({ where: { id: batch.campaignId } })
     : null;
   const copies = Math.max(batch.variants, 1);
-  const textLines = parseHookLines(batch.hookLines);
-  const lines: Array<string | null> = textLines.length ? textLines : [null];
-  const musicQueue = pickTracks(batch.tracks, combos.length * lines.length * copies);
-  await prisma.repurposeBatch.update({ where: { id }, data: { status: "rendering" } });
-  try {
-    const trims = new Map<string, ClipTrim>();
-    if (batch.trimOn) {
-      for (const clip of batch.clips) {
-        const local = await ensureLocal(clip.path);
-        trims.set(clip.path, await quietEnds(local));
-      }
-    }
-    let fileNumber = 0;
-    for (const combo of combos) {
-      for (const line of lines) {
-        for (let copy = 0; copy < copies; copy += 1) {
-        const variation = variationFor(fileNumber, batch);
-        const { label, ...filters } = variation;
-        const music = musicQueue[fileNumber];
-        fileNumber += 1;
-        const outputRel = await assembleVideo({
-          clips: await Promise.all(
-            combo.map(async (clip, index) => ({
-              path: await ensureLocal(clip.path),
-              hookText: index === 0 ? line || clip.hookText || undefined : undefined,
-              trim: trims.get(clip.path) ?? NO_TRIM,
-            })),
-          ),
-          outputName: `${id}-${fileNumber}.mp4`,
-          ...filters,
-          musicPath: music ? await ensureLocal(music.path) : undefined,
-        });
-        const outputBytes = (await stat(path.join(localRoot(), outputRel))).size;
-        const publicUrl = await uploadLocalToR2(outputRel, "video/mp4");
-        const title = `${batch.name} · ${fileNumber}`;
-        const card = await prisma.card.create({
-          data: {
-            title,
-            status: "READY",
-            campaignId: batch.campaignId,
-            formatId: batch.formatId,
-            accountId: batch.accountId,
-            createdById: user.id,
-            hook: line || combo.find((clip) => clip.slot === "HOOK")?.hookText || "",
-            caption: batch.caption,
-            editorNote: `Uniqueness: ${variation.label}`,
-            payoutCents: campaign?.basePayCents ?? 0,
-            assets: {
-              create: {
-                kind: "GENERATED",
-                filename: `${title}.mp4`,
-                path: outputRel,
-                mime: "video/mp4",
-                size: outputBytes,
-                publicUrl,
-              },
-            },
-          },
-        });
-        await prisma.repurposeOut.create({
-          data: {
-            batchId: id,
-            cardId: card.id,
-            path: outputRel,
-            label: `${title} · ${variation.label}`,
-          },
-        });
-        }
-      }
-    }
-    await prisma.repurposeBatch.update({ where: { id }, data: { status: "ready" } });
-  } catch (error) {
-    await prisma.repurposeBatch.update({
-      where: { id },
-      data: { status: error instanceof Error ? error.message.slice(0, 80) : "failed" },
-    });
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Render failed" },
-      { status: 500 },
-    );
-  }
-  return NextResponse.redirect(new URL("/calendar?ship=batch", request.url));
+  const lineCount = Math.max(parseHookLines(batch.hookLines).length, 1);
+  const total = combos.length * lineCount * copies;
+  await prisma.repurposeBatch.update({ where: { id }, data: { status: renderStatus(0, total) } });
+  void renderBatch({
+    batch,
+    combos,
+    userId: user.id,
+    basePayCents: campaign?.basePayCents ?? 0,
+  });
+  return NextResponse.redirect(new URL(`/repurposer/${id}`, request.url), 303);
 }

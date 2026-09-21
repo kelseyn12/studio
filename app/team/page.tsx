@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
+import { RemoveMemberButton } from "@/components/remove-member";
 import { Shell } from "@/components/shell";
+import { requireUser } from "@/lib/auth";
 import { hasClerk } from "@/lib/clerk-mode";
 import { prisma } from "@/lib/prisma";
 import type { Role } from "@prisma/client";
@@ -36,9 +38,19 @@ async function setDefaultEditor(formData: FormData) {
   redirect("/team");
 }
 
-export default async function TeamPage() {
-  const users = await prisma.user.findMany({ orderBy: { createdAt: "asc" } });
+export default async function TeamPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+  const [users, me, query] = await Promise.all([
+    prisma.user.findMany({ orderBy: { createdAt: "asc" } }),
+    requireUser(),
+    searchParams,
+  ]);
   const clerk = hasClerk();
+  const errorText =
+    query.error === "self"
+      ? "You cannot remove yourself."
+      : query.error === "last-creator"
+        ? "Studio needs at least one creator. Add another creator first."
+        : "";
   return (
     <Shell>
       <h1 className="text-3xl font-semibold tracking-tight">Team</h1>
@@ -57,6 +69,7 @@ export default async function TeamPage() {
         </select>
         <button className="rounded-xl bg-sun px-4 py-2 font-semibold text-ink">{clerk ? "Invite" : "Add"}</button>
       </form>
+      {errorText ? <p className="mb-4 text-sm text-review">{errorText}</p> : null}
       <div className="space-y-2">
         {users.map((user) => (
           <div key={user.id} className="flex items-center justify-between rounded-2xl border border-line bg-panel px-5 py-4">
@@ -76,6 +89,7 @@ export default async function TeamPage() {
                   </form>
                 )
               ) : null}
+              {user.id !== me.id ? <RemoveMemberButton id={user.id} name={user.name} /> : null}
             </div>
           </div>
         ))}

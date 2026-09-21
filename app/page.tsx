@@ -6,7 +6,9 @@ import { StudioMap } from "@/components/studio-map";
 import { StatusPill } from "@/components/status-pill";
 import { TodayBoard } from "@/components/today-board";
 import { StorageMeter } from "@/components/storage-meter";
+import { SetupChecklist } from "@/components/setup-checklist";
 import { pickNextAction } from "@/lib/next-action";
+import { setupSteps } from "@/lib/setup";
 import { machineCounts, studioBytes, studioSnapshot } from "@/lib/queries";
 import { hasR2 } from "@/lib/r2";
 import { studioUsage } from "@/lib/storage";
@@ -47,6 +49,23 @@ export default async function TodayPage() {
     studioBytes(),
   ]);
   const files = studioUsage(fileBytes);
+  const [accountCount, dealCount, formatCount, clipCount, videoCount, editorCount] = await Promise.all([
+    prisma.socialAccount.count(),
+    prisma.campaign.count(),
+    prisma.format.count(),
+    prisma.repurposeClip.count(),
+    prisma.card.count(),
+    prisma.user.count({ where: { role: "EDITOR" } }),
+  ]);
+  const steps = setupSteps({
+    accounts: accountCount,
+    deals: dealCount,
+    formats: formatCount,
+    clips: clipCount,
+    videos: videoCount,
+    editors: editorCount,
+    outstand: Boolean(process.env.OUTSTAND_API_KEY),
+  });
 
   return (
     <Shell>
@@ -59,6 +78,7 @@ export default async function TodayPage() {
           </div>
         </div>
         <ActionCard action={pickNextAction(counts)} />
+        <SetupChecklist steps={steps} />
         {files.hot ? (
           <div className="max-w-xl">
             <StorageMeter bytes={files.bytes} r2={hasR2()} />

@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-09-21 — Background render for Multiply (progress bar, leave the page, Stuck?-Reset), remove team member (Team page, also deletes Clerk account), Set up Studio checklist on Today (empty DB made features invisible). Render loop moved to lib/render-batch.ts.
 - 2026-09-21 — Format scorecard on Numbers (Nickolai weekly review): posts, win rate (10k+ views = win), avg and best views per format. Format picker added to video brief and Multiply batch so results actually get tagged.
 - 2026-09-21 — Text color per copy in Multiply (Sasha trick): white → yellow → green → red cycling on the burned hook text, one more variation axis. Toggle on Mix settings.
 - 2026-09-21 — Tracked links on DMs: system-studio.fly.dev/l/word redirects and counts clicks, so DM links are measurable with any sender. Deal page shows They owe you (base + CPM) per deal as the receipt when brands miscount.
