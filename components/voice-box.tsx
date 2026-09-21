@@ -27,7 +27,7 @@ export function VoiceBox({ cardId }: { cardId: string }) {
       router.refresh();
     };
     recorder.start();
-    setStatus("Recording 20s… talk the brief");
+    setStatus("Recording 20s… say what you want");
     window.setTimeout(() => recorder.stop(), 20000);
   }
 

@@ -70,38 +70,6 @@ export async function finishStage(stage: DeskStage, formData: FormData) {
   redirect(`/cards/${id}?step=${onward}`);
 }
 
-export async function uploadAsset(formData: FormData) {
-  await requireUser();
-  const id = String(formData.get("id"));
-  const kind = String(formData.get("kind") || "RAW") as "RAW" | "VOICE" | "EDITED" | "REFERENCE";
-  const file = formData.get("file");
-  if (!(file instanceof File) || file.size === 0) return;
-  const saved = await saveUpload(file, `cards/${id}`);
-  await prisma.asset.create({
-    data: { cardId: id, kind, ...saved },
-  });
-  if (kind === "EDITED") {
-    await markCutReady(id);
-  } else if (kind === "RAW" || kind === "VOICE") {
-    const card = await prisma.card.findUnique({ where: { id } });
-    if (card && (card.status === "IDEA" || card.status === "SCRIPTED")) {
-      await prisma.card.update({ where: { id }, data: { status: "FILMED" } });
-    }
-  }
-  revalidatePath(`/cards/${id}`);
-  revalidatePath("/edits");
-  revalidatePath("/library");
-}
-
-export async function advanceCard(id: string, status: string) {
-  await requireUser();
-  if (!isPipelineStatus(status)) return;
-  const data: { status: typeof status; postedAt?: Date } = { status };
-  if (status === "POSTED") data.postedAt = new Date();
-  await prisma.card.update({ where: { id }, data });
-  revalidatePath(`/cards/${id}`);
-  redirect(`/cards/${id}`);
-}
 
 export async function requestChanges(formData: FormData) {
   await requireUser();

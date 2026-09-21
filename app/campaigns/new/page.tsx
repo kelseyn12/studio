@@ -114,7 +114,7 @@ export default function NewCampaignPage() {
           <input type="checkbox" name="othersViral" /> Other creators go viral
         </label>
         <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" name="briefSupply" /> Daily briefs
+          <input type="checkbox" name="briefSupply" /> They send daily video ideas
         </label>
         <label className="flex items-center gap-2 text-sm">
           <input type="checkbox" name="editorIncluded" /> Editor included

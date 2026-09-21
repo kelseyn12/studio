@@ -26,7 +26,7 @@ export default async function PipelinePage({
           <p className="mt-1 text-mute">Idea → script → film → edit → review → ready → posted → data.</p>
         </div>
         <Link href="/cards/new" className="rounded-xl bg-sun px-4 py-2 text-sm font-semibold text-ink">
-          New card
+          New video
         </Link>
       </div>
       <div className="flex gap-3 overflow-x-auto pb-4">

@@ -14,6 +14,13 @@ const schema = z.object({
   role: z.enum(["CREATOR", "EDITOR", "OPERATOR"]).default("CREATOR"),
 });
 
+/** First person in becomes the creator. Everyone after that starts as editor —
+ * the creator can change roles on Team. Stops PIN-holders minting themselves owner. */
+async function roleForNewUser(): Promise<"CREATOR" | "EDITOR"> {
+  const existingUsers = await prisma.user.count();
+  return existingUsers === 0 ? "CREATOR" : "EDITOR";
+}
+
 export async function POST(request: Request) {
   if (hasClerk()) {
     return NextResponse.json({ error: "PIN is off. Sign in with Clerk." }, { status: 410 });
@@ -34,7 +41,7 @@ export async function POST(request: Request) {
       data: {
         name: parsed.data.name,
         email: parsed.data.email,
-        role: parsed.data.role,
+        role: await roleForNewUser(),
         pinHash: hashPin(studioPin()),
       },
     }));

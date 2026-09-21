@@ -38,7 +38,10 @@ function runForStderr(cmd: string, args: string[]): Promise<string> {
 }
 
 export const HOOK_FONT =
-  process.env.HOOK_FONT || "/System/Library/Fonts/Supplemental/Arial Bold.ttf";
+  process.env.HOOK_FONT ||
+  (process.platform === "darwin"
+    ? "/System/Library/Fonts/Supplemental/Arial Bold.ttf"
+    : "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf");
 
 /** Quiet below this counts as dead air. */
 const SILENCE_NOISE_DB = -35;
