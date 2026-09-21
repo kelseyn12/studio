@@ -4,7 +4,7 @@ import { DealEdit } from "@/components/deal-edit";
 import { Shell } from "@/components/shell";
 import { StatusPill } from "@/components/status-pill";
 import { DEAL_KIND_LABEL } from "@/lib/deal-kind";
-import { formatMoney, scoreDeal } from "@/lib/deals";
+import { cpmEarnedCents, formatMoney, scoreDeal } from "@/lib/deals";
 import { prisma } from "@/lib/prisma";
 
 async function addFormat(formData: FormData) {
@@ -22,19 +22,25 @@ async function addFormat(formData: FormData) {
 
 export default async function CampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [campaign, delivered] = await Promise.all([
+  const [campaign, posted] = await Promise.all([
     prisma.campaign.findUnique({
       where: { id },
       include: { formats: true, cards: { orderBy: { updatedAt: "desc" }, take: 20 } },
     }),
-    prisma.card.count({
+    prisma.card.findMany({
       where: { campaignId: id, OR: [{ status: { in: ["POSTED", "DATA"] } }, { postedAt: { not: null } }] },
+      select: { payoutCents: true, views: true, approved: true },
     }),
   ]);
   if (!campaign) notFound();
   const score = scoreDeal(campaign);
+  const delivered = posted.length;
   const promised = Math.max(campaign.videoCount, 1);
   const deliveredPct = Math.min(100, Math.round((delivered / promised) * 100));
+  const money = (card: { payoutCents: number; views: number }) =>
+    card.payoutCents + cpmEarnedCents(card.views, campaign.cpmCents);
+  const owed = posted.filter((card) => !card.approved).reduce((sum, card) => sum + money(card), 0);
+  const collected = posted.filter((card) => card.approved).reduce((sum, card) => sum + money(card), 0);
 
   return (
     <Shell>
@@ -45,7 +51,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
         <h1 className="text-3xl font-semibold tracking-tight">{campaign.name}</h1>
         {campaign.deliverables ? <p className="mt-2 text-sm text-mute">{campaign.deliverables}</p> : null}
       </div>
-      <section className="mb-8 grid gap-3 md:grid-cols-5">
+      <section className="mb-8 grid gap-3 md:grid-cols-3">
         <div className="rounded-2xl bg-sun px-5 py-4 text-ink">
           <p className="text-xs font-semibold uppercase tracking-[0.16em]">Score</p>
           <p className="mt-2 text-4xl font-semibold">{score.total}</p>
@@ -71,6 +77,13 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
           <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-lift">
             <div className="h-full rounded-full bg-sun" style={{ width: `${deliveredPct}%` }} />
           </div>
+        </div>
+        <div className="rounded-2xl border border-line bg-panel px-5 py-4">
+          <p className="text-xs text-mute">They owe you</p>
+          <p className="mt-2 text-2xl font-semibold">{formatMoney(owed)}</p>
+          <p className="mt-1 text-xs text-mute">
+            {formatMoney(collected)} collected · base{campaign.cpmCents > 0 ? " + CPM on pulled views" : ""}
+          </p>
         </div>
       </section>
       <DealEdit deal={campaign} />

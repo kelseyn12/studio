@@ -45,3 +45,4 @@
 - `pickFinished` — `lib/card-desk.ts` — the file that ships: newest EDITED first, else newest GENERATED. Used by queueCard and the video page.
 - `trimVideo` / `isValidCut` — `lib/ffmpeg.ts` — hand cut: re-encode one file down to a picked start/end window (min half a second). Used by `/api/trim`.
 - `QuickCut` — `components/quick-cut.tsx` — player with Start here / End here / Cut it. On Multiply clip tiles (replaces the clip) and on Live for finished videos (makes a new cut; newest ships).
+- `addLink` / `deleteLink` — `app/dms/actions.ts` — tracked short links for auto-DMs. Public redirect at `/l/[slug]` counts every click.

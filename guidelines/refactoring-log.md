@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-09-21 — Tracked links on DMs: system-studio.fly.dev/l/word redirects and counts clicks, so DM links are measurable with any sender. Deal page shows They owe you (base + CPM) per deal as the receipt when brands miscount.
 - 2026-09-21 — Quick cut inside Studio: trim any Multiply clip in place, or cut the start/end off a finished video on Live (new EDITED asset ships). Files API now serves byte ranges so video scrubbing works in Safari.
 - 2026-09-21 — Ship the newest cut (pickFinished) — revisions used to never post. Polish loop: Ready generated videos can go to the editor (EDITING) and come back To approve. Deal edit now includes CPM.
 - 2026-09-21 — One brain: Turso (libsql) is the database for both this Mac and system-studio.fly.dev via Prisma driver adapter. Local data seeded in. CPM money lands in Collected/Waiting (base + views/1000 × CPM). Numbers is a full dashboard: 8 tiles, top videos, top accounts.

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { Shell } from "@/components/shell";
+import { TrackedLinks } from "@/components/tracked-links";
 import { hasManychat, sendManychatText } from "@/lib/manychat";
 import { prisma } from "@/lib/prisma";
 
@@ -31,7 +32,10 @@ async function sendTest(formData: FormData) {
 }
 
 export default async function DmsPage() {
-  const recipes = await prisma.dmRecipe.findMany({ orderBy: { createdAt: "desc" } });
+  const [recipes, links] = await Promise.all([
+    prisma.dmRecipe.findMany({ orderBy: { createdAt: "desc" } }),
+    prisma.shortLink.findMany({ orderBy: { createdAt: "desc" } }),
+  ]);
   return (
     <Shell>
       <h1 className="text-3xl font-semibold tracking-tight">DMs</h1>
@@ -57,6 +61,7 @@ export default async function DmsPage() {
           <code>MANYCHAT_CREATOR_ID</code> so Send to editor / Live also pings you.
         </p>
       )}
+      <TrackedLinks links={links} />
       <form action={addRecipe} className="mb-8 grid max-w-2xl gap-3 rounded-card border border-line bg-panel p-5">
         <p className="font-semibold">Comment recipe</p>
         <input name="trigger" placeholder="Keyword they comment — LINK, DEAL, KIT" className="field" required />

@@ -287,6 +287,15 @@ model WeeklyReview {
   createdAt DateTime @default(now())
 }
 
+model ShortLink {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  targetUrl String
+  label     String   @default("")
+  clicks    Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
 model DmRecipe {
   id        String   @id @default(cuid())
   trigger   String

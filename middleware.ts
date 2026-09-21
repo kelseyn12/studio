@@ -5,7 +5,7 @@ import { canVisit, homeFor } from "@/lib/access";
 import { hasClerk, parseStudioRole } from "@/lib/clerk-mode";
 import type { Role } from "@prisma/client";
 
-const OPEN = ["/login", "/sign-in", "/sign-up", "/api/auth"];
+const OPEN = ["/login", "/sign-in", "/sign-up", "/api/auth", "/l"];
 
 function isOpen(pathname: string): boolean {
   return OPEN.some((path) => pathname === path || pathname.startsWith(`${path}/`));
