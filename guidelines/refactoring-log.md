@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-09-21 — Quick cut inside Studio: trim any Multiply clip in place, or cut the start/end off a finished video on Live (new EDITED asset ships). Files API now serves byte ranges so video scrubbing works in Safari.
 - 2026-09-21 — Ship the newest cut (pickFinished) — revisions used to never post. Polish loop: Ready generated videos can go to the editor (EDITING) and come back To approve. Deal edit now includes CPM.
 - 2026-09-21 — One brain: Turso (libsql) is the database for both this Mac and system-studio.fly.dev via Prisma driver adapter. Local data seeded in. CPM money lands in Collected/Waiting (base + views/1000 × CPM). Numbers is a full dashboard: 8 tiles, top videos, top accounts.
 - 2026-09-21 — Close the money + failure loops: Got paid? button feeds Collected, failed Outstand posts show on Live with Try again, deals are editable with a delivered-vs-promised bar, Multiply gets a batch caption and a dead-air trimmer, storage meter counts Multiply clips/music and real generated sizes, yt-dlp in Docker.

@@ -1,5 +1,6 @@
 import { approveCut, requestChanges, scheduleCard, sendForTouchUp } from "@/app/cards/[id]/actions";
 import { PaidButton } from "@/components/paid-button";
+import { QuickCut } from "@/components/quick-cut";
 import { toInputDateTime } from "@/lib/dates";
 import { formatMoney } from "@/lib/deals";
 import { publicFileUrl } from "@/lib/urls";
@@ -21,7 +22,7 @@ export function CardLive({
     payoutCents: number;
   };
   accounts: Array<{ id: string; username: string; nickname: string }>;
-  edited?: { path: string; filename: string; publicUrl: string | null };
+  edited?: { id: string; path: string; filename: string; publicUrl: string | null };
 }) {
   if (!edited) {
     return (
@@ -38,6 +39,19 @@ export function CardLive({
       >
         Watch {edited.filename}
       </a>
+      {card.status === "REVIEW" || (card.status === "READY" && !card.scheduledAt) ? (
+        <details className="rounded-card border border-line bg-panel px-5 py-4">
+          <summary className="cursor-pointer text-sm font-semibold">Quick cut — trim the start or end</summary>
+          <div className="mt-3">
+            <QuickCut
+              src={edited.publicUrl || publicFileUrl(edited.path)}
+              target="asset"
+              id={edited.id}
+              note="Makes a new cut of this video. The newest cut is the one that ships."
+            />
+          </div>
+        </details>
+      ) : null}
       {card.status === "POSTED" || card.status === "DATA" ? (
         <div className="flex items-center justify-between rounded-card border border-line bg-panel px-5 py-4">
           <p className="text-sm text-mute">

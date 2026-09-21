@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { trimFromSilence, NO_TRIM } from "@/lib/ffmpeg";
+import { isValidCut, trimFromSilence, NO_TRIM } from "@/lib/ffmpeg";
 
 const line = (start: number, end?: number) =>
   `[silencedetect @ 0x0] silence_start: ${start}\n` +
@@ -37,5 +37,15 @@ describe("trimFromSilence", () => {
   it("refuses to trim a clip down to nothing", () => {
     const log = line(0, 4.9) + line(5.1, 10);
     expect(trimFromSilence(log, 10)).toEqual(NO_TRIM);
+  });
+});
+
+describe("isValidCut", () => {
+  it("accepts a real window and rejects junk", () => {
+    expect(isValidCut(1.2, 8.4)).toBe(true);
+    expect(isValidCut(0, 0.5)).toBe(true);
+    expect(isValidCut(5, 5.2)).toBe(false);
+    expect(isValidCut(-1, 4)).toBe(false);
+    expect(isValidCut(Number.NaN, 4)).toBe(false);
   });
 });

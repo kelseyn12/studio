@@ -49,7 +49,45 @@ const SILENCE_EDGE_SECONDS = 0.1;
 /** Breathing room kept around the cut (seconds). */
 const TRIM_PAD_SECONDS = 0.05;
 /** Never trim a clip below this length (seconds). */
-const MIN_CLIP_SECONDS = 0.5;
+export const MIN_CLIP_SECONDS = 0.5;
+
+/** A hand cut must keep at least MIN_CLIP_SECONDS of video. */
+export function isValidCut(start: number, end: number): boolean {
+  return Number.isFinite(start) && Number.isFinite(end) && start >= 0 && end - start >= MIN_CLIP_SECONDS;
+}
+
+/** Re-encodes one file down to the picked window. Returns the output path. */
+export async function trimVideo(input: {
+  sourceAbs: string;
+  outputRel: string;
+  start: number;
+  end: number;
+}): Promise<string> {
+  const outputAbs = path.join(localRoot(), input.outputRel);
+  await mkdir(path.dirname(outputAbs), { recursive: true });
+  const args: string[] = [];
+  if (input.start > 0) args.push("-ss", input.start.toFixed(2));
+  args.push("-t", (input.end - input.start).toFixed(2), "-i", input.sourceAbs);
+  args.push(
+    "-c:v",
+    "libx264",
+    "-preset",
+    "veryfast",
+    "-crf",
+    "18",
+    "-pix_fmt",
+    "yuv420p",
+    "-movflags",
+    "+faststart",
+    "-c:a",
+    "aac",
+    "-b:a",
+    "192k",
+    outputAbs,
+  );
+  await runFfmpeg(args);
+  return input.outputRel;
+}
 
 export type ClipTrim = { start: number; end: number | null };
 

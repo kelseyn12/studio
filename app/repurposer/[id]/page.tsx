@@ -193,7 +193,7 @@ function SlotBlock({
   hint: string;
   showHook?: boolean;
   hookText?: string;
-  clips: Array<{ id: string; filename: string; thumbPath: string; hookText: string }>;
+  clips: Array<{ id: string; filename: string; path: string; thumbPath: string; hookText: string }>;
 }) {
   return (
     <div className="rounded-card border border-line bg-panel p-5">
