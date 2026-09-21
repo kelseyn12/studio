@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "64mb",
     },
   },
-  serverExternalPackages: ["@aws-sdk/client-s3"],
+  serverExternalPackages: ["@aws-sdk/client-s3", "@prisma/adapter-libsql", "@libsql/client", "libsql"],
 };
 
 export default nextConfig;

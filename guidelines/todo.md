@@ -100,8 +100,15 @@
 - [X] Deals editable + delivered bar
   Edit this deal on the deal page (pay, promised videos, slots, status). Delivered X / promised with a progress bar.
 
-- [ ] One database (Turso) so this Mac and fly.dev stop diverging
-  Waiting on the free Turso account. Until then: jobs for the editor must be sent from the same place they read them.
+- [X] One database (Turso) so this Mac and fly.dev stop diverging
+  studio db on Turso free plan (aws-us-east-1), seeded from the local file. Both places read/write it via TURSO_DATABASE_URL + TURSO_AUTH_TOKEN.
+  Schema changes now need two steps: prisma db push (local file for the CLI) AND the same SQL applied with turso db shell studio.
+
+- [X] CPM money in the totals
+  Every posted video earns payout + views/1000 × the deal's CPM. Collected still waits for Got paid?; Waiting shows the rest.
+
+- [X] Numbers looks like a real dashboard
+  Collected, Waiting, both deal kinds, Views, Posted, Likes, Engagement %. Top videos with Multiply. Top accounts with posts + views.
 
 - [ ] Background render with progress for big Multiply batches
   Generate still holds the page open. Fine on this Mac; do not run 18-video batches on the Fly machine.

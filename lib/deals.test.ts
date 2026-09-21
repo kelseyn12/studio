@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { scoreDeal } from "@/lib/deals";
+import { cpmEarnedCents, scoreDeal } from "@/lib/deals";
 
 const deep = {
   basePayCents: 4000,
@@ -52,5 +52,13 @@ describe("scoreDeal", () => {
     });
     expect(score.verdict).not.toBe("pass");
     expect(score.reasons.length).toBeGreaterThan(0);
+  });
+});
+
+describe("cpmEarnedCents", () => {
+  it("pays per thousand views on top of base", () => {
+    expect(cpmEarnedCents(250000, 100)).toBe(25000); // 250k views at $1 CPM = $250
+    expect(cpmEarnedCents(0, 100)).toBe(0);
+    expect(cpmEarnedCents(50000, 0)).toBe(0);
   });
 });

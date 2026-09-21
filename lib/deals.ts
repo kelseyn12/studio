@@ -137,6 +137,12 @@ export function scoreDeal(deal: DealInput): DealScore {
   };
 }
 
+/** Views money: CPM is cents per 1,000 views on the deal. */
+export function cpmEarnedCents(views: number, cpmCents: number): number {
+  if (views <= 0 || cpmCents <= 0) return 0;
+  return Math.round((views / 1000) * cpmCents);
+}
+
 export function formatMoney(cents: number): string {
   return new Intl.NumberFormat("en-US", {
     style: "currency",

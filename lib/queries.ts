@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { cpmEarnedCents } from "@/lib/deals";
 import { emptyCounts, statusToCountKey, type MachineCounts } from "@/lib/next-action";
 import { addDays, startOfDay, startOfWeek } from "@/lib/dates";
 
@@ -61,10 +62,13 @@ export async function dashboardTotals() {
       comments: true,
       paid: true,
       approved: true,
+      campaign: { select: { cpmCents: true } },
     },
   });
-  const revenue = posted.reduce((sum, card) => sum + (card.approved ? card.payoutCents : 0), 0);
-  const projected = posted.reduce((sum, card) => sum + card.payoutCents, 0);
+  const earned = (card: { payoutCents: number; views: number; campaign: { cpmCents: number } | null }) =>
+    card.payoutCents + cpmEarnedCents(card.views, card.campaign?.cpmCents ?? 0);
+  const revenue = posted.reduce((sum, card) => sum + (card.approved ? earned(card) : 0), 0);
+  const projected = posted.reduce((sum, card) => sum + earned(card), 0);
   const views = posted.reduce((sum, card) => sum + card.views, 0);
   const likes = posted.reduce((sum, card) => sum + card.likes, 0);
   const comments = posted.reduce((sum, card) => sum + card.comments, 0);
@@ -84,7 +88,13 @@ export async function viewsByDay(days = 90) {
   const start = addDays(startOfDay(new Date()), -(days - 1));
   const cards = await prisma.card.findMany({
     where: { postedAt: { gte: start } },
-    select: { postedAt: true, views: true, payoutCents: true, approved: true },
+    select: {
+      postedAt: true,
+      views: true,
+      payoutCents: true,
+      approved: true,
+      campaign: { select: { cpmCents: true } },
+    },
   });
   return Array.from({ length: days }, (_, index) => {
     const day = addDays(start, index);
@@ -93,7 +103,11 @@ export async function viewsByDay(days = 90) {
     return {
       date: day,
       views: rows.reduce((sum, card) => sum + card.views, 0),
-      revenue: rows.reduce((sum, card) => sum + (card.approved ? card.payoutCents : 0), 0),
+      revenue: rows.reduce(
+        (sum, card) =>
+          sum + (card.approved ? card.payoutCents + cpmEarnedCents(card.views, card.campaign?.cpmCents ?? 0) : 0),
+        0,
+      ),
     };
   });
 }
@@ -105,16 +119,25 @@ export async function studioSnapshot() {
       orderBy: { createdAt: "desc" },
     }),
     prisma.card.findMany({
-      where: { payoutCents: { gt: 0 } },
-      select: { approved: true, payoutCents: true, campaign: { select: { kind: true } } },
+      where: {
+        OR: [{ payoutCents: { gt: 0 } }, { views: { gt: 0 }, campaign: { cpmCents: { gt: 0 } } }],
+      },
+      select: {
+        approved: true,
+        payoutCents: true,
+        views: true,
+        campaign: { select: { kind: true, cpmCents: true } },
+      },
     }),
     prisma.card.count({ where: { status: { in: ["FILMED", "EDITING"] } } }),
     prisma.card.count({ where: { status: "REVIEW" } }),
   ]);
-  const collected = payouts.filter((row) => row.approved).reduce((sum, row) => sum + row.payoutCents, 0);
-  const pending = payouts.filter((row) => !row.approved).reduce((sum, row) => sum + row.payoutCents, 0);
+  const money = (row: { payoutCents: number; views: number; campaign: { cpmCents: number } | null }) =>
+    row.payoutCents + cpmEarnedCents(row.views, row.campaign?.cpmCents ?? 0);
+  const collected = payouts.filter((row) => row.approved).reduce((sum, row) => sum + money(row), 0);
+  const pending = payouts.filter((row) => !row.approved).reduce((sum, row) => sum + money(row), 0);
   const kindPay = (kind: "TECH" | "UGC") =>
-    payouts.filter((row) => row.approved && row.campaign?.kind === kind).reduce((sum, row) => sum + row.payoutCents, 0);
+    payouts.filter((row) => row.approved && row.campaign?.kind === kind).reduce((sum, row) => sum + money(row), 0);
   return {
     collected,
     pending,
