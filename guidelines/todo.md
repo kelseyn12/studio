@@ -116,5 +116,8 @@
 - [X] Ship the newest cut
   queueCard and the video page now pick the newest editor cut over older files. Revisions actually post now.
 
+- [X] Quick cut inside Studio
+  Trim on any Multiply clip tile: play, Start here, End here, Cut it — replaces the clip so every video built from it uses the cut. Same tool on Live for finished videos (makes a new cut; newest ships). Files stream with byte ranges so scrubbing works.
+
 - [ ] Background render with progress for big Multiply batches
   Generate still holds the page open. Fine on this Mac; do not run 18-video batches on the Fly machine.
