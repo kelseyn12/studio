@@ -11,3 +11,4 @@ data/studio.db
 data/audit-cookies.txt
 .DS_Store
 vitest.config.ts.timestamp*
+tsconfig.tsbuildinfo
