@@ -34,6 +34,7 @@ export async function POST(
         zoomOn: Number(form.get("cropAmt") || 0) > 0,
         mirrorOn: form.get("mirrorOn") === "on",
         trimOn: form.get("trimOn") === "on",
+        hookColorOn: form.get("hookColorOn") === "on",
         hookLines: String(form.get("hookLines") || ""),
         caption: String(form.get("caption") || ""),
         campaignId: String(form.get("campaignId") || "") || null,

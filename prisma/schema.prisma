@@ -239,6 +239,7 @@ model RepurposeBatch {
   variants    Int              @default(2)
   mirrorOn    Boolean          @default(false)
   trimOn      Boolean          @default(false)
+  hookColorOn Boolean          @default(false)
   hookLines   String           @default("")
   caption     String           @default("")
   campaignId  String?

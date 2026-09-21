@@ -26,6 +26,16 @@ describe("variationFor", () => {
     expect(second.mirror).toBe(true);
     expect(second.label).toContain("mirrored");
   });
+
+  it("cycles text color per copy when the toggle is on", () => {
+    const base = { speedAmt: 0, colorAmt: 0, cropAmt: 0, hookColorOn: true };
+    const colors = [0, 1, 2, 3, 4].map((index) => variationFor(index, base).hookColor);
+    expect(colors[0]).toBe("white");
+    expect(new Set(colors.slice(0, 4)).size).toBe(4);
+    expect(colors[4]).toBe(colors[0]);
+    const off = variationFor(2, { speedAmt: 0, colorAmt: 0, cropAmt: 0 });
+    expect(off.hookColor).toBe("white");
+  });
 });
 
 describe("parseHookLines", () => {

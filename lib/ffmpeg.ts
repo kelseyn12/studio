@@ -197,6 +197,7 @@ function videoFilter(input: {
   crop: number;
   mirror?: boolean;
   hookText?: string;
+  hookColor?: string;
 }): string {
   const crop = Math.max(0, input.crop);
   const width = Math.round(1080 * (1 + crop / 100));
@@ -215,8 +216,9 @@ function videoFilter(input: {
   }
   if (input.hookText) {
     const text = escapeDrawText(input.hookText.slice(0, 80));
+    const color = input.hookColor || "white";
     parts.push(
-      `drawtext=fontfile=${HOOK_FONT}:text='${text}':fontsize=56:fontcolor=white:borderw=4:bordercolor=black:x=(w-text_w)/2:y=h*0.12`,
+      `drawtext=fontfile=${HOOK_FONT}:text='${text}':fontsize=56:fontcolor=${color}:borderw=4:bordercolor=black:x=(w-text_w)/2:y=h*0.12`,
     );
   }
   return parts.join(",");
@@ -242,6 +244,7 @@ export async function assembleVideo(input: {
   hue: number;
   crop: number;
   mirror?: boolean;
+  hookColor?: string;
   musicPath?: string;
 }): Promise<string> {
   await mkdir(path.join(localRoot(), "generated"), { recursive: true });
@@ -274,6 +277,7 @@ export async function assembleVideo(input: {
       crop: input.crop,
       mirror: input.mirror,
       hookText: index === 0 ? input.clips[index].hookText : undefined,
+      hookColor: input.hookColor,
     });
     chains.push(`[${index}:v]${vf}[v${index}]`);
     if (audioFlags[index]) {

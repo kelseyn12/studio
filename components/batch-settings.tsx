@@ -29,6 +29,7 @@ export function BatchSettings({
     cropAmt: number;
     mirrorOn: boolean;
     trimOn: boolean;
+    hookColorOn: boolean;
     hookLines: string;
     caption: string;
     campaignId: string;
@@ -45,6 +46,7 @@ export function BatchSettings({
   const [cropAmt, setCropAmt] = useState(defaults.cropAmt);
   const [mirrorOn, setMirrorOn] = useState(defaults.mirrorOn);
   const [trimOn, setTrimOn] = useState(defaults.trimOn);
+  const [hookColorOn, setHookColorOn] = useState(defaults.hookColorOn);
   const [hookLines, setHookLines] = useState(defaults.hookLines);
   const textCount = useMemo(() => parseHookLines(hookLines).length, [hookLines]);
   const mixes = useMemo(
@@ -52,7 +54,7 @@ export function BatchSettings({
     [hooks, bodies, ctas, allCombos, count],
   );
   const files = outputCount(mixes, variants) * Math.max(textCount, 1);
-  const preview = variationFor(1, { speedAmt, colorAmt, cropAmt, mirrorOn });
+  const preview = variationFor(1, { speedAmt, colorAmt, cropAmt, mirrorOn, hookColorOn });
 
   return (
     <form action={`/api/repurpose/${batchId}/generate`} method="post" className="space-y-6">
@@ -60,6 +62,7 @@ export function BatchSettings({
       {allCombos ? <input type="hidden" name="allCombos" value="on" /> : null}
       {mirrorOn ? <input type="hidden" name="mirrorOn" value="on" /> : null}
       {trimOn ? <input type="hidden" name="trimOn" value="on" /> : null}
+      {hookColorOn ? <input type="hidden" name="hookColorOn" value="on" /> : null}
 
       <div className="rounded-card bg-sun px-5 py-4 text-ink">
         <p className="text-xs font-semibold uppercase tracking-[0.16em]">This batch will make</p>
@@ -170,6 +173,15 @@ export function BatchSettings({
               className={`rounded-full px-4 py-1.5 text-sm font-semibold ${mirrorOn ? "bg-sun text-ink" : "bg-lift text-mute"}`}
             >
               {mirrorOn ? "On" : "Off"}
+            </button>
+          </Row>
+          <Row label="Text color changes per copy">
+            <button
+              type="button"
+              onClick={() => setHookColorOn(!hookColorOn)}
+              className={`rounded-full px-4 py-1.5 text-sm font-semibold ${hookColorOn ? "bg-sun text-ink" : "bg-lift text-mute"}`}
+            >
+              {hookColorOn ? "On" : "Off"}
             </button>
           </Row>
           <Row label="Cut dead air off clip ends">

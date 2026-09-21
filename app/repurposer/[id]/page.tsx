@@ -138,6 +138,7 @@ export default async function BatchPage({
           cropAmt: batch.cropAmt,
           mirrorOn: batch.mirrorOn,
           trimOn: batch.trimOn,
+          hookColorOn: batch.hookColorOn,
           hookLines: batch.hookLines,
           caption: batch.caption,
           campaignId: batch.campaignId ?? "",

@@ -5,14 +5,18 @@ export type Variation = {
   hue: number;
   crop: number;
   mirror: boolean;
+  hookColor: string;
   label: string;
 };
 
 const STEPS = [1, -1, 0.55, -0.7, 1.15];
 
+/** Sasha's trick: same text, different color, and the platform sees a new video. */
+export const HOOK_COLORS = ["white", "yellow", "#5CFF5C", "#FF5C5C"] as const;
+
 export function variationFor(
   index: number,
-  input: { speedAmt: number; colorAmt: number; cropAmt: number; mirrorOn?: boolean },
+  input: { speedAmt: number; colorAmt: number; cropAmt: number; mirrorOn?: boolean; hookColorOn?: boolean },
 ): Variation {
   const step = STEPS[index % STEPS.length];
   const speedAmt = Math.max(0, input.speedAmt);
@@ -24,11 +28,13 @@ export function variationFor(
   const hue = colorAmt ? Math.round(colorAmt * step * 1.2) : 0;
   const crop = cropAmt ? Number((cropAmt * Math.abs(step)).toFixed(1)) : 0;
   const mirror = Boolean(input.mirrorOn) && index % 2 === 1;
+  const hookColor = input.hookColorOn ? HOOK_COLORS[index % HOOK_COLORS.length] : HOOK_COLORS[0];
   const bits = [
     speedAmt ? `${Math.round(speed * 100)}% speed` : null,
     colorAmt ? `sat ${saturation.toFixed(2)}` : null,
     crop ? `crop ${crop}%` : null,
     mirror ? "mirrored" : null,
+    input.hookColorOn && hookColor !== HOOK_COLORS[0] ? `${hookColor} text` : null,
   ].filter(Boolean);
   return {
     speed,
@@ -37,6 +43,7 @@ export function variationFor(
     hue,
     crop,
     mirror,
+    hookColor,
     label: bits.length ? bits.join(" · ") : "clean",
   };
 }
