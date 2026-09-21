@@ -41,3 +41,5 @@
 - `studioBytes` — `lib/queries.ts` — every stored byte: card files + Multiply clips + music. Used by the storage meter on Today and Library.
 - `quietEnds` / `trimFromSilence` — `lib/ffmpeg.ts` — finds dead air at clip ends via silencedetect; safe parse tested in `lib/trim.test.ts`. Used by Multiply generate when Cut dead air is on.
 - `clipDuration` — `lib/ffmpeg.ts` — ffprobe duration in seconds. Used by quietEnds.
+- `sendForTouchUp` — `app/cards/[id]/actions.ts` — sends a finished (usually generated) video to the editor to polish; back to Cuts as EDITING. Used on Live for unscheduled Ready videos.
+- `pickFinished` — `lib/card-desk.ts` — the file that ships: newest EDITED first, else newest GENERATED. Used by queueCard and the video page.

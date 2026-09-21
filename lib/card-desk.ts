@@ -25,3 +25,12 @@ export function sendBackStatus(status: PipelineStatus): PipelineStatus | null {
   if (status === "REVIEW") return "EDITING";
   return null;
 }
+
+/** The file that ships: newest editor cut first, else newest generated video. */
+export function pickFinished<T extends { kind: string; createdAt: Date }>(assets: T[]): T | undefined {
+  const newestFirst = [...assets].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  return (
+    newestFirst.find((asset) => asset.kind === "EDITED") ??
+    newestFirst.find((asset) => asset.kind === "GENERATED")
+  );
+}

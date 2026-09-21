@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { deskStage, nextStatusFor, sendBackStatus } from "@/lib/card-desk";
+import { deskStage, nextStatusFor, pickFinished, sendBackStatus } from "@/lib/card-desk";
 
 describe("card desk", () => {
   it("keeps publish off the card until a file exists", () => {
@@ -21,5 +21,25 @@ describe("card desk", () => {
   it("sends a cut back to the editor from To approve", () => {
     expect(sendBackStatus("REVIEW")).toBe("EDITING");
     expect(sendBackStatus("READY")).toBeNull();
+  });
+
+  it("ships the newest editor cut, not the first one", () => {
+    const day = (offset: number) => new Date(2026, 8, offset + 1);
+    const assets = [
+      { kind: "GENERATED", createdAt: day(0), label: "machine" },
+      { kind: "EDITED", createdAt: day(1), label: "first cut" },
+      { kind: "RAW", createdAt: day(2), label: "clip" },
+      { kind: "EDITED", createdAt: day(3), label: "revision" },
+    ];
+    expect(pickFinished(assets)?.label).toBe("revision");
+  });
+
+  it("falls back to the generated video when no editor cut exists", () => {
+    const assets = [
+      { kind: "RAW", createdAt: new Date(2026, 8, 1) },
+      { kind: "GENERATED", createdAt: new Date(2026, 8, 2) },
+    ];
+    expect(pickFinished(assets)?.kind).toBe("GENERATED");
+    expect(pickFinished([])).toBeUndefined();
   });
 });

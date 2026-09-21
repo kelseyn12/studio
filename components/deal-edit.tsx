@@ -9,6 +9,7 @@ export function DealEdit({
     brand: string;
     status: string;
     basePayCents: number;
+    cpmCents: number;
     videoCount: number;
     postsPerDay: number;
     accountsAllowed: number;
@@ -36,6 +37,17 @@ export function DealEdit({
             min={0}
             step="0.01"
             defaultValue={(deal.basePayCents / 100).toFixed(2)}
+            className="field mt-1"
+          />
+        </label>
+        <label className="text-sm">
+          CPM — $ per 1,000 views (0 if none)
+          <input
+            name="cpm"
+            type="number"
+            min={0}
+            step="0.01"
+            defaultValue={(deal.cpmCents / 100).toFixed(2)}
             className="field mt-1"
           />
         </label>

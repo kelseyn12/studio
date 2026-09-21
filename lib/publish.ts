@@ -1,4 +1,5 @@
 import { postedAtFromPost, createPost, hasOutstand, uploadMedia, type OutstandPost } from "@/lib/outstand";
+import { pickFinished } from "@/lib/card-desk";
 import { ensureLocal } from "@/lib/files";
 import { prisma } from "@/lib/prisma";
 import type { CardStatus } from "@prisma/client";
@@ -34,7 +35,7 @@ export async function queueCard(
   const account = accountId
     ? await prisma.socialAccount.findUnique({ where: { id: accountId } })
     : card.account;
-  const edited = card.assets.find((asset) => asset.kind === "EDITED" || asset.kind === "GENERATED");
+  const edited = pickFinished(card.assets);
 
   let publicUrl = edited?.publicUrl || "";
   let outstandPost: OutstandPost | null = null;

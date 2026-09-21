@@ -110,5 +110,11 @@
 - [X] Numbers looks like a real dashboard
   Collected, Waiting, both deal kinds, Views, Posted, Likes, Engagement %. Top videos with Multiply. Top accounts with posts + views.
 
+- [X] Polish loop for generated videos
+  Ready + unscheduled videos get Send to editor to polish on Live. Editor sees it on Cuts with the note, drops a fixed video, it returns To approve.
+
+- [X] Ship the newest cut
+  queueCard and the video page now pick the newest editor cut over older files. Revisions actually post now.
+
 - [ ] Background render with progress for big Multiply batches
   Generate still holds the page open. Fine on this Mac; do not run 18-video batches on the Fly machine.

@@ -8,7 +8,7 @@ import { MediaRow } from "@/components/media-row";
 import { Shell } from "@/components/shell";
 import { StatusPill } from "@/components/status-pill";
 import { Stepper } from "@/components/stepper";
-import { deskStage, isDeskStage } from "@/lib/card-desk";
+import { deskStage, isDeskStage, pickFinished } from "@/lib/card-desk";
 import { editorNeeds } from "@/lib/editor-packet";
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -36,7 +36,7 @@ export default async function CardPage({
   if (user.role === "EDITOR" && card.editorId !== user.id) notFound();
   const desk = user.role === "EDITOR";
   const stage = desk ? "editor" : isDeskStage(query.step) ? query.step : deskStage(card.status);
-  const edited = card.assets.find((asset) => asset.kind === "EDITED" || asset.kind === "GENERATED");
+  const edited = pickFinished(card.assets);
   const packet = editorNeeds(card);
 
   return (

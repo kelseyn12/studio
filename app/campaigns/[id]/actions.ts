@@ -24,6 +24,7 @@ export async function updateDeal(formData: FormData) {
       brand: String(formData.get("brand") || ""),
       status: asStatus(String(formData.get("status") || "ACTIVE")),
       basePayCents: Math.max(0, Math.round(Number(formData.get("basePay") || 0) * 100)),
+      cpmCents: Math.max(0, Math.round(Number(formData.get("cpm") || 0) * 100)),
       videoCount: Math.max(1, Number(formData.get("videoCount") || 1)),
       postsPerDay: Math.max(1, Number(formData.get("postsPerDay") || 1)),
       accountsAllowed: Math.max(1, Number(formData.get("accountsAllowed") || 1)),

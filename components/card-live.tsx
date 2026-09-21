@@ -1,4 +1,4 @@
-import { approveCut, requestChanges, scheduleCard } from "@/app/cards/[id]/actions";
+import { approveCut, requestChanges, scheduleCard, sendForTouchUp } from "@/app/cards/[id]/actions";
 import { PaidButton } from "@/components/paid-button";
 import { toInputDateTime } from "@/lib/dates";
 import { formatMoney } from "@/lib/deals";
@@ -70,6 +70,22 @@ export function CardLive({
             <button className="w-full rounded-xl border border-line px-4 py-3 font-semibold">Needs changes</button>
           </form>
         </>
+      ) : null}
+      {card.status === "READY" && !card.scheduledAt ? (
+        <form action={sendForTouchUp} className="space-y-3 rounded-card border border-line bg-panel p-5">
+          <input type="hidden" name="id" value={card.id} />
+          <p className="text-sm text-mute">
+            Not quite right? Send it to your editor to polish. They drop the fixed video and it lands back in To
+            approve.
+          </p>
+          <textarea
+            name="editorNote"
+            placeholder="What to polish — trim the hook, tighten the end, fix captions…"
+            className="field min-h-20"
+            required
+          />
+          <button className="w-full rounded-xl border border-line px-4 py-3 font-semibold">Send to editor to polish</button>
+        </form>
       ) : null}
       <form action={scheduleCard} className="space-y-3 rounded-card border border-line bg-panel p-5">
         <input type="hidden" name="id" value={card.id} />

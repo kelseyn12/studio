@@ -139,6 +139,35 @@ export async function approveCut(formData: FormData) {
   redirect("/library");
 }
 
+export async function sendForTouchUp(formData: FormData) {
+  const user = await requireUser();
+  if (user.role === "EDITOR") redirect("/edits");
+  const id = String(formData.get("id"));
+  const card = await prisma.card.findUnique({ where: { id }, include: { assets: true } });
+  if (!card || !card.assets.some((asset) => asset.kind === "EDITED" || asset.kind === "GENERATED")) {
+    redirect(id ? `/cards/${id}?step=live` : "/");
+  }
+  const editorId =
+    String(formData.get("editorId") || "") ||
+    (await prisma.user.findFirst({ where: { defaultEditor: true, role: "EDITOR" } }))?.id;
+  if (!editorId) redirect(`/cards/${id}?step=live&polish=no-editor`);
+  const note = String(formData.get("editorNote") || "").trim();
+  await prisma.card.update({
+    where: { id },
+    data: { status: "EDITING", cutBy: "EDITOR", editorId, editorNote: note || card.editorNote },
+  });
+  try {
+    await pingStudio("editor", `Polish job: ${card.title}. Open Cuts.`);
+  } catch {
+    /* optional ping */
+  }
+  revalidatePath(`/cards/${id}`);
+  revalidatePath("/edits");
+  revalidatePath("/calendar");
+  revalidatePath("/");
+  redirect("/edits");
+}
+
 export async function togglePaid(formData: FormData) {
   const user = await requireUser();
   if (user.role === "EDITOR") return;
