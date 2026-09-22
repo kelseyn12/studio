@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import { BatchSettings } from "@/components/batch-settings";
 import { ClipTile } from "@/components/clip-tile";
 import { DropZone } from "@/components/drop-zone";
@@ -33,7 +33,7 @@ export default async function BatchPage({
     prisma.repurposeBatch.findMany({ orderBy: { createdAt: "desc" }, take: 8 }),
     canBurnText(),
   ]);
-  if (!batch) notFound();
+  if (!batch) redirect("/repurposer");
   const hooks = batch.clips.filter((clip) => clip.slot === "HOOK");
   const bodies = batch.clips.filter((clip) => clip.slot === "DEMO");
   const ctas = batch.clips.filter((clip) => clip.slot === "CTA");

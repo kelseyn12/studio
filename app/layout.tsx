@@ -5,6 +5,9 @@ import "./globals.css";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
 
+/** Every page reads the live database. Never bake a batch/video id in at build. */
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "System Studio",
   description: "The UGC production machine: content, deals, systems.",

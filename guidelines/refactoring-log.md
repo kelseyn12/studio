@@ -1,5 +1,5 @@
 # Refactoring log
-- 2026-09-21 — Spoken captions in Multiply + ffmpeg-full path so text actually burns on this Mac. Generate refuses text if drawtext is missing. Real ffmpeg test burns a hook onto a frame.
+- 2026-09-21 — Fly Multiply 404: Next baked `/repurposer` at build against an empty temp db and redirected to a phantom batch id. Root layout is now force-dynamic; missing batch ids bounce back to Multiply instead of 404.
 
 - 2026-09-21 — Background render for Multiply (progress bar, leave the page, Stuck?-Reset), remove team member (Team page, also deletes Clerk account), Set up Studio checklist on Today (empty DB made features invisible). Render loop moved to lib/render-batch.ts.
 - 2026-09-21 — Format scorecard on Numbers (Nickolai weekly review): posts, win rate (10k+ views = win), avg and best views per format. Format picker added to video brief and Multiply batch so results actually get tagged.
