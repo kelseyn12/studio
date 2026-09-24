@@ -8,3 +8,4 @@
 - `data/` local SQLite (CLI + fallback only — runtime uses Turso when TURSO_DATABASE_URL is set) and local upload fallback
 - `Dockerfile` + `fly.toml` public host (sleeps when idle). App: https://system-studio.fly.dev
 - `guidelines/` conventions, map, glossary, todo
+- `README.md` stack, local setup, route overview, deploy notes
