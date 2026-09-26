@@ -43,7 +43,7 @@ export async function canBurnText(): Promise<boolean> {
   return burnTextKnown;
 }
 
-function runCommand(cmd: string, args: string[]): Promise<string> {
+export function runCommand(cmd: string, args: string[]): Promise<string> {
   return new Promise((resolve, reject) => {
     const child = spawn(cmd, args, { stdio: "pipe" });
     let stdout = "";

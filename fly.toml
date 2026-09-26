@@ -11,6 +11,7 @@ primary_region = "ord"
 [env]
   NODE_ENV = "production"
   UPLOAD_ROOT = "/data/uploads"
+  STUDIO_FILE_MAX_MB = "250"
   DATABASE_URL = "file:/data/studio.db"
   HOOK_FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
   NEXT_PUBLIC_CLERK_SIGN_IN_URL = "/sign-in"

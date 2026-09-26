@@ -47,6 +47,10 @@
 - `sendBatchToEditor` — `app/repurposer/actions.ts` — sends every built, unscheduled video in a Multiply batch to the editor at once (EDITING, cutBy EDITOR, one ping). Used by BatchOutputs on the batch page.
 - `cardsToPolish` / `polishNote` — `lib/batch-polish.ts` — which batch outputs are still READY and unscheduled; note text tagged with the batch name. Tested in `lib/batch-polish.test.ts`.
 - `BatchOutputs` — `components/batch-outputs.tsx` — built-video list with per-video state (Ready / Scheduled / With editor) and the Send all to editor form.
+- `ingestClip` — `lib/ingest.ts` — stores a Multiply clip: `saveLocalUpload` → `videoSize` (ffprobe) → `shrinkClip` when the short side is over 1080 → `uploadLocalToR2`. Throws `UNREADABLE_CLIP` for non-video files. Used by `/api/repurpose/clips`.
+- `needsShrink` / `shrinkScaleFilter` / `parseVideoSize` — `lib/ingest.ts` — pure sizing helpers, tested in `lib/ingest.test.ts` (includes a real 4K→1080 shrink).
+- `saveLocalUpload` — `lib/files.ts` — writes an upload to the working folder only; `saveUpload` is now this plus `uploadLocalToR2`.
+- `fileMaxBytes` — `lib/storage.ts` — per-file cap from `STUDIO_FILE_MAX_MB` (1GB default, 250 on Fly). Feeds `STUDIO_FILE_MAX_BYTES`.
 - `pickFinished` — `lib/card-desk.ts` — the file that ships: newest EDITED first, else newest GENERATED. Used by queueCard and the video page.
 - `trimVideo` / `isValidCut` — `lib/ffmpeg.ts` — hand cut: re-encode one file down to a picked start/end window (min half a second). Used by `/api/trim`.
 - `QuickCut` — `components/quick-cut.tsx` — player with Start here / End here / Cut it. On Multiply clip tiles (replaces the clip) and on Live for finished videos (makes a new cut; newest ships).

@@ -4,7 +4,7 @@ import { EditorNeed } from "@/components/editor-need";
 import { PacketFiles } from "@/components/packet-files";
 import type { PacketItem } from "@/lib/editor-packet";
 import { publicFileUrl } from "@/lib/urls";
-import { STUDIO_FILE_MAX_BYTES } from "@/lib/storage";
+import { formatBytes, STUDIO_FILE_MAX_BYTES } from "@/lib/storage";
 
 export function CardEditorStage({
   card,
@@ -92,7 +92,7 @@ export function CardEditorStage({
         action="/api/assets"
         extra={{ id: card.id, kind: "EDITED" }}
         label="Drop the finished video"
-        hint="The export that posts. Under 250MB. Not a 4K day."
+        hint={`The export that posts. Under ${formatBytes(STUDIO_FILE_MAX_BYTES)}.`}
         accept="video/*"
         maxBytes={STUDIO_FILE_MAX_BYTES}
       />

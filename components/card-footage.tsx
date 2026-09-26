@@ -2,7 +2,7 @@ import { finishStage, updateCard } from "@/app/cards/[id]/actions";
 import { DropZone } from "@/components/drop-zone";
 import { VoiceBox } from "@/components/voice-box";
 import { REFERENCE_MAX_BYTES } from "@/lib/files";
-import { STUDIO_FILE_MAX_BYTES } from "@/lib/storage";
+import { formatBytes, STUDIO_FILE_MAX_BYTES } from "@/lib/storage";
 
 export function CardFootage({
   card,
@@ -60,7 +60,7 @@ export function CardFootage({
         action="/api/assets"
         extra={{ id: card.id, kind: "RAW" }}
         label="Upload small clips"
-        hint="Phone clips and stills under 250MB. Not a 4K day — that is the Drive link above."
+        hint={`Phone clips and stills under ${formatBytes(STUDIO_FILE_MAX_BYTES)}. A whole camera day is the Drive link above.`}
         accept="video/*,image/*,audio/*"
         maxBytes={STUDIO_FILE_MAX_BYTES}
       />

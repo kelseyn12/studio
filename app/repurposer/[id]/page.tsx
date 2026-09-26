@@ -6,7 +6,7 @@ import { ClipTile } from "@/components/clip-tile";
 import { DropZone } from "@/components/drop-zone";
 import { Shell } from "@/components/shell";
 import { REFERENCE_MAX_BYTES } from "@/lib/files";
-import { STUDIO_FILE_MAX_BYTES } from "@/lib/storage";
+import { formatBytes, STUDIO_FILE_MAX_BYTES } from "@/lib/storage";
 import { cardsToPolish } from "@/lib/batch-polish";
 import { isRendering } from "@/lib/render-batch";
 import { canBurnText } from "@/lib/ffmpeg";
@@ -262,7 +262,7 @@ function SlotBlock({
         label={`Add ${title.toLowerCase()}`}
         accept="video/*"
         maxBytes={STUDIO_FILE_MAX_BYTES}
-        hint="One take at a time, 4K is fine. Under 250MB (about 90 seconds of 4K)."
+        hint={`One take at a time. 4K is fine — it gets shrunk to 1080 on arrival. Under ${formatBytes(STUDIO_FILE_MAX_BYTES)}.`}
       />
     </div>
   );

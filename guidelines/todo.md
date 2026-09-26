@@ -122,6 +122,9 @@
 - [X] Background render with progress for big Multiply batches
   Generate returns immediately. Progress bar on the batch page. Run big batches on this Mac, not Fly (512MB).
 
+- [X] 4K phone clips into Multiply
+  Found and fixed: every upload over 10MB was 500ing (Next middleware body cap). Cap is now 1GB on the Mac, 250MB on Fly. 4K clips shrink to 1080 on arrival; non-video files are refused at upload.
+
 - [X] Send a whole Multiply batch to the editor
   "Send all to editor to polish" on the batch page moves every Ready, unscheduled output to Cuts with one note. Per-video state shown next to each output.
 

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { writeThumb } from "@/lib/ffmpeg";
-import { ensureLocal, saveUpload, uploadLocalToR2 } from "@/lib/files";
+import { ensureLocal, uploadLocalToR2 } from "@/lib/files";
+import { ingestClip, UNREADABLE_CLIP } from "@/lib/ingest";
 import { rejectStudioFile } from "@/lib/storage";
 import { hasR2 } from "@/lib/r2";
 import { prisma } from "@/lib/prisma";
@@ -22,7 +23,14 @@ export async function POST(request: Request) {
   }
   const blocked = rejectStudioFile(file.size, "RAW");
   if (blocked) return NextResponse.json({ error: blocked }, { status: 400 });
-  const saved = await saveUpload(file, `repurpose/${batchId}`);
+  let saved;
+  try {
+    saved = await ingestClip(file, `repurpose/${batchId}`);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "";
+    if (message === UNREADABLE_CLIP) return NextResponse.json({ error: message }, { status: 400 });
+    throw error;
+  }
   let thumbPath = "";
   try {
     const local = await ensureLocal(saved.path);

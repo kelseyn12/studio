@@ -11,27 +11,23 @@ export function localRoot(): string {
   return hasR2() ? path.join(os.tmpdir(), "studio-work") : UPLOAD_ROOT;
 }
 
-export async function saveUpload(file: File, folder: string): Promise<SavedFile> {
+export type LocalUpload = { relative: string; absolute: string; mime: string; size: number };
+
+/** Writes an upload to the working folder only (no R2). Ingest steps run on this before it is stored. */
+export async function saveLocalUpload(file: File, folder: string): Promise<LocalUpload> {
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-  const filename = `${randomUUID()}-${safeName}`;
-  const relative = path.join(folder, filename).replace(/\\/g, "/");
+  const relative = path.join(folder, `${randomUUID()}-${safeName}`).replace(/\\/g, "/");
+  const absolute = path.join(localRoot(), relative);
   const bytes = Buffer.from(await file.arrayBuffer());
-  const mime = file.type || "application/octet-stream";
-  let publicUrl = "";
-  if (hasR2()) {
-    publicUrl = await putR2(relative, bytes, mime);
-  } else {
-    const absolute = path.join(UPLOAD_ROOT, relative);
-    await mkdir(path.dirname(absolute), { recursive: true });
-    await writeFile(absolute, bytes);
-  }
-  return {
-    filename: file.name,
-    path: relative,
-    mime,
-    size: bytes.length,
-    publicUrl,
-  };
+  await mkdir(path.dirname(absolute), { recursive: true });
+  await writeFile(absolute, bytes);
+  return { relative, absolute, mime: file.type || mimeFromName(file.name), size: bytes.length };
+}
+
+export async function saveUpload(file: File, folder: string): Promise<SavedFile> {
+  const local = await saveLocalUpload(file, folder);
+  const publicUrl = await uploadLocalToR2(local.relative, local.mime);
+  return { filename: file.name, path: local.relative, mime: local.mime, size: local.size, publicUrl };
 }
 
 export async function uploadLocalToR2(relative: string, mime: string): Promise<string> {

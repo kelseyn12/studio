@@ -1,6 +1,14 @@
 import { REFERENCE_MAX_BYTES } from "@/lib/files";
 
-export const STUDIO_FILE_MAX_BYTES = 250 * 1024 * 1024;
+/** Per-file cap for phone clips and finished videos. 1GB on a Mac (4K phone clips
+ * land here and get shrunk to 1080 on arrival); fly.toml pins Fly to 250MB. */
+const DEFAULT_FILE_MAX_MB = 1024;
+export const STUDIO_FILE_MAX_BYTES = fileMaxBytes(process.env.STUDIO_FILE_MAX_MB);
+
+export function fileMaxBytes(configuredMb: string | undefined): number {
+  const mb = Number(configuredMb);
+  return (Number.isFinite(mb) && mb > 0 ? mb : DEFAULT_FILE_MAX_MB) * 1024 * 1024;
+}
 export const FREE_R2_BYTES = 10 * 1024 * 1024 * 1024;
 export const WARN_R2_BYTES = 8 * 1024 * 1024 * 1024;
 
@@ -33,7 +41,7 @@ export function rejectStudioFile(size: number, kind: string): string | null {
     return null;
   }
   if (size > STUDIO_FILE_MAX_BYTES) {
-    return "That file is a camera day. Paste a Drive folder on Clips. Studio only keeps phone clips and finished videos.";
+    return `That file is over ${formatBytes(STUDIO_FILE_MAX_BYTES)}. Cut it into shorter takes on your phone, or paste a Drive folder on Clips for a whole camera day.`;
   }
   return null;
 }
