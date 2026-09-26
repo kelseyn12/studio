@@ -36,4 +36,6 @@ ENV HOOK_FONT=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf
 ENV UPLOAD_ROOT=/data/uploads
 ENV DATABASE_URL=file:/data/studio.db
 
-CMD ["sh", "-c", "pnpm exec prisma db push --skip-generate && pnpm start"]
+# Turso is the database when TURSO_DATABASE_URL is set; schema changes there are applied by hand
+# (turso db shell). The local file push is only for a Turso-less deploy.
+CMD ["sh", "-c", "if [ -z \"$TURSO_DATABASE_URL\" ]; then pnpm exec prisma db push --skip-generate; fi && pnpm start"]
