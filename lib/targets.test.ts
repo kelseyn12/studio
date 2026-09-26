@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dealAccounts, describeTargets, networkShort, targetAccounts } from "@/lib/targets";
+import { dealAccounts, describeTargets, networkShort, parseAccountIds, targetAccounts } from "@/lib/targets";
 
 const accounts = [
   { id: "polsia-ig", network: "instagram", username: "polsia", isActive: true, campaignId: "polsia" },
@@ -33,6 +33,14 @@ describe("targetAccounts", () => {
       "me-ig",
     ]);
     expect(targetAccounts(accounts, { campaignId: "sitescout", accountId: null })).toEqual([]);
+  });
+
+  it("posts to every checked account when the deal has none assigned yet", () => {
+    const ids = targetAccounts(accounts, { campaignId: null, accountId: null, accountIds: "me-ig,polsia-ig" }).map(
+      (account) => account.id,
+    );
+    expect(ids).toEqual(["polsia-ig", "me-ig"]);
+    expect(parseAccountIds("a, b a")).toEqual(["a", "b"]);
   });
 
   it("describes targets short", () => {

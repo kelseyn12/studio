@@ -122,6 +122,7 @@ export async function renderBatch(input: {
               campaignId: batch.campaignId,
               formatId: batch.formatId,
               accountId,
+              accountIds: targets.map((target) => target.id).join(","),
               createdById: userId,
               hook: stripHighlight(hookLine),
               caption: batch.caption,

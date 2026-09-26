@@ -160,6 +160,7 @@ export default async function BatchPage({
           campaignId: batch.campaignId ?? "",
           formatId: batch.formatId ?? "",
           accountId: batch.accountId ?? "",
+          accountIds: batch.accountIds ?? "",
         }}
         textBurnWorks={textBurnWorks}
         campaigns={campaigns.map((campaign) => ({ id: campaign.id, name: campaign.name }))}

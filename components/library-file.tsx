@@ -3,7 +3,7 @@ import { deleteAsset } from "@/app/library/actions";
 import { StatusPill } from "@/components/status-pill";
 import { formatBytes } from "@/lib/storage";
 import type { PipelineStatus } from "@/lib/pipeline";
-import { publicFileUrl } from "@/lib/urls";
+import { watchUrl } from "@/lib/urls";
 
 export function LibraryFile({
   asset,
@@ -21,7 +21,7 @@ export function LibraryFile({
   };
   liveLabel?: string;
 }) {
-  const href = asset.publicUrl || publicFileUrl(asset.path);
+  const href = watchUrl(asset.path);
   const audio = asset.mime.startsWith("audio");
   const video = asset.mime.startsWith("video");
   return (

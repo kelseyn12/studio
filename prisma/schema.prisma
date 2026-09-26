@@ -142,6 +142,7 @@ model Card {
   format           Format?         @relation(fields: [formatId], references: [id], onDelete: SetNull)
   accountId        String?
   account          SocialAccount?  @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  accountIds       String          @default("")
   createdById      String?
   createdBy        User?           @relation("CreatedCards", fields: [createdById], references: [id], onDelete: SetNull)
   editorId         String?
@@ -254,6 +255,7 @@ model RepurposeBatch {
   caption     String           @default("")
   campaignId  String?
   accountId   String?
+  accountIds  String           @default("")
   createdAt   DateTime         @default(now())
   clips       RepurposeClip[]
   tracks      RepurposeTrack[]

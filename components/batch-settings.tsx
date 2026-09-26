@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { Slider, Toggle } from "@/components/batch-controls";
 import { BatchTargets, Row, type BatchAccount } from "@/components/batch-targets";
 import { TextStylePick } from "@/components/text-style-pick";
-import { dealAccounts } from "@/lib/targets";
+import { dealAccounts, parseAccountIds } from "@/lib/targets";
 import { hookLooks, parseTextStyle, type TextStyle } from "@/lib/text-style";
 import { LIST_MAX, outputCount, parseHookLines, plannedMixes, variationFor } from "@/lib/variations";
 
@@ -47,6 +47,7 @@ export function BatchSettings({
     campaignId: string;
     formatId: string;
     accountId: string;
+    accountIds: string;
   };
   campaigns: Option[];
   formats: Array<{ id: string; name: string; campaignId: string }>;
@@ -66,13 +67,15 @@ export function BatchSettings({
   const [listCount, setListCount] = useState(defaults.listCount);
   const [hookLines, setHookLines] = useState(defaults.hookLines);
   const [campaignId, setCampaignId] = useState(defaults.campaignId);
-  const [accountId, setAccountId] = useState(defaults.accountId);
+  const [accountIds, setAccountIds] = useState(() => {
+    const saved = parseAccountIds(defaults.accountIds);
+    return saved.length ? saved : parseAccountIds(defaults.accountId);
+  });
   const [textStyle, setTextStyle] = useState<TextStyle>(parseTextStyle(defaults.textStyle));
   const targetNetworks = (() => {
     const fromDeal = dealAccounts(accounts, campaignId);
     if (fromDeal.length > 0) return fromDeal.map((account) => account.network);
-    const picked = accounts.find((account) => account.id === accountId);
-    return picked ? [picked.network] : [];
+    return accounts.filter((account) => accountIds.includes(account.id)).map((account) => account.network);
   })();
   const textCount = useMemo(() => parseHookLines(hookLines).length, [hookLines]);
   const mixes = useMemo(
@@ -246,8 +249,8 @@ export function BatchSettings({
             campaignId={campaignId}
             onCampaignChange={setCampaignId}
             formatId={defaults.formatId}
-            accountId={accountId}
-            onAccountChange={setAccountId}
+            accountIds={accountIds}
+            onAccountIdsChange={setAccountIds}
           />
         </div>
         <p className="mt-5 text-sm text-mute">Copy 2 preview: {preview.label}</p>

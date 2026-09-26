@@ -11,7 +11,7 @@ export type BatchAccount = {
   campaignId: string | null;
 };
 
-/** Deal · Format · Account rows on Mix settings. A deal with accounts posts to all of them, so no single pick. */
+/** Deal · Format · Account rows on Mix settings. A deal with accounts posts to all of them. */
 export function BatchTargets({
   campaigns,
   formats,
@@ -19,8 +19,8 @@ export function BatchTargets({
   campaignId,
   onCampaignChange,
   formatId,
-  accountId,
-  onAccountChange,
+  accountIds,
+  onAccountIdsChange,
 }: {
   campaigns: Array<{ id: string; name: string }>;
   formats: Array<{ id: string; name: string; campaignId: string }>;
@@ -28,8 +28,8 @@ export function BatchTargets({
   campaignId: string;
   onCampaignChange: (next: string) => void;
   formatId: string;
-  accountId: string;
-  onAccountChange: (next: string) => void;
+  accountIds: string[];
+  onAccountIdsChange: (next: string[]) => void;
 }) {
   const dealFormats = formats.filter((format) => format.campaignId === campaignId);
   const targets = dealAccounts(accounts, campaignId);
@@ -67,24 +67,35 @@ export function BatchTargets({
           <p className="max-w-xs text-right text-sm">{describeTargets(targets)}</p>
         </Row>
       ) : (
-        <Row label="Account">
-          <select
-            name="accountId"
-            value={accountId}
-            onChange={(event) => onAccountChange(event.target.value)}
-            className="field max-w-xs"
-            required
-          >
-            <option value="" disabled>
-              Required — which account
-            </option>
-            {accounts.map((account) => (
-              <option key={account.id} value={account.id}>
-                {account.name}
-              </option>
-            ))}
-          </select>
-        </Row>
+        <div className="border-t border-line pt-4">
+          <p className="text-sm">Accounts this batch posts to</p>
+          <p className="mt-1 text-xs text-mute">
+            Check every app this should go to — IG and TikTok both, if that is the plan. Or put those accounts on this
+            deal in Accounts and we fill this in.
+          </p>
+          <div className="mt-3 space-y-2">
+            {accounts.map((account) => {
+              const on = accountIds.includes(account.id);
+              return (
+                <label key={account.id} className="flex items-center gap-3 text-sm">
+                  <input
+                    type="checkbox"
+                    name="accountIds"
+                    value={account.id}
+                    checked={on}
+                    onChange={() =>
+                      onAccountIdsChange(on ? accountIds.filter((id) => id !== account.id) : [...accountIds, account.id])
+                    }
+                  />
+                  <span>
+                    {account.name || `@${account.username}`}
+                    <span className="text-mute"> · {account.network}</span>
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+        </div>
       )}
     </>
   );

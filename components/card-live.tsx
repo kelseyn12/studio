@@ -4,7 +4,7 @@ import { QuickCut } from "@/components/quick-cut";
 import { toInputDateTime } from "@/lib/dates";
 import { formatMoney } from "@/lib/deals";
 import { dealAccounts, describeTargets } from "@/lib/targets";
-import { publicFileUrl } from "@/lib/urls";
+import { watchUrl } from "@/lib/urls";
 
 export function CardLive({
   card,
@@ -18,6 +18,7 @@ export function CardLive({
     editorNote: string;
     scheduledAt: Date | null;
     accountId: string | null;
+    accountIds?: string;
     campaignId: string | null;
     account: { username: string } | null;
     approved: boolean;
@@ -44,7 +45,7 @@ export function CardLive({
   return (
     <div className="space-y-3">
       <a
-        href={edited.publicUrl || publicFileUrl(edited.path)}
+        href={watchUrl(edited.path)}
         className="block rounded-xl border border-line px-4 py-3 text-center"
       >
         Watch {edited.filename}
@@ -54,7 +55,7 @@ export function CardLive({
           <summary className="cursor-pointer text-sm font-semibold">Quick cut — trim the start or end</summary>
           <div className="mt-3">
             <QuickCut
-              src={edited.publicUrl || publicFileUrl(edited.path)}
+              src={watchUrl(edited.path)}
               target="asset"
               id={edited.id}
               note="Makes a new cut of this video. The newest cut is the one that ships."
@@ -127,14 +128,27 @@ export function CardLive({
           required
         />
         {dealTargets.length === 0 ? (
-          <select name="accountId" defaultValue={card.accountId ?? ""} className="field" required>
-            <option value="">Which account</option>
+          <div className="space-y-2">
+            <p className="text-xs text-mute">Check every account this video should post to.</p>
             {accounts.map((account) => (
-              <option key={account.id} value={account.id}>
-                {account.nickname ? `${account.nickname} · ` : ""}@{account.username}
-              </option>
+              <label key={account.id} className="flex items-center gap-3 text-sm">
+                <input
+                  type="checkbox"
+                  name="accountIds"
+                  value={account.id}
+                  defaultChecked={
+                    card.accountIds
+                      ? card.accountIds.split(",").includes(account.id)
+                      : card.accountId === account.id
+                  }
+                />
+                <span>
+                  {account.nickname ? `${account.nickname} · ` : ""}@{account.username}
+                  <span className="text-mute"> · {account.network}</span>
+                </span>
+              </label>
             ))}
-          </select>
+          </div>
         ) : null}
         <button className="w-full rounded-xl border border-line px-4 py-3 font-semibold">Schedule</button>
       </form>

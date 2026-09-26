@@ -154,14 +154,18 @@ export async function scheduleCard(formData: FormData) {
   await requireUser();
   const id = String(formData.get("id"));
   const when = formData.get("scheduledAt") ? new Date(String(formData.get("scheduledAt"))) : new Date();
-  const accountId = String(formData.get("accountId") || "") || null;
+  const accountIds = formData.getAll("accountIds").map(String).filter(Boolean);
+  const accountId = accountIds[0] || String(formData.get("accountId") || "") || null;
   if (formData.has("caption")) {
     await prisma.card.update({
       where: { id },
-      data: { caption: String(formData.get("caption") || "") },
+      data: {
+        caption: String(formData.get("caption") || ""),
+        ...(accountIds.length ? { accountIds: accountIds.join(","), accountId } : {}),
+      },
     });
   }
-  const result = await queueCard(id, when, accountId);
+  const result = await queueCard(id, when, accountIds.length ? accountIds : accountId);
   try {
     await pingStudio("creator", `Scheduled: ${id}`);
   } catch {

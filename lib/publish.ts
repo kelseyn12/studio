@@ -2,6 +2,7 @@ import { postedAtFromPost, createPost, hasOutstand, uploadMedia, type OutstandPo
 import { pickFinished, pickForLook } from "@/lib/card-desk";
 import { ensureLocal } from "@/lib/files";
 import { prisma } from "@/lib/prisma";
+import { isPublicMediaUrl } from "@/lib/r2";
 import { targetAccounts, targetsByLook } from "@/lib/targets";
 import type { Asset, CardStatus, SocialAccount } from "@prisma/client";
 
@@ -25,7 +26,7 @@ export function parkWrite(input: {
 
 /** Makes sure Outstand can fetch this file; caches the URL on the asset. */
 async function shippableUrl(asset: Asset): Promise<string> {
-  if (asset.publicUrl) return asset.publicUrl;
+  if (isPublicMediaUrl(asset.publicUrl)) return asset.publicUrl;
   const uploaded = await uploadMedia(await ensureLocal(asset.path), asset.filename || "video.mp4", asset.mime || "video/mp4");
   await prisma.asset.update({ where: { id: asset.id }, data: { publicUrl: uploaded.url } });
   return uploaded.url;
@@ -35,7 +36,7 @@ async function shippableUrl(asset: Asset): Promise<string> {
  * Schedules a video. Deal videos go to every account on the deal; when the deal spans app looks
  * (IG + TT), each look's file ships to its own accounts as its own Outstand post.
  */
-export async function queueCard(cardId: string, when: Date, accountId?: string | null): Promise<QueueResult> {
+export async function queueCard(cardId: string, when: Date, accountId?: string | string[] | null): Promise<QueueResult> {
   const card = await prisma.card.findUnique({ where: { id: cardId }, include: { assets: true } });
   if (!card) return { ok: false, error: "Missing card", scheduled: false };
   const targets = targetAccounts(await prisma.socialAccount.findMany(), card, accountId);

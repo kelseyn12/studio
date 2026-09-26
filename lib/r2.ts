@@ -28,9 +28,23 @@ function client(): S3Client {
   });
 }
 
+/** True when a stored URL is something a browser or Outstand can GET without S3 signing. */
+export function isPublicMediaUrl(url: string | null | undefined): boolean {
+  if (!url) return false;
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return false;
+    if (parsed.hostname.endsWith("r2.cloudflarestorage.com")) return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function r2PublicUrl(key: string): string {
   const base = (process.env.R2_PUBLIC_URL || "").replace(/\/$/, "");
-  return base ? `${base}/${key}` : "";
+  if (!base || base.includes("r2.cloudflarestorage.com")) return "";
+  return `${base}/${key}`;
 }
 
 export async function putR2(key: string, bytes: Buffer, mime: string): Promise<string> {

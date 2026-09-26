@@ -1,4 +1,4 @@
-import { publicFileUrl } from "@/lib/urls";
+import { watchUrl } from "@/lib/urls";
 
 export function PacketFiles({
   rawsUrl,
@@ -23,7 +23,7 @@ export function PacketFiles({
         packet.map((file) => (
           <a
             key={file.id}
-            href={file.publicUrl || publicFileUrl(file.path)}
+            href={watchUrl(file.path)}
             download={file.filename}
             className="flex items-center justify-between rounded-xl bg-lift px-3 py-2 text-sm"
           >

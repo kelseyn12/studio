@@ -53,7 +53,8 @@
 - `targetsByLook` — `lib/targets.ts` — groups a video's target accounts by app look so each look's file posts to its own accounts. Used by `queueCard`.
 - `pickForLook` — `lib/card-desk.ts` — file to ship for one look: newest EDITED, else GENERATED built in that look, else `pickFinished`.
 - `postIdsFor` — `lib/analytics.ts` — distinct Outstand post ids behind a video (card + publish jobs); analytics sync sums them.
-- `targetAccounts` / `dealAccounts` / `describeTargets` / `networkShort` — `lib/targets.ts` — which accounts a video posts to: all active accounts on its deal, else the picked one. Used by `queueCard`, `renderBatch`, Multiply generate guard, CardLive, BatchTargets, deal page. Tested in `lib/targets.test.ts`.
+- `targetAccounts` / `dealAccounts` / `parseAccountIds` / `describeTargets` / `networkShort` — `lib/targets.ts` — which accounts a video posts to: all active accounts on its deal, else every checked id (`accountIds`). Used by `queueCard`, `renderBatch`, Multiply generate guard, CardLive, BatchTargets. Tested in `lib/targets.test.ts`.
+- `watchUrl` / `isPublicMediaUrl` — `lib/urls.ts` / `lib/r2.ts` — in-app play/download always goes through `/api/files`. S3 API hosts (`*.r2.cloudflarestorage.com`) are not treated as public.
 - `saveAccount` — `app/connections/actions.ts` — saves an account's label and deal (was `renameAccount`).
 - `BatchTargets` — `components/batch-targets.tsx` — Deal · Format · Posts-to/Account rows on Mix settings; also exports `Row`.
 - `textStyleForNetworks` — `lib/text-style.ts` — one look for a set of networks (all TikTok → tiktok, all Meta → instagram, mixed → tiktok).

@@ -137,6 +137,12 @@
 - [X] Full-app audit (Sep 26)
   Owner + editor page sweep, API auth probes, real-clip render with the new options, lint clean, ffmpeg.ts split. Nothing broken found.
 
+- [X] Watch uses Studio files, not the R2 S3 URL
+  Clicking Watch opened `*.r2.cloudflarestorage.com` and showed an empty XML error. Players and Download now use `/api/files`.
+
+- [X] Check multiple accounts on Multiply / Live
+  Cross-post without assigning the deal first: check IG + TT (or put them on the deal in Accounts).
+
 - [X] Color wash removed
   The fake full-frame tint looked plastic. Colored rooms come from an LED at filming. Mix settings no longer has a wash slider. Starred words and the numbered list stay.
 

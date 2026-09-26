@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { localRoot, UPLOAD_ROOT } from "@/lib/files";
-import { hasR2, r2PublicUrl } from "@/lib/r2";
+import { hasR2, isPublicMediaUrl, r2PublicUrl } from "@/lib/r2";
 
 const R2_KEYS = [
   "R2_ACCOUNT_ID",
@@ -43,6 +43,16 @@ describe("r2", () => {
     const previous = process.env.R2_PUBLIC_URL;
     process.env.R2_PUBLIC_URL = "https://files.example.com/";
     expect(r2PublicUrl("cards/a.mp4")).toBe("https://files.example.com/cards/a.mp4");
+    if (previous === undefined) delete process.env.R2_PUBLIC_URL;
+    else process.env.R2_PUBLIC_URL = previous;
+  });
+
+  it("refuses the S3 API host as a public watch URL", () => {
+    const previous = process.env.R2_PUBLIC_URL;
+    process.env.R2_PUBLIC_URL = "https://acct.r2.cloudflarestorage.com";
+    expect(r2PublicUrl("generated/a.mp4")).toBe("");
+    expect(isPublicMediaUrl("https://acct.r2.cloudflarestorage.com/generated/a.mp4")).toBe(false);
+    expect(isPublicMediaUrl("https://files.example.com/generated/a.mp4")).toBe(true);
     if (previous === undefined) delete process.env.R2_PUBLIC_URL;
     else process.env.R2_PUBLIC_URL = previous;
   });

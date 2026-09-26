@@ -43,7 +43,12 @@ export async function POST(
         caption: String(form.get("caption") || ""),
         campaignId: String(form.get("campaignId") || "") || null,
         formatId: String(form.get("formatId") || "") || null,
-        accountId: String(form.get("accountId") || "") || null,
+        accountId: String(form.getAll("accountIds")[0] || form.get("accountId") || "") || null,
+        accountIds: form
+          .getAll("accountIds")
+          .map(String)
+          .filter(Boolean)
+          .join(","),
       },
     });
   }
@@ -65,7 +70,7 @@ export async function POST(
   const targets = targetAccounts(await prisma.socialAccount.findMany(), batch);
   if (targets.length === 0) {
     return NextResponse.json(
-      { error: "Pick an account, or put accounts on this deal in Accounts, so these post to the right @" },
+      { error: "Check the accounts this should post to, or put them on this deal in Accounts." },
       { status: 400 },
     );
   }

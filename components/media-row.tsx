@@ -1,11 +1,10 @@
-import { publicFileUrl } from "@/lib/urls";
+import { watchUrl } from "@/lib/urls";
 
 export function MediaRow({
   kind,
   filename,
   path,
   mime,
-  publicUrl,
 }: {
   kind: string;
   filename: string;
@@ -13,7 +12,7 @@ export function MediaRow({
   mime: string;
   publicUrl?: string;
 }) {
-  const href = publicUrl || publicFileUrl(path);
+  const href = watchUrl(path);
   const audio = mime.startsWith("audio") || filename.endsWith(".webm") || filename.endsWith(".mp3");
   const video = mime.startsWith("video") || filename.endsWith(".mp4") || filename.endsWith(".mov");
   return (

@@ -23,17 +23,27 @@ export function dealAccounts<T extends { isActive: boolean; campaignId: string |
   return accounts.filter((account) => account.isActive && account.campaignId === campaignId);
 }
 
-/** The accounts a video ships to: all of its deal's accounts, else the one picked. */
+/** Checkbox / form values → unique account ids. */
+export function parseAccountIds(raw: string | string[] | null | undefined): string[] {
+  const parts = Array.isArray(raw) ? raw : String(raw || "").split(/[\s,]+/);
+  return [...new Set(parts.map((part) => part.trim()).filter(Boolean))];
+}
+
+/** The accounts a video ships to: all of its deal's accounts, else every id checked on Mix / Live. */
 export function targetAccounts<T extends { id: string; isActive: boolean; campaignId: string | null }>(
   accounts: T[],
-  card: { campaignId: string | null; accountId: string | null },
-  pickedAccountId?: string | null,
+  card: { campaignId: string | null; accountId: string | null; accountIds?: string | null },
+  pickedAccountId?: string | string[] | null,
 ): T[] {
   const fromDeal = dealAccounts(accounts, card.campaignId);
   if (fromDeal.length > 0) return fromDeal;
-  const singleId = pickedAccountId || card.accountId;
-  const single = accounts.find((account) => account.id === singleId);
-  return single ? [single] : [];
+  const ids = [
+    ...parseAccountIds(pickedAccountId),
+    ...parseAccountIds(card.accountIds),
+    ...(card.accountId ? [card.accountId] : []),
+  ];
+  const wanted = new Set(ids);
+  return accounts.filter((account) => account.isActive && wanted.has(account.id));
 }
 
 /**

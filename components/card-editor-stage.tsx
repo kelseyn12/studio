@@ -3,7 +3,7 @@ import { DropZone } from "@/components/drop-zone";
 import { EditorNeed } from "@/components/editor-need";
 import { PacketFiles } from "@/components/packet-files";
 import type { PacketItem } from "@/lib/editor-packet";
-import { publicFileUrl } from "@/lib/urls";
+import { watchUrl } from "@/lib/urls";
 import { formatBytes, STUDIO_FILE_MAX_BYTES } from "@/lib/storage";
 
 export function CardEditorStage({
@@ -104,7 +104,7 @@ export function CardEditorStage({
       </form>
       {edited ? (
         <a
-          href={edited.publicUrl || publicFileUrl(edited.path)}
+          href={watchUrl(edited.path)}
           className="block rounded-xl bg-sun px-4 py-3 text-center font-semibold text-ink"
         >
           Open the finished video
