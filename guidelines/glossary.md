@@ -1,5 +1,7 @@
 # Glossary
 
+- `isStalePosted` / `supersededGeneratedIds` / `staleFinishedIds` / `batchClipsAreStale` — `lib/keep.ts` — what files a volume studio can drop. Tested in `lib/keep.test.ts`.
+- `dropSuperseded` / `sweepStale` — `lib/sweep.ts` — deletes those files from R2 and the rows. Editor cut calls `dropSuperseded`; Library Free space runs `sweepStale`.
 - `pickNextAction` — `lib/next-action.ts` — chooses the single Today action. Used on `app/page.tsx`.
 - `machineCounts` — `lib/queries.ts` — pipeline and slot totals for Today.
 - `uploadMedia` — `lib/outstand.ts` — PUT the mp4 into Outstand storage, returns the public URL.

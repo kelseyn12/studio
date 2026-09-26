@@ -63,7 +63,7 @@ export function ClipTile({
       {showHook ? (
         <input
           defaultValue={hookText}
-          placeholder="Hook text"
+          placeholder="Words on this clip — what you say"
           className="field mt-2 px-2 py-1 text-xs"
           onBlur={(event) => saveHook(event.target.value)}
         />

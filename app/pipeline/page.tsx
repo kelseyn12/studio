@@ -12,22 +12,37 @@ export default async function PipelinePage({
   const params = await searchParams;
   const filter = params.status && isPipelineStatus(params.status) ? params.status : undefined;
   const cards = await prisma.card.findMany({
-    where: filter ? { status: filter } : undefined,
+    where: filter
+      ? { status: filter }
+      : { status: { notIn: ["POSTED", "DATA"] } },
     include: { campaign: true, format: true },
     orderBy: { updatedAt: "desc" },
   });
-  const columns = filter ? [filter] : PIPELINE_STATUSES;
+  const columns = filter ? [filter] : PIPELINE_STATUSES.filter((status) => status !== "POSTED" && status !== "DATA");
 
   return (
     <Shell>
       <div className="mb-6 flex items-end justify-between">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">Pipeline</h1>
-          <p className="mt-1 text-mute">Idea → script → film → edit → review → ready → posted → data.</p>
+          <p className="mt-1 text-mute">
+            Work in progress. Posted videos stay on Live and Numbers so this board does not fill up.
+          </p>
         </div>
-        <Link href="/cards/new" className="rounded-xl bg-sun px-4 py-2 text-sm font-semibold text-ink">
-          New video
-        </Link>
+        <div className="flex gap-2">
+          {filter ? (
+            <Link href="/pipeline" className="rounded-xl border border-line px-4 py-2 text-sm">
+              Working
+            </Link>
+          ) : (
+            <Link href="/pipeline?status=POSTED" className="rounded-xl border border-line px-4 py-2 text-sm">
+              Posted
+            </Link>
+          )}
+          <Link href="/cards/new" className="rounded-xl bg-sun px-4 py-2 text-sm font-semibold text-ink">
+            New video
+          </Link>
+        </div>
       </div>
       <div className="flex gap-3 overflow-x-auto pb-4">
         {columns.map((status) => {

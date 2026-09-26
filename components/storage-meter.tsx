@@ -26,10 +26,10 @@ export function StorageMeter({
       </div>
       <p className="mt-2 text-sm text-mute">
         {usage.full
-          ? "Full. Delete clips in Library before you add more."
+          ? "Over the free 10 GB. Paying for more R2 is fine — or Free space in Library."
           : usage.hot
-            ? "Close to the free slice. Library is where you delete."
-            : "Phone clips and finished videos only. 4K days stay in Drive."}
+            ? "Near the free 10 GB. Posted files drop after 14 days, or Free space in Library."
+            : "Working files only. Posted videos drop after 14 days. Paying past 10 GB is fine."}
       </p>
     </Link>
   );

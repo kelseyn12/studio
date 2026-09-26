@@ -122,6 +122,9 @@
 - [X] Background render with progress for big Multiply batches
   Generate returns immediately. Progress bar on the batch page. Run big batches on this Mac, not Fly (512MB).
 
+- [X] Volume without bloat
+  Editor cut drops the unused Multiply looks immediately. Posted files (and unused batch clips) drop after 14 days; the video and its numbers stay. Pipeline hides Posted/Data. Library has Free space. Paying past 10 GB R2 is fine.
+
 - [X] Cross-post per deal
   Each account gets a deal on Accounts. Deal videos post to every account on the deal (Polsia → IG + FB, Morphi → IG + TT + YT + FB). Multiply no longer needs a single account when the deal has some.
 

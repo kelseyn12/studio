@@ -1,4 +1,5 @@
-import { deletePostedRaws } from "@/app/library/actions";
+import { deletePostedRaws, freeSpace } from "@/app/library/actions";
+import { KEEP_FILE_DAYS } from "@/lib/keep";
 import { LibraryDeals } from "@/components/library-deals";
 import { LibraryFile } from "@/components/library-file";
 import { Shell } from "@/components/shell";
@@ -29,10 +30,16 @@ export default async function LibraryPage() {
     <Shell>
       <h1 className="text-3xl font-semibold tracking-tight">Library</h1>
       <p className="mt-2 mb-6 max-w-2xl text-mute">
-        Finished videos are grouped by deal. Watch, keep, or delete. 4K days stay in Drive.
+        Finished videos are grouped by deal. Posted files drop after {KEEP_FILE_DAYS} days — the video and its numbers
+        stay. 4K days stay in Drive.
       </p>
-      <div className="mb-8 max-w-xl">
+      <div className="mb-8 max-w-xl space-y-3">
         <StorageMeter bytes={totals} r2={hasR2()} />
+        <form action={freeSpace}>
+          <button className="rounded-xl border border-line px-4 py-2 text-sm">
+            Free space — drop posted files older than {KEEP_FILE_DAYS} days
+          </button>
+        </form>
       </div>
       <section className="mb-10">
         <h2 className="mb-3 text-lg font-semibold">Finished</h2>

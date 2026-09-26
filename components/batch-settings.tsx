@@ -113,8 +113,8 @@ export function BatchSettings({
       <section className="rounded-card border border-line bg-panel p-5">
         <p className="label">Text hooks · optional</p>
         <p className="mt-2 text-sm text-mute">
-          One line per hook. Each line is drawn onto the first clip in that app&apos;s own text look and multiplies the
-          batch. 6 mixes × 4 lines = 24 videos. Long lines wrap. Leave empty to skip.
+          Lines that go on every mix — each line makes another set of videos. 6 mixes × 4 lines = 24 videos. Leave
+          empty and each hook clip keeps the words typed on it above, which do not multiply.
         </p>
         <textarea
           name="hookLines"

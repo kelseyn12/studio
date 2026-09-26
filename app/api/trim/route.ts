@@ -7,6 +7,7 @@ import { hasR2 } from "@/lib/r2";
 import { prisma } from "@/lib/prisma";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
 import { readSession } from "@/lib/session";
+import { dropSuperseded } from "@/lib/sweep";
 
 export const maxDuration = 120;
 
@@ -71,6 +72,7 @@ export async function POST(request: Request) {
           publicUrl,
         },
       });
+      await dropSuperseded(asset.cardId);
       return NextResponse.json({ ok: true });
     }
 

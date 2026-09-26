@@ -90,7 +90,7 @@ export default async function BatchPage({
             slot="HOOK"
             title="Hooks"
             meta={`${hooks.length} options · first clip · one picked per video`}
-            hint="Openings. Drop every hook take here."
+            hint="Openings. Words on a clip match that take. Lines in Text hooks below go on every mix."
             clips={hooks}
             showHook
             hookText={winningHook}
