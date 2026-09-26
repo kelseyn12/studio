@@ -34,6 +34,8 @@ describe("hookLooks", () => {
     expect(hookLooks("auto", ["instagram", "tiktok"], false)).toEqual(["tiktok"]);
     expect(hookLooks("auto", ["instagram", "facebook"], true)).toEqual(["instagram"]);
     expect(hookLooks("tiktok", ["instagram", "tiktok"], true)).toEqual(["tiktok"]);
+    expect(hookLooks("both", ["facebook"], true)).toEqual(["instagram", "tiktok"]);
+    expect(hookLooks("both", ["tiktok"], false)).toEqual(["tiktok"]);
     expect(hookLooks("auto", [], true)).toEqual(["plain"]);
   });
 });

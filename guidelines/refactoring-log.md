@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-09-26 — Text look gained an explicit "Both looks (TikTok + Instagram)" choice so a batch can make two files without relying on "Match the accounts" + deal accounts.
 - 2026-09-26 — Removed the color-wash slider (`tintAmt` / `tintFilter`). Colored rooms come from an LED at filming. Starred words and the numbered list stay.
 - 2026-09-26 — Full-app audit: every page checked signed-in as owner (all 200) and editor (locked to Edits + own videos), every API bounces without a session, editor blocked from owner APIs. Multiply rendered end to end on real clips with starred word + list + wash in both looks. Trim/dead-air code moved from lib/ffmpeg.ts (was 391 lines) into lib/trim.ts; `ClipTrim`/`NO_TRIM` stay in ffmpeg.ts as the assemble contract. Cleared all lint warnings.
 - 2026-09-26 — Fly startup no longer runs `prisma db push` against the stale /data/studio.db when Turso is set (it crash-looped on the tintOn→tintAmt rename asking for --accept-data-loss). Turso schema changes stay manual via `turso db shell`.

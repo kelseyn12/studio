@@ -43,6 +43,7 @@ describe("text style choice", () => {
 
   it("falls back to auto for junk", () => {
     expect(parseTextStyle("tiktok")).toBe("tiktok");
+    expect(parseTextStyle("both")).toBe("both");
     expect(parseTextStyle("neon")).toBe("auto");
     expect(parseTextStyle(null)).toBe("auto");
   });

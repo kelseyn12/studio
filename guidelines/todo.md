@@ -132,7 +132,7 @@
   A deal on IG + TT gets each video built twice — Instagram look and TikTok look — and each file posts to its own accounts as its own Outstand post. Editor cuts ship everywhere as-is. Numbers sums the posts.
 
 - [X] Text hooks in the platform's own look
-  Text look on Mix settings: TikTok / Instagram / Plain, default follows the account. Hooks wrap to two lines. Nickolai/Sasha style stays burned in; native in-app text is not possible through scheduling.
+  Text look on Mix settings: Match the accounts, Both looks, TikTok only, Instagram only, Plain. Both (or auto on an IG+TT deal) builds two files. Hooks wrap to two lines. Native in-app text is not possible through scheduling.
 
 - [X] Full-app audit (Sep 26)
   Owner + editor page sweep, API auth probes, real-clip render with the new options, lint clean, ffmpeg.ts split. Nothing broken found.

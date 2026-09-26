@@ -4,14 +4,15 @@
  * app's safe zone (clear of the header at the top, the caption block at the bottom and the icon
  * column on the right). "auto" follows the account the batch posts to.
  */
-export const TEXT_STYLES = ["auto", "tiktok", "instagram", "plain"] as const;
+export const TEXT_STYLES = ["auto", "both", "tiktok", "instagram", "plain"] as const;
 export type TextStyle = (typeof TEXT_STYLES)[number];
-export type DrawnStyle = Exclude<TextStyle, "auto">;
+export type DrawnStyle = Exclude<TextStyle, "auto" | "both">;
 
 export const TEXT_STYLE_LABEL: Record<TextStyle, string> = {
-  auto: "Match the account",
-  tiktok: "TikTok text",
-  instagram: "Instagram text",
+  auto: "Match the accounts",
+  both: "Both looks (TikTok + Instagram)",
+  tiktok: "TikTok text only",
+  instagram: "Instagram text only",
   plain: "Plain bold",
 };
 
@@ -52,7 +53,7 @@ export function textStyleForNetworks(networks: string[]): DrawnStyle {
 }
 
 export function resolveTextStyle(style: TextStyle, networks: string | string[] | null | undefined): DrawnStyle {
-  if (style !== "auto") return style;
+  if (style === "tiktok" || style === "instagram" || style === "plain") return style;
   return Array.isArray(networks) ? textStyleForNetworks(networks) : textStyleForNetwork(networks);
 }
 
@@ -75,12 +76,13 @@ export function wrapHook(text: string): string[] {
 }
 
 /**
- * Which looks to render for one Multiply output. With text on the video and "auto" on a deal that
- * spans looks, every look gets its own file. Without text the look does not matter, so one file.
+ * Which looks to render for one Multiply output. "both" always makes two files. "auto" does the same
+ * when the deal spans Instagram and TikTok. Without text the look does not matter, so one file.
  */
 export function hookLooks(style: string, networks: string[], hasText: boolean): DrawnStyle[] {
   const parsed = parseTextStyle(style);
   if (!hasText) return [resolveTextStyle(parsed, networks)];
+  if (parsed === "both") return ["instagram", "tiktok"];
   if (parsed !== "auto") return [parsed];
   const looks = looksForNetworks(networks);
   return looks.length > 0 ? looks : ["plain"];

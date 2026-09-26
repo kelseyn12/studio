@@ -1,8 +1,15 @@
 "use client";
 
-import { looksForNetworks, TEXT_STYLE_LABEL, TEXT_STYLES, textStyleForNetworks, type TextStyle } from "@/lib/text-style";
+import {
+  looksForNetworks,
+  TEXT_STYLE_LABEL,
+  TEXT_STYLES,
+  textStyleForNetworks,
+  type DrawnStyle,
+  type TextStyle,
+} from "@/lib/text-style";
 
-const LOOK_NOTE: Record<Exclude<TextStyle, "auto">, string> = {
+const LOOK_NOTE: Record<DrawnStyle, string> = {
   tiktok: "chunky white with a soft shadow, like TikTok's text tool",
   instagram: "each line on a dark box, like Instagram's Modern text",
   plain: "bold white with a black outline",
@@ -18,14 +25,16 @@ export function TextStylePick({
   onChange: (next: TextStyle) => void;
   networks: string[];
 }) {
-  const drawn = value === "auto" ? textStyleForNetworks(networks) : value;
-  const mixed = value === "auto" && looksForNetworks(networks).length > 1;
+  const drawn = value === "auto" || value === "both" ? textStyleForNetworks(networks) : value;
+  const mixed = value === "both" || (value === "auto" && looksForNetworks(networks).length > 1);
   const note =
-    value === "auto" && networks.length === 0
-      ? "Pick a deal or account below and the text takes that app's look."
-      : mixed
-        ? "Cross-posting: every video is built twice — Instagram look for IG/FB, TikTok look for TT/YT — and each posts to its own accounts."
-        : `Looks like: ${LOOK_NOTE[drawn]}.`;
+    value === "both"
+      ? "Every video is built twice — Instagram look for IG/FB, TikTok look for TT/YT — and each posts to its own accounts."
+      : value === "auto" && networks.length === 0
+        ? "Pick a deal or account below and the text takes that app's look. Choose Both if you need TikTok and Instagram files either way."
+        : mixed
+          ? "This deal has Instagram and TikTok, so every video is built twice — one file per look, each posts to its own accounts."
+          : `Looks like: ${LOOK_NOTE[drawn]}. Choose Both looks if you also need the other app.`;
   return (
     <div className="mt-3">
       <div className="flex flex-wrap items-center gap-3">

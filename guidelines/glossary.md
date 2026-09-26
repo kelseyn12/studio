@@ -49,7 +49,7 @@
 - `sendBatchToEditor` — `app/repurposer/actions.ts` — sends every built, unscheduled video in a Multiply batch to the editor at once (EDITING, cutBy EDITOR, one ping). Used by BatchOutputs on the batch page.
 - `cardsToPolish` / `polishNote` — `lib/batch-polish.ts` — which batch outputs are still READY and unscheduled; note text tagged with the batch name. Tested in `lib/batch-polish.test.ts`.
 - `BatchOutputs` — `components/batch-outputs.tsx` — built-video list with per-video state (Ready / Scheduled / With editor) and the Send all to editor form.
-- `hookLooks` / `looksForNetworks` — `lib/text-style.ts` — which looks to render for one Multiply output / distinct looks a set of accounts needs. Tested in `lib/card-desk-look.test.ts` and `lib/text-style.test.ts`.
+- `hookLooks` / `looksForNetworks` — `lib/text-style.ts` — which looks to render for one Multiply output (`both` always Instagram + TikTok; `auto` does the same when the deal spans those looks) / distinct looks a set of accounts needs. Tested in `lib/card-desk-look.test.ts` and `lib/text-style.test.ts`.
 - `targetsByLook` — `lib/targets.ts` — groups a video's target accounts by app look so each look's file posts to its own accounts. Used by `queueCard`.
 - `pickForLook` — `lib/card-desk.ts` — file to ship for one look: newest EDITED, else GENERATED built in that look, else `pickFinished`.
 - `postIdsFor` — `lib/analytics.ts` — distinct Outstand post ids behind a video (card + publish jobs); analytics sync sums them.
@@ -61,7 +61,7 @@
 - `buildHookAss` / `writeHookAss` — `lib/ass.ts` — hook headline as an ASS track for libass: per-look border/box/shadow, `*word*` colored with the accent color, optional numbered list 1.–N. down the left (`LIST_MAX` 10 in lib/variations.ts). `writeHookAss` writes the track to the OS temp folder and returns the `ass=` filter (`fontsDir`/`fontFamily`: Arial on Mac, DejaVu Sans on Fly). Used by `assembleVideo`. Tested with real renders and pixel counts in `lib/ass.test.ts`.
 - `parseHighlight` / `stripHighlight` / `assColor` / `escapeAssText` / `escapeFilterPath` — `lib/ass.ts` — star markup → segments, strip stars for the card hook, CSS color → `&HBBGGRR&`, text and filter-path escaping.
 - `Toggle` / `Slider` — `components/batch-controls.tsx` — On/Off pill (posts `name=on`) and range row used by Mix settings.
-- `TextStylePick` — `components/text-style-pick.tsx` — "Text look" select in Mix settings; explains which look "Match the account" resolves to.
+- `TextStylePick` — `components/text-style-pick.tsx` — "Text look" select in Mix settings; "Both looks" builds TikTok + Instagram files.
 - `ingestClip` — `lib/ingest.ts` — stores a Multiply clip: `saveLocalUpload` → `videoSize` (ffprobe) → `shrinkClip` when the short side is over 1080 → `uploadLocalToR2`. Throws `UNREADABLE_CLIP` for non-video files. Used by `/api/repurpose/clips`.
 - `needsShrink` / `shrinkScaleFilter` / `parseVideoSize` — `lib/ingest.ts` — pure sizing helpers, tested in `lib/ingest.test.ts` (includes a real 4K→1080 shrink).
 - `saveLocalUpload` — `lib/files.ts` — writes an upload to the working folder only; `saveUpload` is now this plus `uploadLocalToR2`.
