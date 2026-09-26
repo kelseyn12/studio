@@ -248,7 +248,6 @@ model RepurposeBatch {
   captionsOn  Boolean          @default(false)
   textStyle   String           @default("auto")
   listCount   Int              @default(0)
-  tintAmt     Int              @default(0)
   formatId    String?
   format      Format?          @relation(fields: [formatId], references: [id], onDelete: SetNull)
   hookLines   String           @default("")

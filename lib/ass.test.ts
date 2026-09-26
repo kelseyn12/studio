@@ -11,7 +11,7 @@ import {
   stripHighlight,
   writeHookAss,
 } from "@/lib/ass";
-import { runFfmpeg, tintFilter } from "@/lib/ffmpeg";
+import { runFfmpeg } from "@/lib/ffmpeg";
 
 describe("highlight markup", () => {
   it("splits starred words out of a line", () => {
@@ -79,14 +79,6 @@ describe("Sasha frame renders with real ffmpeg", () => {
     if (dir) await rm(dir, { recursive: true, force: true });
   });
 
-  /** Average RGB over a region, via a tiny downscale to raw rgb24. */
-  async function averageColor(frame: string, crop: string): Promise<[number, number, number]> {
-    const raw = `${frame}.${crop.replace(/[^0-9]/g, "")}.rgb`;
-    await runFfmpeg(["-i", frame, "-vf", `crop=${crop},scale=1:1:flags=area,format=rgb24`, "-f", "rawvideo", raw]);
-    const bytes = await readFile(raw);
-    return [bytes[0], bytes[1], bytes[2]];
-  }
-
   const isGreen = (r: number, g: number, b: number) => g > r + 50 && g > b + 50;
   const isWhite = (r: number, g: number, b: number) => r > 200 && g > 200 && b > 200;
 
@@ -102,7 +94,7 @@ describe("Sasha frame renders with real ffmpeg", () => {
   }
 
   it(
-    "puts a green word in the headline, numbers down the left and a red wash over the frame",
+    "puts a green word in the headline and numbers down the left",
     async () => {
       dir = await mkdtemp(path.join(os.tmpdir(), "studio-ass-"));
       const frame = path.join(dir, "sasha.png");
@@ -113,19 +105,13 @@ describe("Sasha frame renders with real ffmpeg", () => {
         "-i",
         "color=c=0x606060:s=1080x1920:d=0.2",
         "-vf",
-        `${tintFilter(0)},${filter}`,
+        filter,
         "-frames:v",
         "1",
         frame,
       ]);
-      // Untouched corner: the wash makes gray clearly red.
-      const [r, g, b] = await averageColor(frame, "200:200:800:1600");
-      expect(r).toBeGreaterThan(g + 40);
-      expect(r).toBeGreaterThan(b + 40);
-      // Headline band: the starred word leaves clearly green pixels; nothing else on the frame is green.
       expect(await countPixels(frame, "1080:200:0:300", isGreen)).toBeGreaterThan(100);
       expect(await countPixels(frame, "1080:200:0:1500", isGreen)).toBe(0);
-      // List column carries white numbers; the same band to the right is bare wash.
       expect(await countPixels(frame, "120:600:70:520", isWhite)).toBeGreaterThan(50);
       expect(await countPixels(frame, "120:600:500:520", isWhite)).toBe(0);
     },

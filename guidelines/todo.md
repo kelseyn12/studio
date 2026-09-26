@@ -137,8 +137,11 @@
 - [X] Full-app audit (Sep 26)
   Owner + editor page sweep, API auth probes, real-clip render with the new options, lint clean, ffmpeg.ts split. Nothing broken found.
 
-- [X] Sasha frame: highlighted word, numbered list, colored rooms
-  Hook text now renders through libass (lib/ass.ts): *stars* around a word color it (green/red/yellow/blue cycle with "Text color changes per copy"), "Numbered list under the headline" puts 1.–N. down the left, "Color wash per copy" slider (0–60%) tints each copy red/blue/purple/magenta/orange/teal; 0 when filming with a colored LED. TikTok look (outline + shadow) and Instagram look (box per line) both render; cross-post deals still get one file per look. Real-render pixel tests in lib/ass.test.ts.
+- [X] Color wash removed
+  The fake full-frame tint looked plastic. Colored rooms come from an LED at filming. Mix settings no longer has a wash slider. Starred words and the numbered list stay.
+
+- [X] Sasha frame: highlighted word, numbered list
+  Hook text renders through libass (lib/ass.ts): *stars* around a word color it (green/red/yellow/blue cycle with "Text color changes per copy"), "Numbered list under the headline" puts 1.–N. down the left. TikTok look (outline + shadow) and Instagram look (box per line) both render; cross-post deals still get one file per look. Real-render pixel tests in lib/ass.test.ts.
 
 - [X] 4K phone clips into Multiply
   Found and fixed: every upload over 10MB was 500ing (Next middleware body cap). Cap is now 1GB on the Mac, 250MB on Fly. 4K clips shrink to 1080 on arrival; non-video files are refused at upload.
