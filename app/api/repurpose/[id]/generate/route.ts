@@ -5,7 +5,7 @@ import { isRendering, renderBatch, renderStatus } from "@/lib/render-batch";
 import { readSession } from "@/lib/session";
 import { targetAccounts } from "@/lib/targets";
 import { parseTextStyle } from "@/lib/text-style";
-import { LIST_MAX, parseHookLines } from "@/lib/variations";
+import { LIST_MAX, TINT_MAX, parseHookLines } from "@/lib/variations";
 import { canBurnText } from "@/lib/ffmpeg";
 import { hasOpenAI } from "@/lib/whisper";
 
@@ -39,7 +39,7 @@ export async function POST(
         captionsOn: form.get("captionsOn") === "on",
         textStyle: parseTextStyle(form.get("textStyle")),
         listCount: Math.min(Math.max(Math.floor(Number(form.get("listCount") || 0)), 0), LIST_MAX),
-        tintOn: form.get("tintOn") === "on",
+        tintAmt: Math.min(Math.max(Math.floor(Number(form.get("tintAmt") || 0)), 0), TINT_MAX),
         hookLines: String(form.get("hookLines") || ""),
         caption: String(form.get("caption") || ""),
         campaignId: String(form.get("campaignId") || "") || null,

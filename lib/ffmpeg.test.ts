@@ -110,6 +110,7 @@ describe("text burn-in", () => {
         hookStyle: "tiktok",
         hookList: 3,
         tintHue: 280,
+        tintMix: 0.4,
       });
       const { stat } = await import("fs/promises");
       const { absoluteUpload } = await import("@/lib/files");

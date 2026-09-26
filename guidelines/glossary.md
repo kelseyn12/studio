@@ -18,7 +18,7 @@
 - `assembleVideo` — `lib/ffmpeg.ts` — concatenates hook × body × CTA, keeps audio, optional music, applies a per-copy Variation, optional hook text + spoken caption filters.
 - `ffmpegBin` / `canBurnText` — `lib/ffmpeg.ts` — prefers Homebrew ffmpeg-full so drawtext exists; Generate refuses text if it does not.
 - `groupWords` / `captionFilters` / `transcribeWords` — `lib/captions.ts` — Whisper word timestamps → 2–3 word on-screen phrases.
-- `variationFor` — `lib/variations.ts` — unique speed / light / crop / mirror amounts for each copy of a mix, plus `hookColor` (whole line), `accentColor` (starred word, `ACCENT_COLORS`) and `tintHue` (color wash, `TINT_HUES`, null when off).
+- `variationFor` — `lib/variations.ts` — unique speed / light / crop / mirror amounts for each copy of a mix, plus `hookColor` (whole line), `accentColor` (starred word, `ACCENT_COLORS`) and `tintHue` + `tintMix` (color wash, `TINT_HUES`, null/0 when `tintAmt` is 0).
 - `pickTracks` — `lib/combinations.ts` — random music per video; uses every track before repeating. Used by Multiply generate.
 - `parseHookLines` — `lib/variations.ts` — batch text hooks, one per line, max 12. Each line multiplies the Multiply batch.
 - `saveUpload` — `lib/files.ts` — writes to R2 when configured; otherwise `data/uploads` on this Mac.
@@ -60,7 +60,7 @@
 - `wrapHook` / `resolveTextStyle` / `textStyleForNetwork` / `parseTextStyle` — `lib/text-style.ts` — which look hook text takes (tiktok / instagram / plain, "auto" from the account network) and word wrapping at ~26 chars. Drawing lives in lib/ass.ts. Safe-zone renders tested in `lib/text-style.test.ts`.
 - `buildHookAss` / `writeHookAss` — `lib/ass.ts` — hook headline as an ASS track for libass: per-look border/box/shadow, `*word*` colored with the accent color, optional numbered list 1.–N. down the left (`LIST_MAX` 10 in lib/variations.ts). `writeHookAss` writes the track to the OS temp folder and returns the `ass=` filter (`fontsDir`/`fontFamily`: Arial on Mac, DejaVu Sans on Fly). Used by `assembleVideo`. Tested with real renders and pixel counts in `lib/ass.test.ts`.
 - `parseHighlight` / `stripHighlight` / `assColor` / `escapeAssText` / `escapeFilterPath` — `lib/ass.ts` — star markup → segments, strip stars for the card hook, CSS color → `&HBBGGRR&`, text and filter-path escaping.
-- `tintFilter` — `lib/ffmpeg.ts` — Sasha's colored room: `colorize` wash at one hue over the frame, under the text. Hue per copy comes from `variationFor` (`TINT_HUES`, `tintOn` on the batch).
+- `tintFilter` — `lib/ffmpeg.ts` — Sasha's colored room: `colorize` wash at one hue over the frame, under the text. Hue per copy comes from `variationFor` (`TINT_HUES`); strength from the `tintAmt` slider on the batch (0–`TINT_MAX` %, `tintMix` 0–1).
 - `Toggle` / `Slider` — `components/batch-controls.tsx` — On/Off pill (posts `name=on`) and range row used by Mix settings.
 - `TextStylePick` — `components/text-style-pick.tsx` — "Text look" select in Mix settings; explains which look "Match the account" resolves to.
 - `ingestClip` — `lib/ingest.ts` — stores a Multiply clip: `saveLocalUpload` → `videoSize` (ffprobe) → `shrinkClip` when the short side is over 1080 → `uploadLocalToR2`. Throws `UNREADABLE_CLIP` for non-video files. Used by `/api/repurpose/clips`.

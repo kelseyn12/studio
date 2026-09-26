@@ -40,12 +40,14 @@ describe("variationFor", () => {
   });
 
   it("walks the color wash palette per copy only when tint is on", () => {
-    const base = { speedAmt: 0, colorAmt: 0, cropAmt: 0, tintOn: true };
+    const base = { speedAmt: 0, colorAmt: 0, cropAmt: 0, tintAmt: 40 };
     const hues = [0, 1, 2, 3, 4, 5, 6].map((index) => variationFor(index, base).tintHue);
     expect(hues.slice(0, 6)).toEqual([0, 220, 280, 320, 30, 170]);
     expect(hues[6]).toBe(0);
-    expect(variationFor(1, base).label).toBe("blue wash");
-    expect(variationFor(1, { ...base, tintOn: false }).tintHue).toBeNull();
+    expect(variationFor(1, base).label).toBe("blue wash 40%");
+    expect(variationFor(1, base).tintMix).toBe(0.4);
+    expect(variationFor(1, { ...base, tintAmt: 0 }).tintHue).toBeNull();
+    expect(variationFor(1, { ...base, tintAmt: 90 }).tintMix).toBe(0.6);
   });
 });
 

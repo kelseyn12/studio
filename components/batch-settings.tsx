@@ -6,7 +6,7 @@ import { BatchTargets, Row, type BatchAccount } from "@/components/batch-targets
 import { TextStylePick } from "@/components/text-style-pick";
 import { dealAccounts } from "@/lib/targets";
 import { hookLooks, parseTextStyle, type TextStyle } from "@/lib/text-style";
-import { LIST_MAX, outputCount, parseHookLines, plannedMixes, variationFor } from "@/lib/variations";
+import { LIST_MAX, TINT_MAX, outputCount, parseHookLines, plannedMixes, variationFor } from "@/lib/variations";
 
 type Option = { id: string; name: string };
 
@@ -40,7 +40,7 @@ export function BatchSettings({
     trimOn: boolean;
     hookColorOn: boolean;
     captionsOn: boolean;
-    tintOn: boolean;
+    tintAmt: number;
     listCount: number;
     textStyle: string;
     hookLines: string;
@@ -64,7 +64,7 @@ export function BatchSettings({
   const [trimOn, setTrimOn] = useState(defaults.trimOn);
   const [hookColorOn, setHookColorOn] = useState(defaults.hookColorOn);
   const [captionsOn, setCaptionsOn] = useState(defaults.captionsOn);
-  const [tintOn, setTintOn] = useState(defaults.tintOn);
+  const [tintAmt, setTintAmt] = useState(defaults.tintAmt);
   const [listCount, setListCount] = useState(defaults.listCount);
   const [hookLines, setHookLines] = useState(defaults.hookLines);
   const [campaignId, setCampaignId] = useState(defaults.campaignId);
@@ -83,7 +83,7 @@ export function BatchSettings({
   );
   const files = outputCount(mixes, variants) * Math.max(textCount, 1);
   const looks = textCount > 0 ? hookLooks(textStyle, targetNetworks, true).length : 1;
-  const preview = variationFor(1, { speedAmt, colorAmt, cropAmt, mirrorOn, hookColorOn, tintOn });
+  const preview = variationFor(1, { speedAmt, colorAmt, cropAmt, mirrorOn, hookColorOn, tintAmt });
 
   return (
     <form action={`/api/repurpose/${batchId}/generate`} method="post" className="space-y-6">
@@ -219,14 +219,18 @@ export function BatchSettings({
             max={12}
             onChange={setCropAmt}
           />
-          <Row label="Color wash per copy">
-            <div className="flex items-center gap-3">
-              <p className="max-w-56 text-right text-xs text-mute">
-                Sasha&apos;s colored rooms: copy 1 red, copy 2 blue, then purple, magenta, orange, teal.
-              </p>
-              <Toggle name="tintOn" on={tintOn} onChange={setTintOn} />
-            </div>
-          </Row>
+          <Slider
+            name="tintAmt"
+            label="Color wash per copy"
+            hint={
+              tintAmt
+                ? `${tintAmt}% · red, blue, purple, magenta, orange, teal — tints your skin too`
+                : "Off — filming with a colored LED? Leave this off"
+            }
+            value={tintAmt}
+            max={TINT_MAX}
+            onChange={setTintAmt}
+          />
           <Row label="Mirror later copies">
             <Toggle name="mirrorOn" on={mirrorOn} onChange={setMirrorOn} />
           </Row>

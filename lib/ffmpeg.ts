@@ -246,6 +246,7 @@ function videoFilter(input: {
   mirror?: boolean;
   hookFilter?: string;
   tintHue?: number | null;
+  tintMix?: number;
   captionFilters?: string[];
 }): string {
   const crop = Math.max(0, input.crop);
@@ -266,14 +267,18 @@ function videoFilter(input: {
     if (input.hue !== 0) parts.push(`hue=h=${input.hue}`);
   }
   // Color wash goes under the text so the words stay clean white.
-  if (input.tintHue !== null && input.tintHue !== undefined) parts.push(tintFilter(input.tintHue));
+  if (input.tintHue !== null && input.tintHue !== undefined && (input.tintMix ?? 0) > 0) {
+    parts.push(tintFilter(input.tintHue, input.tintMix ?? DEFAULT_TINT_MIX));
+  }
   if (input.hookFilter) parts.push(input.hookFilter);
   return parts.join(",");
 }
 
-/** Sasha's colored-light room: a translucent single-hue wash over the whole frame. */
-export function tintFilter(hue: number): string {
-  return `colorize=hue=${Math.round(hue)}:saturation=0.7:lightness=0.5:mix=0.38`;
+const DEFAULT_TINT_MIX = 0.38;
+
+/** Sasha's colored-light room: a translucent single-hue wash over the whole frame. `mix` 0–1 is the strength. */
+export function tintFilter(hue: number, mix = DEFAULT_TINT_MIX): string {
+  return `colorize=hue=${Math.round(hue)}:saturation=0.7:lightness=0.5:mix=${Math.min(Math.max(mix, 0), 1).toFixed(2)}`;
 }
 
 export function uniquenessFilter(input: {
@@ -301,6 +306,7 @@ export async function assembleVideo(input: {
   hookStyle?: DrawnStyle;
   hookList?: number;
   tintHue?: number | null;
+  tintMix?: number;
   musicPath?: string;
 }): Promise<string> {
   await mkdir(path.join(localRoot(), "generated"), { recursive: true });
@@ -344,6 +350,7 @@ export async function assembleVideo(input: {
       mirror: input.mirror,
       hookFilter: index === 0 ? hookFilter : undefined,
       tintHue: input.tintHue,
+      tintMix: input.tintMix,
       captionFilters: input.clips[index].captionFilters,
     });
     chains.push(`[${index}:v]${vf}[v${index}]`);
