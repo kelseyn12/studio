@@ -123,7 +123,10 @@
   Generate returns immediately. Progress bar on the batch page. Run big batches on this Mac, not Fly (512MB).
 
 - [X] Cross-post per deal
-  Each account gets a deal on Accounts. Deal videos post to every account on the deal in one Outstand post (Polsia → IG + FB, Morphi → IG + TT + YT + FB). Multiply no longer needs a single account when the deal has some.
+  Each account gets a deal on Accounts. Deal videos post to every account on the deal (Polsia → IG + FB, Morphi → IG + TT + YT + FB). Multiply no longer needs a single account when the deal has some.
+
+- [X] Native look on every app when cross-posting
+  A deal on IG + TT gets each video built twice — Instagram look and TikTok look — and each file posts to its own accounts as its own Outstand post. Editor cuts ship everywhere as-is. Numbers sums the posts.
 
 - [X] Text hooks in the platform's own look
   Text look on Mix settings: TikTok / Instagram / Plain, default follows the account. Hooks wrap to two lines. Nickolai/Sasha style stays burned in; native in-app text is not possible through scheduling.

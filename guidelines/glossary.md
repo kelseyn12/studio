@@ -47,6 +47,10 @@
 - `sendBatchToEditor` — `app/repurposer/actions.ts` — sends every built, unscheduled video in a Multiply batch to the editor at once (EDITING, cutBy EDITOR, one ping). Used by BatchOutputs on the batch page.
 - `cardsToPolish` / `polishNote` — `lib/batch-polish.ts` — which batch outputs are still READY and unscheduled; note text tagged with the batch name. Tested in `lib/batch-polish.test.ts`.
 - `BatchOutputs` — `components/batch-outputs.tsx` — built-video list with per-video state (Ready / Scheduled / With editor) and the Send all to editor form.
+- `hookLooks` / `looksForNetworks` — `lib/text-style.ts` — which looks to render for one Multiply output / distinct looks a set of accounts needs. Tested in `lib/card-desk-look.test.ts` and `lib/text-style.test.ts`.
+- `targetsByLook` — `lib/targets.ts` — groups a video's target accounts by app look so each look's file posts to its own accounts. Used by `queueCard`.
+- `pickForLook` — `lib/card-desk.ts` — file to ship for one look: newest EDITED, else GENERATED built in that look, else `pickFinished`.
+- `postIdsFor` — `lib/analytics.ts` — distinct Outstand post ids behind a video (card + publish jobs); analytics sync sums them.
 - `targetAccounts` / `dealAccounts` / `describeTargets` / `networkShort` — `lib/targets.ts` — which accounts a video posts to: all active accounts on its deal, else the picked one. Used by `queueCard`, `renderBatch`, Multiply generate guard, CardLive, BatchTargets, deal page. Tested in `lib/targets.test.ts`.
 - `saveAccount` — `app/connections/actions.ts` — saves an account's label and deal (was `renameAccount`).
 - `BatchTargets` — `components/batch-targets.tsx` — Deal · Format · Posts-to/Account rows on Mix settings; also exports `Row`.

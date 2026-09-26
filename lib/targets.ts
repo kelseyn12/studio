@@ -3,6 +3,8 @@
  * so a deal video ships to every active account on that deal in one Outstand post.
  * Personal videos (no deal, or a deal with no accounts yet) still use the single picked account.
  */
+import { looksForNetworks, textStyleForNetwork, type DrawnStyle } from "@/lib/text-style";
+
 export type TargetAccount = {
   id: string;
   outstandAccountId: string;
@@ -32,6 +34,17 @@ export function targetAccounts<T extends { id: string; isActive: boolean; campai
   const singleId = pickedAccountId || card.accountId;
   const single = accounts.find((account) => account.id === singleId);
   return single ? [single] : [];
+}
+
+/**
+ * Split targets by the text look their app wants. A deal on IG + TT gives two groups, so the
+ * Instagram-look file goes to IG/FB and the TikTok-look file goes to TT/YT.
+ */
+export function targetsByLook<T extends { network: string }>(targets: T[]): Array<{ look: DrawnStyle; accounts: T[] }> {
+  return looksForNetworks(targets.map((target) => target.network)).map((look) => ({
+    look,
+    accounts: targets.filter((target) => textStyleForNetwork(target.network) === look),
+  }));
 }
 
 /** "IG @polsia · FB @polsia" — short enough for a card footer. */

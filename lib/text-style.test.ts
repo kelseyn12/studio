@@ -5,6 +5,7 @@ import { afterAll, describe, expect, it } from "vitest";
 import { escapeDrawText, HOOK_FONT, runFfmpeg } from "@/lib/ffmpeg";
 import {
   hookTextFilters,
+  looksForNetworks,
   parseTextStyle,
   resolveTextStyle,
   textStyleForNetwork,
@@ -19,7 +20,7 @@ describe("text style choice", () => {
     expect(textStyleForNetwork("TikTok")).toBe("tiktok");
     expect(textStyleForNetwork("instagram")).toBe("instagram");
     expect(textStyleForNetwork("facebook")).toBe("instagram");
-    expect(textStyleForNetwork("youtube")).toBe("plain");
+    expect(textStyleForNetwork("youtube")).toBe("tiktok");
     expect(textStyleForNetwork(null)).toBe("plain");
     expect(resolveTextStyle("auto", "tiktok")).toBe("tiktok");
     expect(resolveTextStyle("instagram", "tiktok")).toBe("instagram");
@@ -31,6 +32,13 @@ describe("text style choice", () => {
     expect(textStyleForNetworks(["instagram", "tiktok", "youtube", "facebook"])).toBe("tiktok");
     expect(textStyleForNetworks([])).toBe("plain");
     expect(resolveTextStyle("auto", ["instagram", "tiktok"])).toBe("tiktok");
+  });
+
+  it("lists the distinct looks a deal needs", () => {
+    expect(looksForNetworks(["instagram", "facebook"])).toEqual(["instagram"]);
+    expect(looksForNetworks(["tiktok", "instagram", "youtube", "facebook"])).toEqual(["instagram", "tiktok"]);
+    expect(looksForNetworks(["tiktok", "youtube"])).toEqual(["tiktok"]);
+    expect(looksForNetworks([])).toEqual([]);
   });
 
   it("falls back to auto for junk", () => {

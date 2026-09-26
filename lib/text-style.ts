@@ -22,12 +22,22 @@ export function parseTextStyle(value: unknown): TextStyle {
   return TEXT_STYLES.includes(value as TextStyle) ? (value as TextStyle) : "auto";
 }
 
-/** Which app look to use for an account. Meta apps share Instagram's text tool. */
+/**
+ * Which app look to use for an account. Meta apps share Instagram's text tool; TikTok, YouTube
+ * Shorts and everything else read best with the TikTok look. Plain only when there is no account.
+ */
 export function textStyleForNetwork(network: string | null | undefined): DrawnStyle {
   const key = (network || "").toLowerCase();
-  if (key.includes("tiktok")) return "tiktok";
+  if (!key) return "plain";
   if (key.includes("instagram") || key.includes("facebook") || key.includes("threads")) return "instagram";
-  return "plain";
+  return "tiktok";
+}
+
+/** Distinct looks a set of accounts needs, in a stable order. Two looks means two files per video. */
+export function looksForNetworks(networks: string[]): DrawnStyle[] {
+  const order: DrawnStyle[] = ["instagram", "tiktok", "plain"];
+  const wanted = new Set(networks.map(textStyleForNetwork));
+  return order.filter((look) => wanted.has(look));
 }
 
 /**
@@ -35,9 +45,9 @@ export function textStyleForNetwork(network: string | null | undefined): DrawnSt
  * → TikTok, which reads as native on TikTok and natural everywhere else.
  */
 export function textStyleForNetworks(networks: string[]): DrawnStyle {
-  const looks = new Set(networks.map(textStyleForNetwork));
-  if (looks.size === 1) return [...looks][0];
-  if (looks.size === 0) return "plain";
+  const looks = looksForNetworks(networks);
+  if (looks.length === 1) return looks[0];
+  if (looks.length === 0) return "plain";
   return "tiktok";
 }
 
@@ -104,4 +114,16 @@ export function hookTextFilters(input: {
       `y=h*${spec.top}+${index * lineHeight}`,
     ].join(":"),
   );
+}
+
+/**
+ * Which looks to render for one Multiply output. With text on the video and "auto" on a deal that
+ * spans looks, every look gets its own file. Without text the look does not matter, so one file.
+ */
+export function hookLooks(style: string, networks: string[], hasText: boolean): DrawnStyle[] {
+  const parsed = parseTextStyle(style);
+  if (!hasText) return [resolveTextStyle(parsed, networks)];
+  if (parsed !== "auto") return [parsed];
+  const looks = looksForNetworks(networks);
+  return looks.length > 0 ? looks : ["plain"];
 }

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { closeLoop, parseAnalytics } from "@/lib/analytics";
+import { closeLoop, parseAnalytics, postIdsFor } from "@/lib/analytics";
 import { nextLanes } from "@/lib/formats";
 import { getPost, getPostAnalytics, hasOutstand, postedAtFromPost } from "@/lib/outstand";
 import { prisma } from "@/lib/prisma";
@@ -17,22 +17,37 @@ export async function POST(request: Request) {
   if (!hasOutstand()) return NextResponse.json({ error: "Outstand key missing" }, { status: 400 });
   const cards = await prisma.card.findMany({
     where: { outstandPostId: { not: null } },
-    select: { id: true, outstandPostId: true, formatId: true, campaignId: true },
+    select: {
+      id: true,
+      outstandPostId: true,
+      formatId: true,
+      campaignId: true,
+      publishes: { select: { outstandPostId: true } },
+    },
   });
   let updated = 0;
   let posted = 0;
   const campaigns = new Set<string>();
   for (const card of cards) {
-    if (!card.outstandPostId) continue;
+    // A cross-posted video is several Outstand posts (one per app look); its numbers are the sum.
+    const postIds = postIdsFor(card);
+    if (postIds.length === 0) continue;
     try {
-      const post = await getPost(card.outstandPostId);
-      let stats = { views: 0, likes: 0, comments: 0 };
-      try {
-        stats = parseAnalytics(await getPostAnalytics(card.outstandPostId));
-      } catch {
-        /* views can wait; publish state cannot */
+      const stats = { views: 0, likes: 0, comments: 0 };
+      let publishedAt: Date | null = null;
+      for (const postId of postIds) {
+        const post = await getPost(postId);
+        publishedAt = publishedAt ?? postedAtFromPost(post);
+        try {
+          const one = parseAnalytics(await getPostAnalytics(postId));
+          stats.views += one.views;
+          stats.likes += one.likes;
+          stats.comments += one.comments;
+        } catch {
+          /* views can wait; publish state cannot */
+        }
       }
-      const life = closeLoop({ publishedAt: postedAtFromPost(post), views: stats.views });
+      const life = closeLoop({ publishedAt, views: stats.views });
       await prisma.card.update({
         where: { id: card.id },
         data: {
@@ -71,3 +86,4 @@ async function promoteCampaignWinner(campaignId: string) {
     await prisma.format.update({ where: { id: row.id }, data: { lane: row.lane } });
   }
 }
+

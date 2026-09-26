@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { BatchTargets, Row, type BatchAccount } from "@/components/batch-targets";
 import { TextStylePick } from "@/components/text-style-pick";
 import { dealAccounts } from "@/lib/targets";
-import { parseTextStyle, type TextStyle } from "@/lib/text-style";
+import { hookLooks, parseTextStyle, type TextStyle } from "@/lib/text-style";
 import { outputCount, parseHookLines, plannedMixes, variationFor } from "@/lib/variations";
 
 type Option = { id: string; name: string };
@@ -76,6 +76,7 @@ export function BatchSettings({
     [hooks, bodies, ctas, allCombos, count],
   );
   const files = outputCount(mixes, variants) * Math.max(textCount, 1);
+  const looks = textCount > 0 ? hookLooks(textStyle, targetNetworks, true).length : 1;
   const preview = variationFor(1, { speedAmt, colorAmt, cropAmt, mirrorOn, hookColorOn });
 
   return (
@@ -101,6 +102,12 @@ export function BatchSettings({
           {textCount > 0 ? ` × ${textCount} text hook${textCount === 1 ? "" : "s"}` : ""}
           {variants > 1 ? ` × ${variants} unique copies` : ""} = {files} videos
         </p>
+        {looks > 1 ? (
+          <p className="mt-1 text-sm text-ink/80">
+            Each video is built in {looks} looks (Instagram + TikTok text), so {files * looks} files. Each look posts to
+            its own accounts.
+          </p>
+        ) : null}
       </div>
 
       <section className="rounded-card border border-line bg-panel p-5">

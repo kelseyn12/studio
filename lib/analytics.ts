@@ -20,3 +20,14 @@ export function closeLoop(input: {
     postedAt: input.publishedAt,
   };
 }
+
+/** Distinct Outstand post ids behind one video: the card's own plus every publish job's (cross-posts). */
+export function postIdsFor(card: {
+  outstandPostId: string | null;
+  publishes: Array<{ outstandPostId: string | null }>;
+}): string[] {
+  const ids = [card.outstandPostId, ...card.publishes.map((job) => job.outstandPostId)].filter(
+    (id): id is string => Boolean(id),
+  );
+  return [...new Set(ids)];
+}

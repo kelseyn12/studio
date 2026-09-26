@@ -41,3 +41,21 @@ describe("targetAccounts", () => {
     expect(networkShort("bluesky")).toBe("bluesky");
   });
 });
+
+describe("targetsByLook", () => {
+  it("splits a cross-posting deal into one group per app look", async () => {
+    const { targetsByLook } = await import("@/lib/targets");
+    const morphi = [
+      { network: "instagram", id: "ig" },
+      { network: "tiktok", id: "tt" },
+      { network: "youtube", id: "yt" },
+      { network: "facebook", id: "fb" },
+    ];
+    const groups = targetsByLook(morphi).map((group) => ({ look: group.look, ids: group.accounts.map((a) => a.id) }));
+    expect(groups).toEqual([
+      { look: "instagram", ids: ["ig", "fb"] },
+      { look: "tiktok", ids: ["tt", "yt"] },
+    ]);
+    expect(targetsByLook([{ network: "instagram", id: "ig" }])).toHaveLength(1);
+  });
+});

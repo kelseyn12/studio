@@ -1,6 +1,6 @@
 "use client";
 
-import { TEXT_STYLE_LABEL, TEXT_STYLES, textStyleForNetworks, type TextStyle } from "@/lib/text-style";
+import { looksForNetworks, TEXT_STYLE_LABEL, TEXT_STYLES, textStyleForNetworks, type TextStyle } from "@/lib/text-style";
 
 const LOOK_NOTE: Record<Exclude<TextStyle, "auto">, string> = {
   tiktok: "chunky white with a soft shadow, like TikTok's text tool",
@@ -19,11 +19,13 @@ export function TextStylePick({
   networks: string[];
 }) {
   const drawn = value === "auto" ? textStyleForNetworks(networks) : value;
-  const mixed = value === "auto" && new Set(networks.map((network) => network.toLowerCase())).size > 1;
+  const mixed = value === "auto" && looksForNetworks(networks).length > 1;
   const note =
     value === "auto" && networks.length === 0
       ? "Pick a deal or account below and the text takes that app's look."
-      : `Looks like: ${LOOK_NOTE[drawn]}.${mixed ? " Cross-posting, so one look that reads native everywhere." : ""}`;
+      : mixed
+        ? "Cross-posting: every video is built twice — Instagram look for IG/FB, TikTok look for TT/YT — and each posts to its own accounts."
+        : `Looks like: ${LOOK_NOTE[drawn]}.`;
   return (
     <div className="mt-3">
       <div className="flex flex-wrap items-center gap-3">

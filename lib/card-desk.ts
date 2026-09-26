@@ -34,3 +34,19 @@ export function pickFinished<T extends { kind: string; createdAt: Date }>(assets
     newestFirst.find((asset) => asset.kind === "GENERATED")
   );
 }
+
+/**
+ * The file that ships to accounts wanting one text look. An editor's cut always wins (it is the
+ * same for every app); otherwise the Multiply file built in that look; otherwise whatever is newest.
+ */
+export function pickForLook<T extends { kind: string; createdAt: Date; textStyle: string }>(
+  assets: T[],
+  look: string,
+): T | undefined {
+  const newestFirst = [...assets].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  return (
+    newestFirst.find((asset) => asset.kind === "EDITED") ??
+    newestFirst.find((asset) => asset.kind === "GENERATED" && asset.textStyle === look) ??
+    pickFinished(assets)
+  );
+}
