@@ -48,12 +48,12 @@ describe("assemble uniqueness", () => {
       const a = await assembleVideo({
         clips: [{ path: clip }],
         outputName: `test-a-${Date.now()}.mp4`,
-        ...omitLabel(first),
+        ...first,
       });
       const b = await assembleVideo({
         clips: [{ path: clip }],
         outputName: `test-b-${Date.now()}.mp4`,
-        ...omitLabel(second),
+        ...second,
       });
       const { stat } = await import("fs/promises");
       const { absoluteUpload } = await import("@/lib/files");
@@ -70,10 +70,6 @@ describe("assemble uniqueness", () => {
   );
 });
 
-function omitLabel(variation: ReturnType<typeof variationFor>) {
-  const { label: _label, ...filters } = variation;
-  return filters;
-}
 
 describe("text burn-in", () => {
   it("uses an ffmpeg that has drawtext", async () => {

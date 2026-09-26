@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { isValidCut, trimFromSilence, NO_TRIM } from "@/lib/ffmpeg";
+import { NO_TRIM } from "@/lib/ffmpeg";
+import { isValidCut, trimFromSilence } from "@/lib/trim";
 
 const line = (start: number, end?: number) =>
   `[silencedetect @ 0x0] silence_start: ${start}\n` +

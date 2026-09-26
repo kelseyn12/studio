@@ -134,6 +134,9 @@
 - [X] Text hooks in the platform's own look
   Text look on Mix settings: TikTok / Instagram / Plain, default follows the account. Hooks wrap to two lines. Nickolai/Sasha style stays burned in; native in-app text is not possible through scheduling.
 
+- [X] Full-app audit (Sep 26)
+  Owner + editor page sweep, API auth probes, real-clip render with the new options, lint clean, ffmpeg.ts split. Nothing broken found.
+
 - [X] Sasha frame: highlighted word, numbered list, colored rooms
   Hook text now renders through libass (lib/ass.ts): *stars* around a word color it (green/red/yellow/blue cycle with "Text color changes per copy"), "Numbered list under the headline" puts 1.–N. down the left, "Color wash per copy" slider (0–60%) tints each copy red/blue/purple/magenta/orange/teal; 0 when filming with a colored LED. TikTok look (outline + shadow) and Instagram look (box per line) both render; cross-post deals still get one file per look. Real-render pixel tests in lib/ass.test.ts.
 

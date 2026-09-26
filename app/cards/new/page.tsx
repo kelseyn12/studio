@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { Shell } from "@/components/shell";
 import { requireUser } from "@/lib/auth";
-import { DEAL_KIND_LABEL } from "@/lib/deal-kind";
 import { parseLocalDate } from "@/lib/dates";
 import { prisma } from "@/lib/prisma";
 

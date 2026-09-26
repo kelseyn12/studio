@@ -1,7 +1,8 @@
 import { stat } from "fs/promises";
 import path from "path";
 import { NextResponse } from "next/server";
-import { isValidCut, trimVideo, writeThumb } from "@/lib/ffmpeg";
+import { writeThumb } from "@/lib/ffmpeg";
+import { isValidCut, trimVideo } from "@/lib/trim";
 import { deleteUpload, ensureLocal, localRoot, uploadLocalToR2 } from "@/lib/files";
 import { hasR2 } from "@/lib/r2";
 import { prisma } from "@/lib/prisma";

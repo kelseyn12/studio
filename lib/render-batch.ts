@@ -1,7 +1,8 @@
 import { stat } from "fs/promises";
 import path from "path";
 import { captionFilters, groupWords, parseCaptionWords, transcribeWords, type CaptionPhrase } from "@/lib/captions";
-import { assembleVideo, quietEnds, NO_TRIM, type ClipTrim } from "@/lib/ffmpeg";
+import { assembleVideo, NO_TRIM, type ClipTrim } from "@/lib/ffmpeg";
+import { quietEnds } from "@/lib/trim";
 import { ensureLocal, localRoot, uploadLocalToR2 } from "@/lib/files";
 import { prisma } from "@/lib/prisma";
 import { pickTracks } from "@/lib/combinations";
@@ -74,7 +75,6 @@ export async function renderBatch(input: {
       for (const line of lines) {
         for (let copy = 0; copy < copies; copy += 1) {
           const variation = variationFor(fileNumber, batch);
-          const { label, ...filters } = variation;
           const music = musicQueue[fileNumber];
           fileNumber += 1;
           const hookLine = line || combo.find((clip) => clip.slot === "HOOK")?.hookText || "";
@@ -100,7 +100,7 @@ export async function renderBatch(input: {
             const outputRel = await assembleVideo({
               clips,
               outputName: `${id}-${fileNumber}${suffix}.mp4`,
-              ...filters,
+              ...variation,
               hookStyle: look,
               hookList: batch.listCount,
               musicPath,

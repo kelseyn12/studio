@@ -8,7 +8,7 @@ import { cardPatch } from "@/lib/card-patch";
 import { deleteUpload, saveUpload, mimeFromName } from "@/lib/files";
 import { isDirectMediaUrl } from "@/lib/media-url";
 import { rejectStudioFile } from "@/lib/storage";
-import { isPipelineStatus, type PipelineStatus } from "@/lib/pipeline";
+import type { PipelineStatus } from "@/lib/pipeline";
 import { prisma } from "@/lib/prisma";
 import { markCutReady } from "@/lib/cut-ready";
 import { pingStudio } from "@/lib/manychat";

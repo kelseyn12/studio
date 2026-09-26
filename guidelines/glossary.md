@@ -43,8 +43,8 @@
 - `retryFailedPost` / `clearFailedPost` — `app/calendar/actions.ts` — re-ship or dismiss a failed Outstand post. Used by FailedPosts on Live.
 - `updateDeal` — `app/campaigns/[id]/actions.ts` — edits a deal after creation. Used by DealEdit on the deal page.
 - `studioBytes` — `lib/queries.ts` — every stored byte: card files + Multiply clips + music. Used by the storage meter on Today and Library.
-- `quietEnds` / `trimFromSilence` — `lib/ffmpeg.ts` — finds dead air at clip ends via silencedetect; safe parse tested in `lib/trim.test.ts`. Used by Multiply generate when Cut dead air is on.
-- `clipDuration` — `lib/ffmpeg.ts` — ffprobe duration in seconds. Used by quietEnds.
+- `quietEnds` / `trimFromSilence` — `lib/trim.ts` — finds dead air at clip ends via silencedetect; safe parse tested in `lib/trim.test.ts`. Used by Multiply generate when Cut dead air is on.
+- `clipDuration` — `lib/trim.ts` — ffprobe duration in seconds. Used by quietEnds.
 - `sendForTouchUp` — `app/cards/[id]/actions.ts` — sends a finished (usually generated) video to the editor to polish; back to Cuts as EDITING. Used on Live for unscheduled Ready videos.
 - `sendBatchToEditor` — `app/repurposer/actions.ts` — sends every built, unscheduled video in a Multiply batch to the editor at once (EDITING, cutBy EDITOR, one ping). Used by BatchOutputs on the batch page.
 - `cardsToPolish` / `polishNote` — `lib/batch-polish.ts` — which batch outputs are still READY and unscheduled; note text tagged with the batch name. Tested in `lib/batch-polish.test.ts`.
@@ -68,6 +68,6 @@
 - `saveLocalUpload` — `lib/files.ts` — writes an upload to the working folder only; `saveUpload` is now this plus `uploadLocalToR2`.
 - `fileMaxBytes` — `lib/storage.ts` — per-file cap from `STUDIO_FILE_MAX_MB` (1GB default, 250 on Fly). Feeds `STUDIO_FILE_MAX_BYTES`.
 - `pickFinished` — `lib/card-desk.ts` — the file that ships: newest EDITED first, else newest GENERATED. Used by queueCard and the video page.
-- `trimVideo` / `isValidCut` — `lib/ffmpeg.ts` — hand cut: re-encode one file down to a picked start/end window (min half a second). Used by `/api/trim`.
+- `trimVideo` / `isValidCut` — `lib/trim.ts` — hand cut: re-encode one file down to a picked start/end window (min half a second). Used by `/api/trim`.
 - `QuickCut` — `components/quick-cut.tsx` — player with Start here / End here / Cut it. On Multiply clip tiles (replaces the clip) and on Live for finished videos (makes a new cut; newest ships).
 - `addLink` / `deleteLink` — `app/dms/actions.ts` — tracked short links for auto-DMs. Public redirect at `/l/[slug]` counts every click.
