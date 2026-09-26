@@ -262,7 +262,7 @@ function SlotBlock({
         label={`Add ${title.toLowerCase()}`}
         accept="video/*"
         maxBytes={STUDIO_FILE_MAX_BYTES}
-        hint="Phone clip under 250MB. Not a 4K day."
+        hint="One take at a time, 4K is fine. Under 250MB (about 90 seconds of 4K)."
       />
     </div>
   );
