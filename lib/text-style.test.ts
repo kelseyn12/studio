@@ -8,6 +8,7 @@ import {
   parseTextStyle,
   resolveTextStyle,
   textStyleForNetwork,
+  textStyleForNetworks,
   wrapHook,
   type DrawnStyle,
 } from "@/lib/text-style";
@@ -22,6 +23,14 @@ describe("text style choice", () => {
     expect(textStyleForNetwork(null)).toBe("plain");
     expect(resolveTextStyle("auto", "tiktok")).toBe("tiktok");
     expect(resolveTextStyle("instagram", "tiktok")).toBe("instagram");
+  });
+
+  it("picks one look for a deal's set of accounts", () => {
+    expect(textStyleForNetworks(["instagram", "facebook"])).toBe("instagram");
+    expect(textStyleForNetworks(["tiktok"])).toBe("tiktok");
+    expect(textStyleForNetworks(["instagram", "tiktok", "youtube", "facebook"])).toBe("tiktok");
+    expect(textStyleForNetworks([])).toBe("plain");
+    expect(resolveTextStyle("auto", ["instagram", "tiktok"])).toBe("tiktok");
   });
 
   it("falls back to auto for junk", () => {

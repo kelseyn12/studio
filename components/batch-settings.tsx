@@ -1,12 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { BatchTargets, Row, type BatchAccount } from "@/components/batch-targets";
 import { TextStylePick } from "@/components/text-style-pick";
+import { dealAccounts } from "@/lib/targets";
 import { parseTextStyle, type TextStyle } from "@/lib/text-style";
 import { outputCount, parseHookLines, plannedMixes, variationFor } from "@/lib/variations";
 
 type Option = { id: string; name: string };
-type AccountOption = Option & { network: string };
+
 
 export function BatchSettings({
   batchId,
@@ -45,7 +47,7 @@ export function BatchSettings({
   };
   campaigns: Option[];
   formats: Array<{ id: string; name: string; campaignId: string }>;
-  accounts: AccountOption[];
+  accounts: BatchAccount[];
   textBurnWorks?: boolean;
 }) {
   const [allCombos, setAllCombos] = useState(defaults.allCombos);
@@ -62,8 +64,12 @@ export function BatchSettings({
   const [campaignId, setCampaignId] = useState(defaults.campaignId);
   const [accountId, setAccountId] = useState(defaults.accountId);
   const [textStyle, setTextStyle] = useState<TextStyle>(parseTextStyle(defaults.textStyle));
-  const accountNetwork = accounts.find((account) => account.id === accountId)?.network ?? null;
-  const dealFormats = formats.filter((format) => format.campaignId === campaignId);
+  const targetNetworks = (() => {
+    const fromDeal = dealAccounts(accounts, campaignId);
+    if (fromDeal.length > 0) return fromDeal.map((account) => account.network);
+    const picked = accounts.find((account) => account.id === accountId);
+    return picked ? [picked.network] : [];
+  })();
   const textCount = useMemo(() => parseHookLines(hookLines).length, [hookLines]);
   const mixes = useMemo(
     () => plannedMixes(hooks, bodies, ctas, allCombos, count),
@@ -115,7 +121,7 @@ export function BatchSettings({
             {textCount} line{textCount === 1 ? "" : "s"} · every mix gets each line once
           </p>
         ) : null}
-        <TextStylePick value={textStyle} onChange={setTextStyle} accountNetwork={accountNetwork} />
+        <TextStylePick value={textStyle} onChange={setTextStyle} networks={targetNetworks} />
       </section>
 
       <section className="rounded-card border border-line bg-panel p-5">
@@ -232,51 +238,16 @@ export function BatchSettings({
               {trimOn ? "On" : "Off"}
             </button>
           </Row>
-          <Row label="Deal">
-            <select
-              name="campaignId"
-              value={campaignId}
-              onChange={(event) => setCampaignId(event.target.value)}
-              className="field max-w-xs"
-            >
-              <option value="">None — shows as No deal in Library</option>
-              {campaigns.map((campaign) => (
-                <option key={campaign.id} value={campaign.id}>
-                  {campaign.name}
-                </option>
-              ))}
-            </select>
-          </Row>
-          {dealFormats.length > 0 ? (
-            <Row label="Format — so Numbers can score this batch">
-              <select name="formatId" defaultValue={defaults.formatId} className="field max-w-xs">
-                <option value="">No format</option>
-                {dealFormats.map((format) => (
-                  <option key={format.id} value={format.id}>
-                    {format.name}
-                  </option>
-                ))}
-              </select>
-            </Row>
-          ) : null}
-          <Row label="Account">
-            <select
-              name="accountId"
-              value={accountId}
-              onChange={(event) => setAccountId(event.target.value)}
-              className="field max-w-xs"
-              required
-            >
-              <option value="" disabled>
-                Required — which account
-              </option>
-              {accounts.map((account) => (
-                <option key={account.id} value={account.id}>
-                  {account.name}
-                </option>
-              ))}
-            </select>
-          </Row>
+          <BatchTargets
+            campaigns={campaigns}
+            formats={formats}
+            accounts={accounts}
+            campaignId={campaignId}
+            onCampaignChange={setCampaignId}
+            formatId={defaults.formatId}
+            accountId={accountId}
+            onAccountChange={setAccountId}
+          />
         </div>
         <p className="mt-5 text-sm text-mute">Copy 2 preview: {preview.label}</p>
         <button
@@ -291,15 +262,6 @@ export function BatchSettings({
         </p>
       </section>
     </form>
-  );
-}
-
-function Row({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4 first:border-t-0 first:pt-0">
-      <p className="text-sm">{label}</p>
-      {children}
-    </div>
   );
 }
 

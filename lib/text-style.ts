@@ -30,8 +30,20 @@ export function textStyleForNetwork(network: string | null | undefined): DrawnSt
   return "plain";
 }
 
-export function resolveTextStyle(style: TextStyle, network: string | null | undefined): DrawnStyle {
-  return style === "auto" ? textStyleForNetwork(network) : style;
+/**
+ * One look for a set of accounts. All TikTok → TikTok; all Meta → Instagram; a mix (cross-posting)
+ * → TikTok, which reads as native on TikTok and natural everywhere else.
+ */
+export function textStyleForNetworks(networks: string[]): DrawnStyle {
+  const looks = new Set(networks.map(textStyleForNetwork));
+  if (looks.size === 1) return [...looks][0];
+  if (looks.size === 0) return "plain";
+  return "tiktok";
+}
+
+export function resolveTextStyle(style: TextStyle, networks: string | string[] | null | undefined): DrawnStyle {
+  if (style !== "auto") return style;
+  return Array.isArray(networks) ? textStyleForNetworks(networks) : textStyleForNetwork(networks);
 }
 
 /** Breaks a hook into lines the way the apps wrap: word boundaries, about 26 characters. */

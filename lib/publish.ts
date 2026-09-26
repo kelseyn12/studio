@@ -2,6 +2,7 @@ import { postedAtFromPost, createPost, hasOutstand, uploadMedia, type OutstandPo
 import { pickFinished } from "@/lib/card-desk";
 import { ensureLocal } from "@/lib/files";
 import { prisma } from "@/lib/prisma";
+import { targetAccounts } from "@/lib/targets";
 import type { CardStatus } from "@prisma/client";
 
 export type QueueResult = { ok: true; shipped: boolean } | { ok: false; error: string; scheduled: boolean };
@@ -32,9 +33,9 @@ export async function queueCard(
     include: { account: true, assets: true },
   });
   if (!card) return { ok: false, error: "Missing card", scheduled: false };
-  const account = accountId
-    ? await prisma.socialAccount.findUnique({ where: { id: accountId } })
-    : card.account;
+  // Deal videos ship to every account on the deal; personal ones to the picked account.
+  const targets = targetAccounts(await prisma.socialAccount.findMany(), card, accountId);
+  const account = targets[0] ?? null;
   const edited = pickFinished(card.assets);
 
   let publicUrl = edited?.publicUrl || "";
@@ -53,28 +54,29 @@ export async function queueCard(
       await prisma.asset.update({ where: { id: edited.id }, data: { publicUrl } });
     }
     if (hasOutstand() && account && publicUrl) {
-      outstandPost = await createPost({
-        accounts: [account.outstandAccountId],
+      const post = await createPost({
+        accounts: targets.map((target) => target.outstandAccountId),
         content: card.caption || card.title,
         scheduledAt: when.toISOString(),
         media: [{ url: publicUrl, filename: edited?.filename || "video.mp4" }],
       });
+      outstandPost = post;
       shipped = true;
-      const publishedAt = postedAtFromPost(outstandPost);
-      await prisma.publishJob.create({
-        data: {
+      const publishedAt = postedAtFromPost(post);
+      await prisma.publishJob.createMany({
+        data: targets.map((target) => ({
           cardId,
-          accountId: account.id,
-          outstandPostId: outstandPost.id,
+          accountId: target.id,
+          outstandPostId: post.id,
           status: publishedAt ? "PUBLISHED" : "QUEUED",
           scheduledAt: when,
           publishedAt,
-        },
+        })),
       });
     } else if (hasOutstand() && account && !publicUrl) {
       error = "No video file to ship";
     } else if (hasOutstand() && !account) {
-      error = "Pick an account";
+      error = "Pick an account, or put accounts on this deal";
     }
   } catch (caught) {
     error = caught instanceof Error ? caught.message : "Outstand failed";

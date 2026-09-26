@@ -3,6 +3,7 @@ import { PaidButton } from "@/components/paid-button";
 import { QuickCut } from "@/components/quick-cut";
 import { toInputDateTime } from "@/lib/dates";
 import { formatMoney } from "@/lib/deals";
+import { dealAccounts, describeTargets } from "@/lib/targets";
 import { publicFileUrl } from "@/lib/urls";
 
 export function CardLive({
@@ -17,13 +18,22 @@ export function CardLive({
     editorNote: string;
     scheduledAt: Date | null;
     accountId: string | null;
+    campaignId: string | null;
     account: { username: string } | null;
     approved: boolean;
     payoutCents: number;
   };
-  accounts: Array<{ id: string; username: string; nickname: string }>;
+  accounts: Array<{
+    id: string;
+    username: string;
+    nickname: string;
+    network: string;
+    isActive: boolean;
+    campaignId: string | null;
+  }>;
   edited?: { id: string; path: string; filename: string; publicUrl: string | null };
 }) {
+  const dealTargets = dealAccounts(accounts, card.campaignId);
   if (!edited) {
     return (
       <p className="rounded-card border border-dashed border-line bg-panel px-5 py-8 text-sm text-mute">
@@ -104,7 +114,9 @@ export function CardLive({
       <form action={scheduleCard} className="space-y-3 rounded-card border border-line bg-panel p-5">
         <input type="hidden" name="id" value={card.id} />
         <p className="text-sm text-mute">
-          Schedule it. {card.account ? `@${card.account.username}` : "Pick an account"} gets this video at the time you set.
+          {dealTargets.length > 0
+            ? `Schedule it. Posts to ${describeTargets(dealTargets)} at the time you set — one post, every account on this deal.`
+            : `Schedule it. ${card.account ? `@${card.account.username}` : "Pick an account"} gets this video at the time you set.`}
         </p>
         <textarea name="caption" defaultValue={card.caption} placeholder="Caption that ships with the video" className="field min-h-24" />
         <input
@@ -114,14 +126,16 @@ export function CardLive({
           className="field"
           required
         />
-        <select name="accountId" defaultValue={card.accountId ?? ""} className="field" required>
-          <option value="">Which account</option>
-          {accounts.map((account) => (
-            <option key={account.id} value={account.id}>
-              {account.nickname ? `${account.nickname} · ` : ""}@{account.username}
-            </option>
-          ))}
-        </select>
+        {dealTargets.length === 0 ? (
+          <select name="accountId" defaultValue={card.accountId ?? ""} className="field" required>
+            <option value="">Which account</option>
+            {accounts.map((account) => (
+              <option key={account.id} value={account.id}>
+                {account.nickname ? `${account.nickname} · ` : ""}@{account.username}
+              </option>
+            ))}
+          </select>
+        ) : null}
         <button className="w-full rounded-xl border border-line px-4 py-3 font-semibold">Schedule</button>
       </form>
     </div>

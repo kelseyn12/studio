@@ -168,6 +168,9 @@ export default async function BatchPage({
         accounts={accounts.map((account) => ({
           id: account.id,
           network: account.network,
+          username: account.username,
+          isActive: account.isActive,
+          campaignId: account.campaignId,
           name: account.nickname
             ? `${account.nickname} · @${account.username}`
             : `${account.network} · @${account.username}`,

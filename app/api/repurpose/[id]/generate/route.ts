@@ -3,6 +3,7 @@ import { pickCombos } from "@/lib/combinations";
 import { prisma } from "@/lib/prisma";
 import { isRendering, renderBatch, renderStatus } from "@/lib/render-batch";
 import { readSession } from "@/lib/session";
+import { targetAccounts } from "@/lib/targets";
 import { parseTextStyle } from "@/lib/text-style";
 import { parseHookLines } from "@/lib/variations";
 import { canBurnText } from "@/lib/ffmpeg";
@@ -60,8 +61,12 @@ export async function POST(
   if (combos.length === 0) {
     return NextResponse.json({ error: "Add clips first" }, { status: 400 });
   }
-  if (!batch.accountId) {
-    return NextResponse.json({ error: "Pick an account so these post to the right @" }, { status: 400 });
+  const targets = targetAccounts(await prisma.socialAccount.findMany(), batch);
+  if (targets.length === 0) {
+    return NextResponse.json(
+      { error: "Pick an account, or put accounts on this deal in Accounts, so these post to the right @" },
+      { status: 400 },
+    );
   }
   if (batch.captionsOn && !hasOpenAI()) {
     return NextResponse.json(

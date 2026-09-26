@@ -122,6 +122,9 @@
 - [X] Background render with progress for big Multiply batches
   Generate returns immediately. Progress bar on the batch page. Run big batches on this Mac, not Fly (512MB).
 
+- [X] Cross-post per deal
+  Each account gets a deal on Accounts. Deal videos post to every account on the deal in one Outstand post (Polsia → IG + FB, Morphi → IG + TT + YT + FB). Multiply no longer needs a single account when the deal has some.
+
 - [X] Text hooks in the platform's own look
   Text look on Mix settings: TikTok / Instagram / Plain, default follows the account. Hooks wrap to two lines. Nickolai/Sasha style stays burned in; native in-app text is not possible through scheduling.
 

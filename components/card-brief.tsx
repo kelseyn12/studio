@@ -42,7 +42,7 @@ export function CardBrief({
         <p className="text-sm text-mute">Write it. Pick the day you will film and which account it is for. This does not publish.</p>
         <input name="title" defaultValue={card.title} className="field" placeholder="Title" />
         <select name="accountId" defaultValue={card.accountId ?? ""} className="field">
-          <option value="">Which account</option>
+          <option value="">Which account — skip for deal videos, they post to the deal&apos;s accounts</option>
           {accounts.map((account) => (
             <option key={account.id} value={account.id}>
               {account.nickname ? `${account.nickname} · ` : ""}@{account.username}

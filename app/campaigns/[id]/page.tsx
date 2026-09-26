@@ -6,6 +6,7 @@ import { StatusPill } from "@/components/status-pill";
 import { DEAL_KIND_LABEL } from "@/lib/deal-kind";
 import { cpmEarnedCents, formatMoney, scoreDeal } from "@/lib/deals";
 import { prisma } from "@/lib/prisma";
+import { describeTargets } from "@/lib/targets";
 
 async function addFormat(formData: FormData) {
   "use server";
@@ -25,7 +26,11 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
   const [campaign, posted] = await Promise.all([
     prisma.campaign.findUnique({
       where: { id },
-      include: { formats: true, cards: { orderBy: { updatedAt: "desc" }, take: 20 } },
+      include: {
+        formats: true,
+        accounts: { where: { isActive: true } },
+        cards: { orderBy: { updatedAt: "desc" }, take: 20 },
+      },
     }),
     prisma.card.findMany({
       where: { campaignId: id, OR: [{ status: { in: ["POSTED", "DATA"] } }, { postedAt: { not: null } }] },
@@ -50,6 +55,19 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
         </p>
         <h1 className="text-3xl font-semibold tracking-tight">{campaign.name}</h1>
         {campaign.deliverables ? <p className="mt-2 text-sm text-mute">{campaign.deliverables}</p> : null}
+        <p className="mt-2 text-sm text-mute">
+          {campaign.accounts.length > 0 ? (
+            <>Posts to {describeTargets(campaign.accounts)}</>
+          ) : (
+            <>
+              No accounts on this deal yet —{" "}
+              <Link href="/connections" className="underline">
+                put them on it in Accounts
+              </Link>{" "}
+              so videos post everywhere at once.
+            </>
+          )}
+        </p>
       </div>
       <section className="mb-8 grid gap-3 md:grid-cols-3">
         <div className="rounded-2xl bg-sun px-5 py-4 text-ink">

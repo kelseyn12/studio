@@ -47,6 +47,10 @@
 - `sendBatchToEditor` — `app/repurposer/actions.ts` — sends every built, unscheduled video in a Multiply batch to the editor at once (EDITING, cutBy EDITOR, one ping). Used by BatchOutputs on the batch page.
 - `cardsToPolish` / `polishNote` — `lib/batch-polish.ts` — which batch outputs are still READY and unscheduled; note text tagged with the batch name. Tested in `lib/batch-polish.test.ts`.
 - `BatchOutputs` — `components/batch-outputs.tsx` — built-video list with per-video state (Ready / Scheduled / With editor) and the Send all to editor form.
+- `targetAccounts` / `dealAccounts` / `describeTargets` / `networkShort` — `lib/targets.ts` — which accounts a video posts to: all active accounts on its deal, else the picked one. Used by `queueCard`, `renderBatch`, Multiply generate guard, CardLive, BatchTargets, deal page. Tested in `lib/targets.test.ts`.
+- `saveAccount` — `app/connections/actions.ts` — saves an account's label and deal (was `renameAccount`).
+- `BatchTargets` — `components/batch-targets.tsx` — Deal · Format · Posts-to/Account rows on Mix settings; also exports `Row`.
+- `textStyleForNetworks` — `lib/text-style.ts` — one look for a set of networks (all TikTok → tiktok, all Meta → instagram, mixed → tiktok).
 - `hookTextFilters` / `wrapHook` / `resolveTextStyle` / `textStyleForNetwork` / `parseTextStyle` — `lib/text-style.ts` — burned hook text in the platform's own look (tiktok / instagram / plain, "auto" from the account network); word-wrapped, one centered drawtext per line. Used by `videoFilter` in lib/ffmpeg.ts and `renderBatch`. Tested with real renders in `lib/text-style.test.ts`.
 - `TextStylePick` — `components/text-style-pick.tsx` — "Text look" select in Mix settings; explains which look "Match the account" resolves to.
 - `ingestClip` — `lib/ingest.ts` — stores a Multiply clip: `saveLocalUpload` → `videoSize` (ffprobe) → `shrinkClip` when the short side is over 1080 → `uploadLocalToR2`. Throws `UNREADABLE_CLIP` for non-video files. Used by `/api/repurpose/clips`.

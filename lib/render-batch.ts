@@ -5,6 +5,7 @@ import { assembleVideo, quietEnds, NO_TRIM, type ClipTrim } from "@/lib/ffmpeg";
 import { ensureLocal, localRoot, uploadLocalToR2 } from "@/lib/files";
 import { prisma } from "@/lib/prisma";
 import { pickTracks } from "@/lib/combinations";
+import { targetAccounts } from "@/lib/targets";
 import { parseTextStyle, resolveTextStyle } from "@/lib/text-style";
 import { parseHookLines, variationFor } from "@/lib/variations";
 import type { RepurposeBatch, RepurposeClip, RepurposeTrack } from "@prisma/client";
@@ -38,10 +39,13 @@ export async function renderBatch(input: {
   const total = combos.length * lines.length * copies;
   const musicQueue = pickTracks(batch.tracks, total);
   try {
-    const account = batch.accountId
-      ? await prisma.socialAccount.findUnique({ where: { id: batch.accountId }, select: { network: true } })
-      : null;
-    const hookStyle = resolveTextStyle(parseTextStyle(batch.textStyle), account?.network);
+    // Deal batches post to every account on the deal; the text look follows that set.
+    const targets = targetAccounts(await prisma.socialAccount.findMany(), batch);
+    const accountId = targets[0]?.id ?? batch.accountId;
+    const hookStyle = resolveTextStyle(
+      parseTextStyle(batch.textStyle),
+      targets.map((target) => target.network),
+    );
     const trims = new Map<string, ClipTrim>();
     if (batch.trimOn) {
       for (const clip of batch.clips) {
@@ -100,7 +104,7 @@ export async function renderBatch(input: {
               status: "READY",
               campaignId: batch.campaignId,
               formatId: batch.formatId,
-              accountId: batch.accountId,
+              accountId,
               createdById: userId,
               hook: line || combo.find((clip) => clip.slot === "HOOK")?.hookText || "",
               caption: batch.caption,

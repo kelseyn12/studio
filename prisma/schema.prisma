@@ -118,6 +118,7 @@ model Campaign {
   createdAt             DateTime         @default(now())
   formats               Format[]
   cards                 Card[]
+  accounts              SocialAccount[]
 }
 
 model Format {
@@ -196,6 +197,8 @@ model SocialAccount {
   username          String
   nickname          String   @default("")
   isActive          Boolean  @default(true)
+  campaignId        String?
+  campaign          Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
   createdAt         DateTime @default(now())
   cards             Card[]
   publishes         PublishJob[]
