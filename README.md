@@ -61,8 +61,12 @@ Roles: CREATOR (owner), EDITOR (cuts videos), OPERATOR (schedules/posts). Auth i
 ## Deploy
 
 ```bash
-fly deploy
+flyctl deploy --remote-only \
+  --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="$(grep '^NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=' .env | cut -d= -f2- | tr -d '"')" \
+  --build-arg CLERK_SECRET_KEY="$(grep '^CLERK_SECRET_KEY=' .env | cut -d= -f2- | tr -d '"')"
 ```
+
+The Clerk keys must be passed as build args: `NEXT_PUBLIC_*` values are inlined into the client and middleware bundles at build time. A plain `fly deploy` builds without them and the live app silently falls back to the PIN login screen.
 
 `Dockerfile` builds with a throwaway SQLite file; at runtime the app reads `TURSO_DATABASE_URL` / `TURSO_AUTH_TOKEN` from Fly secrets so local and Fly share one database. Schema changes need `pnpm db:push` locally and the matching `ALTER TABLE` on Turso (`turso db shell studio`).
 
