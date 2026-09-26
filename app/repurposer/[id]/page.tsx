@@ -153,6 +153,7 @@ export default async function BatchPage({
           trimOn: batch.trimOn,
           hookColorOn: batch.hookColorOn,
           captionsOn: batch.captionsOn,
+          textStyle: batch.textStyle,
           hookLines: batch.hookLines,
           caption: batch.caption,
           campaignId: batch.campaignId ?? "",
@@ -166,6 +167,7 @@ export default async function BatchPage({
         )}
         accounts={accounts.map((account) => ({
           id: account.id,
+          network: account.network,
           name: account.nickname
             ? `${account.nickname} · @${account.username}`
             : `${account.network} · @${account.username}`,

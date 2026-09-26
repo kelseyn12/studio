@@ -3,6 +3,7 @@ import { pickCombos } from "@/lib/combinations";
 import { prisma } from "@/lib/prisma";
 import { isRendering, renderBatch, renderStatus } from "@/lib/render-batch";
 import { readSession } from "@/lib/session";
+import { parseTextStyle } from "@/lib/text-style";
 import { parseHookLines } from "@/lib/variations";
 import { canBurnText } from "@/lib/ffmpeg";
 import { hasOpenAI } from "@/lib/whisper";
@@ -35,6 +36,7 @@ export async function POST(
         trimOn: form.get("trimOn") === "on",
         hookColorOn: form.get("hookColorOn") === "on",
         captionsOn: form.get("captionsOn") === "on",
+        textStyle: parseTextStyle(form.get("textStyle")),
         hookLines: String(form.get("hookLines") || ""),
         caption: String(form.get("caption") || ""),
         campaignId: String(form.get("campaignId") || "") || null,

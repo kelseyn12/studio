@@ -3,6 +3,7 @@ import { accessSync, constants } from "fs";
 import { mkdir } from "fs/promises";
 import path from "path";
 import { localRoot } from "@/lib/files";
+import { hookTextFilters, wrapHook, type DrawnStyle } from "@/lib/text-style";
 
 const FFMPEG_FULL = "/opt/homebrew/opt/ffmpeg-full/bin/ffmpeg";
 const FFPROBE_FULL = "/opt/homebrew/opt/ffmpeg-full/bin/ffprobe";
@@ -244,6 +245,7 @@ function videoFilter(input: {
   mirror?: boolean;
   hookText?: string;
   hookColor?: string;
+  hookStyle?: DrawnStyle;
   captionFilters?: string[];
 }): string {
   const crop = Math.max(0, input.crop);
@@ -264,10 +266,13 @@ function videoFilter(input: {
     if (input.hue !== 0) parts.push(`hue=h=${input.hue}`);
   }
   if (input.hookText) {
-    const text = escapeDrawText(input.hookText.slice(0, 80));
-    const color = input.hookColor || "white";
     parts.push(
-      `drawtext=fontfile=${HOOK_FONT}:text='${text}':fontsize=56:fontcolor=${color}:borderw=4:bordercolor=black:x=(w-text_w)/2:y=h*0.12`,
+      ...hookTextFilters({
+        escapedLines: wrapHook(input.hookText).map(escapeDrawText),
+        style: input.hookStyle ?? "plain",
+        color: input.hookColor || "white",
+        fontfile: HOOK_FONT,
+      }),
     );
   }
   return parts.join(",");
@@ -294,6 +299,7 @@ export async function assembleVideo(input: {
   crop: number;
   mirror?: boolean;
   hookColor?: string;
+  hookStyle?: DrawnStyle;
   musicPath?: string;
 }): Promise<string> {
   await mkdir(path.join(localRoot(), "generated"), { recursive: true });
@@ -327,6 +333,7 @@ export async function assembleVideo(input: {
       mirror: input.mirror,
       hookText: index === 0 ? input.clips[index].hookText : undefined,
       hookColor: input.hookColor,
+      hookStyle: input.hookStyle,
       captionFilters: input.clips[index].captionFilters,
     });
     chains.push(`[${index}:v]${vf}[v${index}]`);

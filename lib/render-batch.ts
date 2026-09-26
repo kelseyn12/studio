@@ -5,6 +5,7 @@ import { assembleVideo, quietEnds, NO_TRIM, type ClipTrim } from "@/lib/ffmpeg";
 import { ensureLocal, localRoot, uploadLocalToR2 } from "@/lib/files";
 import { prisma } from "@/lib/prisma";
 import { pickTracks } from "@/lib/combinations";
+import { parseTextStyle, resolveTextStyle } from "@/lib/text-style";
 import { parseHookLines, variationFor } from "@/lib/variations";
 import type { RepurposeBatch, RepurposeClip, RepurposeTrack } from "@prisma/client";
 
@@ -37,6 +38,10 @@ export async function renderBatch(input: {
   const total = combos.length * lines.length * copies;
   const musicQueue = pickTracks(batch.tracks, total);
   try {
+    const account = batch.accountId
+      ? await prisma.socialAccount.findUnique({ where: { id: batch.accountId }, select: { network: true } })
+      : null;
+    const hookStyle = resolveTextStyle(parseTextStyle(batch.textStyle), account?.network);
     const trims = new Map<string, ClipTrim>();
     if (batch.trimOn) {
       for (const clip of batch.clips) {
@@ -83,6 +88,7 @@ export async function renderBatch(input: {
             ),
             outputName: `${id}-${fileNumber}.mp4`,
             ...filters,
+            hookStyle,
             musicPath: music ? await ensureLocal(music.path) : undefined,
           });
           const outputBytes = (await stat(path.join(localRoot(), outputRel))).size;

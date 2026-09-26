@@ -122,6 +122,9 @@
 - [X] Background render with progress for big Multiply batches
   Generate returns immediately. Progress bar on the batch page. Run big batches on this Mac, not Fly (512MB).
 
+- [X] Text hooks in the platform's own look
+  Text look on Mix settings: TikTok / Instagram / Plain, default follows the account. Hooks wrap to two lines. Nickolai/Sasha style stays burned in; native in-app text is not possible through scheduling.
+
 - [X] 4K phone clips into Multiply
   Found and fixed: every upload over 10MB was 500ing (Next middleware body cap). Cap is now 1GB on the Mac, 250MB on Fly. 4K clips shrink to 1080 on arrival; non-video files are refused at upload.
 

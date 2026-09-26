@@ -1,9 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { TextStylePick } from "@/components/text-style-pick";
+import { parseTextStyle, type TextStyle } from "@/lib/text-style";
 import { outputCount, parseHookLines, plannedMixes, variationFor } from "@/lib/variations";
 
 type Option = { id: string; name: string };
+type AccountOption = Option & { network: string };
 
 export function BatchSettings({
   batchId,
@@ -33,6 +36,7 @@ export function BatchSettings({
     trimOn: boolean;
     hookColorOn: boolean;
     captionsOn: boolean;
+    textStyle: string;
     hookLines: string;
     caption: string;
     campaignId: string;
@@ -41,7 +45,7 @@ export function BatchSettings({
   };
   campaigns: Option[];
   formats: Array<{ id: string; name: string; campaignId: string }>;
-  accounts: Option[];
+  accounts: AccountOption[];
   textBurnWorks?: boolean;
 }) {
   const [allCombos, setAllCombos] = useState(defaults.allCombos);
@@ -56,6 +60,9 @@ export function BatchSettings({
   const [captionsOn, setCaptionsOn] = useState(defaults.captionsOn);
   const [hookLines, setHookLines] = useState(defaults.hookLines);
   const [campaignId, setCampaignId] = useState(defaults.campaignId);
+  const [accountId, setAccountId] = useState(defaults.accountId);
+  const [textStyle, setTextStyle] = useState<TextStyle>(parseTextStyle(defaults.textStyle));
+  const accountNetwork = accounts.find((account) => account.id === accountId)?.network ?? null;
   const dealFormats = formats.filter((format) => format.campaignId === campaignId);
   const textCount = useMemo(() => parseHookLines(hookLines).length, [hookLines]);
   const mixes = useMemo(
@@ -93,8 +100,8 @@ export function BatchSettings({
       <section className="rounded-card border border-line bg-panel p-5">
         <p className="label">Text hooks · optional</p>
         <p className="mt-2 text-sm text-mute">
-          One line per hook. Each line is burned onto the first clip — big, bold, top-center — and multiplies the
-          batch. 6 mixes × 4 lines = 24 videos. Leave empty to skip.
+          One line per hook. Each line is drawn onto the first clip in that app&apos;s own text look and multiplies the
+          batch. 6 mixes × 4 lines = 24 videos. Long lines wrap. Leave empty to skip.
         </p>
         <textarea
           name="hookLines"
@@ -108,6 +115,7 @@ export function BatchSettings({
             {textCount} line{textCount === 1 ? "" : "s"} · every mix gets each line once
           </p>
         ) : null}
+        <TextStylePick value={textStyle} onChange={setTextStyle} accountNetwork={accountNetwork} />
       </section>
 
       <section className="rounded-card border border-line bg-panel p-5">
@@ -252,7 +260,13 @@ export function BatchSettings({
             </Row>
           ) : null}
           <Row label="Account">
-            <select name="accountId" defaultValue={defaults.accountId} className="field max-w-xs" required>
+            <select
+              name="accountId"
+              value={accountId}
+              onChange={(event) => setAccountId(event.target.value)}
+              className="field max-w-xs"
+              required
+            >
               <option value="" disabled>
                 Required — which account
               </option>
