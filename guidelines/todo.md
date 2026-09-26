@@ -122,5 +122,8 @@
 - [X] Background render with progress for big Multiply batches
   Generate returns immediately. Progress bar on the batch page. Run big batches on this Mac, not Fly (512MB).
 
+- [X] Send a whole Multiply batch to the editor
+  "Send all to editor to polish" on the batch page moves every Ready, unscheduled output to Cuts with one note. Per-video state shown next to each output.
+
 - [X] Spoken words on screen in Multiply
   Toggle on Mix settings. Whisper timestamps → 2–3 word phrases burned through the whole video. Cached per clip. Needs ffmpeg-full + OPENAI_API_KEY.

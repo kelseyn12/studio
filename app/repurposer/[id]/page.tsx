@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { BatchOutputs } from "@/components/batch-outputs";
 import { BatchSettings } from "@/components/batch-settings";
 import { ClipTile } from "@/components/clip-tile";
 import { DropZone } from "@/components/drop-zone";
 import { Shell } from "@/components/shell";
 import { REFERENCE_MAX_BYTES } from "@/lib/files";
 import { STUDIO_FILE_MAX_BYTES } from "@/lib/storage";
-import { publicFileUrl } from "@/lib/urls";
+import { cardsToPolish } from "@/lib/batch-polish";
 import { isRendering } from "@/lib/render-batch";
 import { canBurnText } from "@/lib/ffmpeg";
 import { LiveRefresh } from "@/components/live-refresh";
@@ -18,12 +19,12 @@ export default async function BatchPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ hook?: string }>;
+  searchParams: Promise<{ hook?: string; polish?: string }>;
 }) {
   const { id } = await params;
   const query = await searchParams;
   const winningHook = (query.hook || "").trim();
-  const [batch, campaigns, accounts, batches, textBurnWorks] = await Promise.all([
+  const [batch, campaigns, accounts, batches, editors, textBurnWorks] = await Promise.all([
     prisma.repurposeBatch.findUnique({
       where: { id },
       include: { clips: true, tracks: true, outputs: true },
@@ -31,9 +32,17 @@ export default async function BatchPage({
     prisma.campaign.findMany({ orderBy: { name: "asc" }, include: { formats: true } }),
     prisma.socialAccount.findMany({ where: { isActive: true } }),
     prisma.repurposeBatch.findMany({ orderBy: { createdAt: "desc" }, take: 8 }),
+    prisma.user.findMany({ where: { role: "EDITOR" }, orderBy: { name: "asc" } }),
     canBurnText(),
   ]);
   if (!batch) redirect("/repurposer");
+  const outputCardIds = batch.outputs.map((output) => output.cardId).filter((cardId): cardId is string => Boolean(cardId));
+  const outputCards = outputCardIds.length
+    ? await prisma.card.findMany({
+        where: { id: { in: outputCardIds } },
+        select: { id: true, status: true, scheduledAt: true },
+      })
+    : [];
   const hooks = batch.clips.filter((clip) => clip.slot === "HOOK");
   const bodies = batch.clips.filter((clip) => clip.slot === "DEMO");
   const ctas = batch.clips.filter((clip) => clip.slot === "CTA");
@@ -176,20 +185,14 @@ export default async function BatchPage({
         <p className="mt-6 text-sm text-review">{batch.status}</p>
       ) : null}
 
-      <div className="mt-8 space-y-2">
-        {batch.outputs.map((output) => (
-          <div key={output.id} className="flex items-center justify-between rounded-card border border-line bg-panel px-4 py-3">
-            <a className="text-sun" href={publicFileUrl(output.path)}>
-              {output.label}
-            </a>
-            {output.cardId ? (
-              <Link href={`/cards/${output.cardId}`} className="text-sm text-mute">
-                Open video
-              </Link>
-            ) : null}
-          </div>
-        ))}
-      </div>
+      <BatchOutputs
+        batchId={batch.id}
+        outputs={batch.outputs}
+        cards={outputCards}
+        editors={editors.map((person) => ({ id: person.id, name: person.name, defaultEditor: person.defaultEditor }))}
+        canPolish={isRendering(batch.status) ? 0 : cardsToPolish(outputCards).length}
+        polish={query.polish}
+      />
     </Shell>
   );
 }

@@ -44,6 +44,9 @@
 - `quietEnds` / `trimFromSilence` — `lib/ffmpeg.ts` — finds dead air at clip ends via silencedetect; safe parse tested in `lib/trim.test.ts`. Used by Multiply generate when Cut dead air is on.
 - `clipDuration` — `lib/ffmpeg.ts` — ffprobe duration in seconds. Used by quietEnds.
 - `sendForTouchUp` — `app/cards/[id]/actions.ts` — sends a finished (usually generated) video to the editor to polish; back to Cuts as EDITING. Used on Live for unscheduled Ready videos.
+- `sendBatchToEditor` — `app/repurposer/actions.ts` — sends every built, unscheduled video in a Multiply batch to the editor at once (EDITING, cutBy EDITOR, one ping). Used by BatchOutputs on the batch page.
+- `cardsToPolish` / `polishNote` — `lib/batch-polish.ts` — which batch outputs are still READY and unscheduled; note text tagged with the batch name. Tested in `lib/batch-polish.test.ts`.
+- `BatchOutputs` — `components/batch-outputs.tsx` — built-video list with per-video state (Ready / Scheduled / With editor) and the Send all to editor form.
 - `pickFinished` — `lib/card-desk.ts` — the file that ships: newest EDITED first, else newest GENERATED. Used by queueCard and the video page.
 - `trimVideo` / `isValidCut` — `lib/ffmpeg.ts` — hand cut: re-encode one file down to a picked start/end window (min half a second). Used by `/api/trim`.
 - `QuickCut` — `components/quick-cut.tsx` — player with Start here / End here / Cut it. On Multiply clip tiles (replaces the clip) and on Live for finished videos (makes a new cut; newest ships).

@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-09-25 — Send a whole Multiply batch to the editor: one form on the batch page moves every built, unscheduled video to Cuts (was one-at-a-time from each video's Live step). Output list moved to components/batch-outputs.tsx with per-video state; eligibility in lib/batch-polish.ts.
 - 2026-09-21 — Fly Multiply 404: Next baked `/repurposer` at build against an empty temp db and redirected to a phantom batch id. Root layout is now force-dynamic; missing batch ids bounce back to Multiply instead of 404.
 
 - 2026-09-21 — Background render for Multiply (progress bar, leave the page, Stuck?-Reset), remove team member (Team page, also deletes Clerk account), Set up Studio checklist on Today (empty DB made features invisible). Render loop moved to lib/render-batch.ts.
