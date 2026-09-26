@@ -134,6 +134,9 @@
 - [X] Text hooks in the platform's own look
   Text look on Mix settings: TikTok / Instagram / Plain, default follows the account. Hooks wrap to two lines. Nickolai/Sasha style stays burned in; native in-app text is not possible through scheduling.
 
+- [X] Sasha frame: highlighted word, numbered list, colored rooms
+  Hook text now renders through libass (lib/ass.ts): *stars* around a word color it (green/red/yellow/blue cycle with "Text color changes per copy"), "Numbered list under the headline" puts 1.–N. down the left, "Color wash per copy" tints each copy red/blue/purple/magenta/orange/teal. TikTok look (outline + shadow) and Instagram look (box per line) both render; cross-post deals still get one file per look. Real-render pixel tests in lib/ass.test.ts.
+
 - [X] 4K phone clips into Multiply
   Found and fixed: every upload over 10MB was 500ing (Next middleware body cap). Cap is now 1GB on the Mac, 250MB on Fly. 4K clips shrink to 1080 on arrival; non-video files are refused at upload.
 

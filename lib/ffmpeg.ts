@@ -3,7 +3,8 @@ import { accessSync, constants } from "fs";
 import { mkdir } from "fs/promises";
 import path from "path";
 import { localRoot } from "@/lib/files";
-import { hookTextFilters, wrapHook, type DrawnStyle } from "@/lib/text-style";
+import { writeHookAss } from "@/lib/ass";
+import type { DrawnStyle } from "@/lib/text-style";
 
 const FFMPEG_FULL = "/opt/homebrew/opt/ffmpeg-full/bin/ffmpeg";
 const FFPROBE_FULL = "/opt/homebrew/opt/ffmpeg-full/bin/ffprobe";
@@ -37,7 +38,7 @@ export async function canBurnText(): Promise<boolean> {
   if (burnTextKnown !== null) return burnTextKnown;
   try {
     const out = await runCommand(ffmpegBin(), ["-hide_banner", "-filters"]);
-    burnTextKnown = out.includes(" drawtext ");
+    burnTextKnown = out.includes(" drawtext ") && out.includes(" ass ");
   } catch {
     burnTextKnown = false;
   }
@@ -243,9 +244,8 @@ function videoFilter(input: {
   hue: number;
   crop: number;
   mirror?: boolean;
-  hookText?: string;
-  hookColor?: string;
-  hookStyle?: DrawnStyle;
+  hookFilter?: string;
+  tintHue?: number | null;
   captionFilters?: string[];
 }): string {
   const crop = Math.max(0, input.crop);
@@ -265,17 +265,15 @@ function videoFilter(input: {
     parts.push(`eq=saturation=${input.saturation}:contrast=${input.contrast}`);
     if (input.hue !== 0) parts.push(`hue=h=${input.hue}`);
   }
-  if (input.hookText) {
-    parts.push(
-      ...hookTextFilters({
-        escapedLines: wrapHook(input.hookText).map(escapeDrawText),
-        style: input.hookStyle ?? "plain",
-        color: input.hookColor || "white",
-        fontfile: HOOK_FONT,
-      }),
-    );
-  }
+  // Color wash goes under the text so the words stay clean white.
+  if (input.tintHue !== null && input.tintHue !== undefined) parts.push(tintFilter(input.tintHue));
+  if (input.hookFilter) parts.push(input.hookFilter);
   return parts.join(",");
+}
+
+/** Sasha's colored-light room: a translucent single-hue wash over the whole frame. */
+export function tintFilter(hue: number): string {
+  return `colorize=hue=${Math.round(hue)}:saturation=0.7:lightness=0.5:mix=0.38`;
 }
 
 export function uniquenessFilter(input: {
@@ -299,7 +297,10 @@ export async function assembleVideo(input: {
   crop: number;
   mirror?: boolean;
   hookColor?: string;
+  accentColor?: string;
   hookStyle?: DrawnStyle;
+  hookList?: number;
+  tintHue?: number | null;
   musicPath?: string;
 }): Promise<string> {
   await mkdir(path.join(localRoot(), "generated"), { recursive: true });
@@ -323,6 +324,16 @@ export async function assembleVideo(input: {
 
   const tempo = input.speed !== 1 ? `atempo=${input.speed},` : "";
   const chains: string[] = [];
+  const hookText = input.clips[0]?.hookText;
+  const hookFilter = hookText
+    ? await writeHookAss({
+        text: hookText,
+        style: input.hookStyle ?? "plain",
+        baseColor: input.hookColor,
+        accentColor: input.accentColor,
+        listCount: input.hookList,
+      })
+    : undefined;
   for (let index = 0; index < n; index += 1) {
     const vf = videoFilter({
       speed: input.speed,
@@ -331,9 +342,8 @@ export async function assembleVideo(input: {
       hue: input.hue,
       crop: input.crop,
       mirror: input.mirror,
-      hookText: index === 0 ? input.clips[index].hookText : undefined,
-      hookColor: input.hookColor,
-      hookStyle: input.hookStyle,
+      hookFilter: index === 0 ? hookFilter : undefined,
+      tintHue: input.tintHue,
       captionFilters: input.clips[index].captionFilters,
     });
     chains.push(`[${index}:v]${vf}[v${index}]`);

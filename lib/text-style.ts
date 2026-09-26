@@ -1,8 +1,8 @@
 /**
- * How burned-in hook text is drawn so it reads like the platform's own text tool.
- * "auto" follows the account the batch posts to. Everything stays inside each
- * app's safe zone (clear of the header at the top, the caption block at the bottom
- * and the icon column on the right).
+ * Which app look hook text takes so it reads like the platform's own text tool.
+ * The drawing itself lives in lib/ass.ts (libass); positions there stay inside each
+ * app's safe zone (clear of the header at the top, the caption block at the bottom and the icon
+ * column on the right). "auto" follows the account the batch posts to.
  */
 export const TEXT_STYLES = ["auto", "tiktok", "instagram", "plain"] as const;
 export type TextStyle = (typeof TEXT_STYLES)[number];
@@ -72,48 +72,6 @@ export function wrapHook(text: string): string[] {
   }
   if (current) lines.push(current);
   return lines;
-}
-
-type StyleSpec = { fontsize: number; lineGap: number; top: number; look: string[] };
-
-/** Positions: TikTok's header covers the top ~9%, Instagram Reels ~12%; both are clear below 15%. */
-const STYLE_SPECS: Record<DrawnStyle, StyleSpec> = {
-  // TikTok classic: chunky white text, thin outline plus a soft drop shadow.
-  tiktok: {
-    fontsize: 60,
-    lineGap: 12,
-    top: 0.18,
-    look: ["borderw=2", "bordercolor=black@0.85", "shadowcolor=black@0.55", "shadowx=3", "shadowy=3"],
-  },
-  // Instagram "Modern": each line sits on its own solid box.
-  instagram: { fontsize: 54, lineGap: 20, top: 0.16, look: ["box=1", "boxcolor=black@0.62", "boxborderw=18"] },
-  plain: { fontsize: 56, lineGap: 10, top: 0.12, look: ["borderw=4", "bordercolor=black"] },
-};
-
-/**
- * One centered drawtext per wrapped line. Drawing lines separately keeps every line
- * centered on any ffmpeg version and gives Instagram its per-line box.
- * `escapedLines` must already be drawtext-escaped.
- */
-export function hookTextFilters(input: {
-  escapedLines: string[];
-  style: DrawnStyle;
-  color: string;
-  fontfile: string;
-}): string[] {
-  const spec = STYLE_SPECS[input.style];
-  const lineHeight = spec.fontsize + spec.lineGap;
-  return input.escapedLines.map((line, index) =>
-    [
-      `drawtext=fontfile=${input.fontfile}`,
-      `text='${line}'`,
-      `fontsize=${spec.fontsize}`,
-      `fontcolor=${input.color}`,
-      ...spec.look,
-      "x=(w-text_w)/2",
-      `y=h*${spec.top}+${index * lineHeight}`,
-    ].join(":"),
-  );
 }
 
 /**

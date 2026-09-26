@@ -35,6 +35,17 @@ describe("variationFor", () => {
     expect(colors[4]).toBe(colors[0]);
     const off = variationFor(2, { speedAmt: 0, colorAmt: 0, cropAmt: 0 });
     expect(off.hookColor).toBe("white");
+    expect(off.accentColor).toBe("#5CFF5C");
+    expect(variationFor(1, base).accentColor).toBe("#FF5C5C");
+  });
+
+  it("walks the color wash palette per copy only when tint is on", () => {
+    const base = { speedAmt: 0, colorAmt: 0, cropAmt: 0, tintOn: true };
+    const hues = [0, 1, 2, 3, 4, 5, 6].map((index) => variationFor(index, base).tintHue);
+    expect(hues.slice(0, 6)).toEqual([0, 220, 280, 320, 30, 170]);
+    expect(hues[6]).toBe(0);
+    expect(variationFor(1, base).label).toBe("blue wash");
+    expect(variationFor(1, { ...base, tintOn: false }).tintHue).toBeNull();
   });
 });
 

@@ -6,6 +6,8 @@ export type Variation = {
   crop: number;
   mirror: boolean;
   hookColor: string;
+  accentColor: string;
+  tintHue: number | null;
   label: string;
 };
 
@@ -13,10 +15,24 @@ const STEPS = [1, -1, 0.55, -0.7, 1.15];
 
 /** Sasha's trick: same text, different color, and the platform sees a new video. */
 export const HOOK_COLORS = ["white", "yellow", "#5CFF5C", "#FF5C5C"] as const;
+/** Color of the *starred* word in a hook line. Base text stays white. */
+export const ACCENT_COLORS = ["#5CFF5C", "#FF5C5C", "yellow", "#5CB8FF"] as const;
+/** Sasha's colored-light rooms: red, blue, purple, magenta, orange, teal (hue degrees). */
+export const TINT_HUES = [0, 220, 280, 320, 30, 170] as const;
+/** Longest numbered list that fits under a two-line headline and above the caption block. */
+export const LIST_MAX = 10;
+const TINT_NAMES = ["red", "blue", "purple", "magenta", "orange", "teal"] as const;
 
 export function variationFor(
   index: number,
-  input: { speedAmt: number; colorAmt: number; cropAmt: number; mirrorOn?: boolean; hookColorOn?: boolean },
+  input: {
+    speedAmt: number;
+    colorAmt: number;
+    cropAmt: number;
+    mirrorOn?: boolean;
+    hookColorOn?: boolean;
+    tintOn?: boolean;
+  },
 ): Variation {
   const step = STEPS[index % STEPS.length];
   const speedAmt = Math.max(0, input.speedAmt);
@@ -29,12 +45,16 @@ export function variationFor(
   const crop = cropAmt ? Number((cropAmt * Math.abs(step)).toFixed(1)) : 0;
   const mirror = Boolean(input.mirrorOn) && index % 2 === 1;
   const hookColor = input.hookColorOn ? HOOK_COLORS[index % HOOK_COLORS.length] : HOOK_COLORS[0];
+  const accentColor = input.hookColorOn ? ACCENT_COLORS[index % ACCENT_COLORS.length] : ACCENT_COLORS[0];
+  const tintIndex = index % TINT_HUES.length;
+  const tintHue = input.tintOn ? TINT_HUES[tintIndex] : null;
   const bits = [
     speedAmt ? `${Math.round(speed * 100)}% speed` : null,
     colorAmt ? `sat ${saturation.toFixed(2)}` : null,
     crop ? `crop ${crop}%` : null,
     mirror ? "mirrored" : null,
     input.hookColorOn && hookColor !== HOOK_COLORS[0] ? `${hookColor} text` : null,
+    tintHue !== null ? `${TINT_NAMES[tintIndex]} wash` : null,
   ].filter(Boolean);
   return {
     speed,
@@ -44,6 +64,8 @@ export function variationFor(
     crop,
     mirror,
     hookColor,
+    accentColor,
+    tintHue,
     label: bits.length ? bits.join(" · ") : "clean",
   };
 }

@@ -2,9 +2,9 @@ import { mkdtemp, readFile, rm } from "fs/promises";
 import os from "os";
 import path from "path";
 import { afterAll, describe, expect, it } from "vitest";
-import { escapeDrawText, HOOK_FONT, runFfmpeg } from "@/lib/ffmpeg";
+import { writeHookAss } from "@/lib/ass";
+import { runFfmpeg } from "@/lib/ffmpeg";
 import {
-  hookTextFilters,
   looksForNetworks,
   parseTextStyle,
   resolveTextStyle,
@@ -53,23 +53,6 @@ describe("text style choice", () => {
     expect(wrapHook("   ")).toEqual([]);
     expect(wrapHook("a".repeat(120)).join("").length).toBeLessThanOrEqual(80);
   });
-
-  it("draws one centered line per wrapped line, stacked downward", () => {
-    const filters = hookTextFilters({
-      escapedLines: ["ONE", "TWO"],
-      style: "instagram",
-      color: "yellow",
-      fontfile: "/f.ttf",
-    });
-    expect(filters).toHaveLength(2);
-    expect(filters[0]).toContain("box=1");
-    expect(filters[0]).toContain("fontcolor=yellow");
-    expect(filters[0]).toContain("y=h*0.16+0");
-    expect(filters[1]).toContain("y=h*0.16+74");
-    expect(hookTextFilters({ escapedLines: ["X"], style: "tiktok", color: "white", fontfile: "/f.ttf" })[0]).toContain(
-      "shadowx=3",
-    );
-  });
 });
 
 describe("text styles render with real ffmpeg", () => {
@@ -95,19 +78,14 @@ describe("text styles render with real ffmpeg", () => {
     async (style) => {
       dir = dir || (await mkdtemp(path.join(os.tmpdir(), "studio-style-")));
       const frame = path.join(dir, `${style}.png`);
-      const filters = hookTextFilters({
-        escapedLines: wrapHook("Nobody talks about this one thing").map(escapeDrawText),
-        style,
-        color: "white",
-        fontfile: HOOK_FONT,
-      });
+      const filter = await writeHookAss({ text: "Nobody talks about this one thing", style });
       await runFfmpeg([
         "-f",
         "lavfi",
         "-i",
         "color=c=gray:s=1080x1920:d=0.2",
         "-vf",
-        filters.join(","),
+        filter,
         "-frames:v",
         "1",
         frame,

@@ -6,6 +6,7 @@ import { ensureLocal, localRoot, uploadLocalToR2 } from "@/lib/files";
 import { prisma } from "@/lib/prisma";
 import { pickTracks } from "@/lib/combinations";
 import { targetAccounts } from "@/lib/targets";
+import { stripHighlight } from "@/lib/ass";
 import { hookLooks } from "@/lib/text-style";
 import { parseHookLines, variationFor } from "@/lib/variations";
 import type { RepurposeBatch, RepurposeClip, RepurposeTrack } from "@prisma/client";
@@ -101,6 +102,7 @@ export async function renderBatch(input: {
               outputName: `${id}-${fileNumber}${suffix}.mp4`,
               ...filters,
               hookStyle: look,
+              hookList: batch.listCount,
               musicPath,
             });
             files.push({
@@ -121,7 +123,7 @@ export async function renderBatch(input: {
               formatId: batch.formatId,
               accountId,
               createdById: userId,
-              hook: hookLine,
+              hook: stripHighlight(hookLine),
               caption: batch.caption,
               editorNote: `Uniqueness: ${variation.label}`,
               payoutCents: basePayCents,

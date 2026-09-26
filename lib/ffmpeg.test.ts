@@ -98,7 +98,7 @@ describe("text burn-in", () => {
       ]);
       const { assembleVideo } = await import("@/lib/ffmpeg");
       const outputRel = await assembleVideo({
-        clips: [{ path: clip, hookText: "I QUIT MY 9-5" }],
+        clips: [{ path: clip, hookText: "I *QUIT* MY 9-5" }],
         outputName: `test-text-${Date.now()}.mp4`,
         speed: 1,
         saturation: 1,
@@ -106,6 +106,10 @@ describe("text burn-in", () => {
         hue: 0,
         crop: 0,
         hookColor: "yellow",
+        accentColor: "#5CFF5C",
+        hookStyle: "tiktok",
+        hookList: 3,
+        tintHue: 280,
       });
       const { stat } = await import("fs/promises");
       const { absoluteUpload } = await import("@/lib/files");

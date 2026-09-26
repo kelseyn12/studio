@@ -154,6 +154,8 @@ export default async function BatchPage({
           hookColorOn: batch.hookColorOn,
           captionsOn: batch.captionsOn,
           textStyle: batch.textStyle,
+          listCount: batch.listCount,
+          tintOn: batch.tintOn,
           hookLines: batch.hookLines,
           caption: batch.caption,
           campaignId: batch.campaignId ?? "",

@@ -1,14 +1,16 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Slider, Toggle } from "@/components/batch-controls";
 import { BatchTargets, Row, type BatchAccount } from "@/components/batch-targets";
 import { TextStylePick } from "@/components/text-style-pick";
 import { dealAccounts } from "@/lib/targets";
 import { hookLooks, parseTextStyle, type TextStyle } from "@/lib/text-style";
-import { outputCount, parseHookLines, plannedMixes, variationFor } from "@/lib/variations";
+import { LIST_MAX, outputCount, parseHookLines, plannedMixes, variationFor } from "@/lib/variations";
 
 type Option = { id: string; name: string };
 
+const LIST_CHOICES = [0, 3, 4, 5, 6, 7, 8, 10].filter((count) => count <= LIST_MAX);
 
 export function BatchSettings({
   batchId,
@@ -38,6 +40,8 @@ export function BatchSettings({
     trimOn: boolean;
     hookColorOn: boolean;
     captionsOn: boolean;
+    tintOn: boolean;
+    listCount: number;
     textStyle: string;
     hookLines: string;
     caption: string;
@@ -60,6 +64,8 @@ export function BatchSettings({
   const [trimOn, setTrimOn] = useState(defaults.trimOn);
   const [hookColorOn, setHookColorOn] = useState(defaults.hookColorOn);
   const [captionsOn, setCaptionsOn] = useState(defaults.captionsOn);
+  const [tintOn, setTintOn] = useState(defaults.tintOn);
+  const [listCount, setListCount] = useState(defaults.listCount);
   const [hookLines, setHookLines] = useState(defaults.hookLines);
   const [campaignId, setCampaignId] = useState(defaults.campaignId);
   const [accountId, setAccountId] = useState(defaults.accountId);
@@ -77,21 +83,17 @@ export function BatchSettings({
   );
   const files = outputCount(mixes, variants) * Math.max(textCount, 1);
   const looks = textCount > 0 ? hookLooks(textStyle, targetNetworks, true).length : 1;
-  const preview = variationFor(1, { speedAmt, colorAmt, cropAmt, mirrorOn, hookColorOn });
+  const preview = variationFor(1, { speedAmt, colorAmt, cropAmt, mirrorOn, hookColorOn, tintOn });
 
   return (
     <form action={`/api/repurpose/${batchId}/generate`} method="post" className="space-y-6">
       <input type="hidden" name="name" value={name} />
-      {allCombos ? <input type="hidden" name="allCombos" value="on" /> : null}
-      {mirrorOn ? <input type="hidden" name="mirrorOn" value="on" /> : null}
-      {trimOn ? <input type="hidden" name="trimOn" value="on" /> : null}
-      {hookColorOn ? <input type="hidden" name="hookColorOn" value="on" /> : null}
-      {captionsOn ? <input type="hidden" name="captionsOn" value="on" /> : null}
+      <input type="hidden" name="listCount" value={listCount} />
 
       {textBurnWorks ? null : (
         <p className="rounded-card border border-line bg-panel px-5 py-4 text-sm text-review">
-          This computer cannot burn text onto videos (ffmpeg is missing drawtext). Mixes still work. Spoken words and
-          text hooks will fail until you run <code>brew install ffmpeg-full</code>.
+          This computer cannot put text on videos (ffmpeg is missing drawtext or libass). Mixes still work. Spoken
+          words and text hooks will fail until you run <code>brew install ffmpeg-full</code>.
         </p>
       )}
 
@@ -120,15 +122,34 @@ export function BatchSettings({
           name="hookLines"
           value={hookLines}
           onChange={(event) => setHookLines(event.target.value)}
-          placeholder={"I quit my 9-5 for this\nNobody talks about this\nPOV: you found the hack"}
+          placeholder={"*WORST* birthday months\nNobody talks about this\nPOV: you found the *hack*"}
           className="field mt-3 min-h-24"
         />
-        {textCount > 0 ? (
-          <p className="mt-2 text-sm text-mute">
-            {textCount} line{textCount === 1 ? "" : "s"} · every mix gets each line once
-          </p>
-        ) : null}
+        <p className="mt-2 text-sm text-mute">
+          Put *stars* around one word to color it, like Sasha&apos;s green WORST. The rest stays white.
+          {textCount > 0 ? ` · ${textCount} line${textCount === 1 ? "" : "s"}, every mix gets each line once.` : ""}
+        </p>
         <TextStylePick value={textStyle} onChange={setTextStyle} networks={targetNetworks} />
+        <div className="mt-4 border-t border-line pt-4">
+          <Row label="Numbered list under the headline">
+            <div className="flex items-center gap-3">
+              <p className="max-w-56 text-right text-xs text-mute">
+                1. 2. 3. down the left side, ready for the points you say out loud.
+              </p>
+              <select
+                value={listCount}
+                onChange={(event) => setListCount(Number(event.target.value))}
+                className="field max-w-28"
+              >
+                {LIST_CHOICES.map((choice) => (
+                  <option key={choice} value={choice}>
+                    {choice === 0 ? "None" : `1–${choice}`}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </Row>
+        </div>
       </section>
 
       <section className="rounded-card border border-line bg-panel p-5">
@@ -151,13 +172,7 @@ export function BatchSettings({
         </p>
         <div className="mt-5 space-y-4">
           <Row label="Every mix">
-            <button
-              type="button"
-              onClick={() => setAllCombos(!allCombos)}
-              className={`rounded-full px-4 py-1.5 text-sm font-semibold ${allCombos ? "bg-sun text-ink" : "bg-lift text-mute"}`}
-            >
-              {allCombos ? "On" : "Off"}
-            </button>
+            <Toggle name="allCombos" on={allCombos} onChange={setAllCombos} />
           </Row>
           <Row label="If not every mix, stop after">
             <input
@@ -204,46 +219,35 @@ export function BatchSettings({
             max={12}
             onChange={setCropAmt}
           />
+          <Row label="Color wash per copy">
+            <div className="flex items-center gap-3">
+              <p className="max-w-56 text-right text-xs text-mute">
+                Sasha&apos;s colored rooms: copy 1 red, copy 2 blue, then purple, magenta, orange, teal.
+              </p>
+              <Toggle name="tintOn" on={tintOn} onChange={setTintOn} />
+            </div>
+          </Row>
           <Row label="Mirror later copies">
-            <button
-              type="button"
-              onClick={() => setMirrorOn(!mirrorOn)}
-              className={`rounded-full px-4 py-1.5 text-sm font-semibold ${mirrorOn ? "bg-sun text-ink" : "bg-lift text-mute"}`}
-            >
-              {mirrorOn ? "On" : "Off"}
-            </button>
+            <Toggle name="mirrorOn" on={mirrorOn} onChange={setMirrorOn} />
           </Row>
           <Row label="Spoken words on screen">
             <div className="flex items-center gap-3">
               <p className="max-w-56 text-right text-xs text-mute">
                 We listen to your clips and burn what you say as big text, phrase by phrase, through the whole video.
               </p>
-              <button
-                type="button"
-                onClick={() => setCaptionsOn(!captionsOn)}
-                className={`rounded-full px-4 py-1.5 text-sm font-semibold ${captionsOn ? "bg-sun text-ink" : "bg-lift text-mute"}`}
-              >
-                {captionsOn ? "On" : "Off"}
-              </button>
+              <Toggle name="captionsOn" on={captionsOn} onChange={setCaptionsOn} />
             </div>
           </Row>
           <Row label="Text color changes per copy">
-            <button
-              type="button"
-              onClick={() => setHookColorOn(!hookColorOn)}
-              className={`rounded-full px-4 py-1.5 text-sm font-semibold ${hookColorOn ? "bg-sun text-ink" : "bg-lift text-mute"}`}
-            >
-              {hookColorOn ? "On" : "Off"}
-            </button>
+            <div className="flex items-center gap-3">
+              <p className="max-w-56 text-right text-xs text-mute">
+                Starred word cycles green, red, yellow, blue. Lines without stars change color as a whole.
+              </p>
+              <Toggle name="hookColorOn" on={hookColorOn} onChange={setHookColorOn} />
+            </div>
           </Row>
           <Row label="Cut dead air off clip ends">
-            <button
-              type="button"
-              onClick={() => setTrimOn(!trimOn)}
-              className={`rounded-full px-4 py-1.5 text-sm font-semibold ${trimOn ? "bg-sun text-ink" : "bg-lift text-mute"}`}
-            >
-              {trimOn ? "On" : "Off"}
-            </button>
+            <Toggle name="trimOn" on={trimOn} onChange={setTrimOn} />
           </Row>
           <BatchTargets
             campaigns={campaigns}
@@ -269,39 +273,5 @@ export function BatchSettings({
         </p>
       </section>
     </form>
-  );
-}
-
-function Slider({
-  name,
-  label,
-  hint,
-  value,
-  max,
-  onChange,
-}: {
-  name: string;
-  label: string;
-  hint: string;
-  value: number;
-  max: number;
-  onChange: (value: number) => void;
-}) {
-  return (
-    <div className="border-t border-line pt-4">
-      <div className="mb-2 flex items-baseline justify-between gap-3">
-        <p className="text-sm">{label}</p>
-        <p className="text-xs text-mute">{hint}</p>
-      </div>
-      <input
-        name={name}
-        type="range"
-        min={0}
-        max={max}
-        value={value}
-        onChange={(event) => onChange(Number(event.target.value))}
-        className="w-full accent-sun"
-      />
-    </div>
   );
 }
