@@ -147,10 +147,22 @@ describe("cutVideo", () => {
       expect(fast).toBeLessThan(slow - 0.4);
       expect(Math.abs(fastVideo - fastAudio)).toBeLessThan(0.1);
       expect(Math.abs(slowVideo - slowAudio)).toBeLessThan(0.1);
+      const midRel = `generated/speed-15-${Date.now()}.mp4`;
+      const oneRel = `generated/speed-1-${Date.now()}.mp4`;
+      await cutVideo({ sourceAbs: clip, outputRel: midRel, ranges, speed: 1.5 });
+      await cutVideo({ sourceAbs: clip, outputRel: oneRel, ranges, speed: 1 });
+      const mid = await clipDuration(path.join(localRoot(), midRel));
+      const one = await clipDuration(path.join(localRoot(), oneRel));
+      expect(one).toBeGreaterThan(mid + 0.2);
+      expect(mid).toBeGreaterThan(fast + 0.15);
+      expect(slow).toBeGreaterThan(mid + 0.15);
+      expect(one).toBeGreaterThan(slow + 0.2);
+      await rm(path.join(localRoot(), midRel), { force: true });
+      await rm(path.join(localRoot(), oneRel), { force: true });
       await rm(fastAbs, { force: true });
       await rm(slowAbs, { force: true });
       await rm(dir, { recursive: true, force: true });
     },
-    20_000,
+    40_000,
   );
 });

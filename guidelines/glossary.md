@@ -74,7 +74,7 @@
 - `trimVideo` / `isValidCut` — `lib/trim.ts` — simple start/end re-encode (min half a second). Used by `cutVideo` when there is one keep range and no speed change.
 - `keepRanges` / `parseSpeed` / `parseDrops` / `isPlayableCut` / `speedVideoFilter` / `speedAudioFilter` — `lib/cut-math.ts` — leftover ranges after dropping draggy parts; speed allowlist 1 / 1.25 / 1.5 / 2; `setpts=(PTS-STARTPTS)/n` + `atempo` (no fps/-r after, those undo the speed). Used by QuickCut and `/api/trim`. Tested in `lib/cut.test.ts`.
 - `cutVideo` — `lib/cut.ts` — stitches kept ranges and applies speed (`setpts` + `atempo`). Used by `/api/trim`.
-- `QuickCut` — `components/quick-cut.tsx` — Start here / End here, Cut from here / Cut to here (drop a middle), speed pills. Player stays at 1× while you mark cuts; Save writes the speed and plays that file.
+- `QuickCut` — `components/quick-cut.tsx` — Start here / End here, Cut from here / Cut to here (drop a middle), speed pills 1 / 1.25 / 1.5 / 2. Tapping a pill plays at that rate; Save writes it into the file.
 - `parseLogos` / `logoBoxes` / `writeLogoSheet` — `lib/hook-logos-math.ts` / `lib/hook-logos.ts` — hook logo files (max 4). Three files layout as A + B = C. Sheet overlays the first 2.5s of the hook. Used by ClipTile and `renderBatch`. Tested in `lib/hook-logos.test.ts`.
 - `HookLogos` — `components/hook-logos.tsx` — Add logo on a hook clip.
 - `HookStage` — `components/hook-stage.tsx` — type words on the hook and drag them / logos. Saves `hookLayout` + logo x/y.

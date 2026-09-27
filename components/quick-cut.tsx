@@ -36,6 +36,18 @@ export function QuickCut({
     setUndoReady(Boolean(canUndo));
   }, [src, canUndo]);
 
+  function applyRate(rate: number) {
+    const video = videoRef.current;
+    if (!video) return;
+    video.defaultPlaybackRate = rate;
+    video.playbackRate = rate;
+    video.preservesPitch = true;
+  }
+
+  useEffect(() => {
+    applyRate(speed);
+  }, [speed, playSrc]);
+
   const playhead = () => videoRef.current?.currentTime ?? 0;
   const ranges = keepRanges({ start, end }, drops);
   const remaining = keptSeconds(ranges) / speed;
@@ -110,6 +122,15 @@ export function QuickCut({
           if (!Number.isFinite(total) || total <= 0) return;
           setDuration(total);
           setEnd((current) => (current <= 0 || current > total ? total : current));
+          applyRate(speed);
+        }}
+        onPlay={() => applyRate(speed)}
+        onPlaying={() => applyRate(speed)}
+        onSeeked={() => applyRate(speed)}
+        onRateChange={() => {
+          if (videoRef.current && Math.abs(videoRef.current.playbackRate - speed) > 0.01) {
+            applyRate(speed);
+          }
         }}
       />
       <div className="flex flex-wrap gap-2">
@@ -169,7 +190,11 @@ export function QuickCut({
           <button
             key={choice}
             type="button"
-            onClick={() => setSpeed(choice)}
+            onClick={() => {
+              setSpeed(choice);
+              applyRate(choice);
+              void videoRef.current?.play();
+            }}
             className={`rounded-xl px-3 py-1.5 text-sm ${speed === choice ? "bg-sun font-semibold text-ink" : "border border-line"}`}
           >
             {choice}×
@@ -179,10 +204,7 @@ export function QuickCut({
       <p className="text-xs text-mute">
         Keeps {start.toFixed(1)}s → {end.toFixed(1)}s
         {drops.length ? ` · drops ${drops.length} part${drops.length === 1 ? "" : "s"}` : ""}
-        {speed !== 1 ? ` · ${speed}× after save` : ""} · posts as {remaining.toFixed(1)}s
-      </p>
-      <p className="text-xs text-mute">
-        The player stays at 1× so you can mark cuts. Save writes the speed, then plays that file.
+        {speed !== 1 ? ` · playing ${speed}×` : ""} · posts as {remaining.toFixed(1)}s
       </p>
       {note ? <p className="text-xs text-mute">{note}</p> : null}
       {error ? <p className="text-xs text-review">{error}</p> : null}
