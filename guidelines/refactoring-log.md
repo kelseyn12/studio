@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-09-26 — Output titles include the hook line so copy 1 and copy 2 of the same mix are not mistaken for different hooks.
 - 2026-09-26 — Hook clips store `postCaption` (the text that posts under videos from that hook); batch caption is the fallback. Spoken captions take the file's look (TikTok shadow vs Instagram box) inside the per-look render.
 - 2026-09-26 — Copy 1 and copy 2 no longer share the same crop (`CROP_STEPS` instead of `abs(speed step)`). Output labels are mix / copy / look. Mix settings copy explains mixes vs copies vs both looks.
 - 2026-09-26 — Watch/Download use `/api/files` (`watchUrl`). Stored R2 S3 API URLs (`*.r2.cloudflarestorage.com`) are not public — they opened as an empty XML error. `isPublicMediaUrl` / `r2PublicUrl` refuse that host. Mix settings and Live use account checkboxes so a batch can post to IG + TT without a deal assignment; `accountIds` on batch and card; `targetAccounts` reads the list when the deal has no accounts yet.

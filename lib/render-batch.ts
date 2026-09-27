@@ -96,9 +96,11 @@ export async function renderBatch(input: {
             }),
           );
           const musicPath = music ? await ensureLocal(music.path) : undefined;
+          const hookTag = (stripHighlight(hookLine) || hookClip?.filename || `hook ${mixNumber}`).slice(0, 36);
           const title = [
             batch.name,
             `mix ${mixNumber}`,
+            hookTag,
             textLines.length > 1 ? `text ${textNumber}` : null,
             copies > 1 ? `copy ${copy + 1}` : null,
           ]
