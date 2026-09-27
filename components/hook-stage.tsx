@@ -201,17 +201,21 @@ export function HookStage({
         >
           <p className="mb-1 text-center text-[10px] text-white/70">Drag</p>
           <div className="relative">
-            {boxed ? <WordChips lines={chips} together={preview === "tiktok"} className={`${typeSize} ${inkClass} ${plate}`} /> : null}
+            <WordChips
+              lines={chips}
+              together
+              className={`${typeSize} ${boxed ? `${inkClass} ${plate}` : `text-white ${stroke}`}`}
+            />
             <textarea
               value={text}
               placeholder="Type here"
               onChange={(event) => setText(event.target.value)}
               onBlur={() => save(pos, text)}
               onPointerDown={(event) => event.stopPropagation()}
-              className={`w-full resize-none text-center outline-none ${typeSize} ${
-                boxed ? "absolute inset-0 bg-transparent text-transparent caret-white" : `bg-transparent text-white ${stroke}`
+              className={`absolute inset-0 w-full resize-none bg-transparent text-center text-transparent outline-none ${typeSize} ${
+                boxed && boxIsWhite(lookBox) ? "caret-black" : "caret-white"
               }`}
-              rows={Math.max(2, chips.length || 3)}
+              rows={Math.max(2, chips.length)}
             />
           </div>
         </div>

@@ -15,9 +15,7 @@ export function WordChips({
     return (
       <div className={`pointer-events-none mx-auto w-fit max-w-full text-center ${className}`}>
         {rows.map((line, index) => (
-          <div key={`${index}-${line}`} className="whitespace-nowrap">
-            {line.replace(/\*([^*]+)\*/g, "$1")}
-          </div>
+          <div key={`${index}-${line}`}>{line.replace(/\*([^*]+)\*/g, "$1")}</div>
         ))}
       </div>
     );
