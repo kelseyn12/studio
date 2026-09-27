@@ -198,7 +198,7 @@ export function HookStage({
             onChange={(event) => setText(event.target.value)}
             onBlur={() => save(pos, text)}
             onPointerDown={(event) => event.stopPropagation()}
-            className={`w-full resize-none bg-transparent text-center outline-none ${native} ${plate}`}
+            className={`w-full resize-none text-center outline-none ${pos.box ? "" : "bg-transparent"} ${native} ${plate}`}
             rows={3}
           />
         </div>
