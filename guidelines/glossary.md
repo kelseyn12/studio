@@ -82,7 +82,7 @@
 - `HookLogos` — `components/hook-logos.tsx` — Add logo, +, =, 🔥, or a typed chip. Headline under the formula is Words.
 - `CutTrack` — `components/cut-track.tsx` — yellow ends = the part you keep. Click scrubs. Dark = a middle you dropped.
 - `listStack` / `sharedListPlan` / `lookPaint` / `wordBoxClass` / `LOOK_METRICS` — `lib/list-layout.ts` — native TT 82 / IG 104. Unboxed stroke on a 1080 frame is 5px TikTok and 4px Instagram. TikTok box is one card. Instagram has no plate.
-- `roundedPlatePath` / `plateSize` / `measureTextPx` — `lib/ass-plate.ts`, `lib/font-measure.ts` — the finished TikTok card is a rounded drawing (radius 14, pad 18×8 on 1080). Text width comes from the font file. TikTok letters use 0.04em spacing so they match the app, not a tight tracking.
+- `roundedPlatePath` / `plateSize` / `measureTextPx` — `lib/ass-plate.ts`, `lib/font-measure.ts` — the finished TikTok card is a rounded drawing (radius 14, pad 18×8 on 1080). Text width comes from TikTok Sans Bold at the text optical size, which matches the app. The 36pt display cut was tighter.
 - `matchTypeScale` / `previewLogoPx` / `previewGrab` / `LOGO_TO_TYPE` — `lib/hook-logos-math.ts` — Match type sizes a logo to ~2.4 type-lines. Preview px tracks TT 20 / IG 17. `previewGrab` keeps +, =, and emoji on a glyph-sized hit box.
 - `WordChips` — `components/word-chips.tsx` — hugging per-line box preview under the Words textarea.
 - `sharedAxes` / `snapLogoPos` — `lib/hook-logos-math.ts` — snap to a neighbor or the center line. Align shows guides; it does not reshuffle chips.

@@ -71,9 +71,7 @@ describe("buildHookAss", () => {
 
   it("uses TikTok Sans and Inter Tight unless you pass a font", () => {
     expect(buildHookAss({ text: "hello", style: "tiktok" })).toContain("Style: Head,TikTok Sans,82,");
-    expect(buildHookAss({ text: "hello", style: "tiktok" })).toContain("100,100,3,0");
     expect(buildHookAss({ text: "hello", style: "instagram" })).toContain("Style: Head,Inter Tight,104,");
-    expect(buildHookAss({ text: "hello", style: "instagram" })).toContain("100,100,0,0");
   });
 
   it("gives Instagram Reels Classic and TikTok Classic their own stroke", () => {

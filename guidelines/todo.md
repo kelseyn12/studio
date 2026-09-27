@@ -225,7 +225,7 @@
   The card spans the frame (94%) so a sentence stays two full lines. Corner is 5px in Words and radius 14 in the file, with a tight pad. Already generated videos keep the old plate until the next Generate.
 
 - [X] TikTok letters match the native line
-  Spacing is 0.04em in Words and 3px on the 1080 burn. tracking-tight was pulling the letters together. Already generated videos keep the old spacing until the next Generate.
+  The bundled face is TikTok Sans Bold at optical size 14, the wider text cut the app uses. The 36pt display file was tighter. Already generated videos keep the old letters until the next Generate.
 
 - [X] Per-video words, music start, and delete
   Each finished video has Words + music (song or none, Music starts now) and Rebuild this video. Delete removes that file only and refreshes the list. Older videos need one new Generate before they can be tuned.

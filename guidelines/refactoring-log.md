@@ -1,5 +1,5 @@
 # Refactoring log
-- 2026-09-27 — TikTok letters match the app. The type was tracking-tight; the native line is opened by 0.04em. The white card shape is unchanged.
+- 2026-09-27 — TikTok text uses the open-source font's text cut (optical size 14), not the tighter 36pt display cut. Extra letter-spacing was removed.
 - 2026-09-27 — Done on Words keeps the line on the tile. Reopening Words was reloading the old sentence from the first page load.
 - 2026-09-27 — Cut preview plays the yellow keep only. It starts at the yellow start, skips each dark band, and stops at the yellow end.
 - 2026-09-27 — Save cut plays the short clip instead of jumping back to the full recording. Leaving Words writes the letters, including capitals, before the cut screen opens.
