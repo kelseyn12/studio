@@ -102,6 +102,7 @@ export async function renderBatch(input: {
                 listAt: layout?.listAt,
                 textFrom: layout?.from,
                 textTo: layout?.to,
+                box: layout?.box,
               };
             }),
           );
@@ -131,7 +132,11 @@ export async function renderBatch(input: {
             .filter(Boolean)
             .join(" · ");
           // Cross-posting deals get one file per app look; each ships to its own accounts.
-          const looks = hookLooks(batch.textStyle, networks, Boolean(hookLine));
+          const looks = hookLooks(
+            batch.textStyle,
+            networks,
+            Boolean(hookLine) || batch.listCount > 0 || clips.some((clip) => clip.listItems?.length),
+          );
           const files = [];
           for (const look of looks) {
             const suffix = looks.length > 1 ? `-${look}` : "";
@@ -146,6 +151,7 @@ export async function renderBatch(input: {
                 listAt: clip.listAt,
                 textFrom: clip.textFrom,
                 textTo: clip.textTo,
+                box: clip.box,
                 captionFilters: clip.phrases?.length
                   ? captionFilters(clip.phrases, clip.trim.start, look)
                   : undefined,

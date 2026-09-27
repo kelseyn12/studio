@@ -1,3 +1,6 @@
+import { LOOK_METRICS } from "@/lib/list-layout";
+import type { DrawnStyle } from "@/lib/text-style";
+
 export type HookPos = {
   x: number;
   y: number;
@@ -6,16 +9,17 @@ export type HookPos = {
   from?: number;
   to?: number;
   logoEq?: boolean;
+  box?: boolean;
 };
 
 function clamp01(value: number, low: number, high: number): number {
   return Math.min(high, Math.max(low, value));
 }
 
-/** Same safe-zone tops as lib/ass.ts LOOKS. */
+/** Same safe-zone tops as native TT / IG metrics. */
 export function hookDefaultPos(style: string): HookPos {
-  const top = style === "instagram" ? 0.16 : style === "plain" ? 0.12 : 0.17;
-  return { x: 0.5, y: top };
+  const look = (style in LOOK_METRICS ? style : "tiktok") as DrawnStyle;
+  return { x: 0.5, y: LOOK_METRICS[look].top };
 }
 
 export function parseListLines(raw: unknown): string[] {
@@ -50,6 +54,7 @@ export function parseHookLayout(raw: string | null | undefined): HookPos | null 
       ...(Number.isFinite(from) && from >= 0 ? { from } : {}),
       ...(Number.isFinite(to) && to > 0 ? { to } : {}),
       ...(parsed.logoEq ? { logoEq: true } : {}),
+      ...(parsed.box ? { box: true } : {}),
     };
   } catch {
     return null;
@@ -65,6 +70,7 @@ export function stringifyHookLayout(pos: HookPos): string {
     ...(pos.from != null ? { from: pos.from } : {}),
     ...(pos.to != null ? { to: pos.to } : {}),
     ...(pos.logoEq ? { logoEq: true } : {}),
+    ...(pos.box ? { box: true } : {}),
   });
 }
 

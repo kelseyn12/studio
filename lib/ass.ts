@@ -3,15 +3,16 @@ import os from "os";
 import path from "path";
 import { randomUUID } from "crypto";
 import { wrapHook, type DrawnStyle } from "@/lib/text-style";
+import { clampListCount, FRAME_H, FRAME_W, listStack, LOOK_METRICS, lookPaint, type ListStack } from "@/lib/list-layout";
 import { LIST_MAX } from "@/lib/variations";
+
+export { FRAME_H, FRAME_W };
 
 /**
  * Hook text as an ASS subtitle track rendered by libass. One line can mix colors
  * (the Sasha "*WORST* birthday months" highlight), each look has its own border/box,
  * and a numbered list can sit under the headline. Works on ffmpeg 5 (Fly) and 9 (Mac).
  */
-export const FRAME_W = 1080;
-export const FRAME_H = 1920;
 export const DEFAULT_ACCENT = "#5CFF5C";
 
 export type Segment = { text: string; accent: boolean };
@@ -53,15 +54,6 @@ export function assColor(color: string): string {
 export function escapeAssText(text: string): string {
   return text.replace(/\\/g, "\\\\").replace(/\{/g, "(").replace(/\}/g, ")").replace(/\n/g, " ");
 }
-
-type LookSpec = { fontsize: number; borderStyle: 1 | 3; outline: number; shadow: number; top: number; lineGap: number };
-
-/** Same safe-zone numbers as drawtext looks: clear of app headers (top 9–12%). */
-const LOOKS: Record<DrawnStyle, LookSpec> = {
-  tiktok: { fontsize: 88, borderStyle: 1, outline: 6, shadow: 3, top: 0.17, lineGap: 1.12 },
-  instagram: { fontsize: 86, borderStyle: 1, outline: 8, shadow: 0, top: 0.15, lineGap: 1.18 },
-  plain: { fontsize: 84, borderStyle: 1, outline: 6, shadow: 0, top: 0.12, lineGap: 1.12 },
-};
 
 export function fontFamily(): string {
   return process.env.HOOK_FONT_FAMILY || (process.platform === "darwin" ? "Arial" : "DejaVu Sans");
@@ -106,8 +98,11 @@ export function buildHookAss(input: {
   y?: number;
   from?: number;
   to?: number;
+  box?: boolean;
+  listStack?: ListStack;
 }): string {
-  const look = LOOKS[input.style];
+  const look = LOOK_METRICS[input.style];
+  const paint = lookPaint(input.style, input.box);
   const font = input.font ?? fontFamily();
   const base = input.baseColor || "white";
   const accent = input.accentColor || DEFAULT_ACCENT;
@@ -125,23 +120,26 @@ export function buildHookAss(input: {
   const events: string[] = [];
   if (input.text.trim()) events.push(`Dialogue: 0,${startAt},${endAt},Head,,0,0,0,,${head}`);
   const listItems = (input.listItems ?? []).map((line) => line.trim()).filter(Boolean).slice(0, LIST_MAX);
-  const listCount = listItems.length || Math.min(Math.max(Math.floor(input.listCount ?? 0), 0), LIST_MAX);
+  const listCount = clampListCount(Math.max(listItems.length, input.listCount ?? 0));
   if (listCount > 0) {
-    const lineHeight = look.fontsize * look.lineGap;
-    const listTop = input.text.trim()
-      ? (placed ? py : marginV) + Math.round(Math.max(lines.length, 1) * lineHeight) + 80
-      : Math.round(FRAME_H * look.top);
-    const gap = Math.min(140, Math.floor((FRAME_H * 0.62 - listTop) / listCount));
+    const stack = listStack({
+      style: input.style,
+      headline: input.text,
+      x: input.x,
+      y: input.y,
+      count: listCount,
+      stack: input.listStack,
+    });
     for (let index = 0; index < listCount; index += 1) {
-      const y = listTop + index * gap;
+      const y = stack.top + index * stack.gap;
       const number = `${index + 1}.`;
       const words = listItems[index] ? `${number} ${escapeAssText(listItems[index])}` : number;
       const wordAt = Number(input.listAt?.[index]);
       if (listItems[index] && Number.isFinite(wordAt)) {
-        events.push(`Dialogue: 0,${assClock(0)},${assClock(wordAt)},List,,0,0,0,,{\\pos(90,${y})}${number}`);
-        events.push(`Dialogue: 0,${assClock(wordAt)},${endAt},List,,0,0,0,,{\\pos(90,${y})}${words}`);
+        events.push(`Dialogue: 0,${assClock(0)},${assClock(wordAt)},List,,0,0,0,,{\\pos(${stack.left},${y})}${number}`);
+        events.push(`Dialogue: 0,${assClock(wordAt)},${endAt},List,,0,0,0,,{\\pos(${stack.left},${y})}${words}`);
       } else {
-        events.push(`Dialogue: 0,${assClock(0)},${endAt},List,,0,0,0,,{\\pos(90,${y})}${number}`);
+        events.push(`Dialogue: 0,${assClock(0)},${endAt},List,,0,0,0,,{\\pos(${stack.left},${y})}${number}`);
       }
     }
   }
@@ -157,8 +155,8 @@ export function buildHookAss(input: {
     "",
     "[V4+ Styles]",
     "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding",
-    styleRow("Head", look.fontsize, look.borderStyle, look.outline, look.shadow, 8, marginV),
-    styleRow("List", Math.round(look.fontsize * 0.95), 1, 6, 3, 7, 0),
+    styleRow("Head", look.fontsize, paint.borderStyle, paint.outline, paint.shadow, 8, marginV),
+    styleRow("List", Math.round(look.fontsize * 0.95), paint.borderStyle, paint.outline, paint.shadow, 7, 0),
     "",
     "[Events]",
     "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text",

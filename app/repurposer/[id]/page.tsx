@@ -2,14 +2,14 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { BatchOutputs } from "@/components/batch-outputs";
 import { BatchSettings } from "@/components/batch-settings";
-import { ClipTile } from "@/components/clip-tile";
 import { DropZone } from "@/components/drop-zone";
 import { Shell } from "@/components/shell";
+import { SlotBlock } from "@/components/slot-block";
 import { REFERENCE_MAX_BYTES } from "@/lib/files";
-import { formatBytes, STUDIO_FILE_MAX_BYTES } from "@/lib/storage";
 import { cardsToPolish } from "@/lib/batch-polish";
 import { isRendering } from "@/lib/render-batch";
 import { canBurnText } from "@/lib/ffmpeg";
+import { parseHookLayout } from "@/lib/hook-layout";
 import { LiveRefresh } from "@/components/live-refresh";
 import { prisma } from "@/lib/prisma";
 import { createBatch, resetBatch } from "../actions";
@@ -46,6 +46,13 @@ export default async function BatchPage({
   const hooks = batch.clips.filter((clip) => clip.slot === "HOOK");
   const bodies = batch.clips.filter((clip) => clip.slot === "DEMO");
   const ctas = batch.clips.filter((clip) => clip.slot === "CTA");
+  const hookPos = parseHookLayout(hooks[0]?.hookLayout);
+  const listFromHook = {
+    headline: hooks[0]?.hookText ?? "",
+    x: hookPos?.x ?? 0.5,
+    y: hookPos?.y ?? 0.17,
+  };
+  const look = batch.textStyle === "instagram" ? "instagram" : batch.textStyle === "plain" ? "plain" : "tiktok";
 
   return (
     <Shell>
@@ -90,27 +97,35 @@ export default async function BatchPage({
             slot="HOOK"
             title="Hooks"
             meta={`${hooks.length} options · first clip · one picked per video`}
-            hint="Openings. Words is typed text you place and time — Studio does not hear your list. Add logos, +, =, emoji. Cut yellow ends, or Cut from/to for each middle. Copies get different speed/hue and cover."
+            hint="Openings. Mix 1–5 puts numbers here from the first frame. Body lines sit on those same rows. TT and IG each get their own native type."
             clips={hooks}
             showHook
             hookText={winningHook}
-            look={batch.textStyle === "instagram" ? "instagram" : batch.textStyle === "plain" ? "plain" : "tiktok"}
+            look={look}
+            listCount={batch.listCount}
+            listFromHook={listFromHook}
           />
           <SlotBlock
             id={batch.id}
             slot="DEMO"
             title="Bodies"
             meta={`${bodies.length} options · middle clip · usually one, can be more`}
-            hint="Product / demo. List points live here: type them on Words, then This line now as you say each one. Cut and speed too."
+            hint="Type the points on Words. They lock to the hook numbers. This line now fills each one. Box on/off is behind the words."
             clips={bodies}
+            look={look}
+            listCount={batch.listCount}
+            listFromHook={listFromHook}
           />
           <SlotBlock
             id={batch.id}
             slot="CTA"
             title="CTAs"
             meta={`${ctas.length} options · last clip · one picked per video`}
-            hint="Endings. Cut, speed, Words. Same native TT/IG text as the hook."
+            hint="Endings. Same native TT/IG Words, Align, and Box on/off as the hook."
             clips={ctas}
+            look={look}
+            listCount={batch.listCount}
+            listFromHook={listFromHook}
           />
         </div>
       </section>
@@ -225,65 +240,6 @@ function RenderProgress({ status, batchId }: { status: string; batchId: string }
           <button className="text-xs text-mute hover:text-review">Stuck? Reset</button>
         </form>
       </div>
-    </div>
-  );
-}
-
-function SlotBlock({
-  id,
-  slot,
-  title,
-  meta,
-  hint,
-  clips,
-  showHook,
-  hookText,
-  look,
-}: {
-  id: string;
-  slot: string;
-  title: string;
-  meta: string;
-  hint: string;
-  showHook?: boolean;
-  hookText?: string;
-  look?: "tiktok" | "instagram" | "plain";
-  clips: Array<{
-    id: string;
-    filename: string;
-    path: string;
-    thumbPath: string;
-    hookText: string;
-    postCaption?: string;
-    logosJson?: string;
-    hookLayout?: string;
-    cutUndo?: string;
-  }>;
-}) {
-  return (
-    <div className="rounded-card border border-line bg-panel p-5">
-      <div className="mb-1 flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-lg font-semibold">{title}</h2>
-        <p className="text-xs uppercase tracking-[0.12em] text-mute">{meta}</p>
-      </div>
-      <p className="mb-4 text-sm text-mute">{hint}</p>
-      <div className="mb-4 flex gap-3 overflow-x-auto pb-2">
-        {clips.length === 0 ? (
-          <p className="rounded-xl border border-dashed border-line px-4 py-8 text-sm text-mute">
-            Nothing in this row yet.
-          </p>
-        ) : (
-          clips.map((clip) => <ClipTile key={clip.id} {...clip} showHook={Boolean(showHook)} look={look} />)
-        )}
-      </div>
-      <DropZone
-        action="/api/repurpose/clips"
-        extra={{ batchId: id, slot, ...(hookText ? { hookText } : {}) }}
-        label={`Add ${title.toLowerCase()}`}
-        accept="video/*"
-        maxBytes={STUDIO_FILE_MAX_BYTES}
-        hint={`One take at a time. 4K is fine — it gets shrunk to 1080 on arrival. Under ${formatBytes(STUDIO_FILE_MAX_BYTES)}.`}
-      />
     </div>
   );
 }

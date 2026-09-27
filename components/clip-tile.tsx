@@ -21,6 +21,9 @@ export function ClipTile({
   cutUndo,
   showHook,
   look,
+  slot,
+  listCount,
+  listFromHook,
 }: {
   id: string;
   filename: string;
@@ -33,6 +36,9 @@ export function ClipTile({
   cutUndo?: string;
   showHook: boolean;
   look?: DrawnStyle;
+  slot?: string;
+  listCount?: number;
+  listFromHook?: { headline: string; x: number; y: number };
 }) {
   const router = useRouter();
   const [mode, setMode] = useState<"idle" | "cut" | "place">("idle");
@@ -68,6 +74,9 @@ export function ClipTile({
           hookLayout={hookLayout ?? ""}
           logosJson={logosJson ?? ""}
           look={look ?? "tiktok"}
+          slot={slot}
+          listCount={listCount}
+          listFromHook={listFromHook}
         />
       ) : (
         <div className="relative overflow-hidden rounded-xl bg-ink">

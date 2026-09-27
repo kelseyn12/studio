@@ -199,3 +199,6 @@
 
 - [X] IG-native Sasha, body list, Align
   Instagram is outline stroke like Sasha Reels. List can live on the body (ASS without a headline). Align evens the logo row and centers Words. This line now fills each body line as you say it.
+
+- [X] Native TT/IG Words, shared list rows, Box toggle
+  TikTok Classic 82 / Reels Classic 76. Mix numbers stay on the hook; body words use the same stack. Box on/off is a plate behind Words on hook, body, and CTA.

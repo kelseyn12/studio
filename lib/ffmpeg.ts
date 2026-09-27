@@ -5,6 +5,7 @@ import path from "path";
 import { localRoot } from "@/lib/files";
 import { writeHookAss } from "@/lib/ass";
 import { logoOverlayFilter } from "@/lib/hook-logos-math";
+import { sharedListPlan } from "@/lib/list-layout";
 import type { DrawnStyle } from "@/lib/text-style";
 
 const FFMPEG_FULL = "/opt/homebrew/opt/ffmpeg-full/bin/ffmpeg";
@@ -172,6 +173,7 @@ export async function assembleVideo(input: {
     listAt?: number[];
     textFrom?: number;
     textTo?: number;
+    box?: boolean;
   }>;
   outputName: string;
   speed: number;
@@ -211,21 +213,32 @@ export async function assembleVideo(input: {
   const musicIndex = input.musicPath ? silentIndex + 1 : -1;
 
   const tempo = input.speed !== 1 ? `atempo=${input.speed},` : "";
+  const look = input.hookStyle ?? "plain";
+  const hook = input.clips[0];
+  const { count: listCount, stack } = sharedListPlan({
+    style: look,
+    headline: hook?.hookText || "",
+    x: hook?.hookX ?? input.hookX,
+    y: hook?.hookY ?? input.hookY,
+    hookList: input.hookList,
+    itemCounts: input.clips.map((row) => row.listItems?.length ?? 0),
+  });
   const chains: string[] = [];
   for (let index = 0; index < n; index += 1) {
     const clip = input.clips[index];
-    const listHost = input.clips.findIndex((row) => row.listItems?.length);
-    const emptyList = listHost < 0 && index === 0 ? input.hookList : 0;
+    const showList = (index === 0 && listCount > 0) || Boolean(clip.listItems?.length);
     const hookFilter =
-      clip.hookText || clip.listItems?.length || emptyList
+      clip.hookText || showList
         ? await writeHookAss({
             text: clip.hookText || "",
-            style: input.hookStyle ?? "plain",
+            style: look,
             baseColor: input.hookColor,
             accentColor: input.accentColor,
-            listCount: clip.listItems?.length ? 0 : emptyList,
+            listCount: showList ? listCount : 0,
             listItems: clip.listItems,
             listAt: clip.listAt,
+            listStack: stack,
+            box: clip.box,
             x: clip.hookX ?? (index === 0 ? input.hookX : undefined),
             y: clip.hookY ?? (index === 0 ? input.hookY : undefined),
             from: clip.textFrom,

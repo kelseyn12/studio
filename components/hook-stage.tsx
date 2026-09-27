@@ -2,8 +2,10 @@
 
 import { useRef, useState, type PointerEvent } from "react";
 import { HookList } from "@/components/hook-list";
+import { ListOverlay } from "@/components/list-overlay";
 import { hookDefaultPos, parseHookLayout, stringifyHookLayout, type HookPos } from "@/lib/hook-layout";
 import { ALIGN_SNAP, alignLogoRow, clampLogoScale, defaultLogoPos, isLogoFile, itemScale, LOGO_SCALE_STEP, parseLogoItems, snapLogoPos } from "@/lib/hook-logos-math";
+import { listRows, listStack } from "@/lib/list-layout";
 import { publicFileUrl } from "@/lib/urls";
 import type { DrawnStyle } from "@/lib/text-style";
 
@@ -14,6 +16,9 @@ export function HookStage({
   hookLayout,
   logosJson,
   look,
+  slot,
+  listCount = 0,
+  listFromHook,
 }: {
   id: string;
   src: string;
@@ -21,6 +26,9 @@ export function HookStage({
   hookLayout: string;
   logosJson: string;
   look: DrawnStyle;
+  slot?: string;
+  listCount?: number;
+  listFromHook?: { headline: string; x: number; y: number };
 }) {
   const stageRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -141,10 +149,21 @@ export function HookStage({
     void save({ ...pos, listAt: at }, text, list);
   }
 
+  const lines = list.split("\n").map((line) => line.trim()).filter(Boolean);
+  const count = Math.max(listCount, lines.length);
+  const onHook = slot === "HOOK" || !listFromHook;
+  const stack = listStack({
+    style: preview,
+    headline: onHook ? text : listFromHook.headline,
+    x: onHook ? pos.x : listFromHook.x,
+    y: onHook ? pos.y : listFromHook.y,
+    count,
+  });
   const native =
     preview === "instagram"
-      ? "text-center text-[21px] font-semibold leading-tight text-white [text-shadow:0_2px_0_#000,0_-2px_0_#000,2px_0_0_#000,-2px_0_0_#000]"
-      : "text-center text-[22px] font-bold leading-tight text-white [text-shadow:0_1px_0_#000,0_-1px_0_#000,1px_0_0_#000,-1px_0_0_#000,0_2px_6px_#000]";
+      ? "text-[17px] font-semibold leading-tight text-white [text-shadow:0_1px_0_#000,0_-1px_0_#000,1px_0_0_#000,-1px_0_0_#000]"
+      : "text-[20px] font-bold leading-tight text-white [text-shadow:0_1px_0_#000,0_-1px_0_#000,1px_0_0_#000,-1px_0_0_#000,0_2px_5px_#000]";
+  const plate = pos.box ? "rounded-sm bg-black/80 px-2 py-0.5" : "";
 
   return (
     <div className="space-y-2">
@@ -161,6 +180,13 @@ export function HookStage({
         ))}
         <button type="button" onClick={() => void alignPieces()} className="rounded-lg border border-line px-2 py-1 text-[11px] text-mute">
           Align
+        </button>
+        <button
+          type="button"
+          onClick={() => void save({ ...pos, box: !pos.box })}
+          className={`rounded-lg px-2 py-1 text-[11px] ${pos.box ? "bg-sun font-semibold text-ink" : "border border-line text-mute"}`}
+        >
+          {pos.box ? "Box on" : "Box off"}
         </button>
       </div>
       <div ref={stageRef} className="relative overflow-hidden rounded-xl bg-ink">
@@ -185,10 +211,11 @@ export function HookStage({
             onChange={(event) => setText(event.target.value)}
             onBlur={() => save(pos, text)}
             onPointerDown={(event) => event.stopPropagation()}
-            className={`w-full resize-none bg-transparent outline-none ${native}`}
+            className={`w-full resize-none bg-transparent text-center outline-none ${native} ${plate}`}
             rows={3}
           />
         </div>
+        {count ? <ListOverlay rows={listRows(stack, count)} lines={lines} className={`${native} ${plate}`} /> : null}
         {logos.map((item, index) => {
           const at = loc(item, index);
           const scale = scaleOf(item);

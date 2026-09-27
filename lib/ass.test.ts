@@ -13,6 +13,7 @@ import {
   writeHookAss,
 } from "@/lib/ass";
 import { runFfmpeg } from "@/lib/ffmpeg";
+import { listStack } from "@/lib/list-layout";
 
 describe("highlight markup", () => {
   it("splits starred words out of a line", () => {
@@ -65,14 +66,17 @@ describe("buildHookAss", () => {
     expect(
       buildHookAss({ text: "x", style: "plain", listItems: ["Nobody talks about this", "Your month"], font: "Arial" }),
     ).not.toContain("1. Nobody talks about this");
-    expect(track).toContain("Style: Head,Arial,88");
+    expect(track).toContain("Style: Head,Arial,82");
   });
 
-  it("gives Instagram a Sasha stroke and TikTok an outline with shadow", () => {
+  it("gives Instagram Reels Classic and TikTok Classic their own stroke", () => {
     const instagram = buildHookAss({ text: "hello there", style: "instagram", font: "Arial" });
     const tiktok = buildHookAss({ text: "hello there", style: "tiktok", font: "Arial" });
-    expect(instagram).toMatch(/Style: Head,Arial,86,.*,1,8,0,8,/);
-    expect(tiktok).toMatch(/Style: Head,Arial,88,.*,1,6,3,8,/);
+    expect(instagram).toMatch(/Style: Head,Arial,76,.*,1,5,1,8,/);
+    expect(tiktok).toMatch(/Style: Head,Arial,82,.*,1,5,2,8,/);
+    expect(buildHookAss({ text: "hello there", style: "instagram", box: true, font: "Arial" })).toMatch(
+      /Style: Head,Arial,76,.*,3,16,0,8,/,
+    );
     expect(buildHookAss({ text: "x", style: "plain", font: "Arial" }).match(/,List,/g)).toBeNull();
   });
 
@@ -93,6 +97,23 @@ describe("buildHookAss", () => {
     expect(track).toContain("0:00:00.00,0:00:02.00,List,");
     expect(track).toContain("1. January");
     expect(track.match(/,List,/g)).toHaveLength(4);
+  });
+
+  it("puts body words on the hook number rows", () => {
+    const hook = buildHookAss({ text: "Hello there", style: "tiktok", listCount: 3, x: 0.5, y: 0.2, font: "Arial" });
+    const body = buildHookAss({
+      text: "",
+      style: "tiktok",
+      listItems: ["One", "Two"],
+      listAt: [1, 2],
+      listStack: listStack({ style: "tiktok", headline: "Hello there", x: 0.5, y: 0.2, count: 3 }),
+      listCount: 3,
+      font: "Arial",
+    });
+    const hookY = hook.match(/\\pos\(90,(\d+)\)\}1\./)?.[1];
+    const bodyY = body.match(/\\pos\(90,(\d+)\)\}1\./)?.[1];
+    expect(hookY).toBeTruthy();
+    expect(bodyY).toBe(hookY);
   });
 
   it("burns a body list with no headline", () => {
