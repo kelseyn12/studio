@@ -4,7 +4,7 @@ import path from "path";
 import { describe, expect, it } from "vitest";
 import { runFfmpeg } from "@/lib/ffmpeg";
 import { writeLogoSheet } from "@/lib/hook-logos";
-import { alignLogoRow, boxesFromItems, CANVAS_H, defaultLogoPos, logoBoxes, matchTypeScale, parseLogoItems, parseLogos, previewLogoPx, sharedAxes, snapLogoPos, stringifyLogos } from "@/lib/hook-logos-math";
+import { alignLogoRow, boxesFromItems, CANVAS_H, defaultLogoPos, logoBoxes, matchTypeScale, parseLogoItems, parseLogos, previewGrab, previewLogoPx, sharedAxes, snapLogoPos, stringifyLogos } from "@/lib/hook-logos-math";
 
 describe("parseLogos", () => {
   it("keeps safe relative paths and caps at 4", () => {
@@ -46,6 +46,11 @@ describe("parseLogos", () => {
     expect(matchTypeScale("tiktok", 1)).toBe(0.75);
     expect(previewLogoPx("tiktok", 1)).toBe(49);
     expect(previewLogoPx("instagram", 1)).toBe(45);
+    const equals = previewGrab("tiktok", { kind: "mark", id: "eq", text: "=" }, 1);
+    const flame = previewGrab("tiktok", { kind: "mark", id: "fire", text: "🔥" }, 1);
+    expect(equals.width).toBeLessThan(30);
+    expect(flame.height).toBe(equals.height);
+    expect(flame.width).toBeLessThan(previewLogoPx("tiktok", 1));
   });
 
   it("scales a logo when you ask for bigger", () => {

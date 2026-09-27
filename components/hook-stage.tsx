@@ -7,7 +7,7 @@ import { ListOverlay } from "@/components/list-overlay";
 import { boxFor, boxLabel, hookDefaultPos, nextBox, parseHookLayout, setLookBox, stringifyHookLayout, type HookPos } from "@/lib/hook-layout";
 import { LogoScaleBar } from "@/components/logo-scale-bar";
 import { WordChips } from "@/components/word-chips";
-import { ALIGN_SNAP, clampLogoScale, defaultLogoPos, isLogoFile, itemScale, LOGO_SCALE_STEP, matchTypeScale, parseLogoItems, previewLogoPx, sharedAxes, snapLogoPos } from "@/lib/hook-logos-math";
+import { ALIGN_SNAP, clampLogoScale, defaultLogoPos, isLogoFile, itemScale, LOGO_SCALE_STEP, matchTypeScale, parseLogoItems, previewGrab, sharedAxes, snapLogoPos } from "@/lib/hook-logos-math";
 import { LOOK_FONT_CLASS } from "@/lib/hook-fonts";
 import { boxIsWhite, isBoxed, listRows, listStack, wordBoxClass } from "@/lib/list-layout";
 import { publicFileUrl } from "@/lib/urls";
@@ -222,7 +222,7 @@ export function HookStage({
         {logos.map((item, index) => {
           const at = loc(item, index);
           const scale = scaleOf(item);
-          const px = previewLogoPx(preview, scale);
+          const grab = previewGrab(preview, item, scale);
           return (
             <button
               key={itemKey(item)}
@@ -244,13 +244,13 @@ export function HookStage({
                 event.stopPropagation();
                 void moveItem(item, event);
               }}
-              className={`absolute z-30 flex -translate-x-1/2 -translate-y-1/2 cursor-grab touch-none select-none items-center justify-center bg-transparent text-white [text-shadow:0_1px_0_#000,0_-1px_0_#000,1px_0_0_#000,-1px_0_0_#000] active:cursor-grabbing ${picked === itemKey(item) ? "ring-2 ring-white/40" : ""}`}
-              style={{ left: `${at.x * 100}%`, top: `${at.y * 100}%`, width: px + 4, height: px + 4, fontSize: Math.round(24 * scale) }}
+              className={`absolute z-30 flex -translate-x-1/2 -translate-y-1/2 cursor-grab touch-none select-none items-center justify-center overflow-hidden bg-transparent p-0 leading-none text-white [text-shadow:0_1px_0_#000,0_-1px_0_#000,1px_0_0_#000,-1px_0_0_#000] active:cursor-grabbing ${picked === itemKey(item) ? "ring-2 ring-white/40" : ""}`}
+              style={{ left: `${at.x * 100}%`, top: `${at.y * 100}%`, width: grab.width, height: grab.height, fontSize: grab.fontSize || undefined }}
               title="Drag"
             >
               {isLogoFile(item) ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={publicFileUrl(item.path)} alt={item.filename} className="pointer-events-none object-contain" style={{ width: px, height: px }} />
+                <img src={publicFileUrl(item.path)} alt={item.filename} className="pointer-events-none object-contain" style={{ width: grab.width, height: grab.height }} />
               ) : (
                 item.text
               )}

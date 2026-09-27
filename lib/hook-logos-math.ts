@@ -101,6 +101,24 @@ export function previewLogoPx(style: DrawnStyle, scale: number): number {
   return Math.max(16, Math.round((typePx / LOOK_METRICS[style].fontsize) * LOGO_FILE_ROW * scale));
 }
 
+/** Grab box. Logo files stay image-sized. +, =, and emoji hug the glyph. */
+export function previewGrab(
+  style: DrawnStyle,
+  item: LogoItem,
+  scale: number,
+): { width: number; height: number; fontSize: number } {
+  if (isLogoFile(item)) {
+    const px = previewLogoPx(style, scale);
+    return { width: px, height: px, fontSize: 0 };
+  }
+  const typePx = style === "instagram" ? 17 : style === "tiktok" ? 20 : 21;
+  const ratio = typePx / LOOK_METRICS[style].fontsize;
+  const text = item.text.trim();
+  const fontSize = Math.max(12, Math.round((text.length <= 2 ? 88 : 48) * scale * ratio));
+  const width = text.length <= 2 ? fontSize : Math.max(fontSize, Math.round(28 * text.length * scale * ratio));
+  return { width, height: fontSize, fontSize };
+}
+
 export function itemScale(item: LogoItem): number {
   return item.scale == null ? 1 : clampLogoScale(item.scale);
 }
