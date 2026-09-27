@@ -1,5 +1,5 @@
 # Refactoring log
-- 2026-09-26 — Box on is one hugging chip per line (TT pill, IG block). Burn-in emits one ASS Dialogue per wrap; libass plates stay square. Match type sizes logos to the look.
+- 2026-09-26 — Box on is one hugging chip per line (TT pill, IG block). Burn-in emits one ASS Dialogue per wrap; libass plates stay square. Match type sizes logos to the look. Tailwind now scans `lib/` so plate classes actually paint.
 - 2026-09-26 — Box on is native black/white (TT rounded, IG tight). Align is a center-line guide, not a reshuffle.
 - 2026-09-26 — Native TT/IG Words (82 / 70), shared list stack from the hook, Box on/off on every clip. Body words use the hook number rows.
 - 2026-09-26 — IG look is Sasha Reels stroke (not a gray box). List burns on the body without a headline. Align evens logos and centers the line. List words wait for This line now even before the first tap.

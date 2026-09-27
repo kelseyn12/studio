@@ -5,6 +5,7 @@ import { AlignGuides } from "@/components/align-guides";
 import { HookList } from "@/components/hook-list";
 import { ListOverlay } from "@/components/list-overlay";
 import { hookDefaultPos, parseHookLayout, stringifyHookLayout, type HookPos } from "@/lib/hook-layout";
+import { LogoScaleBar } from "@/components/logo-scale-bar";
 import { WordChips } from "@/components/word-chips";
 import { ALIGN_SNAP, clampLogoScale, defaultLogoPos, isLogoFile, itemScale, LOGO_SCALE_STEP, matchTypeScale, parseLogoItems, previewLogoPx, sharedAxes, snapLogoPos } from "@/lib/hook-logos-math";
 import { listRows, listStack, wordBoxClass } from "@/lib/list-layout";
@@ -138,13 +139,12 @@ export function HookStage({
     y: onHook ? pos.y : listFromHook.y,
     count,
   });
-  const native = pos.box
-    ? preview === "instagram"
-      ? "text-[17px] font-semibold leading-tight text-white"
-      : "text-[20px] font-bold leading-tight text-white"
+  const typeSize = preview === "instagram" ? "text-[17px] font-semibold leading-tight" : "text-[20px] font-bold leading-tight";
+  const stroke = pos.box
+    ? ""
     : preview === "instagram"
-      ? "text-[17px] font-semibold leading-tight text-white [text-shadow:0_1px_0_#000,0_-1px_0_#000,1px_0_0_#000,-1px_0_0_#000]"
-      : "text-[20px] font-bold leading-tight text-white [text-shadow:0_1px_0_#000,0_-1px_0_#000,1px_0_0_#000,-1px_0_0_#000,0_2px_5px_#000]";
+      ? "[text-shadow:0_1px_0_#000,0_-1px_0_#000,1px_0_0_#000,-1px_0_0_#000]"
+      : "[text-shadow:0_1px_0_#000,0_-1px_0_#000,1px_0_0_#000,-1px_0_0_#000,0_2px_5px_#000]";
   const plate = wordBoxClass(preview, pos.box);
   const chips = wrapHook(text);
   const active = logos.find((row) => itemKey(row) === picked) ?? logos[0];
@@ -196,19 +196,27 @@ export function HookStage({
         >
           <p className="mb-1 text-center text-[10px] text-white/70">Drag</p>
           <div className="relative min-h-[4.5rem]">
-            {pos.box ? <WordChips lines={chips} className={`${native} ${plate}`} /> : null}
+            {pos.box ? <WordChips lines={chips} className={`${typeSize} text-white ${plate}`} /> : null}
             <textarea
               value={text}
               placeholder="Type here"
               onChange={(event) => setText(event.target.value)}
               onBlur={() => save(pos, text)}
               onPointerDown={(event) => event.stopPropagation()}
-              className={`w-full resize-none text-center outline-none ${pos.box ? "absolute inset-0 bg-transparent text-transparent caret-white" : "bg-transparent"} ${native}`}
+              className={`w-full resize-none text-center outline-none ${typeSize} ${
+                pos.box ? "absolute inset-0 bg-transparent text-transparent caret-white" : `bg-transparent text-white ${stroke}`
+              }`}
               rows={Math.max(2, chips.length || 3)}
             />
           </div>
         </div>
-        {count ? <ListOverlay rows={listRows(stack, count)} lines={lines} className={`${native} ${plate}${pos.box ? " w-fit" : ""}`} /> : null}
+        {count ? (
+          <ListOverlay
+            rows={listRows(stack, count)}
+            lines={lines}
+            className={`${typeSize} ${pos.box ? `text-white ${plate} w-fit` : `text-white ${stroke}`}`}
+          />
+        ) : null}
         {logos.map((item, index) => {
           const at = loc(item, index);
           const scale = scaleOf(item);
@@ -249,20 +257,11 @@ export function HookStage({
         })}
       </div>
       {logos.length ? (
-        <div className="space-y-1">
-          <div className="flex gap-1">
-            <button type="button" onClick={() => active && void setScale(scaleOf(active) - LOGO_SCALE_STEP)} className="flex-1 rounded-lg border border-line px-2 py-1 text-[11px] text-mute">
-              Smaller
-            </button>
-            <button type="button" onClick={() => void setScale(matchTypeScale(preview, logos.filter(isLogoFile).length))} className="flex-1 rounded-lg border border-line px-2 py-1 text-[11px] text-mute">
-              Match type
-            </button>
-            <button type="button" onClick={() => active && void setScale(scaleOf(active) + LOGO_SCALE_STEP)} className="flex-1 rounded-lg border border-line px-2 py-1 text-[11px] text-mute">
-              Bigger
-            </button>
-          </div>
-          <p className="text-[11px] text-mute">Type is locked to TT/IG size. Tap a logo, Match type, then Bigger/Smaller if it still shouts.</p>
-        </div>
+        <LogoScaleBar
+          onSmaller={() => active && void setScale(scaleOf(active) - LOGO_SCALE_STEP)}
+          onMatch={() => void setScale(matchTypeScale(preview, logos.filter(isLogoFile).length))}
+          onBigger={() => active && void setScale(scaleOf(active) + LOGO_SCALE_STEP)}
+        />
       ) : null}
       <div className="flex gap-1">
         <button
