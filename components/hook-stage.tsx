@@ -1,17 +1,16 @@
 "use client";
 
-import { useRef, useState, type PointerEvent } from "react";
+import { useEffect, useRef, useState, type PointerEvent } from "react";
 import { AlignGuides } from "@/components/align-guides";
 import { HookList } from "@/components/hook-list";
 import { ListOverlay } from "@/components/list-overlay";
 import { boxFor, boxLabel, hookDefaultPos, nextBox, parseHookLayout, posFor, setLookBox, setLookPos, stringifyHookLayout, type HookPos } from "@/lib/hook-layout";
 import { LogoScaleBar } from "@/components/logo-scale-bar";
-import { WordChips } from "@/components/word-chips";
 import { ALIGN_SNAP, clampLogoScale, defaultLogoPos, isLogoFile, itemScale, LOGO_SCALE_STEP, matchTypeScale, parseLogoItems, previewGrab, sharedAxes, snapLogoPos } from "@/lib/hook-logos-math";
 import { LOOK_FONT_CLASS } from "@/lib/hook-fonts";
 import { boxIsWhite, isBoxed, listRows, listStack, wordBoxClass } from "@/lib/list-layout";
 import { publicFileUrl } from "@/lib/urls";
-import { wrapHook, type DrawnStyle } from "@/lib/text-style";
+import type { DrawnStyle } from "@/lib/text-style";
 
 export function HookStage({
   id,
@@ -36,6 +35,7 @@ export function HookStage({
 }) {
   const stageRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const typeRef = useRef<HTMLTextAreaElement>(null);
   const saved = parseHookLayout(hookLayout) ?? hookDefaultPos(look);
   const [text, setText] = useState(hookText);
   const [list, setList] = useState((saved.list ?? []).join("\n"));
@@ -153,8 +153,14 @@ export function HookStage({
   const boxed = isBoxed(lookBox);
   const inkClass = boxed && boxIsWhite(lookBox) ? "text-black" : "text-white";
   const plate = wordBoxClass(preview, lookBox);
-  const chips = wrapHook(text);
   const stroke = boxed ? "" : preview === "instagram" ? "stroke-ig" : "stroke-tt";
+
+  useEffect(() => {
+    const node = typeRef.current;
+    if (!node) return;
+    node.style.height = "0px";
+    node.style.height = `${node.scrollHeight}px`;
+  }, [text, preview, boxed]);
   const active = logos.find((row) => itemKey(row) === picked) ?? logos[0];
   const axes = sharedAxes([{ x: at.x, y: at.y }, ...logos.map((item, index) => loc(item, index))]);
 
@@ -200,24 +206,18 @@ export function HookStage({
           onPointerUp={(event) => void save(dragged(event))}
         >
           <p className="mb-1 text-center text-[10px] text-white/70">Drag</p>
-          <div className="relative">
-            <WordChips
-              lines={chips}
-              together
-              className={`${typeSize} ${boxed ? `${inkClass} ${plate}` : `text-white ${stroke}`}`}
-            />
-            <textarea
-              value={text}
-              placeholder="Type here"
-              onChange={(event) => setText(event.target.value)}
-              onBlur={() => save(pos, text)}
-              onPointerDown={(event) => event.stopPropagation()}
-              className={`absolute inset-0 w-full resize-none bg-transparent text-center text-transparent outline-none ${typeSize} ${
-                boxed && boxIsWhite(lookBox) ? "caret-black" : "caret-white"
-              }`}
-              rows={Math.max(2, chips.length)}
-            />
-          </div>
+          <textarea
+            ref={typeRef}
+            value={text}
+            placeholder="Type here"
+            onChange={(event) => setText(event.target.value)}
+            onBlur={() => save(pos, text)}
+            onPointerDown={(event) => event.stopPropagation()}
+            rows={2}
+            className={`block w-full resize-none overflow-hidden bg-transparent text-center outline-none [field-sizing:content] ${typeSize} ${
+              boxed ? `${inkClass} ${plate}` : `text-white ${stroke}`
+            } ${boxed && boxIsWhite(lookBox) ? "caret-black" : "caret-white"}`}
+          />
         </div>
         {count ? (
           <ListOverlay

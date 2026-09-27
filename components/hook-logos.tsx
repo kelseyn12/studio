@@ -103,7 +103,7 @@ export function HookLogos({ id, logosJson }: { id: string; logosJson: string; ho
                 }
               }}
               placeholder="emoji or word"
-              className="field h-8 w-24 px-2 text-[11px]"
+              className="field h-8 min-w-24 flex-1 px-2 text-[11px]"
             />
           </>
         ) : null}
