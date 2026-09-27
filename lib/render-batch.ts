@@ -2,7 +2,7 @@ import { stat } from "fs/promises";
 import path from "path";
 import { captionFilters, groupWords, parseCaptionWords, transcribeWords, type CaptionPhrase } from "@/lib/captions";
 import { assembleVideo, NO_TRIM, writeThumb, type ClipTrim } from "@/lib/ffmpeg";
-import { parseLogos, writeLogoSheet } from "@/lib/hook-logos";
+import { isLogoFile, parseLogoItems, writeLogoSheet } from "@/lib/hook-logos";
 import { parseHookLayout } from "@/lib/hook-layout";
 import { quietEnds } from "@/lib/trim";
 import { ensureLocal, localRoot, uploadLocalToR2 } from "@/lib/files";
@@ -105,18 +105,20 @@ export async function renderBatch(input: {
             }),
           );
           const musicPath = music ? await ensureLocal(music.path) : undefined;
-          const logoFiles = parseLogos(hookClip?.logosJson);
-          const logoPath = logoFiles.length
+          const hookPos = parseHookLayout(hookClip?.hookLayout);
+          const logoItems = parseLogoItems(hookClip?.logosJson);
+          const logoFiles = logoItems.filter(isLogoFile);
+          const logoPath = logoItems.length
             ? path.join(
                 localRoot(),
                 await writeLogoSheet(
                   await Promise.all(logoFiles.map((logo) => ensureLocal(logo.path))),
                   logoFiles,
-                  Boolean(hookPos?.logoEq),
+                  Boolean(hookPos?.logoEq) && !logoItems.some((item) => "kind" in item && item.kind === "mark"),
+                  logoItems,
                 ),
               )
             : undefined;
-          const hookPos = parseHookLayout(hookClip?.hookLayout);
           const hookTag = (stripHighlight(hookLine) || hookClip?.filename || `hook ${mixNumber}`).slice(0, 36);
           const title = [
             batch.name,

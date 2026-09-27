@@ -1,9 +1,12 @@
-export const LOGO_SECONDS = 2.5;
+export const LOGO_SECONDS = 4;
 export const MAX_HOOK_LOGOS = 4;
+export const MAX_LOGO_ITEMS = 8;
 export const CANVAS_W = 1080;
 export const CANVAS_H = 1920;
 
 export type HookLogo = { path: string; filename: string; x?: number; y?: number };
+export type LogoMark = { kind: "mark"; id: string; text: string; x?: number; y?: number };
+export type LogoItem = (HookLogo & { kind?: "file" }) | LogoMark;
 export type LogoBox =
   | { kind: "logo"; index: number; x: number; y: number; w: number; h: number }
   | { kind: "mark"; text: string; x: number; y: number; size: number };
@@ -13,36 +16,50 @@ function fileName(pathValue: string): string {
   return parts[parts.length - 1] || pathValue;
 }
 
-export function parseLogos(raw: string | null | undefined): HookLogo[] {
+function placed(item: { x?: unknown; y?: unknown }): { x: number; y: number } | Record<string, never> {
+  const x = Number(item.x);
+  const y = Number(item.y);
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return {};
+  return { x: Math.min(0.92, Math.max(0.08, x)), y: Math.min(0.88, Math.max(0.08, y)) };
+}
+
+export function parseLogoItems(raw: string | null | undefined): LogoItem[] {
   if (!raw?.trim()) return [];
   try {
     const parsed = JSON.parse(raw) as unknown;
     if (!Array.isArray(parsed)) return [];
     return parsed
-      .flatMap((item) => {
+      .flatMap((item, index) => {
         if (!item || typeof item !== "object") return [];
-        const pathValue = String((item as HookLogo).path || "").replace(/\\/g, "/");
-        const filename = String((item as HookLogo).filename || "").trim();
+        const row = item as LogoItem & { kind?: string; text?: string; id?: string };
+        if (row.kind === "mark") {
+          const text = String(row.text || "").trim().slice(0, 48);
+          if (!text) return [];
+          return [{ kind: "mark" as const, id: String(row.id || `mark-${index}`), text, ...placed(row) }];
+        }
+        const pathValue = String((row as HookLogo).path || "").replace(/\\/g, "/");
+        const filename = String((row as HookLogo).filename || "").trim();
         if (!pathValue || pathValue.includes("..") || pathValue.startsWith("/")) return [];
-        const x = Number((item as HookLogo).x);
-        const y = Number((item as HookLogo).y);
-        const placed = Number.isFinite(x) && Number.isFinite(y);
-        return [
-          {
-            path: pathValue,
-            filename: filename || fileName(pathValue),
-            ...(placed ? { x: Math.min(0.92, Math.max(0.08, x)), y: Math.min(0.88, Math.max(0.08, y)) } : {}),
-          },
-        ];
+        return [{ path: pathValue, filename: filename || fileName(pathValue), ...placed(row) }];
       })
-      .slice(0, MAX_HOOK_LOGOS);
+      .slice(0, MAX_LOGO_ITEMS);
   } catch {
     return [];
   }
 }
 
-export function stringifyLogos(logos: HookLogo[]): string {
-  return JSON.stringify(logos.slice(0, MAX_HOOK_LOGOS));
+export function parseLogos(raw: string | null | undefined): HookLogo[] {
+  return parseLogoItems(raw)
+    .flatMap((item) => (isLogoFile(item) ? [item] : []))
+    .slice(0, MAX_HOOK_LOGOS);
+}
+
+export function stringifyLogos(items: LogoItem[]): string {
+  return JSON.stringify(items.slice(0, MAX_LOGO_ITEMS));
+}
+
+export function isLogoFile(item: LogoItem): item is HookLogo {
+  return !("kind" in item && item.kind === "mark") && Boolean((item as HookLogo).path);
 }
 
 function centerY(size: number): number {
@@ -85,6 +102,40 @@ export function logoBoxes(count: number, equation = false): LogoBox[] {
   return Array.from({ length: count }, (_, index) => {
     const box: LogoBox = { kind: "logo", index, x, y: centerY(size), w: size, h: size };
     x += size + gap;
+    return box;
+  });
+}
+
+/** Mixed row: files, +, =, emoji, short text. Uses x/y when the item was dragged. */
+export function boxesFromItems(items: LogoItem[]): LogoBox[] {
+  if (!items.length) return [];
+  const fileSize = items.filter(isLogoFile).length <= 1 ? 280 : 200;
+  const widths = items.map((item) => (isLogoFile(item) ? fileSize : Math.min(320, 28 * Math.max(1, item.text.length))));
+  const gap = 16;
+  const total = widths.reduce((sum, width) => sum + width, 0) + gap * Math.max(0, items.length - 1);
+  let x = Math.round((CANVAS_W - total) / 2);
+  let fileIndex = 0;
+  return items.map((item, index) => {
+    const width = widths[index];
+    if (isLogoFile(item)) {
+      const box: LogoBox = { kind: "logo", index: fileIndex, x, y: centerY(fileSize), w: fileSize, h: fileSize };
+      if (item.x != null && item.y != null) {
+        box.x = Math.round(item.x * CANVAS_W - fileSize / 2);
+        box.y = Math.round(item.y * CANVAS_H - fileSize / 2);
+      }
+      fileIndex += 1;
+      x += width + gap;
+      return box;
+    }
+    const size = item.text.length <= 2 ? 88 : 48;
+    const box: LogoBox = {
+      kind: "mark",
+      text: item.text,
+      x: item.x != null ? Math.round(item.x * CANVAS_W - width / 2) : x,
+      y: item.y != null ? Math.round(item.y * CANVAS_H - size / 2) : centerY(fileSize) + Math.round((fileSize - size) / 2),
+      size,
+    };
+    x += width + gap;
     return box;
   });
 }

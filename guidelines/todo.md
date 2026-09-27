@@ -181,3 +181,6 @@
 
 - [X] Mini edit on every clip
   Precise drag + TT/IG preview. Cut track. Words/cut/speed on bodies and CTAs. Type list lines on the clip. Logos default to a row; A + B = C is optional. Text can start/end mid-clip. Four apps still share two looks (IG+FB / TT+YT).
+
+- [X] Words timing, multi-cut, formula logos
+  Words do not hear speech — Show text now / Hide text after now is a clock window; Spoken words in Mix follows talking. Logos accept +, =, emoji, and a short chip next to files. Yellow track ends trim; Cut from/to drops each middle and can be repeated.

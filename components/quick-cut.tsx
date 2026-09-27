@@ -171,6 +171,10 @@ export function QuickCut({
           Reset
         </button>
       </div>
+      <p className="text-[11px] text-mute">
+        Yellow ends trim the keep window. Each extra middle: play to the start, Cut from here, play to the end, Cut to
+        here. Repeat. Clicking the bar only scrubs.
+      </p>
       <CutTrack
         duration={duration}
         current={now}

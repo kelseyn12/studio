@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { MAX_HOOK_LOGOS, parseLogos, stringifyLogos } from "@/lib/hook-logos-math";
+import { MAX_HOOK_LOGOS, MAX_LOGO_ITEMS, parseLogoItems, parseLogos, stringifyLogos } from "@/lib/hook-logos-math";
 import { deleteUpload, mimeFromName, saveUpload } from "@/lib/files";
 import { rejectStudioFile } from "@/lib/storage";
 import { prisma } from "@/lib/prisma";
@@ -17,9 +17,26 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
   const { id } = await context.params;
   const clip = await prisma.repurposeClip.findUnique({ where: { id } });
   if (!clip) return NextResponse.json({ error: "Missing clip" }, { status: 404 });
-  const current = parseLogos(clip.logosJson);
-  if (current.length >= MAX_HOOK_LOGOS) {
-    return NextResponse.json({ error: "Four logos is enough on one hook" }, { status: 400 });
+  const current = parseLogoItems(clip.logosJson);
+  if (current.length >= MAX_LOGO_ITEMS) {
+    return NextResponse.json({ error: "That's enough pieces on this clip" }, { status: 400 });
+  }
+  const type = request.headers.get("content-type") || "";
+  if (type.includes("application/json")) {
+    const body = (await request.json()) as { mark?: unknown };
+    const text = String(body.mark || "").trim().slice(0, 48);
+    if (!text) return NextResponse.json({ error: "Type +, =, an emoji, or a short word" }, { status: 400 });
+    await prisma.repurposeClip.update({
+      where: { id },
+      data: {
+        logosJson: stringifyLogos([...current, { kind: "mark", id: `mark-${Date.now()}`, text }]),
+      },
+    });
+    return NextResponse.json({ ok: true });
+  }
+  const files = parseLogos(clip.logosJson);
+  if (files.length >= MAX_HOOK_LOGOS) {
+    return NextResponse.json({ error: "Four logo files is enough on one clip" }, { status: 400 });
   }
   const form = await request.formData();
   const file = form.get("file");
@@ -43,11 +60,14 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
   const { id } = await context.params;
   const clip = await prisma.repurposeClip.findUnique({ where: { id } });
   if (!clip) return NextResponse.json({ error: "Missing clip" }, { status: 404 });
-  const body = (await request.json()) as { path?: unknown; x?: unknown; y?: unknown };
+  const body = (await request.json()) as { path?: unknown; id?: unknown; x?: unknown; y?: unknown };
   const pathValue = String(body.path || "");
-  const next = parseLogos(clip.logosJson).map((logo) =>
-    logo.path === pathValue ? { ...logo, x: Number(body.x), y: Number(body.y) } : logo,
-  );
+  const markId = String(body.id || "");
+  const next = parseLogoItems(clip.logosJson).map((item) => {
+    const match = pathValue && "path" in item && item.path === pathValue;
+    const mark = markId && "kind" in item && item.kind === "mark" && item.id === markId;
+    return match || mark ? { ...item, x: Number(body.x), y: Number(body.y) } : item;
+  });
   await prisma.repurposeClip.update({ where: { id }, data: { logosJson: stringifyLogos(next) } });
   return NextResponse.json({ ok: true });
 }
@@ -59,9 +79,11 @@ export async function DELETE(request: Request, context: { params: Promise<{ id: 
   const clip = await prisma.repurposeClip.findUnique({ where: { id } });
   if (!clip) return NextResponse.json({ error: "Missing clip" }, { status: 404 });
   const pathValue = new URL(request.url).searchParams.get("path") || "";
-  const next = parseLogos(clip.logosJson).filter((logo) => logo.path !== pathValue);
-  const removed = parseLogos(clip.logosJson).find((logo) => logo.path === pathValue);
-  if (removed) await deleteUpload(removed.path);
+  const markId = new URL(request.url).searchParams.get("id") || "";
+  const items = parseLogoItems(clip.logosJson);
+  const removed = items.find((item) => ("path" in item && item.path === pathValue) || ("id" in item && item.id === markId));
+  const next = items.filter((item) => item !== removed);
+  if (removed && "path" in removed && removed.path) await deleteUpload(removed.path);
   await prisma.repurposeClip.update({ where: { id }, data: { logosJson: stringifyLogos(next) } });
   return NextResponse.json({ ok: true });
 }

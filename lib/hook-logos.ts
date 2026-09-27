@@ -2,22 +2,35 @@ import { mkdir } from "fs/promises";
 import path from "path";
 import { randomUUID } from "crypto";
 import { localRoot } from "@/lib/files";
-import { CANVAS_H, CANVAS_W, logoBoxes, placeLogoBoxes } from "@/lib/hook-logos-math";
+import { boxesFromItems, CANVAS_H, CANVAS_W, logoBoxes, placeLogoBoxes } from "@/lib/hook-logos-math";
 
-export { LOGO_SECONDS, MAX_HOOK_LOGOS, parseLogos, stringifyLogos, logoBoxes, logoOverlayFilter } from "@/lib/hook-logos-math";
+export {
+  LOGO_SECONDS,
+  MAX_HOOK_LOGOS,
+  parseLogos,
+  parseLogoItems,
+  stringifyLogos,
+  isLogoFile,
+  logoBoxes,
+  boxesFromItems,
+  logoOverlayFilter,
+} from "@/lib/hook-logos-math";
 
 function escapeDraw(text: string): string {
   return text.replace(/\\/g, "\\\\").replace(/'/g, "\u2019").replace(/:/g, "\\:");
 }
 
-/** Transparent 1080×1920 sheet with the logos (and + / = when there are three). */
+/** Transparent 1080×1920 sheet: logo files plus optional + = emoji text. */
 export async function writeLogoSheet(
   absPaths: string[],
   places: Array<{ x?: number; y?: number }> = [],
   equation = false,
+  items?: import("@/lib/hook-logos-math").LogoItem[],
 ): Promise<string> {
-  const boxes = placeLogoBoxes(logoBoxes(absPaths.length, equation), places);
-  if (!boxes.length) throw new Error("Drop 1 to 4 logo files");
+  const boxes = items?.length
+    ? boxesFromItems(items)
+    : placeLogoBoxes(logoBoxes(absPaths.length, equation), places);
+  if (!boxes.length) throw new Error("Drop a logo or add + = emoji text");
   const outputRel = `generated/hook-logos-${randomUUID()}.png`;
   const outputAbs = path.join(localRoot(), outputRel);
   await mkdir(path.dirname(outputAbs), { recursive: true });

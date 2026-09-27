@@ -3,7 +3,7 @@
 import { useRef, useState, type PointerEvent } from "react";
 import { useRouter } from "next/navigation";
 import { hookDefaultPos, parseHookLayout, stringifyHookLayout, type HookPos } from "@/lib/hook-layout";
-import { parseLogos } from "@/lib/hook-logos-math";
+import { isLogoFile, parseLogoItems } from "@/lib/hook-logos-math";
 import { publicFileUrl } from "@/lib/urls";
 import type { DrawnStyle } from "@/lib/text-style";
 
@@ -30,7 +30,7 @@ export function HookStage({
   const [list, setList] = useState((saved.list ?? []).join("\n"));
   const [pos, setPos] = useState<HookPos>(saved);
   const [preview, setPreview] = useState<DrawnStyle>(look);
-  const logos = parseLogos(logosJson);
+  const logos = parseLogoItems(logosJson);
 
   function point(event: PointerEvent<HTMLElement>): HookPos {
     const box = stageRef.current?.getBoundingClientRect();
@@ -52,12 +52,17 @@ export function HookStage({
     });
   }
 
-  async function moveLogo(path: string, event: PointerEvent<HTMLButtonElement>) {
+  async function moveItem(item: (typeof logos)[number], event: PointerEvent<HTMLButtonElement>) {
     const next = point(event);
     await fetch(`/api/repurpose/clips/${id}/logos`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ path, x: next.x, y: next.y }),
+      body: JSON.stringify({
+        path: isLogoFile(item) ? item.path : undefined,
+        id: !isLogoFile(item) ? item.id : undefined,
+        x: next.x,
+        y: next.y,
+      }),
     });
     router.refresh();
   }
@@ -106,9 +111,9 @@ export function HookStage({
             rows={3}
           />
         </div>
-        {logos.map((logo) => (
+        {logos.map((item) => (
           <button
-            key={logo.path}
+            key={isLogoFile(item) ? item.path : item.id}
             type="button"
             onPointerDown={(event) => event.currentTarget.setPointerCapture(event.pointerId)}
             onPointerMove={(event) => {
@@ -117,13 +122,17 @@ export function HookStage({
               event.currentTarget.style.left = `${next.x * 100}%`;
               event.currentTarget.style.top = `${next.y * 100}%`;
             }}
-            onPointerUp={(event) => moveLogo(logo.path, event)}
-            className="absolute z-20 h-12 w-12 -translate-x-1/2 -translate-y-1/2 cursor-grab overflow-hidden rounded-lg border border-white/40 bg-ink/40"
-            style={{ left: `${(logo.x ?? 0.5) * 100}%`, top: `${(logo.y ?? 0.5) * 100}%` }}
-            title="Drag this logo"
+            onPointerUp={(event) => moveItem(item, event)}
+            className="absolute z-20 flex h-12 min-w-12 -translate-x-1/2 -translate-y-1/2 cursor-grab items-center justify-center overflow-hidden rounded-lg border border-white/40 bg-ink/40 px-1 text-lg"
+            style={{ left: `${(item.x ?? 0.5) * 100}%`, top: `${(item.y ?? 0.5) * 100}%` }}
+            title="Drag"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={publicFileUrl(logo.path)} alt={logo.filename} className="h-full w-full object-contain" />
+            {isLogoFile(item) ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={publicFileUrl(item.path)} alt={item.filename} className="h-full w-full object-contain" />
+            ) : (
+              item.text
+            )}
           </button>
         ))}
       </div>
@@ -133,20 +142,22 @@ export function HookStage({
           onClick={() => save({ ...pos, from: videoRef.current?.currentTime ?? 0 })}
           className="flex-1 rounded-lg border border-line px-2 py-1 text-[11px] text-mute"
         >
-          Words from here
+          Show text now
         </button>
         <button
           type="button"
           onClick={() => save({ ...pos, to: videoRef.current?.currentTime ?? 0 })}
           className="flex-1 rounded-lg border border-line px-2 py-1 text-[11px] text-mute"
         >
-          Words to here
+          Hide text after now
         </button>
       </div>
       <p className="text-[11px] text-mute">
+        Studio does not hear your list. You set when this text is on screen
         {pos.from != null || pos.to != null
-          ? `On screen ${pos.from?.toFixed(1) ?? "0.0"}s → ${pos.to?.toFixed(1) ?? "end"}`
-          : "Whole clip. Scrub, then Words from / to here."}
+          ? ` (${pos.from?.toFixed(1) ?? "0.0"}s → ${pos.to?.toFixed(1) ?? "end"}).`
+          : " (whole clip until you set a window)."}{" "}
+        Turn on Spoken words in Mix if you want captions to follow what you say.
       </p>
       <textarea
         value={list}

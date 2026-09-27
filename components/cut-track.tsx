@@ -82,7 +82,10 @@ export function CutTrack({
           }}
         />
       </div>
-      <p className="text-[11px] text-mute">Drag the yellow ends. Click the bar to scrub. Dark = dropped.</p>
+      <p className="text-[11px] text-mute">
+        Yellow ends = keep this window. Click the bar to scrub, not to cut. Dark = a middle you dropped. For each
+        dragging part: Cut from here, then Cut to here.
+      </p>
     </div>
   );
 }

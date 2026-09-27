@@ -4,7 +4,7 @@ import path from "path";
 import { describe, expect, it } from "vitest";
 import { runFfmpeg } from "@/lib/ffmpeg";
 import { writeLogoSheet } from "@/lib/hook-logos";
-import { logoBoxes, parseLogos, stringifyLogos } from "@/lib/hook-logos-math";
+import { boxesFromItems, logoBoxes, parseLogoItems, parseLogos, stringifyLogos } from "@/lib/hook-logos-math";
 
 describe("parseLogos", () => {
   it("keeps safe relative paths and caps at 4", () => {
@@ -19,6 +19,26 @@ describe("parseLogos", () => {
     ]);
     expect(parseLogos(raw).map((logo) => logo.path)).toEqual(["repurpose/a/logo.png", "b.png", "c.png", "d.png"]);
     expect(stringifyLogos(parseLogos(raw)).startsWith("[")).toBe(true);
+  });
+
+  it("keeps + = emoji and short text next to logo files", () => {
+    const items = parseLogoItems(
+      JSON.stringify([
+        { path: "repurpose/a/claude.png", filename: "claude.png" },
+        { kind: "mark", id: "plus", text: "+" },
+        { path: "repurpose/a/higgs.png", filename: "higgs.png" },
+        { kind: "mark", id: "eq", text: "=" },
+        { kind: "mark", id: "fire", text: "🔥" },
+      ]),
+    );
+    expect(items.map((item) => ("text" in item && item.kind === "mark" ? item.text : "logo"))).toEqual([
+      "logo",
+      "+",
+      "logo",
+      "=",
+      "🔥",
+    ]);
+    expect(boxesFromItems(items).some((box) => box.kind === "mark" && box.text === "+")).toBe(true);
   });
 });
 
@@ -54,6 +74,15 @@ describe("writeLogoSheet", () => {
       const { stat } = await import("fs/promises");
       expect((await stat(path.join(localRoot(), rel))).size).toBeGreaterThan(800);
       await rm(path.join(localRoot(), rel), { force: true });
+      const mixed = await writeLogoSheet(files.slice(0, 2), [], false, [
+        { path: files[0], filename: "a.png" },
+        { kind: "mark", id: "plus", text: "+" },
+        { path: files[1], filename: "b.png" },
+        { kind: "mark", id: "eq", text: "=" },
+        { kind: "mark", id: "fire", text: "100+" },
+      ]);
+      expect((await stat(path.join(localRoot(), mixed))).size).toBeGreaterThan(800);
+      await rm(path.join(localRoot(), mixed), { force: true });
       await rm(dir, { recursive: true, force: true });
     },
     20_000,

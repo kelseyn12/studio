@@ -1,56 +1,65 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { parseHookLayout, stringifyHookLayout } from "@/lib/hook-layout";
 import { publicFileUrl } from "@/lib/urls";
-import { MAX_HOOK_LOGOS, parseLogos } from "@/lib/hook-logos-math";
+import { isLogoFile, MAX_HOOK_LOGOS, MAX_LOGO_ITEMS, parseLogoItems } from "@/lib/hook-logos-math";
 
-export function HookLogos({ id, logosJson, hookLayout }: { id: string; logosJson: string; hookLayout: string }) {
+export function HookLogos({ id, logosJson }: { id: string; logosJson: string; hookLayout?: string }) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
-  const logos = parseLogos(logosJson);
-  const layout = parseHookLayout(hookLayout);
+  const [mark, setMark] = useState("");
+  const items = parseLogoItems(logosJson);
+  const files = items.filter(isLogoFile);
 
-  async function add(file: File) {
+  async function addFile(file: File) {
     const body = new FormData();
     body.append("file", file);
     await fetch(`/api/repurpose/clips/${id}/logos`, { method: "POST", body });
     router.refresh();
   }
 
-  async function remove(path: string) {
-    await fetch(`/api/repurpose/clips/${id}/logos?path=${encodeURIComponent(path)}`, { method: "DELETE" });
+  async function addMark(text: string) {
+    const value = text.trim();
+    if (!value) return;
+    await fetch(`/api/repurpose/clips/${id}/logos`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mark: value }),
+    });
+    setMark("");
     router.refresh();
   }
 
-  async function toggleEquation() {
-    const next = { ...(layout ?? { x: 0.5, y: 0.17 }), logoEq: !layout?.logoEq };
-    await fetch(`/api/repurpose/clips/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ hookLayout: stringifyHookLayout(next) }),
-    });
+  async function remove(item: (typeof items)[number]) {
+    const query = isLogoFile(item) ? `path=${encodeURIComponent(item.path)}` : `id=${encodeURIComponent(item.id)}`;
+    await fetch(`/api/repurpose/clips/${id}/logos?${query}`, { method: "DELETE" });
     router.refresh();
   }
 
   return (
     <div className="mt-2 space-y-1">
-      <p className="text-[11px] text-mute">Logos · first 2.5s. Drag on Words. Three sit in a row unless you pick A + B = C.</p>
+      <p className="text-[11px] text-mute">
+        First seconds: logos, +, =, emoji, or a short line. Drag on Words. Headline text is Words, not a logo.
+      </p>
       <div className="flex flex-wrap items-center gap-1">
-        {logos.map((logo) => (
+        {items.map((item) => (
           <button
-            key={logo.path}
+            key={isLogoFile(item) ? item.path : item.id}
             type="button"
-            onClick={() => remove(logo.path)}
-            className="relative h-10 w-10 overflow-hidden rounded-lg border border-line bg-ink"
-            title={`Remove ${logo.filename}`}
+            onClick={() => remove(item)}
+            className="relative flex h-10 min-w-10 items-center justify-center overflow-hidden rounded-lg border border-line bg-ink px-1 text-xs"
+            title="Remove"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={publicFileUrl(logo.path)} alt={logo.filename} className="h-full w-full object-contain" />
+            {isLogoFile(item) ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={publicFileUrl(item.path)} alt={item.filename} className="h-full w-full object-contain" />
+            ) : (
+              item.text
+            )}
           </button>
         ))}
-        {logos.length < MAX_HOOK_LOGOS ? (
+        {files.length < MAX_HOOK_LOGOS && items.length < MAX_LOGO_ITEMS ? (
           <>
             <input
               ref={inputRef}
@@ -59,7 +68,7 @@ export function HookLogos({ id, logosJson, hookLayout }: { id: string; logosJson
               className="hidden"
               onChange={(event) => {
                 const file = event.target.files?.[0];
-                if (file) add(file);
+                if (file) addFile(file);
                 event.target.value = "";
               }}
             />
@@ -72,14 +81,31 @@ export function HookLogos({ id, logosJson, hookLayout }: { id: string; logosJson
             </button>
           </>
         ) : null}
-        {logos.length === 3 ? (
-          <button
-            type="button"
-            onClick={toggleEquation}
-            className={`rounded-lg px-2 py-1 text-[11px] ${layout?.logoEq ? "bg-sun font-semibold text-ink" : "border border-line text-mute"}`}
-          >
-            A + B = C
-          </button>
+        {items.length < MAX_LOGO_ITEMS ? (
+          <>
+            {["+", "=", "🔥"].map((chip) => (
+              <button
+                key={chip}
+                type="button"
+                onClick={() => addMark(chip)}
+                className="rounded-lg border border-line px-2 py-1 text-[11px] text-mute"
+              >
+                {chip}
+              </button>
+            ))}
+            <input
+              value={mark}
+              onChange={(event) => setMark(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  void addMark(mark);
+                }
+              }}
+              placeholder="emoji or word"
+              className="field h-8 w-24 px-2 text-[11px]"
+            />
+          </>
         ) : null}
       </div>
     </div>

@@ -90,7 +90,7 @@ export default async function BatchPage({
             slot="HOOK"
             title="Hooks"
             meta={`${hooks.length} options · first clip · one picked per video`}
-            hint="Openings. Tap Words to type on the clip and drag. Cut, speed, logos. Copies of a mix get different speed/hue and a different cover frame."
+            hint="Openings. Words is typed text you place and time — Studio does not hear your list. Add logos, +, =, emoji. Cut yellow ends, or Cut from/to for each middle. Copies get different speed/hue and cover."
             clips={hooks}
             showHook
             hookText={winningHook}
@@ -101,7 +101,7 @@ export default async function BatchPage({
             slot="DEMO"
             title="Bodies"
             meta={`${bodies.length} options · middle clip · usually one, can be more`}
-            hint="Product / demo. Cut, speed, and Words work here too — text can appear mid-clip."
+            hint="Product / demo. Cut, speed, and Words. Scrub to the second you say the point, then Show text now / Hide text after now."
             clips={bodies}
           />
           <SlotBlock
