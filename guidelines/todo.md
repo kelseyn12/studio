@@ -216,4 +216,4 @@
   Box cycles Off / Black / White. Spoken phrases can be rewritten on the clip; Wipe listens again on the next Generate.
 
 - [X] CapCut-style spoken captions
-  Spoken on burns lower-third ASS: TikTok stroke + karaoke, Instagram boxed phrase. Hooks are skipped. Bodies and CTAs keep SpokenFix.
+  Spoken on burns lower-third white + black outline (IG thinner, TT fatter). No box, no karaoke. Hooks skipped. Bodies and CTAs keep SpokenFix.

@@ -52,7 +52,7 @@ describe("applyCaptionLines", () => {
 describe("buildCaptionAss", () => {
   it("shifts times by the trim and keeps spoken case", () => {
     const track = buildCaptionAss([{ text: "this app is", start: 1, end: 1.5 }], 0.4);
-    expect(track).toContain("This app is");
+    expect(track).toContain("this app is");
     expect(track).not.toContain("THIS APP IS");
     expect(track).toContain("0:00:00.60");
     expect(track).toContain("0:00:01.10");
@@ -60,24 +60,19 @@ describe("buildCaptionAss", () => {
 
   it("drops phrases fully cut off by the trim", () => {
     const track = buildCaptionAss([{ text: "gone", start: 0, end: 0.3 }], 0.5);
-    expect(track).not.toContain("Gone");
+    expect(track).not.toContain("gone");
   });
 
-  it("paints Instagram as a boxed phrase and TikTok as stroke plus karaoke", () => {
-    const words = [
-      { word: "hello", start: 0, end: 0.4 },
-      { word: "there", start: 0.4, end: 1 },
-    ];
-    const phrase = { text: "hello there", start: 0, end: 1, words };
+  it("paints both looks as white stroke, IG thinner and TT fatter", () => {
+    const phrase = { text: "hello there", start: 0, end: 1 };
     const instagram = buildCaptionAss([phrase], 0, "instagram");
     const tiktok = buildCaptionAss([phrase], 0, "tiktok");
-    expect(instagram).toContain(",3,12,0,5,");
+    expect(instagram).toContain(",1,7,0,5,");
     expect(instagram).toContain("Inter Tight");
-    expect(instagram).not.toContain("&H00FFFF&");
-    expect(tiktok).toContain(",1,5,2,5,");
+    expect(instagram).not.toContain(",3,");
+    expect(tiktok).toContain(",1,9,0,5,");
     expect(tiktok).toContain("TikTok Sans");
-    expect(tiktok).toContain("&H00FFFF&");
-    expect(tiktok).toContain("0:00:00.40");
+    expect(tiktok).not.toContain("&H00FFFF&");
   });
 });
 

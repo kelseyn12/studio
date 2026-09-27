@@ -1,5 +1,6 @@
 # Refactoring log
-- 2026-09-26 — Spoken captions left drawtext ALL CAPS. They now burn CapCut-style ASS (TT karaoke stroke, IG boxed phrase) on bodies/CTAs only.
+- 2026-09-26 — Spoken captions match the CapCut refs: both looks are white + black outline, IG thinner, TT fatter. Box and karaoke removed.
+- 2026-09-26 — Spoken captions left drawtext ALL CAPS. They now burn CapCut-style ASS on bodies/CTAs only.
 - 2026-09-26 — Box cycles Off / Black / White. Spoken words can be rewritten on the clip (`captions-math` + SpokenFix). Caption listen still happens only when captionsJson is empty.
 - 2026-09-26 — Words use real faces: TikTok Sans (OFL) and Inter Tight (OFL stand-in for Instagram Sans). Bundled in `fonts/`. Fly `HOOK_FONT` no longer overrides a look that has its own file.
 - 2026-09-26 — Box on is one hugging chip per line (TT pill, IG block). Burn-in emits one ASS Dialogue per wrap; libass plates stay square. Match type sizes logos to the look. Tailwind now scans `lib/` so plate classes actually paint.

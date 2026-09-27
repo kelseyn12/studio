@@ -17,7 +17,7 @@
 - `canVisit` — `lib/access.ts` — rooms a role may open. Used by middleware and nav.
 - `assembleVideo` — `lib/ffmpeg.ts` — concatenates hook × body × CTA, keeps audio, optional music, applies a per-copy Variation, optional hook text + spoken caption filters.
 - `ffmpegBin` / `canBurnText` — `lib/ffmpeg.ts` — prefers Homebrew ffmpeg-full so drawtext exists; Generate refuses text if it does not.
-- `groupWords` / `buildCaptionAss` / `writeCaptionAss` / `transcribeWords` / `spokenOnClip` — `lib/captions.ts` / `lib/caption-ass.ts` — Whisper → 2–3 word phrases. CapCut-style lower third (TT stroke + karaoke, IG box). Hooks skip spoken. `writeCaptionAss` returns an `ass=` filter.
+- `groupWords` / `buildCaptionAss` / `writeCaptionAss` / `transcribeWords` / `spokenOnClip` — `lib/captions.ts` / `lib/caption-ass.ts` — Whisper → 2–3 word phrases. Lower-third white + black outline (IG 58/7, TT 64/9). Hooks skip spoken. `writeCaptionAss` returns an `ass=` filter.
 - `variationFor` — `lib/variations.ts` — unique speed / light / crop / mirror amounts for each copy of a mix, plus `hookColor` (whole line) and `accentColor` (starred word, `ACCENT_COLORS`).
 - `pickTracks` — `lib/combinations.ts` — random music per video; uses every track before repeating. Used by Multiply generate.
 - `parseHookLines` — `lib/variations.ts` — batch text hooks, one per line, max 12. Each line multiplies the Multiply batch.
