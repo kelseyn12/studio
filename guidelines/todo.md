@@ -202,3 +202,6 @@
 
 - [X] Native TT/IG Words, shared list rows, Box toggle
   TikTok Classic 82 / Reels Classic 76. Mix numbers stay on the hook; body words use the same stack. Box on/off is a plate behind Words on hook, body, and CTA.
+
+- [X] Native black/white boxes + Align guides
+  Box on is solid black + white type: TT rounded chip, IG tight block. Align shows the center line and shared axes; it does not reshuffle logos.

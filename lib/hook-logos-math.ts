@@ -32,10 +32,24 @@ export function snapLogoPos(
     if (Math.abs(other.y - y) < ALIGN_SNAP) nextY = other.y;
     if (Math.abs(other.x - x) < ALIGN_SNAP) nextX = other.x;
   }
+  if (Math.abs(0.5 - nextX) < ALIGN_SNAP) nextX = 0.5;
   return {
     x: Math.min(0.92, Math.max(0.08, nextX)),
     y: Math.min(0.88, Math.max(0.08, nextY)),
   };
+}
+
+/** Shared X or Y when two pieces sit on the same line. */
+export function sharedAxes(points: Array<{ x: number; y: number }>, snap = ALIGN_SNAP): { xs: number[]; ys: number[] } {
+  const xs: number[] = [];
+  const ys: number[] = [];
+  for (let i = 0; i < points.length; i += 1) {
+    for (let j = i + 1; j < points.length; j += 1) {
+      if (Math.abs(points[i].x - points[j].x) < snap) xs.push(points[i].x);
+      if (Math.abs(points[i].y - points[j].y) < snap) ys.push(points[i].y);
+    }
+  }
+  return { xs: [...new Set(xs)], ys: [...new Set(ys)] };
 }
 
 export const LOGO_SCALE_MIN = 0.5;

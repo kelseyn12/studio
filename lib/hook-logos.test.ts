@@ -4,7 +4,7 @@ import path from "path";
 import { describe, expect, it } from "vitest";
 import { runFfmpeg } from "@/lib/ffmpeg";
 import { writeLogoSheet } from "@/lib/hook-logos";
-import { alignLogoRow, boxesFromItems, CANVAS_H, defaultLogoPos, logoBoxes, parseLogoItems, parseLogos, snapLogoPos, stringifyLogos } from "@/lib/hook-logos-math";
+import { alignLogoRow, boxesFromItems, CANVAS_H, defaultLogoPos, logoBoxes, parseLogoItems, parseLogos, sharedAxes, snapLogoPos, stringifyLogos } from "@/lib/hook-logos-math";
 
 describe("parseLogos", () => {
   it("keeps safe relative paths and caps at 4", () => {
@@ -63,6 +63,10 @@ describe("parseLogos", () => {
     expect(row[0].y).toBe(0.2);
     expect(row[2].x - row[1].x).toBeCloseTo(row[1].x - row[0].x);
     expect(snapLogoPos(0.51, 0.21, [{ x: 0.5, y: 0.2 }])).toEqual({ x: 0.5, y: 0.2 });
+    expect(sharedAxes([{ x: 0.2, y: 0.3 }, { x: 0.8, y: 0.3 }, { x: 0.2, y: 0.7 }])).toEqual({
+      xs: [0.2],
+      ys: [0.3],
+    });
   });
 });
 

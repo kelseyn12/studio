@@ -1,11 +1,12 @@
 "use client";
 
 import { useRef, useState, type PointerEvent } from "react";
+import { AlignGuides } from "@/components/align-guides";
 import { HookList } from "@/components/hook-list";
 import { ListOverlay } from "@/components/list-overlay";
 import { hookDefaultPos, parseHookLayout, stringifyHookLayout, type HookPos } from "@/lib/hook-layout";
-import { ALIGN_SNAP, alignLogoRow, clampLogoScale, defaultLogoPos, isLogoFile, itemScale, LOGO_SCALE_STEP, parseLogoItems, snapLogoPos } from "@/lib/hook-logos-math";
-import { listRows, listStack } from "@/lib/list-layout";
+import { ALIGN_SNAP, clampLogoScale, defaultLogoPos, isLogoFile, itemScale, LOGO_SCALE_STEP, parseLogoItems, sharedAxes, snapLogoPos } from "@/lib/hook-logos-math";
+import { listRows, listStack, wordBoxClass } from "@/lib/list-layout";
 import { publicFileUrl } from "@/lib/urls";
 import type { DrawnStyle } from "@/lib/text-style";
 
@@ -40,6 +41,7 @@ export function HookStage({
   const [places, setPlaces] = useState<Record<string, { x: number; y: number }>>({});
   const [scales, setScales] = useState<Record<string, number>>({});
   const [picked, setPicked] = useState<string | null>(null);
+  const [guides, setGuides] = useState(true);
   const logos = parseLogoItems(logosJson);
 
   function itemKey(item: (typeof logos)[number]): string {
@@ -94,36 +96,12 @@ export function HookStage({
 
   function shiftItem(item: (typeof logos)[number], event: PointerEvent<HTMLButtonElement>) {
     const raw = point(event);
-    const next = snapLogoPos(
-      raw.x,
-      raw.y,
-      logos.flatMap((row, index) => (itemKey(row) === itemKey(item) ? [] : [loc(row, index)])),
-    );
+    const next = snapLogoPos(raw.x, raw.y, [
+      { x: 0.5, y: pos.y },
+      ...logos.flatMap((row, index) => (itemKey(row) === itemKey(item) ? [] : [loc(row, index)])),
+    ]);
     setPlaces((current) => ({ ...current, [itemKey(item)]: next }));
     return next;
-  }
-
-  async function alignPieces() {
-    const row = alignLogoRow(logos.length, logos[0] ? loc(logos[0], 0).y : undefined);
-    const nextPlaces: Record<string, { x: number; y: number }> = {};
-    await Promise.all(
-      logos.map((item, index) => {
-        const at = row[index];
-        nextPlaces[itemKey(item)] = at;
-        return fetch(`/api/repurpose/clips/${id}/logos`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            path: isLogoFile(item) ? item.path : undefined,
-            id: !isLogoFile(item) ? item.id : undefined,
-            x: at.x,
-            y: at.y,
-          }),
-        });
-      }),
-    );
-    setPlaces((current) => ({ ...current, ...nextPlaces }));
-    await save({ ...pos, x: 0.5, y: hookDefaultPos(preview).y });
   }
 
   async function moveItem(item: (typeof logos)[number], event: PointerEvent<HTMLButtonElement>) {
@@ -159,11 +137,15 @@ export function HookStage({
     y: onHook ? pos.y : listFromHook.y,
     count,
   });
-  const native =
-    preview === "instagram"
+  const native = pos.box
+    ? preview === "instagram"
+      ? "text-[17px] font-semibold leading-tight text-white"
+      : "text-[20px] font-bold leading-tight text-white"
+    : preview === "instagram"
       ? "text-[17px] font-semibold leading-tight text-white [text-shadow:0_1px_0_#000,0_-1px_0_#000,1px_0_0_#000,-1px_0_0_#000]"
       : "text-[20px] font-bold leading-tight text-white [text-shadow:0_1px_0_#000,0_-1px_0_#000,1px_0_0_#000,-1px_0_0_#000,0_2px_5px_#000]";
-  const plate = pos.box ? "rounded-sm bg-black/80 px-2 py-0.5" : "";
+  const plate = wordBoxClass(preview, pos.box);
+  const axes = sharedAxes([{ x: pos.x, y: pos.y }, ...logos.map((item, index) => loc(item, index))]);
 
   return (
     <div className="space-y-2">
@@ -178,7 +160,11 @@ export function HookStage({
             {choice === "tiktok" ? "TT size" : "IG size"}
           </button>
         ))}
-        <button type="button" onClick={() => void alignPieces()} className="rounded-lg border border-line px-2 py-1 text-[11px] text-mute">
+        <button
+          type="button"
+          onClick={() => setGuides((on) => !on)}
+          className={`rounded-lg px-2 py-1 text-[11px] ${guides ? "bg-sun font-semibold text-ink" : "border border-line text-mute"}`}
+        >
           Align
         </button>
         <button
@@ -191,6 +177,7 @@ export function HookStage({
       </div>
       <div ref={stageRef} className="relative overflow-hidden rounded-xl bg-ink">
         <video ref={videoRef} src={src} controls playsInline className="aspect-[9/16] w-full object-cover" />
+        {guides ? <AlignGuides horizontals={[pos.y, ...axes.ys]} verticals={axes.xs} /> : null}
         <div
           className="absolute z-10 w-[78%] cursor-grab"
           style={{ left: `${pos.x * 100}%`, top: `${pos.y * 100}%`, transform: "translate(-50%, -50%)" }}

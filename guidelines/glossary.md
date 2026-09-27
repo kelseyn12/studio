@@ -79,7 +79,8 @@
 - `parseLogoItems` / `parseLogos` / `boxesFromItems` / `defaultLogoPos` / `alignLogoRow` / `snapLogoPos` / `itemScale` / `writeLogoSheet` — `lib/hook-logos-math.ts` / `lib/hook-logos.ts` — files plus `+` `=` emoji / short text. `scale` 0.5–2.5 (Bigger / Smaller on Words). Align evens a row; drag snaps to a neighbor. Unused items line up at `LOGO_ROW_Y` (0.15). First 4s. Tested in `lib/hook-logos.test.ts`.
 - `HookLogos` — `components/hook-logos.tsx` — Add logo, +, =, 🔥, or a typed chip. Headline under the formula is Words.
 - `CutTrack` — `components/cut-track.tsx` — yellow ends = keep window. Click scrubs. Dark = dropped middles. Repeat Cut from/to for more than one middle.
-- `listStack` / `sharedListPlan` / `lookPaint` / `LOOK_METRICS` — `lib/list-layout.ts` — native TT 82 / IG 76. Shared number rows so body words sit on the hook's 1. 2. 3. `box` paints a plate (ASS BorderStyle 3).
-- `HookStage` / `HookList` / `ListOverlay` — `components/hook-stage.tsx` / `components/hook-list.tsx` / `components/list-overlay.tsx` — TT/IG preview, Align, Box on/off. Mix numbers on the hook; body lines lock to those rows. This line now fills each point (`listAt`). Does not listen to speech.
+- `listStack` / `sharedListPlan` / `lookPaint` / `wordBoxClass` / `LOOK_METRICS` — `lib/list-layout.ts` — native TT 82 / IG 76. Box on is solid black + white: TT rounded chip, IG tight block.
+- `sharedAxes` / `snapLogoPos` — `lib/hook-logos-math.ts` — snap to a neighbor or the center line. Align shows guides; it does not reshuffle chips.
+- `HookStage` / `HookList` / `ListOverlay` / `AlignGuides` — Words: TT/IG preview, Align guides, Box on/off. Mix numbers on the hook; body lines lock to those rows.
 - `CoverPick` — `components/cover-pick.tsx` — pick a still on Live. Copies also get staggered cover times on generate.
 - `addLink` / `deleteLink` — `app/dms/actions.ts` — tracked short links for auto-DMs. Public redirect at `/l/[slug]` counts every click.

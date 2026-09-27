@@ -143,8 +143,10 @@ export function buildHookAss(input: {
       }
     }
   }
+  const ink = input.box ? assColor("white") : assColor(base);
+  const edge = input.box ? assColor("black") : "&H00000000&";
   const styleRow = (name: string, size: number, border: 1 | 3, outline: number, shadow: number, align: number, mv: number) =>
-    `Style: ${name},${font},${size},${assColor(base)},${assColor(base)},&H00000000&,&HA0000000&,-1,0,0,0,100,100,0,0,${border},${outline},${shadow},${align},60,60,${mv},1`;
+    `Style: ${name},${font},${size},${ink},${ink},${edge},&H00000000&,-1,0,0,0,100,100,0,0,${border},${outline},${shadow},${align},60,60,${mv},1`;
   return [
     "[Script Info]",
     "ScriptType: v4.00+",
