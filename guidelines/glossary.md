@@ -84,6 +84,8 @@
 - `matchTypeScale` / `previewLogoPx` / `LOGO_TO_TYPE` — `lib/hook-logos-math.ts` — Match type sizes a logo to ~2.4 type-lines. Preview px tracks TT 20 / IG 17 so logos sit with the look.
 - `WordChips` — `components/word-chips.tsx` — hugging per-line box preview under the Words textarea.
 - `sharedAxes` / `snapLogoPos` — `lib/hook-logos-math.ts` — snap to a neighbor or the center line. Align shows guides; it does not reshuffle chips.
-- `HookStage` / `HookList` / `ListOverlay` / `AlignGuides` — Words: TT/IG preview, Align guides, Box on/off. Mix numbers on the hook; body lines lock to those rows.
+- `HookStage` / `HookList` / `ListOverlay` / `AlignGuides` / `SpokenFix` — Words: TT/IG preview, Align guides, Box off / Black / White. Mix numbers on the hook; body lines lock to those rows. Spoken phrases edit on the clip after the first listen.
+- `nextBox` / `boxLabel` / `isBoxed` / `boxIsWhite` — `lib/hook-layout.ts` / `lib/list-layout.ts` — Box cycles off → black plate → white plate.
+- `applyCaptionLines` / `captionLines` — `lib/captions-math.ts` — rewrite spoken phrases and keep their clocks.
 - `CoverPick` — `components/cover-pick.tsx` — pick a still on Live. Copies also get staggered cover times on generate.
 - `addLink` / `deleteLink` — `app/dms/actions.ts` — tracked short links for auto-DMs. Public redirect at `/l/[slug]` counts every click.

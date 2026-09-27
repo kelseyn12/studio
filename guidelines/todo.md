@@ -211,3 +211,6 @@
 
 - [X] Native faces on Words
   TT burns and previews in TikTok Sans (OFL). IG uses Inter Tight — Instagram Sans is not licensed to bundle. Spoken captions use the same files.
+
+- [X] White box + spoken-word fix
+  Box cycles Off / Black / White. Spoken phrases can be rewritten on the clip; Wipe listens again on the next Generate.

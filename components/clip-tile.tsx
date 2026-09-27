@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { HookLogos } from "@/components/hook-logos";
+import { SpokenFix } from "@/components/spoken-fix";
 import { HookStage } from "@/components/hook-stage";
 import { QuickCut } from "@/components/quick-cut";
 import { cutPreviewPath } from "@/lib/hook-layout";
@@ -18,6 +19,7 @@ export function ClipTile({
   postCaption,
   logosJson,
   hookLayout,
+  captionsJson,
   cutUndo,
   showHook,
   look,
@@ -33,6 +35,7 @@ export function ClipTile({
   postCaption?: string;
   logosJson?: string;
   hookLayout?: string;
+  captionsJson?: string;
   cutUndo?: string;
   showHook: boolean;
   look?: DrawnStyle;
@@ -120,6 +123,7 @@ export function ClipTile({
       ) : (
         <p className="mt-2 truncate text-xs text-mute">{filename}</p>
       )}
+      <SpokenFix id={id} captionsJson={captionsJson ?? ""} />
       <HookLogos id={id} logosJson={logosJson ?? ""} hookLayout={hookLayout ?? ""} />
     </div>
   );

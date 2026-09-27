@@ -15,21 +15,30 @@ export const LOOK_METRICS: Record<DrawnStyle, LookMetrics> = {
   plain: { fontsize: 84, top: 0.12, lineGap: 1.12 },
 };
 
-export function lookPaint(style: DrawnStyle, box?: boolean): { borderStyle: 1 | 3; outline: number; shadow: number } {
-  if (box && style === "tiktok") return { borderStyle: 3, outline: 10, shadow: 0 };
-  if (box && style === "instagram") return { borderStyle: 3, outline: 8, shadow: 0 };
-  if (box) return { borderStyle: 3, outline: 10, shadow: 0 };
+export type BoxKind = true | "white";
+
+export function isBoxed(box?: boolean | "white"): boolean {
+  return box === true || box === "white";
+}
+
+export function boxIsWhite(box?: boolean | "white"): boolean {
+  return box === "white";
+}
+
+export function lookPaint(style: DrawnStyle, box?: boolean | "white"): { borderStyle: 1 | 3; outline: number; shadow: number } {
+  if (isBoxed(box) && style === "tiktok") return { borderStyle: 3, outline: 10, shadow: 0 };
+  if (isBoxed(box) && style === "instagram") return { borderStyle: 3, outline: 8, shadow: 0 };
+  if (isBoxed(box)) return { borderStyle: 3, outline: 10, shadow: 0 };
   if (style === "instagram") return { borderStyle: 1, outline: 5, shadow: 1 };
   if (style === "tiktok") return { borderStyle: 1, outline: 5, shadow: 2 };
   return { borderStyle: 1, outline: 6, shadow: 0 };
 }
 
 /** Preview plate: one chip per line. TT is the pill; IG is the tighter block. */
-export function wordBoxClass(style: DrawnStyle, box?: boolean): string {
-  if (!box) return "";
-  return style === "instagram"
-    ? "rounded-[4px] bg-black px-[7px] py-[2px] text-white"
-    : "rounded-full bg-black px-3 py-[3px] text-white";
+export function wordBoxClass(style: DrawnStyle, box?: boolean | "white"): string {
+  if (!isBoxed(box)) return "";
+  const fill = boxIsWhite(box) ? "bg-white text-black" : "bg-black text-white";
+  return style === "instagram" ? `rounded-[4px] px-[7px] py-[2px] ${fill}` : `rounded-full px-3 py-[3px] ${fill}`;
 }
 
 export function clampListCount(count: number): number {

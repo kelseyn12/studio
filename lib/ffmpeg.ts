@@ -173,7 +173,7 @@ export async function assembleVideo(input: {
     listAt?: number[];
     textFrom?: number;
     textTo?: number;
-    box?: boolean;
+    box?: boolean | "white";
   }>;
   outputName: string;
   speed: number;

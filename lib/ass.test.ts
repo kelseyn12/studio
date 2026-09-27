@@ -85,6 +85,9 @@ describe("buildHookAss", () => {
     expect(buildHookAss({ text: "hello there", style: "tiktok", box: true, font: "Arial" })).toMatch(
       /Style: Head,Arial,82,.*,3,10,0,8,/,
     );
+    expect(buildHookAss({ text: "hello there", style: "tiktok", box: "white", font: "Arial" })).toMatch(
+      /Style: Head,Arial,82,&H000000&,&H000000&,&HFFFFFF&/,
+    );
     expect(buildHookAss({ text: "x", style: "plain", font: "Arial" }).match(/,List,/g)).toBeNull();
   });
 

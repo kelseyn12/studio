@@ -9,7 +9,7 @@ export type HookPos = {
   from?: number;
   to?: number;
   logoEq?: boolean;
-  box?: boolean;
+  box?: boolean | "white";
 };
 
 function clamp01(value: number, low: number, high: number): number {
@@ -54,7 +54,7 @@ export function parseHookLayout(raw: string | null | undefined): HookPos | null 
       ...(Number.isFinite(from) && from >= 0 ? { from } : {}),
       ...(Number.isFinite(to) && to > 0 ? { to } : {}),
       ...(parsed.logoEq ? { logoEq: true } : {}),
-      ...(parsed.box ? { box: true } : {}),
+      ...(parsed.box === "white" ? { box: "white" as const } : parsed.box ? { box: true } : {}),
     };
   } catch {
     return null;
@@ -70,8 +70,20 @@ export function stringifyHookLayout(pos: HookPos): string {
     ...(pos.from != null ? { from: pos.from } : {}),
     ...(pos.to != null ? { to: pos.to } : {}),
     ...(pos.logoEq ? { logoEq: true } : {}),
-    ...(pos.box ? { box: true } : {}),
+    ...(pos.box === "white" ? { box: "white" as const } : pos.box ? { box: true } : {}),
   });
+}
+
+export function nextBox(box?: boolean | "white"): boolean | "white" | undefined {
+  if (!box) return true;
+  if (box === true) return "white";
+  return undefined;
+}
+
+export function boxLabel(box?: boolean | "white"): string {
+  if (box === "white") return "White box";
+  if (box) return "Black box";
+  return "Box off";
 }
 
 export type CutUndo = { path: string; thumbPath: string; size: number; basePath: string };

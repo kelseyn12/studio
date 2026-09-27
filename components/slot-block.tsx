@@ -35,6 +35,7 @@ export function SlotBlock({
     postCaption?: string;
     logosJson?: string;
     hookLayout?: string;
+    captionsJson?: string;
     cutUndo?: string;
   }>;
 }) {

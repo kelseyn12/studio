@@ -98,7 +98,7 @@ export function buildHookAss(input: {
   y?: number;
   from?: number;
   to?: number;
-  box?: boolean;
+  box?: boolean | "white";
   listStack?: ListStack;
 }): string {
   const look = LOOK_METRICS[input.style];
@@ -124,7 +124,7 @@ export function buildHookAss(input: {
           ? py + Math.round((index - mid) * lineH)
           : Math.round(marginV + look.fontsize * 0.5 + index * lineH);
         events.push(
-          `Dialogue: 0,${startAt},${endAt},Head,,0,0,0,,{\\an5\\pos(${boxX},${y})}${headline([parseHighlight(line)], "white", accent)}`,
+          `Dialogue: 0,${startAt},${endAt},Head,,0,0,0,,{\\an5\\pos(${boxX},${y})}${headline([parseHighlight(line)], input.box === "white" ? "black" : "white", accent)}`,
         );
       });
     } else {
@@ -157,8 +157,8 @@ export function buildHookAss(input: {
       }
     }
   }
-  const ink = input.box ? assColor("white") : assColor(base);
-  const edge = input.box ? assColor("black") : "&H00000000&";
+  const ink = input.box ? assColor(input.box === "white" ? "black" : "white") : assColor(base);
+  const edge = input.box ? assColor(input.box === "white" ? "white" : "black") : "&H00000000&";
   const styleRow = (name: string, size: number, border: 1 | 3, outline: number, shadow: number, align: number, mv: number) =>
     `Style: ${name},${font},${size},${ink},${ink},${edge},&H00000000&,-1,0,0,0,100,100,0,0,${border},${outline},${shadow},${align},60,60,${mv},1`;
   return [

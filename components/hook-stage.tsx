@@ -4,12 +4,12 @@ import { useRef, useState, type PointerEvent } from "react";
 import { AlignGuides } from "@/components/align-guides";
 import { HookList } from "@/components/hook-list";
 import { ListOverlay } from "@/components/list-overlay";
-import { hookDefaultPos, parseHookLayout, stringifyHookLayout, type HookPos } from "@/lib/hook-layout";
+import { boxLabel, hookDefaultPos, nextBox, parseHookLayout, stringifyHookLayout, type HookPos } from "@/lib/hook-layout";
 import { LogoScaleBar } from "@/components/logo-scale-bar";
 import { WordChips } from "@/components/word-chips";
 import { ALIGN_SNAP, clampLogoScale, defaultLogoPos, isLogoFile, itemScale, LOGO_SCALE_STEP, matchTypeScale, parseLogoItems, previewLogoPx, sharedAxes, snapLogoPos } from "@/lib/hook-logos-math";
 import { LOOK_FONT_CLASS } from "@/lib/hook-fonts";
-import { listRows, listStack, wordBoxClass } from "@/lib/list-layout";
+import { boxIsWhite, isBoxed, listRows, listStack, wordBoxClass } from "@/lib/list-layout";
 import { publicFileUrl } from "@/lib/urls";
 import { wrapHook, type DrawnStyle } from "@/lib/text-style";
 
@@ -141,13 +141,13 @@ export function HookStage({
     count,
   });
   const typeSize = `${LOOK_FONT_CLASS[preview]} ${preview === "instagram" ? "text-[17px] font-semibold leading-tight" : "text-[20px] font-bold leading-tight"}`;
-  const stroke = pos.box
-    ? ""
-    : preview === "instagram"
-      ? "[text-shadow:0_1px_0_#000,0_-1px_0_#000,1px_0_0_#000,-1px_0_0_#000]"
-      : "[text-shadow:0_1px_0_#000,0_-1px_0_#000,1px_0_0_#000,-1px_0_0_#000,0_2px_5px_#000]";
+  const boxed = isBoxed(pos.box);
+  const inkClass = boxed && boxIsWhite(pos.box) ? "text-black" : "text-white";
   const plate = wordBoxClass(preview, pos.box);
   const chips = wrapHook(text);
+  const stroke = boxed ? "" : preview === "instagram"
+    ? "[text-shadow:0_1px_0_#000,0_-1px_0_#000,1px_0_0_#000,-1px_0_0_#000]"
+    : "[text-shadow:0_1px_0_#000,0_-1px_0_#000,1px_0_0_#000,-1px_0_0_#000,0_2px_5px_#000]";
   const active = logos.find((row) => itemKey(row) === picked) ?? logos[0];
   const axes = sharedAxes([{ x: pos.x, y: pos.y }, ...logos.map((item, index) => loc(item, index))]);
 
@@ -173,10 +173,10 @@ export function HookStage({
         </button>
         <button
           type="button"
-          onClick={() => void save({ ...pos, box: !pos.box })}
-          className={`rounded-lg px-2 py-1 text-[11px] ${pos.box ? "bg-sun font-semibold text-ink" : "border border-line text-mute"}`}
+          onClick={() => void save({ ...pos, box: nextBox(pos.box) })}
+          className={`rounded-lg px-2 py-1 text-[11px] ${boxed ? "bg-sun font-semibold text-ink" : "border border-line text-mute"}`}
         >
-          {pos.box ? "Box on" : "Box off"}
+          {boxLabel(pos.box)}
         </button>
       </div>
       <div ref={stageRef} className="relative overflow-hidden rounded-xl bg-ink">
@@ -197,7 +197,7 @@ export function HookStage({
         >
           <p className="mb-1 text-center text-[10px] text-white/70">Drag</p>
           <div className="relative min-h-[4.5rem]">
-            {pos.box ? <WordChips lines={chips} className={`${typeSize} text-white ${plate}`} /> : null}
+            {boxed ? <WordChips lines={chips} className={`${typeSize} ${inkClass} ${plate}`} /> : null}
             <textarea
               value={text}
               placeholder="Type here"
@@ -205,7 +205,7 @@ export function HookStage({
               onBlur={() => save(pos, text)}
               onPointerDown={(event) => event.stopPropagation()}
               className={`w-full resize-none text-center outline-none ${typeSize} ${
-                pos.box ? "absolute inset-0 bg-transparent text-transparent caret-white" : `bg-transparent text-white ${stroke}`
+                boxed ? "absolute inset-0 bg-transparent text-transparent caret-white" : `bg-transparent text-white ${stroke}`
               }`}
               rows={Math.max(2, chips.length || 3)}
             />
@@ -215,7 +215,7 @@ export function HookStage({
           <ListOverlay
             rows={listRows(stack, count)}
             lines={lines}
-            className={`${typeSize} ${pos.box ? `text-white ${plate} w-fit` : `text-white ${stroke}`}`}
+            className={`${typeSize} ${boxed ? `${inkClass} ${plate} w-fit` : `text-white ${stroke}`}`}
           />
         ) : null}
         {logos.map((item, index) => {

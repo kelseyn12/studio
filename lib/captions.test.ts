@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { captionFilters, groupWords, parseCaptionWords } from "@/lib/captions";
+import { applyCaptionLines, captionFilters, groupWords, parseCaptionWords } from "@/lib/captions";
 
 describe("groupWords", () => {
   it("groups up to three words into a phrase", () => {
@@ -28,6 +28,20 @@ describe("groupWords", () => {
       { word: "extraordinary", start: 0.5, end: 1 },
     ]);
     expect(phrases.length).toBe(2);
+  });
+});
+
+describe("applyCaptionLines", () => {
+  it("keeps the old clocks when you rewrite a phrase", () => {
+    const words = [
+      { word: "this", start: 0, end: 0.2 },
+      { word: "app", start: 0.2, end: 0.4 },
+      { word: "is", start: 0.4, end: 0.5 },
+    ];
+    const next = applyCaptionLines(words, "this tool works");
+    expect(next[0]?.start).toBe(0);
+    expect(next[next.length - 1]?.end).toBe(0.5);
+    expect(next.map((item) => item.word).join(" ")).toBe("this tool works");
   });
 });
 
