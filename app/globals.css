@@ -53,13 +53,31 @@ textarea {
   color: #a89f91;
 }
 
-/* Hard outline, same idea as the TikTok text tool. Stroke is painted under the fill. */
-.stroke-tt {
-  -webkit-text-stroke: 6px #000;
-  paint-order: stroke fill;
-}
-
+/* Instagram text-tool stroke: white fill, hard black edge. TikTok stays a light shadow. */
 .stroke-ig {
-  -webkit-text-stroke: 3px #000;
-  paint-order: stroke fill;
+  text-shadow:
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000,
+    -2px 0 0 #000,
+    2px 0 0 #000,
+    0 -2px 0 #000,
+    0 2px 0 #000,
+    -2px -2px 0 #000,
+    2px -2px 0 #000,
+    -2px 2px 0 #000,
+    2px 2px 0 #000,
+    -3px 0 0 #000,
+    3px 0 0 #000,
+    0 -3px 0 #000,
+    0 3px 0 #000,
+    -3px -1px 0 #000,
+    3px -1px 0 #000,
+    -1px -3px 0 #000,
+    1px -3px 0 #000,
+    -3px 1px 0 #000,
+    3px 1px 0 #000,
+    -1px 3px 0 #000,
+    1px 3px 0 #000;
 }
