@@ -90,11 +90,17 @@ export async function renderBatch(input: {
             combo.map(async (clip, index) => {
               const trim = trims.get(clip.path) ?? NO_TRIM;
               const phrases = phrasesByClip.get(clip.path);
+              const layout = parseHookLayout(clip.hookLayout);
               return {
                 path: await ensureLocal(clip.path),
-                hookText: index === 0 ? line || clip.hookText || undefined : undefined,
+                hookText: index === 0 ? line || clip.hookText || undefined : clip.hookText || undefined,
                 trim,
                 phrases,
+                hookX: layout?.x,
+                hookY: layout?.y,
+                listItems: layout?.list,
+                textFrom: layout?.from,
+                textTo: layout?.to,
               };
             }),
           );
@@ -106,6 +112,7 @@ export async function renderBatch(input: {
                 await writeLogoSheet(
                   await Promise.all(logoFiles.map((logo) => ensureLocal(logo.path))),
                   logoFiles,
+                  Boolean(hookPos?.logoEq),
                 ),
               )
             : undefined;
@@ -130,6 +137,11 @@ export async function renderBatch(input: {
                 path: clip.path,
                 hookText: clip.hookText,
                 trim: clip.trim,
+                hookX: clip.hookX,
+                hookY: clip.hookY,
+                listItems: clip.listItems,
+                textFrom: clip.textFrom,
+                textTo: clip.textTo,
                 captionFilters: clip.phrases?.length
                   ? captionFilters(clip.phrases, clip.trim.start, look)
                   : undefined,

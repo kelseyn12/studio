@@ -101,7 +101,7 @@ export default async function BatchPage({
             slot="DEMO"
             title="Bodies"
             meta={`${bodies.length} options · middle clip · usually one, can be more`}
-            hint="Product / demo. Same body can sit under many hooks."
+            hint="Product / demo. Cut, speed, and Words work here too — text can appear mid-clip."
             clips={bodies}
           />
           <SlotBlock
@@ -109,7 +109,7 @@ export default async function BatchPage({
             slot="CTA"
             title="CTAs"
             meta={`${ctas.length} options · last clip · one picked per video`}
-            hint="Endings. Film a few closes without rebuilding the scene."
+            hint="Endings. Cut, speed, Words. Same native TT/IG text as the hook."
             clips={ctas}
           />
         </div>

@@ -51,7 +51,7 @@ export function ClipTile({
   }
 
   return (
-    <div className={`${mode !== "idle" ? "w-64" : showHook ? "w-52" : "w-32"} shrink-0`}>
+    <div className={`${mode !== "idle" ? "w-64" : "w-52"} shrink-0`}>
       {mode === "cut" ? (
         <QuickCut
           src={publicFileUrl(cutPreviewPath(path, cutUndo))}
@@ -82,51 +82,36 @@ export function ClipTile({
           </button>
         </div>
       )}
-      {showHook ? (
-        <div className="mt-2 flex gap-1">
-          <button
-            type="button"
-            onClick={() => {
-              if (mode === "cut") router.refresh();
-              setMode(mode === "cut" ? "idle" : "cut");
-            }}
-            className="flex-1 rounded-lg border border-line px-2 py-1 text-xs text-mute"
-          >
-            {mode === "cut" ? "Done" : "Cut"}
-          </button>
-          <button
-            type="button"
-            onClick={() => setMode(mode === "place" ? "idle" : "place")}
-            className="flex-1 rounded-lg border border-line px-2 py-1 text-xs text-mute"
-          >
-            {mode === "place" ? "Done" : "Words"}
-          </button>
-        </div>
-      ) : (
+      <div className="mt-2 flex gap-1">
         <button
           type="button"
           onClick={() => {
             if (mode === "cut") router.refresh();
             setMode(mode === "cut" ? "idle" : "cut");
           }}
-          className="mt-2 w-full rounded-lg border border-line px-2 py-1 text-xs text-mute"
+          className="flex-1 rounded-lg border border-line px-2 py-1 text-xs text-mute"
         >
-          {mode === "cut" ? "Done cutting" : "Cut"}
+          {mode === "cut" ? "Done" : "Cut"}
         </button>
-      )}
+        <button
+          type="button"
+          onClick={() => setMode(mode === "place" ? "idle" : "place")}
+          className="flex-1 rounded-lg border border-line px-2 py-1 text-xs text-mute"
+        >
+          {mode === "place" ? "Done" : "Words"}
+        </button>
+      </div>
       {showHook ? (
-        <>
-          <textarea
-            defaultValue={postCaption}
-            placeholder="Caption that posts under videos from this hook"
-            className="field mt-2 min-h-16 px-2 py-1 text-xs"
-            onBlur={(event) => saveCaption(event.target.value)}
-          />
-          <HookLogos id={id} logosJson={logosJson ?? ""} />
-        </>
+        <textarea
+          defaultValue={postCaption}
+          placeholder="Caption that posts under videos from this hook"
+          className="field mt-2 min-h-16 px-2 py-1 text-xs"
+          onBlur={(event) => saveCaption(event.target.value)}
+        />
       ) : (
         <p className="mt-2 truncate text-xs text-mute">{filename}</p>
       )}
+      <HookLogos id={id} logosJson={logosJson ?? ""} hookLayout={hookLayout ?? ""} />
     </div>
   );
 }

@@ -1,4 +1,15 @@
-export type HookPos = { x: number; y: number };
+export type HookPos = {
+  x: number;
+  y: number;
+  list?: string[];
+  from?: number;
+  to?: number;
+  logoEq?: boolean;
+};
+
+function clamp01(value: number, low: number, high: number): number {
+  return Math.min(high, Math.max(low, value));
+}
 
 /** Same safe-zone tops as lib/ass.ts LOOKS. */
 export function hookDefaultPos(style: string): HookPos {
@@ -6,21 +17,42 @@ export function hookDefaultPos(style: string): HookPos {
   return { x: 0.5, y: top };
 }
 
+export function parseListLines(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.map((line) => String(line || "").trim()).filter(Boolean).slice(0, 10);
+}
+
 export function parseHookLayout(raw: string | null | undefined): HookPos | null {
   if (!raw?.trim()) return null;
   try {
-    const parsed = JSON.parse(raw) as { x?: unknown; y?: unknown };
+    const parsed = JSON.parse(raw) as Partial<HookPos>;
     const x = Number(parsed.x);
     const y = Number(parsed.y);
     if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
-    return { x: Math.min(0.92, Math.max(0.08, x)), y: Math.min(0.88, Math.max(0.08, y)) };
+    const from = Number(parsed.from);
+    const to = Number(parsed.to);
+    return {
+      x: clamp01(x, 0.08, 0.92),
+      y: clamp01(y, 0.08, 0.88),
+      list: parseListLines(parsed.list),
+      ...(Number.isFinite(from) && from >= 0 ? { from } : {}),
+      ...(Number.isFinite(to) && to > 0 ? { to } : {}),
+      ...(parsed.logoEq ? { logoEq: true } : {}),
+    };
   } catch {
     return null;
   }
 }
 
 export function stringifyHookLayout(pos: HookPos): string {
-  return JSON.stringify({ x: pos.x, y: pos.y });
+  return JSON.stringify({
+    x: pos.x,
+    y: pos.y,
+    ...(pos.list?.length ? { list: pos.list } : {}),
+    ...(pos.from != null ? { from: pos.from } : {}),
+    ...(pos.to != null ? { to: pos.to } : {}),
+    ...(pos.logoEq ? { logoEq: true } : {}),
+  });
 }
 
 export type CutUndo = { path: string; thumbPath: string; size: number; basePath: string };

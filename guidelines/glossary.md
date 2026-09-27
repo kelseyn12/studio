@@ -76,8 +76,9 @@
 - `cutPreviewPath` / `parseCutUndo` — `lib/hook-layout.ts` — 1× is the recorded file (`basePath`). 1.25 / 1.5 / 2 step up from that, never from a previous sped cut.
 - `cutVideo` — `lib/cut.ts` — stitches kept ranges and applies speed (`setpts` + `atempo`). Used by `/api/trim`.
 - `QuickCut` — `components/quick-cut.tsx` — Start here / End here, Cut from here / Cut to here (drop a middle), speed pills 1 / 1.25 / 1.5 / 2. Tapping a pill plays at that rate; Save writes it into the file.
-- `parseLogos` / `logoBoxes` / `writeLogoSheet` — `lib/hook-logos-math.ts` / `lib/hook-logos.ts` — hook logo files (max 4). Three files layout as A + B = C. Sheet overlays the first 2.5s of the hook. Used by ClipTile and `renderBatch`. Tested in `lib/hook-logos.test.ts`.
-- `HookLogos` — `components/hook-logos.tsx` — Add logo on a hook clip.
+- `parseLogos` / `logoBoxes` / `writeLogoSheet` — `lib/hook-logos-math.ts` / `lib/hook-logos.ts` — 1–4 logos, row by default. Optional A + B = C (`logoEq` on hookLayout). Drag on Words. First 2.5s. Tested in `lib/hook-logos.test.ts`.
+- `HookLogos` — `components/hook-logos.tsx` — Add logo on any clip. A + B = C is a toggle, not the default.
+- `CutTrack` — `components/cut-track.tsx` — scrub bar with start/end handles and drop blocks. Used by QuickCut.
 - `HookStage` — `components/hook-stage.tsx` — type words on the hook and drag them / logos. Saves `hookLayout` + logo x/y.
 - `CoverPick` — `components/cover-pick.tsx` — pick a still on Live. Copies also get staggered cover times on generate.
 - `addLink` / `deleteLink` — `app/dms/actions.ts` — tracked short links for auto-DMs. Public redirect at `/l/[slug]` counts every click.

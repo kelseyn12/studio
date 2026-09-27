@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { CutTrack } from "@/components/cut-track";
 import { SPEED_CHOICES, isPlayableCut, keepRanges, keptSeconds } from "@/lib/cut-math";
 import { publicFileUrl } from "@/lib/urls";
 
@@ -26,6 +27,7 @@ export function QuickCut({
   const [end, setEnd] = useState(0);
   const [dropFrom, setDropFrom] = useState<number | null>(null);
   const [drops, setDrops] = useState<Drop[]>([]);
+  const [now, setNow] = useState(0);
   const [speed, setSpeed] = useState(1);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -126,6 +128,7 @@ export function QuickCut({
         onPlay={() => applyRate(speed)}
         onPlaying={() => applyRate(speed)}
         onSeeked={() => applyRate(speed)}
+        onTimeUpdate={(event) => setNow(event.currentTarget.currentTime)}
         onRateChange={() => {
           if (videoRef.current && Math.abs(videoRef.current.playbackRate - speed) > 0.01) {
             applyRate(speed);
@@ -168,6 +171,19 @@ export function QuickCut({
           Reset
         </button>
       </div>
+      <CutTrack
+        duration={duration}
+        current={now}
+        start={start}
+        end={end}
+        drops={drops}
+        onSeek={(time) => {
+          if (videoRef.current) videoRef.current.currentTime = time;
+          setNow(time);
+        }}
+        onStart={setStart}
+        onEnd={setEnd}
+      />
       {dropFrom !== null ? <p className="text-xs text-sun">Dropping from {dropFrom.toFixed(1)}s — play to the end of it, then Cut to here.</p> : null}
       {drops.length > 0 ? (
         <div className="flex flex-wrap gap-2">

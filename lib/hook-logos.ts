@@ -14,8 +14,9 @@ function escapeDraw(text: string): string {
 export async function writeLogoSheet(
   absPaths: string[],
   places: Array<{ x?: number; y?: number }> = [],
+  equation = false,
 ): Promise<string> {
-  const boxes = placeLogoBoxes(logoBoxes(absPaths.length), places);
+  const boxes = placeLogoBoxes(logoBoxes(absPaths.length, equation), places);
   if (!boxes.length) throw new Error("Drop 1 to 4 logo files");
   const outputRel = `generated/hook-logos-${randomUUID()}.png`;
   const outputAbs = path.join(localRoot(), outputRel);

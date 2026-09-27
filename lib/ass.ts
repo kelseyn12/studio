@@ -82,15 +82,29 @@ function headline(segments: Segment[][], base: string, accent: string): string {
     .join("\\N");
 }
 
+/** ASS clock: H:MM:SS.CC */
+export function assClock(seconds: number): string {
+  const clamped = Math.max(0, seconds);
+  const hours = Math.floor(clamped / 3600);
+  const minutes = Math.floor((clamped % 3600) / 60);
+  const rest = clamped - hours * 3600 - minutes * 60;
+  const whole = Math.floor(rest);
+  const hundredths = Math.min(99, Math.round((rest - whole) * 100));
+  return `${hours}:${String(minutes).padStart(2, "0")}:${String(whole).padStart(2, "0")}.${String(hundredths).padStart(2, "0")}`;
+}
+
 export function buildHookAss(input: {
   text: string;
   style: DrawnStyle;
   baseColor?: string;
   accentColor?: string;
   listCount?: number;
+  listItems?: string[];
   font?: string;
   x?: number;
   y?: number;
+  from?: number;
+  to?: number;
 }): string {
   const look = LOOKS[input.style];
   const font = input.font ?? fontFamily();
@@ -105,14 +119,18 @@ export function buildHookAss(input: {
   const head = placed
     ? `{\\an5\\pos(${px},${py})}${headline(segments, base, accent)}`
     : headline(segments, base, accent);
-  const events = [`Dialogue: 0,0:00:00.00,9:59:59.00,Head,,0,0,0,,${head}`];
-  const listCount = Math.min(Math.max(Math.floor(input.listCount ?? 0), 0), LIST_MAX);
+  const startAt = assClock(input.from ?? 0);
+  const endAt = assClock(input.to && input.to > (input.from ?? 0) ? input.to : 9 * 3600 + 59 * 60 + 59);
+  const events = [`Dialogue: 0,${startAt},${endAt},Head,,0,0,0,,${head}`];
+  const listItems = (input.listItems ?? []).map((line) => line.trim()).filter(Boolean).slice(0, LIST_MAX);
+  const listCount = listItems.length || Math.min(Math.max(Math.floor(input.listCount ?? 0), 0), LIST_MAX);
   if (listCount > 0) {
     const lineHeight = look.fontsize * look.lineGap;
     const listTop = (placed ? py : marginV) + Math.round(lines.length * lineHeight) + 120;
     const gap = Math.min(140, Math.floor((FRAME_H * 0.62 - listTop) / listCount));
     for (let index = 0; index < listCount; index += 1) {
-      events.push(`Dialogue: 0,0:00:00.00,9:59:59.00,List,,0,0,0,,{\\pos(90,${listTop + index * gap})}${index + 1}.`);
+      const label = listItems[index] ? `${index + 1}. ${escapeAssText(listItems[index])}` : `${index + 1}.`;
+      events.push(`Dialogue: 0,${startAt},${endAt},List,,0,0,0,,{\\pos(90,${listTop + index * gap})}${label}`);
     }
   }
   const styleRow = (name: string, size: number, border: 1 | 3, outline: number, shadow: number, align: number, mv: number) =>

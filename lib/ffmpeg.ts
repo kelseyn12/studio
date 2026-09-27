@@ -161,7 +161,17 @@ export function uniquenessFilter(input: {
 }
 
 export async function assembleVideo(input: {
-  clips: Array<{ path: string; hookText?: string; trim?: ClipTrim; captionFilters?: string[] }>;
+  clips: Array<{
+    path: string;
+    hookText?: string;
+    trim?: ClipTrim;
+    captionFilters?: string[];
+    hookX?: number;
+    hookY?: number;
+    listItems?: string[];
+    textFrom?: number;
+    textTo?: number;
+  }>;
   outputName: string;
   speed: number;
   saturation: number;
@@ -201,19 +211,22 @@ export async function assembleVideo(input: {
 
   const tempo = input.speed !== 1 ? `atempo=${input.speed},` : "";
   const chains: string[] = [];
-  const hookText = input.clips[0]?.hookText;
-  const hookFilter = hookText
-    ? await writeHookAss({
-        text: hookText,
-        style: input.hookStyle ?? "plain",
-        baseColor: input.hookColor,
-        accentColor: input.accentColor,
-        listCount: input.hookList,
-        x: input.hookX,
-        y: input.hookY,
-      })
-    : undefined;
   for (let index = 0; index < n; index += 1) {
+    const clip = input.clips[index];
+    const hookFilter = clip.hookText
+      ? await writeHookAss({
+          text: clip.hookText,
+          style: input.hookStyle ?? "plain",
+          baseColor: input.hookColor,
+          accentColor: input.accentColor,
+          listCount: index === 0 ? input.hookList : 0,
+          listItems: clip.listItems,
+          x: clip.hookX ?? (index === 0 ? input.hookX : undefined),
+          y: clip.hookY ?? (index === 0 ? input.hookY : undefined),
+          from: clip.textFrom,
+          to: clip.textTo,
+        })
+      : undefined;
     const vf = videoFilter({
       speed: input.speed,
       saturation: input.saturation,
@@ -221,8 +234,8 @@ export async function assembleVideo(input: {
       hue: input.hue,
       crop: input.crop,
       mirror: input.mirror,
-      hookFilter: index === 0 ? hookFilter : undefined,
-      captionFilters: input.clips[index].captionFilters,
+      hookFilter,
+      captionFilters: clip.captionFilters,
     });
     if (index === 0 && logoIndex >= 0) {
       chains.push(`[${index}:v]${vf}[v${index}base]`);

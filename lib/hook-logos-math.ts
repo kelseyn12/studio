@@ -49,14 +49,14 @@ function centerY(size: number): number {
   return Math.round((CANVAS_H - size) / 2);
 }
 
-/** 1 logo centered, 3 logos become A + B = C, 2 or 4 sit in a row. */
-export function logoBoxes(count: number): LogoBox[] {
+/** 1 centered, 2–4 in a row. Pass equation for the optional A + B = C layout. */
+export function logoBoxes(count: number, equation = false): LogoBox[] {
   if (count < 1 || count > MAX_HOOK_LOGOS) return [];
   if (count === 1) {
     const size = 360;
     return [{ kind: "logo", index: 0, x: Math.round((CANVAS_W - size) / 2), y: centerY(size), w: size, h: size }];
   }
-  if (count === 3) {
+  if (count === 3 && equation) {
     const size = 240;
     const mark = 96;
     const gap = 20;

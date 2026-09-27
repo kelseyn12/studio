@@ -141,7 +141,7 @@ export function BatchSettings({
           <Row label="Numbered list under the headline">
             <div className="flex items-center gap-3">
               <p className="max-w-56 text-right text-xs text-mute">
-                1. 2. 3. down the left side, ready for the points you say out loud.
+                Fallback count only. Type the real points on the clip (Words → list). Sasha&apos;s words change per video.
               </p>
               <select
                 value={listCount}

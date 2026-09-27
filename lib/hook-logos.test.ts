@@ -29,8 +29,10 @@ describe("logoBoxes", () => {
     if (box.kind === "logo") expect(box.x + box.w / 2).toBe(540);
   });
 
-  it("turns three logos into A + B = C", () => {
-    const kinds = logoBoxes(3).map((box) => (box.kind === "mark" ? box.text : "logo"));
+  it("keeps three logos in a row unless equation is on", () => {
+    expect(logoBoxes(3).every((box) => box.kind === "logo")).toBe(true);
+    expect(logoBoxes(3)).toHaveLength(3);
+    const kinds = logoBoxes(3, true).map((box) => (box.kind === "mark" ? box.text : "logo"));
     expect(kinds).toEqual(["logo", "+", "logo", "=", "logo"]);
   });
 });

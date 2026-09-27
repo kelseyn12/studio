@@ -178,3 +178,6 @@
 
 - [X] 1× is recorded speed
   After a sped save, 1 was playing the sped file and sounded fast. Preview and encode stay on the original (`basePath`). 1 is normal; 1.25 / 1.5 / 2 go up from there.
+
+- [X] Mini edit on every clip
+  Precise drag + TT/IG preview. Cut track. Words/cut/speed on bodies and CTAs. Type list lines on the clip. Logos default to a row; A + B = C is optional. Text can start/end mid-clip. Four apps still share two looks (IG+FB / TT+YT).

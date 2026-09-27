@@ -3,6 +3,7 @@ import os from "os";
 import path from "path";
 import { afterAll, describe, expect, it } from "vitest";
 import {
+  assClock,
   assColor,
   buildHookAss,
   escapeAssText,
@@ -37,6 +38,13 @@ describe("highlight markup", () => {
   });
 });
 
+describe("assClock", () => {
+  it("writes libass timestamps", () => {
+    expect(assClock(0)).toBe("0:00:00.00");
+    expect(assClock(1.25)).toBe("0:00:01.25");
+  });
+});
+
 describe("buildHookAss", () => {
   it("colors only the starred word and stacks a numbered list under the headline", () => {
     const track = buildHookAss({
@@ -51,6 +59,9 @@ describe("buildHookAss", () => {
     expect(buildHookAss({ text: "Hello", style: "tiktok", x: 0.5, y: 0.3 })).toContain("\\pos(");
     expect(track).toContain("1.");
     expect(track).toContain("5.");
+    expect(
+      buildHookAss({ text: "x", style: "plain", listItems: ["Nobody talks about this", "Your month"], font: "Arial" }),
+    ).toContain("1. Nobody talks about this");
     expect(track).toContain("Style: Head,Arial,72");
   });
 
