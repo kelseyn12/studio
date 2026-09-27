@@ -17,7 +17,7 @@
 - `canVisit` — `lib/access.ts` — rooms a role may open. Used by middleware and nav.
 - `assembleVideo` — `lib/ffmpeg.ts` — concatenates hook × body × CTA, keeps audio, optional music, applies a per-copy Variation, optional hook text + spoken caption filters.
 - `ffmpegBin` / `canBurnText` — `lib/ffmpeg.ts` — prefers Homebrew ffmpeg-full so drawtext exists; Generate refuses text if it does not.
-- `groupWords` / `captionFilters` / `transcribeWords` — `lib/captions.ts` — Whisper word timestamps → 2–3 word on-screen phrases. `captionFilters` takes a `DrawnStyle` so spoken words match TikTok or Instagram text.
+- `groupWords` / `buildCaptionAss` / `writeCaptionAss` / `transcribeWords` / `spokenOnClip` — `lib/captions.ts` / `lib/caption-ass.ts` — Whisper → 2–3 word phrases. CapCut-style lower third (TT stroke + karaoke, IG box). Hooks skip spoken. `writeCaptionAss` returns an `ass=` filter.
 - `variationFor` — `lib/variations.ts` — unique speed / light / crop / mirror amounts for each copy of a mix, plus `hookColor` (whole line) and `accentColor` (starred word, `ACCENT_COLORS`).
 - `pickTracks` — `lib/combinations.ts` — random music per video; uses every track before repeating. Used by Multiply generate.
 - `parseHookLines` — `lib/variations.ts` — batch text hooks, one per line, max 12. Each line multiplies the Multiply batch.
@@ -84,7 +84,7 @@
 - `matchTypeScale` / `previewLogoPx` / `LOGO_TO_TYPE` — `lib/hook-logos-math.ts` — Match type sizes a logo to ~2.4 type-lines. Preview px tracks TT 20 / IG 17 so logos sit with the look.
 - `WordChips` — `components/word-chips.tsx` — hugging per-line box preview under the Words textarea.
 - `sharedAxes` / `snapLogoPos` — `lib/hook-logos-math.ts` — snap to a neighbor or the center line. Align shows guides; it does not reshuffle chips.
-- `HookStage` / `HookList` / `ListOverlay` / `AlignGuides` / `SpokenFix` — Words: TT/IG preview, Align guides, Box off / Black / White. Mix numbers on the hook; body lines lock to those rows. Spoken phrases edit on the clip after the first listen.
+- `HookStage` / `HookList` / `ListOverlay` / `AlignGuides` / `SpokenFix` — Words: TT/IG preview, Align guides, Box off / Black / White. Mix numbers on the hook; body lines lock to those rows. SpokenFix is on bodies and CTAs after the first listen.
 - `nextBox` / `boxLabel` / `isBoxed` / `boxIsWhite` — `lib/hook-layout.ts` / `lib/list-layout.ts` — Box cycles off → black plate → white plate.
 - `applyCaptionLines` / `captionLines` — `lib/captions-math.ts` — rewrite spoken phrases and keep their clocks.
 - `CoverPick` — `components/cover-pick.tsx` — pick a still on Live. Copies also get staggered cover times on generate.

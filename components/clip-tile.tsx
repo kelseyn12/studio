@@ -6,6 +6,7 @@ import { HookLogos } from "@/components/hook-logos";
 import { SpokenFix } from "@/components/spoken-fix";
 import { HookStage } from "@/components/hook-stage";
 import { QuickCut } from "@/components/quick-cut";
+import { spokenOnClip } from "@/lib/captions-math";
 import { cutPreviewPath } from "@/lib/hook-layout";
 import { publicFileUrl } from "@/lib/urls";
 import type { DrawnStyle } from "@/lib/text-style";
@@ -123,7 +124,7 @@ export function ClipTile({
       ) : (
         <p className="mt-2 truncate text-xs text-mute">{filename}</p>
       )}
-      <SpokenFix id={id} captionsJson={captionsJson ?? ""} />
+      {spokenOnClip(slot) ? <SpokenFix id={id} captionsJson={captionsJson ?? ""} /> : null}
       <HookLogos id={id} logosJson={logosJson ?? ""} hookLayout={hookLayout ?? ""} />
     </div>
   );

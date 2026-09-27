@@ -1,5 +1,18 @@
 export type CaptionWord = { word: string; start: number; end: number };
-export type CaptionPhrase = { text: string; start: number; end: number };
+export type CaptionPhrase = { text: string; start: number; end: number; words?: CaptionWord[] };
+
+/** Hooks keep Words only. Spoken captions burn on bodies and CTAs. */
+export function spokenOnClip(slot?: string | null): boolean {
+  return slot !== "HOOK";
+}
+
+/** CapCut chunks start with a capital; the rest stays as Whisper said it. */
+export function captionCase(text: string): string {
+  const trimmed = text.trim();
+  const index = trimmed.search(/[A-Za-z]/);
+  if (index < 0) return trimmed;
+  return trimmed.slice(0, index) + trimmed[index].toUpperCase() + trimmed.slice(index + 1);
+}
 
 const PHRASE_MAX_WORDS = 3;
 const PHRASE_MAX_CHARS = 22;
@@ -15,6 +28,7 @@ export function groupWords(words: CaptionWord[]): CaptionPhrase[] {
       text: current.map((word) => word.word.trim()).join(" "),
       start: current[0].start,
       end: current[current.length - 1].end,
+      words: current.map((word) => ({ word: word.word.trim(), start: word.start, end: word.end })),
     });
     current = [];
   };

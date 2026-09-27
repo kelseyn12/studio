@@ -97,7 +97,7 @@ export default async function BatchPage({
             slot="HOOK"
             title="Hooks"
             meta={`${hooks.length} options · first clip · one picked per video`}
-            hint="Openings. Mix 1–5 puts numbers here from the first frame. Body lines sit on those same rows. TT and IG each get their own native type."
+            hint="Openings. Mix 1–5 puts numbers here from the first frame. Body lines sit on those same rows. Spoken words skip this row."
             clips={hooks}
             showHook
             hookText={winningHook}
@@ -110,7 +110,7 @@ export default async function BatchPage({
             slot="DEMO"
             title="Bodies"
             meta={`${bodies.length} options · middle clip · usually one, can be more`}
-            hint="Type the points on Words. They lock to the hook numbers. This line now fills each one. Box on/off is behind the words."
+            hint="Type the points on Words. They lock to the hook numbers. Spoken words in Mix put CapCut-style captions on this take."
             clips={bodies}
             look={look}
             listCount={batch.listCount}
@@ -121,7 +121,7 @@ export default async function BatchPage({
             slot="CTA"
             title="CTAs"
             meta={`${ctas.length} options · last clip · one picked per video`}
-            hint="Endings. Same native TT/IG Words, Align, and Box on/off as the hook."
+            hint="Endings. Same Words/Box as the hook. Spoken words land here when you are talking."
             clips={ctas}
             look={look}
             listCount={batch.listCount}

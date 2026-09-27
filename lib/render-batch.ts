@@ -1,6 +1,6 @@
 import { stat } from "fs/promises";
 import path from "path";
-import { captionFilters, groupWords, parseCaptionWords, transcribeWords, type CaptionPhrase } from "@/lib/captions";
+import { groupWords, parseCaptionWords, spokenOnClip, transcribeWords, writeCaptionAss, type CaptionPhrase } from "@/lib/captions";
 import { assembleVideo, NO_TRIM, writeThumb, type ClipTrim } from "@/lib/ffmpeg";
 import { isLogoFile, parseLogoItems, writeLogoSheet } from "@/lib/hook-logos";
 import { parseHookLayout } from "@/lib/hook-layout";
@@ -61,6 +61,7 @@ export async function renderBatch(input: {
     const phrasesByClip = new Map<string, CaptionPhrase[]>();
     if (batch.captionsOn) {
       for (const clip of batch.clips) {
+        if (!spokenOnClip(clip.slot)) continue;
         let words = parseCaptionWords(clip.captionsJson);
         if (words.length === 0) {
           const local = await ensureLocal(clip.path);
@@ -89,7 +90,7 @@ export async function renderBatch(input: {
           const clips = await Promise.all(
             combo.map(async (clip, index) => {
               const trim = trims.get(clip.path) ?? NO_TRIM;
-              const phrases = phrasesByClip.get(clip.path);
+              const phrases = spokenOnClip(clip.slot) ? phrasesByClip.get(clip.path) : undefined;
               const layout = parseHookLayout(clip.hookLayout);
               return {
                 path: await ensureLocal(clip.path),
@@ -135,7 +136,7 @@ export async function renderBatch(input: {
           const looks = hookLooks(
             batch.textStyle,
             networks,
-            Boolean(hookLine) || batch.listCount > 0 || clips.some((clip) => clip.listItems?.length),
+            Boolean(hookLine) || batch.listCount > 0 || batch.captionsOn || clips.some((clip) => clip.listItems?.length),
           );
           const files = [];
           for (const look of looks) {
@@ -153,7 +154,7 @@ export async function renderBatch(input: {
                 textTo: clip.textTo,
                 box: clip.box,
                 captionFilters: clip.phrases?.length
-                  ? captionFilters(clip.phrases, clip.trim.start, look)
+                  ? [await writeCaptionAss(clip.phrases, clip.trim.start, look)]
                   : undefined,
               })),
               outputName: `${id}-${fileNumber}${suffix}.mp4`,

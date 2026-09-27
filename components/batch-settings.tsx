@@ -265,7 +265,7 @@ export function BatchSettings({
           <Row label="Spoken words on screen">
             <div className="flex items-center gap-3">
               <p className="max-w-56 text-right text-xs text-mute">
-                What you say, phrase by phrase, in that file&apos;s look — TikTok text or Instagram text.
+                Bodies and CTAs only. CapCut-style lower third — TikTok stroke, Instagram box. Hooks stay clean.
               </p>
               <Toggle name="captionsOn" on={captionsOn} onChange={setCaptionsOn} />
             </div>

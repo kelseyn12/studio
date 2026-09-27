@@ -20,14 +20,14 @@ export function SpokenFix({ id, captionsJson }: { id: string; captionsJson: stri
   if (!words.length) {
     return (
       <p className="mt-2 text-[11px] text-mute">
-        Spoken words: Generate once with Spoken words on. The phrases land here so you can fix them, then Generate again.
+        Spoken words: Generate once with Spoken words on. CapCut-style captions land here so you can fix them, then Generate again.
       </p>
     );
   }
 
   return (
     <div className="mt-2 space-y-1">
-      <p className="text-[11px] text-mute">Spoken words — one phrase per line. Times stay. Wipe to listen again.</p>
+      <p className="text-[11px] text-mute">Spoken words — one phrase per line. Lower third. Times stay. Wipe to listen again.</p>
       <textarea
         value={text}
         className="field min-h-16 px-2 py-1 text-xs"

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { applyCaptionLines, captionFilters, groupWords, parseCaptionWords } from "@/lib/captions";
+import { applyCaptionLines, buildCaptionAss, groupWords, parseCaptionWords } from "@/lib/captions";
+import { captionCase, spokenOnClip } from "@/lib/captions-math";
 
 describe("groupWords", () => {
   it("groups up to three words into a phrase", () => {
@@ -10,8 +11,11 @@ describe("groupWords", () => {
       { word: "insane", start: 0.5, end: 0.9 },
     ]);
     expect(phrases).toHaveLength(2);
-    expect(phrases[0]).toEqual({ text: "this app is", start: 0, end: 0.5 });
-    expect(phrases[1]).toEqual({ text: "insane", start: 0.5, end: 0.9 });
+    expect(phrases[0]?.text).toBe("this app is");
+    expect(phrases[0]?.start).toBe(0);
+    expect(phrases[0]?.end).toBe(0.5);
+    expect(phrases[0]?.words).toHaveLength(3);
+    expect(phrases[1]?.text).toBe("insane");
   });
 
   it("starts a new phrase after a long pause", () => {
@@ -45,26 +49,49 @@ describe("applyCaptionLines", () => {
   });
 });
 
-describe("captionFilters", () => {
-  it("shifts times by the trim and uppercases", () => {
-    const [filter] = captionFilters([{ text: "this app is", start: 1, end: 1.5 }], 0.4);
-    expect(filter).toContain("THIS APP IS");
-    expect(filter).toContain("between(t,0.60,1.10)");
+describe("buildCaptionAss", () => {
+  it("shifts times by the trim and keeps spoken case", () => {
+    const track = buildCaptionAss([{ text: "this app is", start: 1, end: 1.5 }], 0.4);
+    expect(track).toContain("This app is");
+    expect(track).not.toContain("THIS APP IS");
+    expect(track).toContain("0:00:00.60");
+    expect(track).toContain("0:00:01.10");
   });
 
   it("drops phrases fully cut off by the trim", () => {
-    const filters = captionFilters([{ text: "gone", start: 0, end: 0.3 }], 0.5);
-    expect(filters).toHaveLength(0);
+    const track = buildCaptionAss([{ text: "gone", start: 0, end: 0.3 }], 0.5);
+    expect(track).not.toContain("Gone");
   });
 
-  it("draws Instagram spoken words in a box and TikTok words with a shadow", () => {
-    const instagram = captionFilters([{ text: "hello", start: 0, end: 1 }], 0, "instagram")[0];
-    const tiktok = captionFilters([{ text: "hello", start: 0, end: 1 }], 0, "tiktok")[0];
-    expect(instagram).toContain("box=1");
-    expect(instagram).toContain("InterTight-SemiBold.ttf");
-    expect(tiktok).toContain("shadowx=3");
-    expect(tiktok).toContain("TikTokSans-Bold.ttf");
-    expect(tiktok).not.toContain("box=1");
+  it("paints Instagram as a boxed phrase and TikTok as stroke plus karaoke", () => {
+    const words = [
+      { word: "hello", start: 0, end: 0.4 },
+      { word: "there", start: 0.4, end: 1 },
+    ];
+    const phrase = { text: "hello there", start: 0, end: 1, words };
+    const instagram = buildCaptionAss([phrase], 0, "instagram");
+    const tiktok = buildCaptionAss([phrase], 0, "tiktok");
+    expect(instagram).toContain(",3,12,0,5,");
+    expect(instagram).toContain("Inter Tight");
+    expect(instagram).not.toContain("&H00FFFF&");
+    expect(tiktok).toContain(",1,5,2,5,");
+    expect(tiktok).toContain("TikTok Sans");
+    expect(tiktok).toContain("&H00FFFF&");
+    expect(tiktok).toContain("0:00:00.40");
+  });
+});
+
+describe("spokenOnClip", () => {
+  it("skips hooks and keeps bodies and CTAs", () => {
+    expect(spokenOnClip("HOOK")).toBe(false);
+    expect(spokenOnClip("DEMO")).toBe(true);
+    expect(spokenOnClip("CTA")).toBe(true);
+  });
+});
+
+describe("captionCase", () => {
+  it("capitals the first letter only", () => {
+    expect(captionCase("this app is")).toBe("This app is");
   });
 });
 
