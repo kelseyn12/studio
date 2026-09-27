@@ -79,6 +79,6 @@
 - `parseLogoItems` / `parseLogos` / `boxesFromItems` / `defaultLogoPos` / `itemScale` / `writeLogoSheet` — `lib/hook-logos-math.ts` / `lib/hook-logos.ts` — files plus `+` `=` emoji / short text. `scale` 0.5–2.5 (Bigger / Smaller on Words). Unused items line up at `LOGO_ROW_Y` (0.15). First 4s. Tested in `lib/hook-logos.test.ts`.
 - `HookLogos` — `components/hook-logos.tsx` — Add logo, +, =, 🔥, or a typed chip. Headline under the formula is Words.
 - `CutTrack` — `components/cut-track.tsx` — yellow ends = keep window. Click scrubs. Dark = dropped middles. Repeat Cut from/to for more than one middle.
-- `HookStage` — `components/hook-stage.tsx` — type words, drag them / logos / marks. Show text now / Hide text after now sets `from`/`to`. Does not listen to speech (Spoken words in Mix does).
+- `HookStage` / `HookList` — `components/hook-stage.tsx` / `components/hook-list.tsx` — type words, drag, Bigger/Smaller logos. Show text now / Hide text after now is the headline window. List numbers stay from 0:00; This line now fills each point (`listAt`). Does not listen to speech.
 - `CoverPick` — `components/cover-pick.tsx` — pick a still on Live. Copies also get staggered cover times on generate.
 - `addLink` / `deleteLink` — `app/dms/actions.ts` — tracked short links for auto-DMs. Public redirect at `/l/[slug]` counts every click.

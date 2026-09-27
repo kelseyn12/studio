@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, type PointerEvent } from "react";
+import { HookList } from "@/components/hook-list";
 import { hookDefaultPos, parseHookLayout, stringifyHookLayout, type HookPos } from "@/lib/hook-layout";
 import { clampLogoScale, defaultLogoPos, isLogoFile, itemScale, LOGO_SCALE_STEP, parseLogoItems } from "@/lib/hook-logos-math";
 import { publicFileUrl } from "@/lib/urls";
@@ -73,7 +74,8 @@ export function HookStage({
   }
 
   async function save(next: HookPos, value = text, lines = list) {
-    const packed = { ...next, list: lines.split("\n").map((line) => line.trim()).filter(Boolean) };
+    const items = lines.split("\n").map((line) => line.trim()).filter(Boolean);
+    const packed = { ...next, list: items, listAt: (next.listAt ?? pos.listAt)?.slice(0, items.length) };
     setPos(packed);
     await fetch(`/api/repurpose/clips/${id}`, {
       method: "PATCH",
@@ -102,10 +104,19 @@ export function HookStage({
     });
   }
 
+  function revealLine() {
+    const items = list.split("\n").map((line) => line.trim()).filter(Boolean);
+    if (!items.length) return;
+    const at = [...(pos.listAt ?? [])];
+    const slot = items.findIndex((_, index) => !Number.isFinite(at[index]));
+    at[slot >= 0 ? slot : items.length - 1] = videoRef.current?.currentTime ?? 0;
+    void save({ ...pos, listAt: at }, text, list);
+  }
+
   const native =
     preview === "instagram"
-      ? "rounded-md bg-black/70 px-2 py-1 text-center text-[13px] font-semibold leading-tight text-white"
-      : "text-center text-[13px] font-bold leading-tight text-white [text-shadow:0_1px_0_#000,0_-1px_0_#000,1px_0_0_#000,-1px_0_0_#000,0_2px_6px_#000]";
+      ? "rounded-md bg-black/70 px-2 py-1 text-center text-[20px] font-semibold leading-tight text-white"
+      : "text-center text-[22px] font-bold leading-tight text-white [text-shadow:0_1px_0_#000,0_-1px_0_#000,1px_0_0_#000,-1px_0_0_#000,0_2px_6px_#000]";
 
   return (
     <div className="space-y-2">
@@ -218,12 +229,12 @@ export function HookStage({
           : " (whole clip until you set a window)."}{" "}
         Turn on Spoken words in Mix if you want captions to follow what you say.
       </p>
-      <textarea
-        value={list}
-        placeholder={"List under the headline\none point per line\nYour birthday month"}
-        className="field min-h-16 px-2 py-1 text-xs"
-        onChange={(event) => setList(event.target.value)}
+      <HookList
+        list={list}
+        listAt={pos.listAt}
+        onList={setList}
         onBlur={() => save(pos, text, list)}
+        onReveal={revealLine}
       />
     </div>
   );

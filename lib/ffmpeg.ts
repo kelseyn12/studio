@@ -169,6 +169,7 @@ export async function assembleVideo(input: {
     hookX?: number;
     hookY?: number;
     listItems?: string[];
+    listAt?: number[];
     textFrom?: number;
     textTo?: number;
   }>;
@@ -221,6 +222,7 @@ export async function assembleVideo(input: {
           accentColor: input.accentColor,
           listCount: index === 0 ? input.hookList : 0,
           listItems: clip.listItems,
+          listAt: clip.listAt,
           x: clip.hookX ?? (index === 0 ? input.hookX : undefined),
           y: clip.hookY ?? (index === 0 ? input.hookY : undefined),
           from: clip.textFrom,

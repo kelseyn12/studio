@@ -69,8 +69,9 @@ describe("parseSpeed / parseDrops", () => {
   });
 
   it("stores list lines and a drag point on the hook layout", () => {
-    const raw = stringifyHookLayout({ x: 0.5, y: 0.2, list: ["Nobody talks about this", "Your month"] });
+    const raw = stringifyHookLayout({ x: 0.5, y: 0.2, list: ["Nobody talks about this", "Your month"], listAt: [2, 5] });
     expect(parseHookLayout(raw)?.list).toEqual(["Nobody talks about this", "Your month"]);
+    expect(parseHookLayout(raw)?.listAt).toEqual([2, 5]);
   });
 
   it("treats 1× as the recorded file, not a previous sped cut", () => {

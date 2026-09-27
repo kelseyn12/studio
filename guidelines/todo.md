@@ -193,3 +193,6 @@
 
 - [X] Bigger / Smaller logos
   Each chip stores `scale`. Tap it on Words, then Bigger or Smaller (0.5×–2.5×). Preview and the burned sheet both use that size.
+
+- [X] Bigger hook type + Sasha list clocks
+  Headline is TT 88 / IG 80. Numbers stay from the first frame. Type the points, scrub, tap This line now for each one (`listAt` in hookLayout). Studio still does not hear the list.

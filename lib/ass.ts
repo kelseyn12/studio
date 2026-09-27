@@ -58,9 +58,9 @@ type LookSpec = { fontsize: number; borderStyle: 1 | 3; outline: number; shadow:
 
 /** Same safe-zone numbers as drawtext looks: clear of app headers (top 9–12%). */
 const LOOKS: Record<DrawnStyle, LookSpec> = {
-  tiktok: { fontsize: 72, borderStyle: 1, outline: 5, shadow: 3, top: 0.17, lineGap: 1.15 },
-  instagram: { fontsize: 66, borderStyle: 3, outline: 18, shadow: 0, top: 0.16, lineGap: 1.3 },
-  plain: { fontsize: 68, borderStyle: 1, outline: 6, shadow: 0, top: 0.12, lineGap: 1.15 },
+  tiktok: { fontsize: 88, borderStyle: 1, outline: 6, shadow: 3, top: 0.17, lineGap: 1.12 },
+  instagram: { fontsize: 80, borderStyle: 3, outline: 20, shadow: 0, top: 0.16, lineGap: 1.25 },
+  plain: { fontsize: 84, borderStyle: 1, outline: 6, shadow: 0, top: 0.12, lineGap: 1.12 },
 };
 
 export function fontFamily(): string {
@@ -100,6 +100,7 @@ export function buildHookAss(input: {
   accentColor?: string;
   listCount?: number;
   listItems?: string[];
+  listAt?: number[];
   font?: string;
   x?: number;
   y?: number;
@@ -128,9 +129,20 @@ export function buildHookAss(input: {
     const lineHeight = look.fontsize * look.lineGap;
     const listTop = (placed ? py : marginV) + Math.round(lines.length * lineHeight) + 120;
     const gap = Math.min(140, Math.floor((FRAME_H * 0.62 - listTop) / listCount));
+    const stagger = (input.listAt ?? []).some((time) => Number.isFinite(time));
     for (let index = 0; index < listCount; index += 1) {
-      const label = listItems[index] ? `${index + 1}. ${escapeAssText(listItems[index])}` : `${index + 1}.`;
-      events.push(`Dialogue: 0,${startAt},${endAt},List,,0,0,0,,{\\pos(90,${listTop + index * gap})}${label}`);
+      const y = listTop + index * gap;
+      const number = `${index + 1}.`;
+      const words = listItems[index] ? `${number} ${escapeAssText(listItems[index])}` : number;
+      const wordAt = Number(input.listAt?.[index]);
+      if (stagger && listItems[index] && Number.isFinite(wordAt)) {
+        events.push(`Dialogue: 0,${assClock(0)},${assClock(wordAt)},List,,0,0,0,,{\\pos(90,${y})}${number}`);
+        events.push(`Dialogue: 0,${assClock(wordAt)},${endAt},List,,0,0,0,,{\\pos(90,${y})}${words}`);
+      } else if (stagger) {
+        events.push(`Dialogue: 0,${assClock(0)},${endAt},List,,0,0,0,,{\\pos(90,${y})}${number}`);
+      } else {
+        events.push(`Dialogue: 0,${startAt},${endAt},List,,0,0,0,,{\\pos(90,${y})}${words}`);
+      }
     }
   }
   const styleRow = (name: string, size: number, border: 1 | 3, outline: number, shadow: number, align: number, mv: number) =>
@@ -146,7 +158,7 @@ export function buildHookAss(input: {
     "[V4+ Styles]",
     "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding",
     styleRow("Head", look.fontsize, look.borderStyle, look.outline, look.shadow, 8, marginV),
-    styleRow("List", Math.round(look.fontsize * 0.9), 1, 5, 3, 7, 0),
+    styleRow("List", Math.round(look.fontsize * 0.95), 1, 6, 3, 7, 0),
     "",
     "[Events]",
     "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text",

@@ -2,6 +2,7 @@ export type HookPos = {
   x: number;
   y: number;
   list?: string[];
+  listAt?: number[];
   from?: number;
   to?: number;
   logoEq?: boolean;
@@ -22,6 +23,16 @@ export function parseListLines(raw: unknown): string[] {
   return raw.map((line) => String(line || "").trim()).filter(Boolean).slice(0, 10);
 }
 
+export function parseListAt(raw: unknown): number[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const times = raw.map((value) => {
+    const n = Number(value);
+    return Number.isFinite(n) && n >= 0 ? n : NaN;
+  });
+  if (!times.some((n) => Number.isFinite(n))) return undefined;
+  return times;
+}
+
 export function parseHookLayout(raw: string | null | undefined): HookPos | null {
   if (!raw?.trim()) return null;
   try {
@@ -35,6 +46,7 @@ export function parseHookLayout(raw: string | null | undefined): HookPos | null 
       x: clamp01(x, 0.08, 0.92),
       y: clamp01(y, 0.08, 0.88),
       list: parseListLines(parsed.list),
+      listAt: parseListAt(parsed.listAt),
       ...(Number.isFinite(from) && from >= 0 ? { from } : {}),
       ...(Number.isFinite(to) && to > 0 ? { to } : {}),
       ...(parsed.logoEq ? { logoEq: true } : {}),
@@ -49,6 +61,7 @@ export function stringifyHookLayout(pos: HookPos): string {
     x: pos.x,
     y: pos.y,
     ...(pos.list?.length ? { list: pos.list } : {}),
+    ...(pos.listAt?.some((time) => Number.isFinite(time)) ? { listAt: pos.listAt } : {}),
     ...(pos.from != null ? { from: pos.from } : {}),
     ...(pos.to != null ? { to: pos.to } : {}),
     ...(pos.logoEq ? { logoEq: true } : {}),

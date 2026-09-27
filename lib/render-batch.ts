@@ -99,6 +99,7 @@ export async function renderBatch(input: {
                 hookX: layout?.x,
                 hookY: layout?.y,
                 listItems: layout?.list,
+                listAt: layout?.listAt,
                 textFrom: layout?.from,
                 textTo: layout?.to,
               };
@@ -142,6 +143,7 @@ export async function renderBatch(input: {
                 hookX: clip.hookX,
                 hookY: clip.hookY,
                 listItems: clip.listItems,
+                listAt: clip.listAt,
                 textFrom: clip.textFrom,
                 textTo: clip.textTo,
                 captionFilters: clip.phrases?.length
