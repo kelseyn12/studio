@@ -227,5 +227,8 @@
 - [X] TikTok letters match the native line
   The bundled face is TikTok Sans Bold at optical size 14, the wider text cut the app uses. The 36pt display file was tighter. Already generated videos keep the old letters until the next Generate.
 
+- [X] TikTok card sits on the words
+  The white card was pinned to the bottom-right of the line, so the words sat outside it. The drawing now starts at 0,0 and libass centers it. The name at the top of Multiply is what videos start with. Already generated videos keep the old card until the next Generate.
+
 - [X] Per-video words, music start, and delete
   Each finished video has Words + music (song or none, Music starts now) and Rebuild this video. Delete removes that file only and refreshes the list. Older videos need one new Generate before they can be tuned.

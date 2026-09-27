@@ -164,6 +164,14 @@ export function stringifyLogos(items: LogoItem[]): string {
   return JSON.stringify(items.slice(0, MAX_LOGO_ITEMS));
 }
 
+/** Arial has no emoji, so a flame would burn as an empty box. */
+export function markNeedsEmoji(text: string): boolean {
+  for (const char of text) {
+    if ((char.codePointAt(0) ?? 0) > 0xff) return true;
+  }
+  return false;
+}
+
 export function isLogoFile(item: LogoItem): item is HookLogo {
   return !("kind" in item && item.kind === "mark") && Boolean((item as HookLogo).path);
 }

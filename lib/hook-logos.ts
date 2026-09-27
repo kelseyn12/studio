@@ -1,8 +1,9 @@
 import { mkdir } from "fs/promises";
 import path from "path";
 import { randomUUID } from "crypto";
+import { HOOK_FONT } from "@/lib/ffmpeg";
 import { localRoot } from "@/lib/files";
-import { boxesFromItems, CANVAS_H, CANVAS_W, logoBoxes, placeLogoBoxes } from "@/lib/hook-logos-math";
+import { boxesFromItems, CANVAS_H, CANVAS_W, logoBoxes, markNeedsEmoji, placeLogoBoxes } from "@/lib/hook-logos-math";
 
 export {
   LOGO_SECONDS,
@@ -19,10 +20,17 @@ export {
   logoBoxes,
   boxesFromItems,
   logoOverlayFilter,
+  markNeedsEmoji,
 } from "@/lib/hook-logos-math";
+
+const EMOJI_FONT = path.join(process.cwd(), "fonts", "NotoEmoji.ttf");
 
 function escapeDraw(text: string): string {
   return text.replace(/\\/g, "\\\\").replace(/'/g, "\u2019").replace(/:/g, "\\:");
+}
+
+function fontFile(text: string): string {
+  return (markNeedsEmoji(text) ? EMOJI_FONT : HOOK_FONT).replace(/\\/g, "/").replace(/:/g, "\\:").replace(/'/g, "");
 }
 
 /** Transparent 1080×1920 sheet: logo files plus optional + = emoji text. */
@@ -39,7 +47,7 @@ export async function writeLogoSheet(
   const outputRel = `generated/hook-logos-${randomUUID()}.png`;
   const outputAbs = path.join(localRoot(), outputRel);
   await mkdir(path.dirname(outputAbs), { recursive: true });
-  const { HOOK_FONT, runFfmpeg } = await import("@/lib/ffmpeg");
+  const { runFfmpeg } = await import("@/lib/ffmpeg");
   const args: string[] = ["-f", "lavfi", "-i", `color=black@0.0:s=${CANVAS_W}x${CANVAS_H},format=rgba`];
   for (const file of absPaths) args.push("-i", file);
   const chains: string[] = ["[0:v]format=rgba[bg]"];
@@ -60,7 +68,7 @@ export async function writeLogoSheet(
     } else {
       const next = `s${step}`;
       chains.push(
-        `[${last}]drawtext=fontfile='${HOOK_FONT}':text='${escapeDraw(box.text)}':fontsize=${box.size}:fontcolor=white:borderw=6:bordercolor=black:x=${box.x}:y=${box.y}[${next}]`,
+        `[${last}]drawtext=fontfile='${fontFile(box.text)}':text='${escapeDraw(box.text)}':fontsize=${box.size}:fontcolor=white:borderw=6:bordercolor=black:x=${box.x}:y=${box.y}[${next}]`,
       );
       last = next;
       step += 1;

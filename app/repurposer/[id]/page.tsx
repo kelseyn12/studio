@@ -12,7 +12,7 @@ import { canBurnText } from "@/lib/ffmpeg";
 import { parseHookLayout } from "@/lib/hook-layout";
 import { LiveRefresh } from "@/components/live-refresh";
 import { prisma } from "@/lib/prisma";
-import { createBatch, resetBatch } from "../actions";
+import { createBatch, renameBatch, resetBatch } from "../actions";
 
 export default async function BatchPage({
   params,
@@ -59,7 +59,16 @@ export default async function BatchPage({
     <Shell>
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight">{batch.name}</h1>
+          <form action={renameBatch} className="flex flex-wrap items-center gap-2">
+            <input type="hidden" name="id" value={batch.id} />
+            <input
+              name="name"
+              defaultValue={batch.name}
+              aria-label="Batch name"
+              className="w-64 bg-transparent text-3xl font-semibold tracking-tight outline-none"
+            />
+            <button className="rounded-xl border border-line px-3 py-1 text-sm text-mute">Save name</button>
+          </form>
           <p className="mt-2 max-w-2xl text-mute">
             Drop openings in Hooks, middles in Bodies, endings in CTAs. Mix settings are under the rows.
           </p>
@@ -70,7 +79,7 @@ export default async function BatchPage({
           ) : null}
         </div>
         <form action={createBatch} className="flex gap-2">
-          <input name="name" placeholder="Another batch" className="field w-44" />
+          <input name="name" placeholder="Name" aria-label="New batch name" className="field w-44" />
           <button className="shrink-0 rounded-xl border border-line px-4 py-2 text-sm">New batch</button>
         </form>
       </div>

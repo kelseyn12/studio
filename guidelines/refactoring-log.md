@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-09-27 — TikTok white card is drawn from 0,0. A centered path sat at the bottom-right, so the bar missed the words. Emoji marks use Noto Emoji so a flame is not an empty box. The name at the top of Multiply is what the videos start with. New batch names a separate batch.
 - 2026-09-27 — Done on Words keeps logos, +, =, emoji, and list lines on the tile. Only the headline was painted after Words closed.
 - 2026-09-27 — TikTok text uses the open-source font's text cut (optical size 14), not the tighter 36pt display cut. Extra letter-spacing was removed.
 - 2026-09-27 — Done on Words keeps the line on the tile. Reopening Words was reloading the old sentence from the first page load.

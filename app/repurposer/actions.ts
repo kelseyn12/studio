@@ -10,9 +10,21 @@ import { prisma } from "@/lib/prisma";
 export async function createBatch(formData: FormData) {
   await requireUser();
   const batch = await prisma.repurposeBatch.create({
-    data: { name: String(formData.get("name") || "New batch") },
+    data: { name: String(formData.get("name") || "New batch").trim().slice(0, 80) || "New batch" },
   });
   redirect(`/repurposer/${batch.id}`);
+}
+
+/** The name at the top of Multiply. Finished videos start with it. */
+export async function renameBatch(formData: FormData) {
+  await requireUser();
+  const id = String(formData.get("id") || "");
+  const name = String(formData.get("name") || "").trim().slice(0, 80);
+  if (id && name) {
+    await prisma.repurposeBatch.update({ where: { id }, data: { name } });
+    revalidatePath(`/repurposer/${id}`);
+  }
+  redirect(id ? `/repurposer/${id}` : "/repurposer");
 }
 
 export async function resetBatch(formData: FormData) {

@@ -85,7 +85,12 @@ describe("buildHookAss", () => {
     expect(buildHookAss({ text: "hello there", style: "tiktok", box: true, font: "Arial" })).toMatch(
       /Style: Head,Arial,82,.*,1,0,0,8,/,
     );
-    expect(buildHookAss({ text: "hello there", style: "tiktok", box: "white", font: "Arial" })).toContain("\\p1");
+    const whiteCard = buildHookAss({ text: "hello there", style: "tiktok", box: "white", font: "Arial" });
+    expect(whiteCard).toContain("\\p1");
+    const platePath = whiteCard.split("\\p1}")[1]?.split("\n")[0] ?? "";
+    const plateNums = platePath.match(/-?\d+/g)?.map(Number) ?? [];
+    expect(plateNums.length).toBeGreaterThan(8);
+    expect(Math.min(...plateNums)).toBeGreaterThanOrEqual(0);
     expect(buildHookAss({ text: "hello there", style: "tiktok", box: "white", font: "Arial" })).toContain(" b ");
     expect(buildHookAss({ text: "hello there", style: "tiktok", box: "white", font: "Arial" })).toMatch(
       /Style: Plate,Arial,1,&HFFFFFF&/,
