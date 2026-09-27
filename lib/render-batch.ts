@@ -81,7 +81,8 @@ export async function renderBatch(input: {
           const variation = variationFor(fileNumber, batch);
           const music = musicQueue[fileNumber];
           fileNumber += 1;
-          const hookLine = line || combo.find((clip) => clip.slot === "HOOK")?.hookText || "";
+          const hookClip = combo.find((clip) => clip.slot === "HOOK");
+          const hookLine = line || hookClip?.hookText || "";
           const clips = await Promise.all(
             combo.map(async (clip, index) => {
               const trim = trims.get(clip.path) ?? NO_TRIM;
@@ -90,7 +91,7 @@ export async function renderBatch(input: {
                 path: await ensureLocal(clip.path),
                 hookText: index === 0 ? line || clip.hookText || undefined : undefined,
                 trim,
-                captionFilters: phrases?.length ? captionFilters(phrases, trim.start) : undefined,
+                phrases,
               };
             }),
           );
@@ -109,7 +110,14 @@ export async function renderBatch(input: {
           for (const look of looks) {
             const suffix = looks.length > 1 ? `-${look}` : "";
             const outputRel = await assembleVideo({
-              clips,
+              clips: clips.map((clip) => ({
+                path: clip.path,
+                hookText: clip.hookText,
+                trim: clip.trim,
+                captionFilters: clip.phrases?.length
+                  ? captionFilters(clip.phrases, clip.trim.start, look)
+                  : undefined,
+              })),
               outputName: `${id}-${fileNumber}${suffix}.mp4`,
               ...variation,
               hookStyle: look,
@@ -136,7 +144,7 @@ export async function renderBatch(input: {
               accountIds: targets.map((target) => target.id).join(","),
               createdById: userId,
               hook: stripHighlight(hookLine),
-              caption: batch.caption,
+              caption: hookClip?.postCaption?.trim() || batch.caption,
               editorNote: `Uniqueness: ${variation.label}`,
               payoutCents: basePayCents,
               assets: { create: files },

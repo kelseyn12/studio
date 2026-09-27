@@ -1,6 +1,7 @@
 import { readFile } from "fs/promises";
 import path from "path";
 import { escapeDrawText, HOOK_FONT } from "@/lib/ffmpeg";
+import type { DrawnStyle } from "@/lib/text-style";
 
 export type CaptionWord = { word: string; start: number; end: number };
 export type CaptionPhrase = { text: string; start: number; end: number };
@@ -50,7 +51,14 @@ export function groupWords(words: CaptionWord[]): CaptionPhrase[] {
  * trimStart shifts times when dead air was cut off the front of the clip.
  * These run before the speed filter, so speed changes keep captions in sync.
  */
-export function captionFilters(phrases: CaptionPhrase[], trimStart: number): string[] {
+const CAPTION_LOOK: Record<DrawnStyle, string[]> = {
+  tiktok: ["fontsize=56", "fontcolor=white", "borderw=2", "bordercolor=black@0.85", "shadowcolor=black@0.55", "shadowx=3", "shadowy=3", "y=h*0.62"],
+  instagram: ["fontsize=52", "fontcolor=white", "box=1", "boxcolor=black@0.62", "boxborderw=14", "y=h*0.64"],
+  plain: ["fontsize=58", "fontcolor=white", "borderw=5", "bordercolor=black", "y=h*0.62"],
+};
+
+export function captionFilters(phrases: CaptionPhrase[], trimStart: number, style: DrawnStyle = "plain"): string[] {
+  const look = CAPTION_LOOK[style];
   return phrases
     .map((phrase) => ({
       text: escapeDrawText(phrase.text).toUpperCase(),
@@ -58,9 +66,14 @@ export function captionFilters(phrases: CaptionPhrase[], trimStart: number): str
       end: Math.max(0, phrase.end - trimStart),
     }))
     .filter((phrase) => phrase.end > phrase.start && phrase.text.length > 0)
-    .map(
-      (phrase) =>
-        `drawtext=fontfile=${HOOK_FONT}:text='${phrase.text}':fontsize=58:fontcolor=white:borderw=5:bordercolor=black:x=(w-text_w)/2:y=h*0.62:enable='between(t,${phrase.start.toFixed(2)},${phrase.end.toFixed(2)})'`,
+    .map((phrase) =>
+      [
+        `drawtext=fontfile=${HOOK_FONT}`,
+        `text='${phrase.text}'`,
+        ...look,
+        "x=(w-text_w)/2",
+        `enable='between(t,${phrase.start.toFixed(2)},${phrase.end.toFixed(2)})'`,
+      ].join(":"),
     );
 }
 

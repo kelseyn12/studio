@@ -11,6 +11,7 @@ export function ClipTile({
   path,
   thumbPath,
   hookText,
+  postCaption,
   showHook,
 }: {
   id: string;
@@ -18,6 +19,7 @@ export function ClipTile({
   path: string;
   thumbPath: string;
   hookText: string;
+  postCaption?: string;
   showHook: boolean;
 }) {
   const router = useRouter();
@@ -28,16 +30,16 @@ export function ClipTile({
     router.refresh();
   }
 
-  async function saveHook(value: string) {
+  async function save(field: "hookText" | "postCaption", value: string) {
     await fetch(`/api/repurpose/clips/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ hookText: value }),
+      body: JSON.stringify({ [field]: value }),
     });
   }
 
   return (
-    <div className={`${cutting ? "w-64" : "w-32"} shrink-0`}>
+    <div className={`${cutting ? "w-64" : showHook ? "w-52" : "w-32"} shrink-0`}>
       {cutting ? (
         <QuickCut src={publicFileUrl(path)} target="clip" id={id} note="Every video made from this clip uses the cut." />
       ) : (
@@ -61,12 +63,20 @@ export function ClipTile({
         {cutting ? "Done cutting" : "Trim"}
       </button>
       {showHook ? (
-        <input
-          defaultValue={hookText}
-          placeholder="Words on this clip — what you say"
-          className="field mt-2 px-2 py-1 text-xs"
-          onBlur={(event) => saveHook(event.target.value)}
-        />
+        <>
+          <input
+            defaultValue={hookText}
+            placeholder="Words on this clip"
+            className="field mt-2 px-2 py-1 text-xs"
+            onBlur={(event) => save("hookText", event.target.value)}
+          />
+          <textarea
+            defaultValue={postCaption}
+            placeholder="Caption that posts under videos from this hook"
+            className="field mt-2 min-h-16 px-2 py-1 text-xs"
+            onBlur={(event) => save("postCaption", event.target.value)}
+          />
+        </>
       ) : (
         <p className="mt-2 truncate text-xs text-mute">{filename}</p>
       )}

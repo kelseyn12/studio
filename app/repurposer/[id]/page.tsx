@@ -90,7 +90,7 @@ export default async function BatchPage({
             slot="HOOK"
             title="Hooks"
             meta={`${hooks.length} options · first clip · one picked per video`}
-            hint="Openings. Words on a clip match that take. Lines in Text hooks below go on every mix."
+            hint="Openings. Words on a clip match that take. The caption box on a hook is what posts under videos that start with that hook."
             clips={hooks}
             showHook
             hookText={winningHook}
@@ -245,7 +245,14 @@ function SlotBlock({
   hint: string;
   showHook?: boolean;
   hookText?: string;
-  clips: Array<{ id: string; filename: string; path: string; thumbPath: string; hookText: string }>;
+  clips: Array<{
+    id: string;
+    filename: string;
+    path: string;
+    thumbPath: string;
+    hookText: string;
+    postCaption?: string;
+  }>;
 }) {
   return (
     <div className="rounded-card border border-line bg-panel p-5">

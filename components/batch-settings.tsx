@@ -155,14 +155,15 @@ export function BatchSettings({
       </section>
 
       <section className="rounded-card border border-line bg-panel p-5">
-        <p className="label">Caption</p>
+        <p className="label">Default caption</p>
         <p className="mt-2 text-sm text-mute">
-          Ships with every video in this batch. Leave it empty and videos post with no caption text.
+          Used only when a hook has no caption of its own. Different hooks should get different captions — type those on
+          the hook clips above.
         </p>
         <textarea
           name="caption"
           defaultValue={defaults.caption}
-          placeholder="Caption + hashtags for every video in this batch"
+          placeholder="Fallback caption + hashtags if a hook is blank"
           className="field mt-3 min-h-20"
         />
       </section>
@@ -241,7 +242,7 @@ export function BatchSettings({
           <Row label="Spoken words on screen">
             <div className="flex items-center gap-3">
               <p className="max-w-56 text-right text-xs text-mute">
-                We listen to your clips and burn what you say as big text, phrase by phrase, through the whole video.
+                What you say, phrase by phrase, in that file&apos;s look — TikTok text or Instagram text.
               </p>
               <Toggle name="captionsOn" on={captionsOn} onChange={setCaptionsOn} />
             </div>

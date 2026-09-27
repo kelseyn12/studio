@@ -9,10 +9,13 @@ export async function PATCH(
   const user = await readSession();
   if (!user) return NextResponse.json({ error: "Auth required" }, { status: 401 });
   const { id } = await context.params;
-  const body = await request.json();
+  const body = (await request.json()) as { hookText?: unknown; postCaption?: unknown };
   await prisma.repurposeClip.update({
     where: { id },
-    data: { hookText: String(body.hookText || "") },
+    data: {
+      ...(body.hookText !== undefined ? { hookText: String(body.hookText || "") } : {}),
+      ...(body.postCaption !== undefined ? { postCaption: String(body.postCaption || "") } : {}),
+    },
   });
   return NextResponse.json({ ok: true });
 }

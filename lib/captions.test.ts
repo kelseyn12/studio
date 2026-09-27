@@ -42,6 +42,14 @@ describe("captionFilters", () => {
     const filters = captionFilters([{ text: "gone", start: 0, end: 0.3 }], 0.5);
     expect(filters).toHaveLength(0);
   });
+
+  it("draws Instagram spoken words in a box and TikTok words with a shadow", () => {
+    const instagram = captionFilters([{ text: "hello", start: 0, end: 1 }], 0, "instagram")[0];
+    const tiktok = captionFilters([{ text: "hello", start: 0, end: 1 }], 0, "tiktok")[0];
+    expect(instagram).toContain("box=1");
+    expect(tiktok).toContain("shadowx=3");
+    expect(tiktok).not.toContain("box=1");
+  });
 });
 
 describe("parseCaptionWords", () => {

@@ -270,6 +270,7 @@ model RepurposeClip {
   path     String
   filename String
   hookText String         @default("")
+  postCaption String      @default("")
   thumbPath String        @default("")
   size     Int            @default(0)
   captionsJson String     @default("")

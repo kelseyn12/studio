@@ -137,6 +137,9 @@
 - [X] Full-app audit (Sep 26)
   Owner + editor page sweep, API auth probes, real-clip render with the new options, lint clean, ffmpeg.ts split. Nothing broken found.
 
+- [X] Caption per hook + spoken words match the file look
+  Each hook clip has its own post caption. Spoken words on screen use TikTok or Instagram text style to match that file.
+
 - [X] Watch uses Studio files, not the R2 S3 URL
   Clicking Watch opened `*.r2.cloudflarestorage.com` and showed an empty XML error. Players and Download now use `/api/files`.
 
