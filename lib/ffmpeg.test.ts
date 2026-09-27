@@ -13,6 +13,7 @@ describe("uniquenessFilter", () => {
     expect(filter).toContain("eq=saturation=");
     expect(filter).toContain("crop=1080:1920");
     expect(filter).toMatch(/scale=\d+:\d+/);
+    expect(filter.indexOf("setpts=")).toBeGreaterThan(filter.indexOf("fps=30"));
   });
 
   it("flips the frame when mirror is on", () => {

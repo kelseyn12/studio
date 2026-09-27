@@ -172,3 +172,6 @@
 
 - [X] Place words on the hook, undo cuts, fix 2×, pick covers
   Words button types on the clip and drags (TT/IG look still burns through libass). Logos drag too. Undo last cut. 2× is actually faster than 1.25×. Copies keep speed/hue; each copy and Live can pick a cover frame.
+
+- [X] Speed pills write a real 2× file
+  Dropped fps/-r after setpts and the 4K playbackRate preview (2× looked slower than 1.25×). Save cut encodes `setpts`+`atempo`, then plays that file at 1×. Video and audio durations match in lib/cut.test.ts.

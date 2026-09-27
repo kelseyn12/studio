@@ -4,8 +4,24 @@ import path from "path";
 import { describe, expect, it } from "vitest";
 import { runFfmpeg } from "@/lib/ffmpeg";
 import { cutVideo } from "@/lib/cut";
-import { isPlayableCut, keepRanges, parseDrops, parseSpeed } from "@/lib/cut-math";
+import { isPlayableCut, keepRanges, parseDrops, parseSpeed, speedAudioFilter, speedVideoFilter } from "@/lib/cut-math";
+import { ffprobeBin, runCommand } from "@/lib/ffmpeg";
 import { clipDuration } from "@/lib/trim";
+
+async function streamDuration(file: string, kind: "v:0" | "a:0"): Promise<number> {
+  const out = await runCommand(ffprobeBin(), [
+    "-v",
+    "error",
+    "-select_streams",
+    kind,
+    "-show_entries",
+    "stream=duration",
+    "-of",
+    "csv=p=0",
+    file,
+  ]);
+  return Number(out.trim()) || 0;
+}
 
 describe("keepRanges", () => {
   it("keeps the whole window when nothing is dropped", () => {
@@ -42,6 +58,13 @@ describe("parseSpeed / parseDrops", () => {
     expect(parseSpeed(1.5)).toBe(1.5);
     expect(parseSpeed(3)).toBe(1);
     expect(parseSpeed("nope")).toBe(1);
+  });
+
+  it("speeds video by shrinking PTS, not by raising fps", () => {
+    expect(speedVideoFilter(2)).toBe("setpts=(PTS-STARTPTS)/2");
+    expect(speedVideoFilter(1.25)).toBe("setpts=(PTS-STARTPTS)/1.25");
+    expect(speedVideoFilter(2)).not.toContain("fps");
+    expect(speedAudioFilter(2)).toBe("atempo=2");
   });
 
   it("drops junk ranges", () => {
@@ -94,7 +117,7 @@ describe("cutVideo", () => {
         "-f",
         "lavfi",
         "-i",
-        "color=c=green:s=320x240:d=2",
+        "color=c=green:s=320x240:d=2:r=60",
         "-f",
         "lavfi",
         "-i",
@@ -109,11 +132,23 @@ describe("cutVideo", () => {
       const ranges = keepRanges({ start: 0, end: 2 }, []);
       await cutVideo({ sourceAbs: clip, outputRel: fastRel, ranges, speed: 2 });
       await cutVideo({ sourceAbs: clip, outputRel: slowRel, ranges, speed: 1.25 });
-      const fast = await clipDuration(path.join(localRoot(), fastRel));
-      const slow = await clipDuration(path.join(localRoot(), slowRel));
-      expect(fast).toBeLessThan(slow - 0.2);
-      await rm(path.join(localRoot(), fastRel), { force: true });
-      await rm(path.join(localRoot(), slowRel), { force: true });
+      const fastAbs = path.join(localRoot(), fastRel);
+      const slowAbs = path.join(localRoot(), slowRel);
+      const fast = await clipDuration(fastAbs);
+      const slow = await clipDuration(slowAbs);
+      const fastVideo = await streamDuration(fastAbs, "v:0");
+      const fastAudio = await streamDuration(fastAbs, "a:0");
+      const slowVideo = await streamDuration(slowAbs, "v:0");
+      const slowAudio = await streamDuration(slowAbs, "a:0");
+      expect(fast).toBeGreaterThan(0.9);
+      expect(fast).toBeLessThan(1.15);
+      expect(slow).toBeGreaterThan(1.5);
+      expect(slow).toBeLessThan(1.75);
+      expect(fast).toBeLessThan(slow - 0.4);
+      expect(Math.abs(fastVideo - fastAudio)).toBeLessThan(0.1);
+      expect(Math.abs(slowVideo - slowAudio)).toBeLessThan(0.1);
+      await rm(fastAbs, { force: true });
+      await rm(slowAbs, { force: true });
       await rm(dir, { recursive: true, force: true });
     },
     20_000,

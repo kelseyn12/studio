@@ -9,6 +9,16 @@ export function parseSpeed(value: unknown): number {
   return SPEED_CHOICES.find((choice) => Math.abs(choice - speed) < 0.01) ?? 1;
 }
 
+/** Halve PTS for 2×. Do not add fps or -r after this — they write 30fps timestamps and undo the speed. */
+export function speedVideoFilter(speed: number): string {
+  return `setpts=(PTS-STARTPTS)/${speed}`;
+}
+
+/** atempo max is 2; every SPEED_CHOICES value fits in one filter. */
+export function speedAudioFilter(speed: number): string {
+  return `atempo=${speed}`;
+}
+
 export function parseDrops(value: unknown): TimeRange[] {
   if (!Array.isArray(value)) return [];
   return value.flatMap((item) => {

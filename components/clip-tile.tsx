@@ -85,7 +85,10 @@ export function ClipTile({
         <div className="mt-2 flex gap-1">
           <button
             type="button"
-            onClick={() => setMode(mode === "cut" ? "idle" : "cut")}
+            onClick={() => {
+              if (mode === "cut") router.refresh();
+              setMode(mode === "cut" ? "idle" : "cut");
+            }}
             className="flex-1 rounded-lg border border-line px-2 py-1 text-xs text-mute"
           >
             {mode === "cut" ? "Done" : "Cut"}
@@ -101,7 +104,10 @@ export function ClipTile({
       ) : (
         <button
           type="button"
-          onClick={() => setMode(mode === "cut" ? "idle" : "cut")}
+          onClick={() => {
+            if (mode === "cut") router.refresh();
+            setMode(mode === "cut" ? "idle" : "cut");
+          }}
           className="mt-2 w-full rounded-lg border border-line px-2 py-1 text-xs text-mute"
         >
           {mode === "cut" ? "Done cutting" : "Cut"}

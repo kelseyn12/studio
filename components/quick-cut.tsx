@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { SPEED_CHOICES, isPlayableCut, keepRanges, keptSeconds } from "@/lib/cut-math";
+import { publicFileUrl } from "@/lib/urls";
 
 type Drop = { start: number; end: number };
 
@@ -19,8 +19,8 @@ export function QuickCut({
   note?: string;
   canUndo?: boolean;
 }) {
-  const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [playSrc, setPlaySrc] = useState(src);
   const [duration, setDuration] = useState(0);
   const [start, setStart] = useState(0);
   const [end, setEnd] = useState(0);
@@ -29,15 +29,26 @@ export function QuickCut({
   const [speed, setSpeed] = useState(1);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [undoReady, setUndoReady] = useState(Boolean(canUndo));
 
   useEffect(() => {
-    if (videoRef.current) videoRef.current.playbackRate = speed;
-  }, [speed]);
+    setPlaySrc(src);
+    setUndoReady(Boolean(canUndo));
+  }, [src, canUndo]);
 
   const playhead = () => videoRef.current?.currentTime ?? 0;
   const ranges = keepRanges({ start, end }, drops);
   const remaining = keptSeconds(ranges) / speed;
   const canSave = isPlayableCut(ranges) && !busy;
+
+  function resetWindow(total: number) {
+    setDuration(total);
+    setStart(0);
+    setEnd(total);
+    setDrops([]);
+    setDropFrom(null);
+    setSpeed(1);
+  }
 
   function addDrop() {
     const to = playhead();
@@ -50,39 +61,55 @@ export function QuickCut({
     setError("");
   }
 
-  async function save() {
+  async function postTrim(body: Record<string, unknown>) {
     setBusy(true);
     setError("");
     const response = await fetch("/api/trim", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ target, id, start, end, drops, speed }),
+      body: JSON.stringify(body),
     });
-    const body = await response.json().catch(() => ({}));
+    const payload = await response.json().catch(() => ({}));
     setBusy(false);
     if (!response.ok) {
-      setError(String(body.error || "Cut failed"));
-      return;
+      setError(String(payload.error || "Cut failed"));
+      return null;
     }
-    router.refresh();
+    return payload as { ok: true; path?: string };
+  }
+
+  async function save() {
+    const payload = await postTrim({ target, id, start, end, drops, speed });
+    if (!payload) return;
+    if (payload.path) setPlaySrc(publicFileUrl(payload.path));
+    setUndoReady(true);
+    resetWindow(0);
+  }
+
+  async function undo() {
+    const payload = await postTrim({ target, id, undo: true });
+    if (!payload) return;
+    setPlaySrc(payload.path ? publicFileUrl(payload.path) : src);
+    setUndoReady(false);
+    resetWindow(0);
   }
 
   return (
     <div className="space-y-2">
       <video
+        key={playSrc}
         ref={videoRef}
-        src={src}
+        src={playSrc}
         controls
         playsInline
         preload="metadata"
+        autoPlay={playSrc !== src}
         className="w-full rounded-xl bg-ink"
-        onPlay={() => {
-          if (videoRef.current) videoRef.current.playbackRate = speed;
-        }}
         onLoadedMetadata={(event) => {
-          const total = event.currentTarget.duration || 0;
+          const total = event.currentTarget.duration;
+          if (!Number.isFinite(total) || total <= 0) return;
           setDuration(total);
-          setEnd(total);
+          setEnd((current) => (current <= 0 || current > total ? total : current));
         }}
       />
       <div className="flex flex-wrap gap-2">
@@ -115,13 +142,7 @@ export function QuickCut({
         </button>
         <button
           type="button"
-          onClick={() => {
-            setStart(0);
-            setEnd(duration);
-            setDrops([]);
-            setDropFrom(null);
-            setSpeed(1);
-          }}
+          onClick={() => resetWindow(duration)}
           className="rounded-xl border border-line px-3 py-1.5 text-sm text-mute"
         >
           Reset
@@ -158,31 +179,19 @@ export function QuickCut({
       <p className="text-xs text-mute">
         Keeps {start.toFixed(1)}s → {end.toFixed(1)}s
         {drops.length ? ` · drops ${drops.length} part${drops.length === 1 ? "" : "s"}` : ""}
-        {speed !== 1 ? ` · ${speed}×` : ""} · posts as {remaining.toFixed(1)}s
+        {speed !== 1 ? ` · ${speed}× after save` : ""} · posts as {remaining.toFixed(1)}s
+      </p>
+      <p className="text-xs text-mute">
+        The player stays at 1× so you can mark cuts. Save writes the speed, then plays that file.
       </p>
       {note ? <p className="text-xs text-mute">{note}</p> : null}
       {error ? <p className="text-xs text-review">{error}</p> : null}
       <div className="flex gap-2">
-        {canUndo ? (
+        {undoReady ? (
           <button
             type="button"
             disabled={busy}
-            onClick={async () => {
-              setBusy(true);
-              setError("");
-              const response = await fetch("/api/trim", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ target, id, undo: true }),
-              });
-              setBusy(false);
-              if (!response.ok) {
-                const body = await response.json().catch(() => ({}));
-                setError(String(body.error || "Nothing to undo"));
-                return;
-              }
-              router.refresh();
-            }}
+            onClick={undo}
             className="w-full rounded-xl border border-line px-3 py-2 text-sm text-mute"
           >
             Undo last cut

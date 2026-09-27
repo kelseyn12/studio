@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-09-26 — Cut speed again: `fps`/`-r 30` after `setpts` and Safari `playbackRate` on 4K made 2× feel slower than 1.25×. Encode is now `setpts=(PTS-STARTPTS)/n` + `atempo` only. Player stays at 1×; Save plays the new file. `/api/files` sends Content-Length + no-store.
 - 2026-09-26 — Hook Words: type/drag on the clip (libass still draws TT/IG). Logos drag. Cut undo. 2× encode was fps-then-setpts so players stayed at 30fps; setpts then fps + playbackRate preview. Cover frame per copy + Live picker (`Asset.coverPath`).
 - 2026-09-26 — Hook logos: drop 1–4 images on a Multiply hook. Three become A + B = C for 2.5s. Layout math in lib/hook-logos-math.ts; sheet + overlay in lib/hook-logos.ts / assembleVideo. `RepurposeClip.logosJson` (Turso ALTER).
 - 2026-09-26 — Quick cut can drop dragging middle sections and speed the leftover (1.25 / 1.5 / 2×). Keep-range math lives in lib/cut-math.ts (browser-safe); ffmpeg stitch/speed in lib/cut.ts. `/api/trim` now takes `drops` + `speed`.

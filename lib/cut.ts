@@ -1,6 +1,6 @@
 import { mkdir } from "fs/promises";
 import path from "path";
-import { isPlayableCut, parseSpeed, type TimeRange } from "@/lib/cut-math";
+import { isPlayableCut, parseSpeed, speedAudioFilter, speedVideoFilter, type TimeRange } from "@/lib/cut-math";
 import { clipHasAudio, runFfmpeg } from "@/lib/ffmpeg";
 import { localRoot } from "@/lib/files";
 import { trimVideo } from "@/lib/trim";
@@ -23,6 +23,10 @@ function encodeArgs(outputAbs: string): string[] {
     "192k",
     outputAbs,
   ];
+}
+
+function mapSpeed(hasAudio: boolean): string[] {
+  return hasAudio ? ["-map", "[outv]", "-map", "[outa]"] : ["-map", "[outv]"];
 }
 
 /** Drops marked ranges, stitches what is left, then speeds the whole file. */
@@ -53,9 +57,18 @@ export async function cutVideo(input: {
 
   const hasAudio = await clipHasAudio(input.sourceAbs);
   const count = input.ranges.length;
+
+  if (count === 1 && speed !== 1) {
+    const video = `[0:v]${speedVideoFilter(speed)}[outv]`;
+    const audio = hasAudio ? `;[0:a]${speedAudioFilter(speed)}[outa]` : "";
+    args.push("-filter_complex", `${video}${audio}`, ...mapSpeed(hasAudio), ...encodeArgs(outputAbs));
+    await runFfmpeg(args);
+    return input.outputRel;
+  }
+
   const chains: string[] = [];
   for (let index = 0; index < count; index += 1) {
-    chains.push(`[${index}:v]fps=30,setsar=1,format=yuv420p[v${index}]`);
+    chains.push(`[${index}:v]setsar=1,format=yuv420p[v${index}]`);
     if (hasAudio) chains.push(`[${index}:a]aresample=44100,aformat=channel_layouts=stereo[a${index}]`);
   }
   if (hasAudio) {
@@ -66,9 +79,8 @@ export async function cutVideo(input: {
     chains.push(`${parts}concat=n=${count}:v=1:a=0[cv]`);
   }
   if (speed !== 1) {
-    // fps after setpts so 2× is actually shorter than 1.25× (fps-then-setpts left players at 30fps).
-    chains.push(`[cv]setpts=PTS/${speed},fps=30[outv]`);
-    if (hasAudio) chains.push(`[ca]atempo=${speed}[outa]`);
+    chains.push(`[cv]${speedVideoFilter(speed)}[outv]`);
+    if (hasAudio) chains.push(`[ca]${speedAudioFilter(speed)}[outa]`);
   }
 
   const video = speed === 1 ? "[cv]" : "[outv]";
@@ -76,7 +88,6 @@ export async function cutVideo(input: {
   args.push("-filter_complex", chains.join(";"));
   args.push("-map", video);
   if (hasAudio) args.push("-map", audio);
-  if (speed !== 1) args.push("-r", "30");
   args.push(...encodeArgs(outputAbs));
   await runFfmpeg(args);
   return input.outputRel;

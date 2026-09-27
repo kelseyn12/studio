@@ -20,10 +20,10 @@ async function undoCut(target: string, id: string) {
     await deleteUpload(clip.path);
     if (clip.thumbPath) await deleteUpload(clip.thumbPath);
     await prisma.repurposeClip.update({
-      where: { id },
-      data: { path: prior.path, thumbPath: prior.thumbPath, size: prior.size, cutUndo: "" },
-    });
-    return NextResponse.json({ ok: true });
+        where: { id },
+        data: { path: prior.path, thumbPath: prior.thumbPath, size: prior.size, cutUndo: "" },
+      });
+    return NextResponse.json({ ok: true, path: prior.path });
   }
   if (target === "asset") {
     const asset = await prisma.asset.findUnique({ where: { id } });
@@ -35,7 +35,7 @@ async function undoCut(target: string, id: string) {
     if (!newest) return NextResponse.json({ error: "Nothing to undo" }, { status: 400 });
     await deleteUpload(newest.path);
     await prisma.asset.delete({ where: { id: newest.id } });
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, path: asset.path });
   }
   return NextResponse.json({ error: "Unknown target" }, { status: 400 });
 }
@@ -90,7 +90,7 @@ export async function POST(request: Request) {
           cutUndo: JSON.stringify({ path: clip.path, thumbPath: clip.thumbPath, size: clip.size }),
         },
       });
-      return NextResponse.json({ ok: true });
+      return NextResponse.json({ ok: true, path: outputRel });
     }
 
     if (target === "asset") {
@@ -114,7 +114,7 @@ export async function POST(request: Request) {
           publicUrl,
         },
       });
-      return NextResponse.json({ ok: true });
+      return NextResponse.json({ ok: true, path: outputRel });
     }
 
     return NextResponse.json({ error: "Unknown target" }, { status: 400 });

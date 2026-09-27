@@ -139,8 +139,8 @@ function videoFilter(input: {
   if (input.mirror) parts.push("hflip");
   // Spoken captions go in before the speed change so their timing stays true.
   if (input.captionFilters?.length) parts.push(...input.captionFilters);
-  if (input.speed !== 1) parts.push(`setpts=PTS/${input.speed}`);
   parts.push("fps=30");
+  if (input.speed !== 1) parts.push(`setpts=(PTS-STARTPTS)/${input.speed}`);
   if (input.saturation !== 1 || input.contrast !== 1 || input.hue !== 0) {
     parts.push(`eq=saturation=${input.saturation}:contrast=${input.contrast}`);
     if (input.hue !== 0) parts.push(`hue=h=${input.hue}`);

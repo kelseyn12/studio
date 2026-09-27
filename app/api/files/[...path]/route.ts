@@ -34,6 +34,8 @@ export async function GET(
     const common = {
       "Content-Type": mime,
       "Accept-Ranges": "bytes",
+      "Content-Length": String(bytes.byteLength ?? bytes.length),
+      "Cache-Control": inline ? "private, no-store" : "private, max-age=0",
       "Content-Disposition": `${inline ? "inline" : "attachment"}; filename="${name}"`,
     };
     const part = slice(Buffer.isBuffer(bytes) ? bytes : Buffer.from(bytes), request.headers.get("range"));
