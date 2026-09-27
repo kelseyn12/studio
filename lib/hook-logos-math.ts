@@ -12,8 +12,12 @@ export function defaultLogoPos(index: number, count: number): { x: number; y: nu
   return { x: Math.min(0.92, Math.max(0.08, x)), y: LOGO_ROW_Y };
 }
 
-export type HookLogo = { path: string; filename: string; x?: number; y?: number };
-export type LogoMark = { kind: "mark"; id: string; text: string; x?: number; y?: number };
+export const LOGO_SCALE_MIN = 0.5;
+export const LOGO_SCALE_MAX = 2.5;
+export const LOGO_SCALE_STEP = 0.25;
+
+export type HookLogo = { path: string; filename: string; x?: number; y?: number; scale?: number };
+export type LogoMark = { kind: "mark"; id: string; text: string; x?: number; y?: number; scale?: number };
 export type LogoItem = (HookLogo & { kind?: "file" }) | LogoMark;
 export type LogoBox =
   | { kind: "logo"; index: number; x: number; y: number; w: number; h: number }
@@ -31,6 +35,23 @@ function placed(item: { x?: unknown; y?: unknown }): { x: number; y: number } | 
   return { x: Math.min(0.92, Math.max(0.08, x)), y: Math.min(0.88, Math.max(0.08, y)) };
 }
 
+export function clampLogoScale(value: unknown): number {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return 1;
+  const stepped = Math.round(n / LOGO_SCALE_STEP) * LOGO_SCALE_STEP;
+  return Math.min(LOGO_SCALE_MAX, Math.max(LOGO_SCALE_MIN, stepped));
+}
+
+export function itemScale(item: LogoItem): number {
+  return item.scale == null ? 1 : clampLogoScale(item.scale);
+}
+
+function scaled(item: { scale?: unknown }): { scale?: number } {
+  if (item.scale == null) return {};
+  const scale = clampLogoScale(item.scale);
+  return scale === 1 ? {} : { scale };
+}
+
 export function parseLogoItems(raw: string | null | undefined): LogoItem[] {
   if (!raw?.trim()) return [];
   try {
@@ -43,12 +64,12 @@ export function parseLogoItems(raw: string | null | undefined): LogoItem[] {
         if (row.kind === "mark") {
           const text = String(row.text || "").trim().slice(0, 48);
           if (!text) return [];
-          return [{ kind: "mark" as const, id: String(row.id || `mark-${index}`), text, ...placed(row) }];
+          return [{ kind: "mark" as const, id: String(row.id || `mark-${index}`), text, ...placed(row), ...scaled(row) }];
         }
         const pathValue = String((row as HookLogo).path || "").replace(/\\/g, "/");
         const filename = String((row as HookLogo).filename || "").trim();
         if (!pathValue || pathValue.includes("..") || pathValue.startsWith("/")) return [];
-        return [{ path: pathValue, filename: filename || fileName(pathValue), ...placed(row) }];
+        return [{ path: pathValue, filename: filename || fileName(pathValue), ...placed(row), ...scaled(row) }];
       })
       .slice(0, MAX_LOGO_ITEMS);
   } catch {
@@ -121,15 +142,20 @@ export function logoBoxes(count: number, equation = false): LogoBox[] {
 /** Mixed row: files, +, =, emoji, short text. Uses x/y when the item was dragged. */
 export function boxesFromItems(items: LogoItem[]): LogoBox[] {
   if (!items.length) return [];
-  const fileSize = items.filter(isLogoFile).length <= 1 ? 280 : 200;
-  const widths = items.map((item) => (isLogoFile(item) ? fileSize : Math.min(320, 28 * Math.max(1, item.text.length))));
+  const fileBase = items.filter(isLogoFile).length <= 1 ? 280 : 200;
+  const widths = items.map((item) => {
+    const scale = itemScale(item);
+    return isLogoFile(item) ? Math.round(fileBase * scale) : Math.min(400, Math.round(28 * Math.max(1, item.text.length) * scale));
+  });
   const gap = 16;
   const total = widths.reduce((sum, width) => sum + width, 0) + gap * Math.max(0, items.length - 1);
   let x = Math.round((CANVAS_W - total) / 2);
   let fileIndex = 0;
   return items.map((item, index) => {
     const width = widths[index];
+    const scale = itemScale(item);
     if (isLogoFile(item)) {
+      const fileSize = Math.round(fileBase * scale);
       const box: LogoBox = { kind: "logo", index: fileIndex, x, y: rowTop(fileSize), w: fileSize, h: fileSize };
       if (item.x != null && item.y != null) {
         box.x = Math.round(item.x * CANVAS_W - fileSize / 2);
@@ -139,12 +165,12 @@ export function boxesFromItems(items: LogoItem[]): LogoBox[] {
       x += width + gap;
       return box;
     }
-    const size = item.text.length <= 2 ? 88 : 48;
+    const size = Math.round((item.text.length <= 2 ? 88 : 48) * scale);
     const box: LogoBox = {
       kind: "mark",
       text: item.text,
       x: item.x != null ? Math.round(item.x * CANVAS_W - width / 2) : x,
-      y: item.y != null ? Math.round(item.y * CANVAS_H - size / 2) : rowTop(fileSize) + Math.round((fileSize - size) / 2),
+      y: item.y != null ? Math.round(item.y * CANVAS_H - size / 2) : rowTop(fileBase) + Math.round((fileBase - size) / 2),
       size,
     };
     x += width + gap;

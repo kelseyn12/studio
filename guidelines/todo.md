@@ -190,3 +190,6 @@
 
 - [X] Logo chips have no white boxes
   The rounded white borders were only the Words grab handle. Preview is now the logo / + / = / emoji with no pill. Generate never drew those boxes.
+
+- [X] Bigger / Smaller logos
+  Each chip stores `scale`. Tap it on Words, then Bigger or Smaller (0.5×–2.5×). Preview and the burned sheet both use that size.

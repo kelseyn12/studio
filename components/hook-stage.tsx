@@ -2,7 +2,7 @@
 
 import { useRef, useState, type PointerEvent } from "react";
 import { hookDefaultPos, parseHookLayout, stringifyHookLayout, type HookPos } from "@/lib/hook-layout";
-import { defaultLogoPos, isLogoFile, parseLogoItems } from "@/lib/hook-logos-math";
+import { clampLogoScale, defaultLogoPos, isLogoFile, itemScale, LOGO_SCALE_STEP, parseLogoItems } from "@/lib/hook-logos-math";
 import { publicFileUrl } from "@/lib/urls";
 import type { DrawnStyle } from "@/lib/text-style";
 
@@ -29,6 +29,8 @@ export function HookStage({
   const [pos, setPos] = useState<HookPos>(saved);
   const [preview, setPreview] = useState<DrawnStyle>(look);
   const [places, setPlaces] = useState<Record<string, { x: number; y: number }>>({});
+  const [scales, setScales] = useState<Record<string, number>>({});
+  const [picked, setPicked] = useState<string | null>(null);
   const logos = parseLogoItems(logosJson);
 
   function itemKey(item: (typeof logos)[number]): string {
@@ -37,6 +39,27 @@ export function HookStage({
 
   function loc(item: (typeof logos)[number], index: number): { x: number; y: number } {
     return places[itemKey(item)] ?? (item.x != null && item.y != null ? { x: item.x, y: item.y } : defaultLogoPos(index, logos.length));
+  }
+
+  function scaleOf(item: (typeof logos)[number]): number {
+    return scales[itemKey(item)] ?? itemScale(item);
+  }
+
+  async function bumpScale(delta: number) {
+    const item = logos.find((row) => itemKey(row) === picked) ?? logos[0];
+    if (!item) return;
+    const next = clampLogoScale(scaleOf(item) + delta);
+    setPicked(itemKey(item));
+    setScales((current) => ({ ...current, [itemKey(item)]: next }));
+    await fetch(`/api/repurpose/clips/${id}/logos`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        path: isLogoFile(item) ? item.path : undefined,
+        id: !isLogoFile(item) ? item.id : undefined,
+        scale: next,
+      }),
+    });
   }
 
   function point(event: PointerEvent<HTMLElement>): HookPos {
@@ -125,6 +148,8 @@ export function HookStage({
         </div>
         {logos.map((item, index) => {
           const at = loc(item, index);
+          const scale = scaleOf(item);
+          const px = Math.round(48 * scale);
           return (
             <button
               key={itemKey(item)}
@@ -132,6 +157,7 @@ export function HookStage({
               onPointerDown={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
+                setPicked(itemKey(item));
                 event.currentTarget.setPointerCapture(event.pointerId);
               }}
               onPointerMove={(event) => {
@@ -145,13 +171,13 @@ export function HookStage({
                 event.stopPropagation();
                 void moveItem(item, event);
               }}
-              className="absolute z-30 flex h-16 min-w-16 -translate-x-1/2 -translate-y-1/2 cursor-grab touch-none select-none items-center justify-center bg-transparent px-2 text-2xl text-white [text-shadow:0_1px_0_#000,0_-1px_0_#000,1px_0_0_#000,-1px_0_0_#000] active:cursor-grabbing active:ring-2 active:ring-white/50"
-              style={{ left: `${at.x * 100}%`, top: `${at.y * 100}%` }}
+              className={`absolute z-30 flex -translate-x-1/2 -translate-y-1/2 cursor-grab touch-none select-none items-center justify-center bg-transparent text-white [text-shadow:0_1px_0_#000,0_-1px_0_#000,1px_0_0_#000,-1px_0_0_#000] active:cursor-grabbing ${picked === itemKey(item) ? "ring-2 ring-white/40" : ""}`}
+              style={{ left: `${at.x * 100}%`, top: `${at.y * 100}%`, width: px + 16, height: px + 16, fontSize: Math.round(24 * scale) }}
               title="Drag"
             >
               {isLogoFile(item) ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={publicFileUrl(item.path)} alt={item.filename} className="pointer-events-none h-12 w-12 object-contain" />
+                <img src={publicFileUrl(item.path)} alt={item.filename} className="pointer-events-none object-contain" style={{ width: px, height: px }} />
               ) : (
                 item.text
               )}
@@ -159,6 +185,16 @@ export function HookStage({
           );
         })}
       </div>
+      {logos.length ? (
+        <div className="flex gap-1">
+          <button type="button" onClick={() => bumpScale(-LOGO_SCALE_STEP)} className="flex-1 rounded-lg border border-line px-2 py-1 text-[11px] text-mute">
+            Smaller
+          </button>
+          <button type="button" onClick={() => bumpScale(LOGO_SCALE_STEP)} className="flex-1 rounded-lg border border-line px-2 py-1 text-[11px] text-mute">
+            Bigger
+          </button>
+        </div>
+      ) : null}
       <div className="flex gap-1">
         <button
           type="button"

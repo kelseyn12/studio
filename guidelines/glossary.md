@@ -76,7 +76,7 @@
 - `cutPreviewPath` / `parseCutUndo` — `lib/hook-layout.ts` — 1× is the recorded file (`basePath`). 1.25 / 1.5 / 2 step up from that, never from a previous sped cut.
 - `cutVideo` — `lib/cut.ts` — stitches kept ranges and applies speed (`setpts` + `atempo`). Used by `/api/trim`.
 - `QuickCut` — `components/quick-cut.tsx` — Start here / End here, Cut from here / Cut to here (drop a middle), speed pills 1 / 1.25 / 1.5 / 2. Tapping a pill plays at that rate; Save writes it into the file.
-- `parseLogoItems` / `parseLogos` / `boxesFromItems` / `defaultLogoPos` / `writeLogoSheet` — `lib/hook-logos-math.ts` / `lib/hook-logos.ts` — files plus `+` `=` emoji / short text. Unused items line up at `LOGO_ROW_Y` (0.15). Drag on Words. First 4s. Tested in `lib/hook-logos.test.ts`.
+- `parseLogoItems` / `parseLogos` / `boxesFromItems` / `defaultLogoPos` / `itemScale` / `writeLogoSheet` — `lib/hook-logos-math.ts` / `lib/hook-logos.ts` — files plus `+` `=` emoji / short text. `scale` 0.5–2.5 (Bigger / Smaller on Words). Unused items line up at `LOGO_ROW_Y` (0.15). First 4s. Tested in `lib/hook-logos.test.ts`.
 - `HookLogos` — `components/hook-logos.tsx` — Add logo, +, =, 🔥, or a typed chip. Headline under the formula is Words.
 - `CutTrack` — `components/cut-track.tsx` — yellow ends = keep window. Click scrubs. Dark = dropped middles. Repeat Cut from/to for more than one middle.
 - `HookStage` — `components/hook-stage.tsx` — type words, drag them / logos / marks. Show text now / Hide text after now sets `from`/`to`. Does not listen to speech (Spoken words in Mix does).

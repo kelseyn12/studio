@@ -41,6 +41,14 @@ describe("parseLogos", () => {
     expect(boxesFromItems(items).some((box) => box.kind === "mark" && box.text === "+")).toBe(true);
   });
 
+  it("scales a logo when you ask for bigger", () => {
+    const normal = boxesFromItems([{ path: "a.png", filename: "a.png" }]);
+    const big = boxesFromItems([{ path: "a.png", filename: "a.png", scale: 2 }]);
+    expect(normal[0].kind).toBe("logo");
+    expect(big[0].kind).toBe("logo");
+    if (normal[0].kind === "logo" && big[0].kind === "logo") expect(big[0].w).toBe(normal[0].w * 2);
+  });
+
   it("lines unused logos across the top, not the play button", () => {
     expect(defaultLogoPos(0, 3)).toEqual({ x: 0.16, y: 0.15 });
     expect(defaultLogoPos(2, 3).x).toBeCloseTo(0.84);

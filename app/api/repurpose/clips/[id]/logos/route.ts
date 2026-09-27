@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { MAX_HOOK_LOGOS, MAX_LOGO_ITEMS, parseLogoItems, parseLogos, stringifyLogos } from "@/lib/hook-logos-math";
+import { clampLogoScale, MAX_HOOK_LOGOS, MAX_LOGO_ITEMS, parseLogoItems, parseLogos, stringifyLogos } from "@/lib/hook-logos-math";
 import { deleteUpload, mimeFromName, saveUpload } from "@/lib/files";
 import { rejectStudioFile } from "@/lib/storage";
 import { prisma } from "@/lib/prisma";
@@ -60,13 +60,21 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
   const { id } = await context.params;
   const clip = await prisma.repurposeClip.findUnique({ where: { id } });
   if (!clip) return NextResponse.json({ error: "Missing clip" }, { status: 404 });
-  const body = (await request.json()) as { path?: unknown; id?: unknown; x?: unknown; y?: unknown };
+  const body = (await request.json()) as { path?: unknown; id?: unknown; x?: unknown; y?: unknown; scale?: unknown };
   const pathValue = String(body.path || "");
   const markId = String(body.id || "");
   const next = parseLogoItems(clip.logosJson).map((item) => {
     const match = pathValue && "path" in item && item.path === pathValue;
     const mark = markId && "kind" in item && item.kind === "mark" && item.id === markId;
-    return match || mark ? { ...item, x: Number(body.x), y: Number(body.y) } : item;
+    if (!match && !mark) return item;
+    const x = Number(body.x);
+    const y = Number(body.y);
+    return {
+      ...item,
+      ...(Number.isFinite(x) ? { x: Math.min(0.92, Math.max(0.08, x)) } : {}),
+      ...(Number.isFinite(y) ? { y: Math.min(0.88, Math.max(0.08, y)) } : {}),
+      ...(body.scale != null ? { scale: clampLogoScale(body.scale) } : {}),
+    };
   });
   await prisma.repurposeClip.update({ where: { id }, data: { logosJson: stringifyLogos(next) } });
   return NextResponse.json({ ok: true });

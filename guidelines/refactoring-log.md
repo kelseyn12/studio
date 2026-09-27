@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-09-26 — Logo `scale` (0.5–2.5, step 0.25). Words has Smaller / Bigger for the tapped chip. PATCH can set scale without wiping x/y.
 - 2026-09-26 — Logo chips on Words have no white pills; grab pad is invisible. Burn-in was already just the files and drawtext.
 - 2026-09-26 — Logo drag: default row at y=0.15 (`defaultLogoPos`), bigger z-30 pads, local pointer capture, Words tile `w-96`. Chips were 48px on the play button and lost the drag to video/words.
 - 2026-09-26 — Logo marks: +, =, emoji, short text sit next to logo files (`parseLogoItems` / `boxesFromItems`). Words from/to renamed Show text now / Hide text after now — typed text, not speech. Cut track copy: yellow ends vs repeatable Cut from/to middles.

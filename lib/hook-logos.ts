@@ -12,6 +12,8 @@ export {
   stringifyLogos,
   isLogoFile,
   defaultLogoPos,
+  clampLogoScale,
+  itemScale,
   logoBoxes,
   boxesFromItems,
   logoOverlayFilter,
