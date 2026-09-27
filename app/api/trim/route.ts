@@ -3,15 +3,42 @@ import path from "path";
 import { NextResponse } from "next/server";
 import { cutVideo } from "@/lib/cut";
 import { isPlayableCut, keepRanges, parseDrops, parseSpeed } from "@/lib/cut-math";
+import { parseCutUndo } from "@/lib/hook-layout";
 import { writeThumb } from "@/lib/ffmpeg";
 import { deleteUpload, ensureLocal, localRoot, uploadLocalToR2 } from "@/lib/files";
 import { hasR2 } from "@/lib/r2";
 import { prisma } from "@/lib/prisma";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
 import { readSession } from "@/lib/session";
-import { dropSuperseded } from "@/lib/sweep";
-
 export const maxDuration = 120;
+
+async function undoCut(target: string, id: string) {
+  if (target === "clip") {
+    const clip = await prisma.repurposeClip.findUnique({ where: { id } });
+    const prior = parseCutUndo(clip?.cutUndo);
+    if (!clip || !prior) return NextResponse.json({ error: "Nothing to undo" }, { status: 400 });
+    await deleteUpload(clip.path);
+    if (clip.thumbPath) await deleteUpload(clip.thumbPath);
+    await prisma.repurposeClip.update({
+      where: { id },
+      data: { path: prior.path, thumbPath: prior.thumbPath, size: prior.size, cutUndo: "" },
+    });
+    return NextResponse.json({ ok: true });
+  }
+  if (target === "asset") {
+    const asset = await prisma.asset.findUnique({ where: { id } });
+    if (!asset) return NextResponse.json({ error: "Missing video" }, { status: 404 });
+    const newest = await prisma.asset.findFirst({
+      where: { cardId: asset.cardId, kind: "EDITED", filename: { startsWith: "cut-" } },
+      orderBy: { createdAt: "desc" },
+    });
+    if (!newest) return NextResponse.json({ error: "Nothing to undo" }, { status: 400 });
+    await deleteUpload(newest.path);
+    await prisma.asset.delete({ where: { id: newest.id } });
+    return NextResponse.json({ ok: true });
+  }
+  return NextResponse.json({ error: "Unknown target" }, { status: 400 });
+}
 
 export async function POST(request: Request) {
   if (!rateLimit(clientKey(request, "trim"), 30)) {
@@ -22,6 +49,9 @@ export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   const target = String(body?.target || "");
   const id = String(body?.id || "");
+  if (body?.undo) {
+    return undoCut(target, id);
+  }
   const start = Number(body?.start);
   const end = Number(body?.end);
   const ranges = keepRanges({ start, end }, parseDrops(body?.drops));
@@ -46,12 +76,20 @@ export async function POST(request: Request) {
       } catch {
         thumbPath = clip.thumbPath;
       }
+      const prior = parseCutUndo(clip.cutUndo);
+      if (prior) {
+        await deleteUpload(prior.path);
+        if (prior.thumbPath) await deleteUpload(prior.thumbPath);
+      }
       await prisma.repurposeClip.update({
         where: { id },
-        data: { path: outputRel, size, thumbPath },
+        data: {
+          path: outputRel,
+          size,
+          thumbPath,
+          cutUndo: JSON.stringify({ path: clip.path, thumbPath: clip.thumbPath, size: clip.size }),
+        },
       });
-      await deleteUpload(clip.path);
-      if (clip.thumbPath && thumbPath !== clip.thumbPath) await deleteUpload(clip.thumbPath);
       return NextResponse.json({ ok: true });
     }
 
@@ -76,7 +114,6 @@ export async function POST(request: Request) {
           publicUrl,
         },
       });
-      await dropSuperseded(asset.cardId);
       return NextResponse.json({ ok: true });
     }
 

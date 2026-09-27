@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-09-26 — Hook Words: type/drag on the clip (libass still draws TT/IG). Logos drag. Cut undo. 2× encode was fps-then-setpts so players stayed at 30fps; setpts then fps + playbackRate preview. Cover frame per copy + Live picker (`Asset.coverPath`).
 - 2026-09-26 — Hook logos: drop 1–4 images on a Multiply hook. Three become A + B = C for 2.5s. Layout math in lib/hook-logos-math.ts; sheet + overlay in lib/hook-logos.ts / assembleVideo. `RepurposeClip.logosJson` (Turso ALTER).
 - 2026-09-26 — Quick cut can drop dragging middle sections and speed the leftover (1.25 / 1.5 / 2×). Keep-range math lives in lib/cut-math.ts (browser-safe); ffmpeg stitch/speed in lib/cut.ts. `/api/trim` now takes `drops` + `speed`.
 - 2026-09-26 — Select all + delete selected on Library Finished and Multiply outputs. Shared `dropCards` / `uniqueIds` so two looks of the same video count as one delete. Single-video delete uses the same path.

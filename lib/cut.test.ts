@@ -84,4 +84,38 @@ describe("cutVideo", () => {
     },
     20_000,
   );
+
+  it(
+    "makes 2× shorter than 1.25×",
+    async () => {
+      const dir = await mkdtemp(path.join(os.tmpdir(), "studio-speed-"));
+      const clip = path.join(dir, "source.mp4");
+      await runFfmpeg([
+        "-f",
+        "lavfi",
+        "-i",
+        "color=c=green:s=320x240:d=2",
+        "-f",
+        "lavfi",
+        "-i",
+        "sine=frequency=440:duration=2",
+        "-pix_fmt",
+        "yuv420p",
+        clip,
+      ]);
+      const { localRoot } = await import("@/lib/files");
+      const fastRel = `generated/speed-2-${Date.now()}.mp4`;
+      const slowRel = `generated/speed-125-${Date.now()}.mp4`;
+      const ranges = keepRanges({ start: 0, end: 2 }, []);
+      await cutVideo({ sourceAbs: clip, outputRel: fastRel, ranges, speed: 2 });
+      await cutVideo({ sourceAbs: clip, outputRel: slowRel, ranges, speed: 1.25 });
+      const fast = await clipDuration(path.join(localRoot(), fastRel));
+      const slow = await clipDuration(path.join(localRoot(), slowRel));
+      expect(fast).toBeLessThan(slow - 0.2);
+      await rm(path.join(localRoot(), fastRel), { force: true });
+      await rm(path.join(localRoot(), slowRel), { force: true });
+      await rm(dir, { recursive: true, force: true });
+    },
+    20_000,
+  );
 });

@@ -6,7 +6,7 @@ export const SPEED_CHOICES = [1, 1.25, 1.5, 2] as const;
 
 export function parseSpeed(value: unknown): number {
   const speed = Number(value ?? 1);
-  return SPEED_CHOICES.includes(speed as (typeof SPEED_CHOICES)[number]) ? speed : 1;
+  return SPEED_CHOICES.find((choice) => Math.abs(choice - speed) < 0.01) ?? 1;
 }
 
 export function parseDrops(value: unknown): TimeRange[] {

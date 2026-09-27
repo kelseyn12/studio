@@ -37,6 +37,21 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
   return NextResponse.json({ ok: true });
 }
 
+export async function PATCH(request: Request, context: { params: Promise<{ id: string }> }) {
+  const user = await readSession();
+  if (!user) return NextResponse.json({ error: "Auth required" }, { status: 401 });
+  const { id } = await context.params;
+  const clip = await prisma.repurposeClip.findUnique({ where: { id } });
+  if (!clip) return NextResponse.json({ error: "Missing clip" }, { status: 404 });
+  const body = (await request.json()) as { path?: unknown; x?: unknown; y?: unknown };
+  const pathValue = String(body.path || "");
+  const next = parseLogos(clip.logosJson).map((logo) =>
+    logo.path === pathValue ? { ...logo, x: Number(body.x), y: Number(body.y) } : logo,
+  );
+  await prisma.repurposeClip.update({ where: { id }, data: { logosJson: stringifyLogos(next) } });
+  return NextResponse.json({ ok: true });
+}
+
 export async function DELETE(request: Request, context: { params: Promise<{ id: string }> }) {
   const user = await readSession();
   if (!user) return NextResponse.json({ error: "Auth required" }, { status: 401 });

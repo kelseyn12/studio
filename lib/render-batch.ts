@@ -1,10 +1,12 @@
 import { stat } from "fs/promises";
 import path from "path";
 import { captionFilters, groupWords, parseCaptionWords, transcribeWords, type CaptionPhrase } from "@/lib/captions";
-import { assembleVideo, NO_TRIM, type ClipTrim } from "@/lib/ffmpeg";
+import { assembleVideo, NO_TRIM, writeThumb, type ClipTrim } from "@/lib/ffmpeg";
 import { parseLogos, writeLogoSheet } from "@/lib/hook-logos";
+import { parseHookLayout } from "@/lib/hook-layout";
 import { quietEnds } from "@/lib/trim";
 import { ensureLocal, localRoot, uploadLocalToR2 } from "@/lib/files";
+import { hasR2 } from "@/lib/r2";
 import { prisma } from "@/lib/prisma";
 import { pickTracks } from "@/lib/combinations";
 import { targetAccounts } from "@/lib/targets";
@@ -99,8 +101,15 @@ export async function renderBatch(input: {
           const musicPath = music ? await ensureLocal(music.path) : undefined;
           const logoFiles = parseLogos(hookClip?.logosJson);
           const logoPath = logoFiles.length
-            ? path.join(localRoot(), await writeLogoSheet(await Promise.all(logoFiles.map((logo) => ensureLocal(logo.path)))))
+            ? path.join(
+                localRoot(),
+                await writeLogoSheet(
+                  await Promise.all(logoFiles.map((logo) => ensureLocal(logo.path))),
+                  logoFiles,
+                ),
+              )
             : undefined;
+          const hookPos = parseHookLayout(hookClip?.hookLayout);
           const hookTag = (stripHighlight(hookLine) || hookClip?.filename || `hook ${mixNumber}`).slice(0, 36);
           const title = [
             batch.name,
@@ -131,7 +140,18 @@ export async function renderBatch(input: {
               hookList: batch.listCount,
               musicPath,
               logoPath,
+              hookX: hookPos?.x,
+              hookY: hookPos?.y,
             });
+            const coverAt = 0.4 + copy * 0.9;
+            const coverRel = `thumbs/${outputRel}.jpg`;
+            let coverPath = "";
+            try {
+              coverPath = await writeThumb(path.join(localRoot(), outputRel), coverRel, coverAt);
+              if (hasR2()) await uploadLocalToR2(coverPath, "image/jpeg");
+            } catch {
+              coverPath = "";
+            }
             files.push({
               kind: "GENERATED" as const,
               filename: `${title}${suffix}.mp4`,
@@ -140,6 +160,8 @@ export async function renderBatch(input: {
               size: (await stat(path.join(localRoot(), outputRel))).size,
               publicUrl: await uploadLocalToR2(outputRel, "video/mp4"),
               textStyle: look,
+              coverPath,
+              coverAt,
             });
           }
           const card = await prisma.card.create({

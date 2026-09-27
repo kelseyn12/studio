@@ -89,6 +89,8 @@ export function buildHookAss(input: {
   accentColor?: string;
   listCount?: number;
   font?: string;
+  x?: number;
+  y?: number;
 }): string {
   const look = LOOKS[input.style];
   const font = input.font ?? fontFamily();
@@ -96,12 +98,18 @@ export function buildHookAss(input: {
   const accent = input.accentColor || DEFAULT_ACCENT;
   const lines = wrapHookKeepingStars(input.text);
   const segments = lines.map(parseHighlight);
-  const marginV = Math.round(FRAME_H * look.top);
-  const events = [`Dialogue: 0,0:00:00.00,9:59:59.00,Head,,0,0,0,,${headline(segments, base, accent)}`];
+  const placed = Number.isFinite(input.x) && Number.isFinite(input.y);
+  const px = Math.round(FRAME_W * Math.min(0.92, Math.max(0.08, input.x ?? 0.5)));
+  const py = Math.round(FRAME_H * Math.min(0.88, Math.max(0.08, input.y ?? look.top)));
+  const marginV = placed ? 0 : Math.round(FRAME_H * look.top);
+  const head = placed
+    ? `{\\an5\\pos(${px},${py})}${headline(segments, base, accent)}`
+    : headline(segments, base, accent);
+  const events = [`Dialogue: 0,0:00:00.00,9:59:59.00,Head,,0,0,0,,${head}`];
   const listCount = Math.min(Math.max(Math.floor(input.listCount ?? 0), 0), LIST_MAX);
   if (listCount > 0) {
     const lineHeight = look.fontsize * look.lineGap;
-    const listTop = marginV + Math.round(lines.length * lineHeight) + 120;
+    const listTop = (placed ? py : marginV) + Math.round(lines.length * lineHeight) + 120;
     const gap = Math.min(140, Math.floor((FRAME_H * 0.62 - listTop) / listCount));
     for (let index = 0; index < listCount; index += 1) {
       events.push(`Dialogue: 0,0:00:00.00,9:59:59.00,List,,0,0,0,,{\\pos(90,${listTop + index * gap})}${index + 1}.`);

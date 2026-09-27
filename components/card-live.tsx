@@ -1,5 +1,6 @@
 import { approveCut, requestChanges, scheduleCard, sendForTouchUp } from "@/app/cards/[id]/actions";
 import { PaidButton } from "@/components/paid-button";
+import { CoverPick } from "@/components/cover-pick";
 import { QuickCut } from "@/components/quick-cut";
 import { toInputDateTime } from "@/lib/dates";
 import { formatMoney } from "@/lib/deals";
@@ -10,6 +11,7 @@ export function CardLive({
   card,
   accounts,
   edited,
+  canUndo,
 }: {
   card: {
     id: string;
@@ -32,7 +34,8 @@ export function CardLive({
     isActive: boolean;
     campaignId: string | null;
   }>;
-  edited?: { id: string; path: string; filename: string; publicUrl: string | null };
+  edited?: { id: string; path: string; filename: string; publicUrl: string | null; coverPath?: string };
+  canUndo?: boolean;
 }) {
   const dealTargets = dealAccounts(accounts, card.campaignId);
   if (!edited) {
@@ -58,8 +61,17 @@ export function CardLive({
               src={watchUrl(edited.path)}
               target="asset"
               id={edited.id}
+              canUndo={canUndo}
               note="Makes a new cut of this video. The newest cut is the one that ships."
             />
+          </div>
+        </details>
+      ) : null}
+      {card.status === "REVIEW" || (card.status === "READY" && !card.scheduledAt) ? (
+        <details className="rounded-card border border-line bg-panel px-5 py-4">
+          <summary className="cursor-pointer text-sm font-semibold">Cover frame — pick a different still for twins</summary>
+          <div className="mt-3">
+            <CoverPick id={edited.id} src={watchUrl(edited.path)} />
           </div>
         </details>
       ) : null}

@@ -3,7 +3,7 @@ export const MAX_HOOK_LOGOS = 4;
 export const CANVAS_W = 1080;
 export const CANVAS_H = 1920;
 
-export type HookLogo = { path: string; filename: string };
+export type HookLogo = { path: string; filename: string; x?: number; y?: number };
 export type LogoBox =
   | { kind: "logo"; index: number; x: number; y: number; w: number; h: number }
   | { kind: "mark"; text: string; x: number; y: number; size: number };
@@ -24,7 +24,16 @@ export function parseLogos(raw: string | null | undefined): HookLogo[] {
         const pathValue = String((item as HookLogo).path || "").replace(/\\/g, "/");
         const filename = String((item as HookLogo).filename || "").trim();
         if (!pathValue || pathValue.includes("..") || pathValue.startsWith("/")) return [];
-        return [{ path: pathValue, filename: filename || fileName(pathValue) }];
+        const x = Number((item as HookLogo).x);
+        const y = Number((item as HookLogo).y);
+        const placed = Number.isFinite(x) && Number.isFinite(y);
+        return [
+          {
+            path: pathValue,
+            filename: filename || fileName(pathValue),
+            ...(placed ? { x: Math.min(0.92, Math.max(0.08, x)), y: Math.min(0.88, Math.max(0.08, y)) } : {}),
+          },
+        ];
       })
       .slice(0, MAX_HOOK_LOGOS);
   } catch {
@@ -78,6 +87,30 @@ export function logoBoxes(count: number): LogoBox[] {
     x += size + gap;
     return box;
   });
+}
+
+export function placeLogoBoxes(boxes: LogoBox[], places: Array<{ x?: number; y?: number }>): LogoBox[] {
+  const next = boxes.map((box) => {
+    if (box.kind !== "logo") return { ...box };
+    const place = places[box.index];
+    if (place?.x == null || place?.y == null || !Number.isFinite(place.x) || !Number.isFinite(place.y)) return { ...box };
+    return {
+      ...box,
+      x: Math.round(place.x * CANVAS_W - box.w / 2),
+      y: Math.round(place.y * CANVAS_H - box.h / 2),
+    };
+  });
+  const logos = next.filter((box): box is Extract<LogoBox, { kind: "logo" }> => box.kind === "logo");
+  const marks = next.filter((box): box is Extract<LogoBox, { kind: "mark" }> => box.kind === "mark");
+  if (logos.length === 3 && marks.length === 2) {
+    const mid = (left: (typeof logos)[0], right: (typeof logos)[0], mark: (typeof marks)[0]) => {
+      mark.x = Math.round((left.x + left.w + right.x) / 2 - mark.size / 2);
+      mark.y = Math.round((left.y + right.y) / 2 + (left.h - mark.size) / 4);
+    };
+    mid(logos[0], logos[1], marks[0]);
+    mid(logos[1], logos[2], marks[1]);
+  }
+  return next;
 }
 
 export function logoOverlayFilter(baseLabel: string, logoLabel: string, outLabel: string): string {

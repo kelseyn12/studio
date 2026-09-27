@@ -189,6 +189,8 @@ model Asset {
   size      Int
   publicUrl String    @default("")
   textStyle String    @default("")
+  coverPath String    @default("")
+  coverAt   Float     @default(0)
   createdAt DateTime  @default(now())
 }
 
@@ -275,6 +277,8 @@ model RepurposeClip {
   size     Int            @default(0)
   captionsJson String     @default("")
   logosJson    String     @default("")
+  hookLayout   String     @default("")
+  cutUndo      String     @default("")
 }
 
 model RepurposeTrack {

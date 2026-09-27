@@ -66,7 +66,8 @@ export async function cutVideo(input: {
     chains.push(`${parts}concat=n=${count}:v=1:a=0[cv]`);
   }
   if (speed !== 1) {
-    chains.push(`[cv]setpts=PTS/${speed}[outv]`);
+    // fps after setpts so 2× is actually shorter than 1.25× (fps-then-setpts left players at 30fps).
+    chains.push(`[cv]setpts=PTS/${speed},fps=30[outv]`);
     if (hasAudio) chains.push(`[ca]atempo=${speed}[outa]`);
   }
 
@@ -75,6 +76,7 @@ export async function cutVideo(input: {
   args.push("-filter_complex", chains.join(";"));
   args.push("-map", video);
   if (hasAudio) args.push("-map", audio);
+  if (speed !== 1) args.push("-r", "30");
   args.push(...encodeArgs(outputAbs));
   await runFfmpeg(args);
   return input.outputRel;

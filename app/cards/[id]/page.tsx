@@ -73,7 +73,14 @@ export default async function CardPage({
             desk={desk}
           />
         ) : null}
-        {stage === "live" ? <CardLive card={card} accounts={accounts} edited={edited} /> : null}
+        {stage === "live" ? (
+          <CardLive
+            card={card}
+            accounts={accounts}
+            edited={edited}
+            canUndo={card.assets.some((asset) => asset.kind === "EDITED" && asset.filename.startsWith("cut-"))}
+          />
+        ) : null}
         <div className="mt-6 space-y-2">
           {card.assets.map((asset) => (
             <MediaRow

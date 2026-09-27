@@ -110,10 +110,11 @@ export function escapeDrawText(text: string): string {
     .trim();
 }
 
-export async function writeThumb(inputAbs: string, outputRel: string): Promise<string> {
+export async function writeThumb(inputAbs: string, outputRel: string, at = 0): Promise<string> {
   const outputAbs = path.join(localRoot(), outputRel);
   await mkdir(path.dirname(outputAbs), { recursive: true });
-  await runFfmpeg(["-i", inputAbs, "-vframes", "1", "-q:v", "3", outputAbs]);
+  const seek = at > 0.05 ? ["-ss", at.toFixed(2)] : [];
+  await runFfmpeg([...seek, "-i", inputAbs, "-vframes", "1", "-q:v", "3", outputAbs]);
   return outputRel;
 }
 
@@ -133,13 +134,13 @@ function videoFilter(input: {
   const parts = [
     `scale=${width}:${height}:force_original_aspect_ratio=increase:flags=lanczos`,
     "crop=1080:1920",
-    "fps=30",
     "setsar=1",
   ];
   if (input.mirror) parts.push("hflip");
   // Spoken captions go in before the speed change so their timing stays true.
   if (input.captionFilters?.length) parts.push(...input.captionFilters);
   if (input.speed !== 1) parts.push(`setpts=PTS/${input.speed}`);
+  parts.push("fps=30");
   if (input.saturation !== 1 || input.contrast !== 1 || input.hue !== 0) {
     parts.push(`eq=saturation=${input.saturation}:contrast=${input.contrast}`);
     if (input.hue !== 0) parts.push(`hue=h=${input.hue}`);
@@ -174,6 +175,8 @@ export async function assembleVideo(input: {
   hookList?: number;
   musicPath?: string;
   logoPath?: string;
+  hookX?: number;
+  hookY?: number;
 }): Promise<string> {
   await mkdir(path.join(localRoot(), "generated"), { recursive: true });
   const outputRel = path.join("generated", input.outputName);
@@ -206,6 +209,8 @@ export async function assembleVideo(input: {
         baseColor: input.hookColor,
         accentColor: input.accentColor,
         listCount: input.hookList,
+        x: input.hookX,
+        y: input.hookY,
       })
     : undefined;
   for (let index = 0; index < n; index += 1) {

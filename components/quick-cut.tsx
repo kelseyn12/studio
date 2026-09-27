@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { SPEED_CHOICES, isPlayableCut, keepRanges, keptSeconds } from "@/lib/cut-math";
 
@@ -11,11 +11,13 @@ export function QuickCut({
   target,
   id,
   note,
+  canUndo,
 }: {
   src: string;
   target: "clip" | "asset";
   id: string;
   note?: string;
+  canUndo?: boolean;
 }) {
   const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -27,6 +29,10 @@ export function QuickCut({
   const [speed, setSpeed] = useState(1);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (videoRef.current) videoRef.current.playbackRate = speed;
+  }, [speed]);
 
   const playhead = () => videoRef.current?.currentTime ?? 0;
   const ranges = keepRanges({ start, end }, drops);
@@ -70,6 +76,9 @@ export function QuickCut({
         playsInline
         preload="metadata"
         className="w-full rounded-xl bg-ink"
+        onPlay={() => {
+          if (videoRef.current) videoRef.current.playbackRate = speed;
+        }}
         onLoadedMetadata={(event) => {
           const total = event.currentTarget.duration || 0;
           setDuration(total);
@@ -153,14 +162,41 @@ export function QuickCut({
       </p>
       {note ? <p className="text-xs text-mute">{note}</p> : null}
       {error ? <p className="text-xs text-review">{error}</p> : null}
-      <button
-        type="button"
-        onClick={save}
-        disabled={!canSave}
-        className="w-full rounded-xl bg-sun px-3 py-2 text-sm font-semibold text-ink disabled:opacity-40"
-      >
-        {busy ? "Cutting…" : "Save cut"}
-      </button>
+      <div className="flex gap-2">
+        {canUndo ? (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={async () => {
+              setBusy(true);
+              setError("");
+              const response = await fetch("/api/trim", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ target, id, undo: true }),
+              });
+              setBusy(false);
+              if (!response.ok) {
+                const body = await response.json().catch(() => ({}));
+                setError(String(body.error || "Nothing to undo"));
+                return;
+              }
+              router.refresh();
+            }}
+            className="w-full rounded-xl border border-line px-3 py-2 text-sm text-mute"
+          >
+            Undo last cut
+          </button>
+        ) : null}
+        <button
+          type="button"
+          onClick={save}
+          disabled={!canSave}
+          className="w-full rounded-xl bg-sun px-3 py-2 text-sm font-semibold text-ink disabled:opacity-40"
+        >
+          {busy ? "Cutting…" : "Save cut"}
+        </button>
+      </div>
     </div>
   );
 }

@@ -77,4 +77,6 @@
 - `QuickCut` — `components/quick-cut.tsx` — Start here / End here, Cut from here / Cut to here (drop a middle), speed pills, Save cut. On Multiply clip tiles (replaces the clip) and on Live for finished videos (newest cut ships).
 - `parseLogos` / `logoBoxes` / `writeLogoSheet` — `lib/hook-logos-math.ts` / `lib/hook-logos.ts` — hook logo files (max 4). Three files layout as A + B = C. Sheet overlays the first 2.5s of the hook. Used by ClipTile and `renderBatch`. Tested in `lib/hook-logos.test.ts`.
 - `HookLogos` — `components/hook-logos.tsx` — Add logo on a hook clip.
+- `HookStage` — `components/hook-stage.tsx` — type words on the hook and drag them / logos. Saves `hookLayout` + logo x/y.
+- `CoverPick` — `components/cover-pick.tsx` — pick a still on Live. Copies also get staggered cover times on generate.
 - `addLink` / `deleteLink` — `app/dms/actions.ts` — tracked short links for auto-DMs. Public redirect at `/l/[slug]` counts every click.

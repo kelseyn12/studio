@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { HookLogos } from "@/components/hook-logos";
+import { HookStage } from "@/components/hook-stage";
 import { QuickCut } from "@/components/quick-cut";
 import { publicFileUrl } from "@/lib/urls";
+import type { DrawnStyle } from "@/lib/text-style";
 
 export function ClipTile({
   id,
@@ -14,7 +16,10 @@ export function ClipTile({
   hookText,
   postCaption,
   logosJson,
+  hookLayout,
+  cutUndo,
   showHook,
+  look,
 }: {
   id: string;
   filename: string;
@@ -23,28 +28,46 @@ export function ClipTile({
   hookText: string;
   postCaption?: string;
   logosJson?: string;
+  hookLayout?: string;
+  cutUndo?: string;
   showHook: boolean;
+  look?: DrawnStyle;
 }) {
   const router = useRouter();
-  const [cutting, setCutting] = useState(false);
+  const [mode, setMode] = useState<"idle" | "cut" | "place">("idle");
 
   async function remove() {
     await fetch(`/api/repurpose/clips/${id}`, { method: "DELETE" });
     router.refresh();
   }
 
-  async function save(field: "hookText" | "postCaption", value: string) {
+  async function saveCaption(value: string) {
     await fetch(`/api/repurpose/clips/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ [field]: value }),
+      body: JSON.stringify({ postCaption: value }),
     });
   }
 
   return (
-    <div className={`${cutting ? "w-64" : showHook ? "w-52" : "w-32"} shrink-0`}>
-      {cutting ? (
-        <QuickCut src={publicFileUrl(path)} target="clip" id={id} note="Every video made from this clip uses the cut." />
+    <div className={`${mode !== "idle" ? "w-64" : showHook ? "w-52" : "w-32"} shrink-0`}>
+      {mode === "cut" ? (
+        <QuickCut
+          src={publicFileUrl(path)}
+          target="clip"
+          id={id}
+          canUndo={Boolean(cutUndo)}
+          note="Every video made from this clip uses the cut."
+        />
+      ) : mode === "place" ? (
+        <HookStage
+          id={id}
+          src={publicFileUrl(path)}
+          hookText={hookText}
+          hookLayout={hookLayout ?? ""}
+          logosJson={logosJson ?? ""}
+          look={look ?? "tiktok"}
+        />
       ) : (
         <div className="relative overflow-hidden rounded-xl bg-ink">
           {thumbPath ? (
@@ -58,26 +81,39 @@ export function ClipTile({
           </button>
         </div>
       )}
-      <button
-        type="button"
-        onClick={() => setCutting(!cutting)}
-        className="mt-2 w-full rounded-lg border border-line px-2 py-1 text-xs text-mute"
-      >
-        {cutting ? "Done cutting" : "Cut"}
-      </button>
+      {showHook ? (
+        <div className="mt-2 flex gap-1">
+          <button
+            type="button"
+            onClick={() => setMode(mode === "cut" ? "idle" : "cut")}
+            className="flex-1 rounded-lg border border-line px-2 py-1 text-xs text-mute"
+          >
+            {mode === "cut" ? "Done" : "Cut"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode(mode === "place" ? "idle" : "place")}
+            className="flex-1 rounded-lg border border-line px-2 py-1 text-xs text-mute"
+          >
+            {mode === "place" ? "Done" : "Words"}
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setMode(mode === "cut" ? "idle" : "cut")}
+          className="mt-2 w-full rounded-lg border border-line px-2 py-1 text-xs text-mute"
+        >
+          {mode === "cut" ? "Done cutting" : "Cut"}
+        </button>
+      )}
       {showHook ? (
         <>
-          <input
-            defaultValue={hookText}
-            placeholder="Words on this clip"
-            className="field mt-2 px-2 py-1 text-xs"
-            onBlur={(event) => save("hookText", event.target.value)}
-          />
           <textarea
             defaultValue={postCaption}
             placeholder="Caption that posts under videos from this hook"
             className="field mt-2 min-h-16 px-2 py-1 text-xs"
-            onBlur={(event) => save("postCaption", event.target.value)}
+            onBlur={(event) => saveCaption(event.target.value)}
           />
           <HookLogos id={id} logosJson={logosJson ?? ""} />
         </>

@@ -48,6 +48,7 @@ describe("buildHookAss", () => {
     });
     expect(track).toContain("{\\c&H5CFF5C&}WORST{\\c&HFFFFFF&} birthday months");
     expect(track.match(/^Dialogue: .*,List,/gm)).toHaveLength(5);
+    expect(buildHookAss({ text: "Hello", style: "tiktok", x: 0.5, y: 0.3 })).toContain("\\pos(");
     expect(track).toContain("1.");
     expect(track).toContain("5.");
     expect(track).toContain("Style: Head,Arial,72");

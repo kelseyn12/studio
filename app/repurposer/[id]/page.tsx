@@ -90,10 +90,11 @@ export default async function BatchPage({
             slot="HOOK"
             title="Hooks"
             meta={`${hooks.length} options · first clip · one picked per video`}
-            hint="Openings. Words on a clip match that take. Cut, speed, and drop logos on the hook — three logos become A + B = $. Then generate and schedule."
+            hint="Openings. Tap Words to type on the clip and drag. Cut, speed, logos. Copies of a mix get different speed/hue and a different cover frame."
             clips={hooks}
             showHook
             hookText={winningHook}
+            look={batch.textStyle === "instagram" ? "instagram" : batch.textStyle === "plain" ? "plain" : "tiktok"}
           />
           <SlotBlock
             id={batch.id}
@@ -237,6 +238,7 @@ function SlotBlock({
   clips,
   showHook,
   hookText,
+  look,
 }: {
   id: string;
   slot: string;
@@ -245,6 +247,7 @@ function SlotBlock({
   hint: string;
   showHook?: boolean;
   hookText?: string;
+  look?: "tiktok" | "instagram" | "plain";
   clips: Array<{
     id: string;
     filename: string;
@@ -253,6 +256,8 @@ function SlotBlock({
     hookText: string;
     postCaption?: string;
     logosJson?: string;
+    hookLayout?: string;
+    cutUndo?: string;
   }>;
 }) {
   return (
@@ -268,7 +273,7 @@ function SlotBlock({
             Nothing in this row yet.
           </p>
         ) : (
-          clips.map((clip) => <ClipTile key={clip.id} {...clip} showHook={Boolean(showHook)} />)
+          clips.map((clip) => <ClipTile key={clip.id} {...clip} showHook={Boolean(showHook)} look={look} />)
         )}
       </div>
       <DropZone

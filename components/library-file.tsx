@@ -19,6 +19,7 @@ export function LibraryFile({
     mime: string;
     size: number;
     publicUrl: string | null;
+    coverPath?: string;
     card: { id: string; title: string; status: PipelineStatus; campaign: { name: string } | null };
   };
   liveLabel?: string;
@@ -31,7 +32,12 @@ export function LibraryFile({
     <article className="rounded-card border border-line bg-panel p-4">
       {pick ? <div className="mb-3">{pick}</div> : null}
       {video ? (
-        <video controls src={href} className="mb-3 aspect-[9/16] max-h-80 w-full rounded-xl bg-ink object-cover" />
+        <video
+          controls
+          src={href}
+          poster={asset.coverPath ? watchUrl(asset.coverPath) : undefined}
+          className="mb-3 aspect-[9/16] max-h-80 w-full rounded-xl bg-ink object-cover"
+        />
       ) : null}
       {audio ? <audio controls src={href} className="mb-3 w-full" /> : null}
       <div className="flex items-start justify-between gap-2">

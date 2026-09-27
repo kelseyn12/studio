@@ -169,3 +169,6 @@
 
 - [X] Logos on the first beat of a hook
   Drop PNG/JPG on a hook clip. They show for 2.5s. Three files layout as A + B = C. Generate burns them in.
+
+- [X] Place words on the hook, undo cuts, fix 2×, pick covers
+  Words button types on the clip and drags (TT/IG look still burns through libass). Logos drag too. Undo last cut. 2× is actually faster than 1.25×. Copies keep speed/hue; each copy and Live can pick a cover frame.

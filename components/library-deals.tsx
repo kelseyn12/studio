@@ -11,6 +11,7 @@ type FinishedAsset = {
   mime: string;
   size: number;
   publicUrl: string | null;
+  coverPath?: string;
   card: { id: string; title: string; status: PipelineStatus; campaign: { name: string } | null };
 };
 
