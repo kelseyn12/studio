@@ -79,7 +79,7 @@
 - `cutVideo` — `lib/cut.ts` — stitches kept ranges and applies speed (`setpts` + `atempo`). Used by `/api/trim`.
 - `QuickCut` — `components/quick-cut.tsx` — Keep from here / Keep until here chop the ends. Drop from here / Drop to here throws away a middle. Save cut plays the short clip. Trim again goes back to the recording.
 - `parseLogoItems` / `parseLogos` / `boxesFromItems` / `defaultLogoPos` / `alignLogoRow` / `snapLogoPos` / `itemScale` / `writeLogoSheet` — `lib/hook-logos-math.ts` / `lib/hook-logos.ts` — files plus `+` `=` emoji / short text. `scale` 0.5–2.5 (Bigger / Smaller / Match type on Words). Align evens a row; drag snaps to a neighbor. Unused items line up at `LOGO_ROW_Y` (0.15). First 4s. Tested in `lib/hook-logos.test.ts`.
-- `HookLogos` — `components/hook-logos.tsx` — Add logo, +, =, 🔥, or a typed chip. Headline under the formula is Words.
+- `HookLogos` — `components/hook-logos.tsx` — Add logo, +, =, 🔥, or a typed chip. Headline under the formula is Words. The closed tile keeps the headline, the list lines, and those marks on the picture.
 - `CutTrack` — `components/cut-track.tsx` — yellow ends = the part you keep. Click scrubs. Dark = a middle you dropped.
 - `listStack` / `sharedListPlan` / `lookPaint` / `wordBoxClass` / `LOOK_METRICS` — `lib/list-layout.ts` — native TT 82 / IG 104. Unboxed stroke on a 1080 frame is 5px TikTok and 4px Instagram. TikTok box is one card. Instagram has no plate.
 - `roundedPlatePath` / `plateSize` / `measureTextPx` — `lib/ass-plate.ts`, `lib/font-measure.ts` — the finished TikTok card is a rounded drawing (radius 14, pad 18×8 on 1080). Text width comes from TikTok Sans Bold at the text optical size, which matches the app. The 36pt display cut was tighter.

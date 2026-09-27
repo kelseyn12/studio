@@ -23,6 +23,8 @@ export function HookStage({
   listCount = 0,
   listFromHook,
   onText,
+  onLayout,
+  onLogos,
 }: {
   id: string;
   src: string;
@@ -34,6 +36,8 @@ export function HookStage({
   listCount?: number;
   listFromHook?: { headline: string; x: number; y: number; places?: HookPos["places"] };
   onText?: (value: string) => void;
+  onLayout?: (value: string) => void;
+  onLogos?: (items: ReturnType<typeof parseLogoItems>) => void;
 }) {
   const stageRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -50,6 +54,10 @@ export function HookStage({
   const [picked, setPicked] = useState<string | null>(null);
   const [guides, setGuides] = useState(true);
   const logos = parseLogoItems(logosJson);
+  const onLayoutRef = useRef(onLayout);
+  const onLogosRef = useRef(onLogos);
+  onLayoutRef.current = onLayout;
+  onLogosRef.current = onLogos;
 
   function itemKey(item: (typeof logos)[number]): string {
     return isLogoFile(item) ? item.path : item.id;
@@ -107,6 +115,21 @@ export function HookStage({
       keepalive: true,
     });
   }
+
+  useEffect(() => {
+    const items = list.split("\n").map((line) => line.trim()).filter(Boolean);
+    onLayoutRef.current?.(stringifyHookLayout({ ...pos, list: items, listAt: (pos.listAt ?? []).slice(0, items.length) }));
+  }, [list, pos]);
+
+  useEffect(() => {
+    onLogosRef.current?.(
+      logos.map((item, index) => {
+        const at = places[itemKey(item)] ?? (item.x != null && item.y != null ? { x: item.x, y: item.y } : defaultLogoPos(index, logos.length));
+        const scale = scales[itemKey(item)] ?? itemScale(item);
+        return { ...item, x: at.x, y: at.y, scale };
+      }),
+    );
+  }, [logosJson, places, scales]);
 
   useEffect(() => {
     return () => {
