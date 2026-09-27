@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-09-27 — Done on Words keeps the line on the tile. Reopening Words was reloading the old sentence from the first page load.
 - 2026-09-27 — Cut preview plays the yellow keep only. It starts at the yellow start, skips each dark band, and stops at the yellow end.
 - 2026-09-27 — Save cut plays the short clip instead of jumping back to the full recording. Leaving Words writes the letters, including capitals, before the cut screen opens.
 - 2026-09-27 — The words on the video are the letters you type, including capitals. The old box painted a copy underneath and hid the keys.

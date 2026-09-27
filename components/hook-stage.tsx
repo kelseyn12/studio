@@ -22,6 +22,7 @@ export function HookStage({
   slot,
   listCount = 0,
   listFromHook,
+  onText,
 }: {
   id: string;
   src: string;
@@ -32,6 +33,7 @@ export function HookStage({
   slot?: string;
   listCount?: number;
   listFromHook?: { headline: string; x: number; y: number; places?: HookPos["places"] };
+  onText?: (value: string) => void;
 }) {
   const stageRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -230,6 +232,7 @@ export function HookStage({
             onChange={(event) => {
               draft.current.text = event.target.value;
               setText(event.target.value);
+              onText?.(event.target.value);
             }}
             onBlur={(event) => save(draft.current.pos, event.target.value, draft.current.list)}
             onPointerDown={(event) => event.stopPropagation()}

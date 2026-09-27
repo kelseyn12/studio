@@ -1,15 +1,17 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { HookLogos } from "@/components/hook-logos";
 import { SpokenFix } from "@/components/spoken-fix";
 import { HookStage } from "@/components/hook-stage";
 import { QuickCut } from "@/components/quick-cut";
 import { spokenOnClip } from "@/lib/captions-math";
-import { cutPreviewPath } from "@/lib/hook-layout";
+import { LOOK_FONT_CLASS } from "@/lib/hook-fonts";
+import { boxFor, cutPreviewPath, hookDefaultPos, parseHookLayout, posFor } from "@/lib/hook-layout";
+import { boxIsWhite, isBoxed, wordBoxClass } from "@/lib/list-layout";
+import { wrapHook, type DrawnStyle } from "@/lib/text-style";
 import { publicFileUrl } from "@/lib/urls";
-import type { DrawnStyle } from "@/lib/text-style";
 
 export function ClipTile({
   id,
@@ -46,7 +48,17 @@ export function ClipTile({
 }) {
   const router = useRouter();
   const [mode, setMode] = useState<"idle" | "cut" | "place">("idle");
+  const [words, setWords] = useState(hookText);
+  const editing = useRef(false);
   const captionRef = useRef(postCaption ?? "");
+  const previewLook = look ?? "tiktok";
+  const at = posFor(parseHookLayout(hookLayout ?? "") ?? hookDefaultPos(previewLook), previewLook);
+  const plate = boxFor(parseHookLayout(hookLayout ?? "") ?? hookDefaultPos(previewLook), previewLook);
+  const lines = wrapHook(words);
+
+  useEffect(() => {
+    if (!editing.current) setWords(hookText);
+  }, [hookText]);
 
   async function remove() {
     await fetch(`/api/repurpose/clips/${id}`, { method: "DELETE" });
@@ -75,7 +87,8 @@ export function ClipTile({
         <HookStage
           id={id}
           src={publicFileUrl(path)}
-          hookText={hookText}
+          hookText={words}
+          onText={setWords}
           hookLayout={hookLayout ?? ""}
           logosJson={logosJson ?? ""}
           look={look ?? "tiktok"}
@@ -91,9 +104,19 @@ export function ClipTile({
           ) : (
             <div className="flex aspect-[9/16] items-center justify-center text-xs text-mute">{filename}</div>
           )}
-          <button type="button" onClick={remove} className="absolute right-1 top-1 rounded-full bg-ink/80 px-2 text-xs">
+          <button type="button" onClick={remove} className="absolute right-1 top-1 z-20 rounded-full bg-ink/80 px-2 text-xs">
             ×
           </button>
+          {lines.length ? (
+            <div
+              className={`pointer-events-none absolute z-10 w-max max-w-[94%] -translate-x-1/2 -translate-y-1/2 text-center text-[11px] font-bold leading-snug ${LOOK_FONT_CLASS[previewLook]} ${isBoxed(plate) ? `${boxIsWhite(plate) ? "text-black" : "text-white"} ${wordBoxClass(previewLook, plate)}` : "text-white stroke-tt"}`}
+              style={{ left: `${at.x * 100}%`, top: `${at.y * 100}%` }}
+            >
+              {lines.map((line, index) => (
+                <div key={`${index}-${line}`}>{line}</div>
+              ))}
+            </div>
+          ) : null}
         </div>
       )}
       <div className="mt-2 flex gap-1">
@@ -112,6 +135,7 @@ export function ClipTile({
           type="button"
           onClick={() => {
             void saveCaption(captionRef.current);
+            editing.current = mode !== "place";
             setMode(mode === "place" ? "idle" : "place");
           }}
           className="flex-1 rounded-lg border border-line px-2 py-1 text-xs text-mute"
