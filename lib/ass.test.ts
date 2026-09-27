@@ -69,6 +69,11 @@ describe("buildHookAss", () => {
     expect(track).toContain("Style: Head,Arial,82");
   });
 
+  it("uses TikTok Sans and Inter Tight unless you pass a font", () => {
+    expect(buildHookAss({ text: "hello", style: "tiktok" })).toContain("Style: Head,TikTok Sans,82,");
+    expect(buildHookAss({ text: "hello", style: "instagram" })).toContain("Style: Head,Inter Tight,76,");
+  });
+
   it("gives Instagram Reels Classic and TikTok Classic their own stroke", () => {
     const instagram = buildHookAss({ text: "hello there", style: "instagram", font: "Arial" });
     const tiktok = buildHookAss({ text: "hello there", style: "tiktok", font: "Arial" });

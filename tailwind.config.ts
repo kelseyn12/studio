@@ -23,6 +23,8 @@ const config: Config = {
       },
       fontFamily: {
         sans: ["var(--font-geist)", "ui-sans-serif", "system-ui"],
+        tiktok: ["var(--font-tiktok)", "ui-sans-serif", "system-ui"],
+        ig: ["var(--font-ig)", "ui-sans-serif", "system-ui"],
       },
       borderRadius: {
         card: "1.25rem",

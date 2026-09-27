@@ -2,6 +2,7 @@ import { mkdir, writeFile } from "fs/promises";
 import os from "os";
 import path from "path";
 import { randomUUID } from "crypto";
+import { hookFontFamily, hookFontsDir } from "@/lib/hook-font-files";
 import { wrapHook, type DrawnStyle } from "@/lib/text-style";
 import { clampListCount, FRAME_H, FRAME_W, listStack, LOOK_METRICS, lookPaint, type ListStack } from "@/lib/list-layout";
 import { LIST_MAX } from "@/lib/variations";
@@ -55,13 +56,12 @@ export function escapeAssText(text: string): string {
   return text.replace(/\\/g, "\\\\").replace(/\{/g, "(").replace(/\}/g, ")").replace(/\n/g, " ");
 }
 
-export function fontFamily(): string {
-  return process.env.HOOK_FONT_FAMILY || (process.platform === "darwin" ? "Arial" : "DejaVu Sans");
+export function fontFamily(style: DrawnStyle = "plain"): string {
+  return hookFontFamily(style);
 }
 
-export function fontsDir(): string {
-  if (process.env.HOOK_FONT) return path.dirname(process.env.HOOK_FONT);
-  return process.platform === "darwin" ? "/System/Library/Fonts/Supplemental" : "/usr/share/fonts/truetype/dejavu";
+export function fontsDir(style: DrawnStyle = "plain"): string {
+  return hookFontsDir(style);
 }
 
 function headline(segments: Segment[][], base: string, accent: string): string {
@@ -103,7 +103,7 @@ export function buildHookAss(input: {
 }): string {
   const look = LOOK_METRICS[input.style];
   const paint = lookPaint(input.style, input.box);
-  const font = input.font ?? fontFamily();
+  const font = input.font ?? hookFontFamily(input.style);
   const base = input.baseColor || "white";
   const accent = input.accentColor || DEFAULT_ACCENT;
   const lines = wrapHookKeepingStars(input.text);
@@ -198,7 +198,7 @@ export async function writeHookAss(input: Parameters<typeof buildHookAss>[0]): P
   await mkdir(dir, { recursive: true });
   const file = path.join(dir, `${randomUUID()}.ass`);
   await writeFile(file, buildHookAss(input), "utf8");
-  return `ass=filename=${escapeFilterPath(file)}:fontsdir=${escapeFilterPath(fontsDir())}`;
+  return `ass=filename=${escapeFilterPath(file)}:fontsdir=${escapeFilterPath(hookFontsDir(input.style))}`;
 }
 
 export function escapeFilterPath(value: string): string {

@@ -1,6 +1,7 @@
 import { readFile } from "fs/promises";
 import path from "path";
-import { escapeDrawText, HOOK_FONT } from "@/lib/ffmpeg";
+import { hookFontFile } from "@/lib/hook-font-files";
+import { escapeDrawText } from "@/lib/ffmpeg";
 import type { DrawnStyle } from "@/lib/text-style";
 
 export type CaptionWord = { word: string; start: number; end: number };
@@ -68,7 +69,7 @@ export function captionFilters(phrases: CaptionPhrase[], trimStart: number, styl
     .filter((phrase) => phrase.end > phrase.start && phrase.text.length > 0)
     .map((phrase) =>
       [
-        `drawtext=fontfile=${HOOK_FONT}`,
+        `drawtext=fontfile='${hookFontFile(style).replace(/'/g, "\\'")}'`,
         `text='${phrase.text}'`,
         ...look,
         "x=(w-text_w)/2",

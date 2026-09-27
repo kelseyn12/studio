@@ -47,7 +47,9 @@ describe("captionFilters", () => {
     const instagram = captionFilters([{ text: "hello", start: 0, end: 1 }], 0, "instagram")[0];
     const tiktok = captionFilters([{ text: "hello", start: 0, end: 1 }], 0, "tiktok")[0];
     expect(instagram).toContain("box=1");
+    expect(instagram).toContain("InterTight-SemiBold.ttf");
     expect(tiktok).toContain("shadowx=3");
+    expect(tiktok).toContain("TikTokSans-Bold.ttf");
     expect(tiktok).not.toContain("box=1");
   });
 });

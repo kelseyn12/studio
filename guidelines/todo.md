@@ -208,3 +208,6 @@
 
 - [X] Per-line native boxes + Match type
   Box was one wide slab on the textarea. Preview is now a hugging chip per wrap (TT pill, IG block). Burn-in is one ASS plate per line. Match type sizes a logo to the look; Bigger/Smaller still nudge.
+
+- [X] Native faces on Words
+  TT burns and previews in TikTok Sans (OFL). IG uses Inter Tight — Instagram Sans is not licensed to bundle. Spoken captions use the same files.

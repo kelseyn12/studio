@@ -8,6 +8,7 @@ import { hookDefaultPos, parseHookLayout, stringifyHookLayout, type HookPos } fr
 import { LogoScaleBar } from "@/components/logo-scale-bar";
 import { WordChips } from "@/components/word-chips";
 import { ALIGN_SNAP, clampLogoScale, defaultLogoPos, isLogoFile, itemScale, LOGO_SCALE_STEP, matchTypeScale, parseLogoItems, previewLogoPx, sharedAxes, snapLogoPos } from "@/lib/hook-logos-math";
+import { LOOK_FONT_CLASS } from "@/lib/hook-fonts";
 import { listRows, listStack, wordBoxClass } from "@/lib/list-layout";
 import { publicFileUrl } from "@/lib/urls";
 import { wrapHook, type DrawnStyle } from "@/lib/text-style";
@@ -139,7 +140,7 @@ export function HookStage({
     y: onHook ? pos.y : listFromHook.y,
     count,
   });
-  const typeSize = preview === "instagram" ? "text-[17px] font-semibold leading-tight" : "text-[20px] font-bold leading-tight";
+  const typeSize = `${LOOK_FONT_CLASS[preview]} ${preview === "instagram" ? "text-[17px] font-semibold leading-tight" : "text-[20px] font-bold leading-tight"}`;
   const stroke = pos.box
     ? ""
     : preview === "instagram"
