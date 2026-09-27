@@ -1,8 +1,11 @@
 import { mkdir } from "fs/promises";
 import path from "path";
 import { spawn } from "child_process";
+import { MIN_CLIP_SECONDS } from "@/lib/cut-math";
 import { ffmpegBin, ffprobeBin, NO_TRIM, runCommand, runFfmpeg, type ClipTrim } from "@/lib/ffmpeg";
 import { localRoot } from "@/lib/files";
+
+export { MIN_CLIP_SECONDS };
 
 /** Cutting clips: hand trims from the Quick cut tool and dead-air trims found with silencedetect. */
 
@@ -29,9 +32,6 @@ const SILENCE_MIN_SECONDS = 0.3;
 const SILENCE_EDGE_SECONDS = 0.1;
 /** Breathing room kept around the cut (seconds). */
 const TRIM_PAD_SECONDS = 0.05;
-/** Never trim a clip below this length (seconds). */
-export const MIN_CLIP_SECONDS = 0.5;
-
 /** A hand cut must keep at least MIN_CLIP_SECONDS of video. */
 export function isValidCut(start: number, end: number): boolean {
   return Number.isFinite(start) && Number.isFinite(end) && start >= 0 && end - start >= MIN_CLIP_SECONDS;

@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-09-26 — Quick cut can drop dragging middle sections and speed the leftover (1.25 / 1.5 / 2×). Keep-range math lives in lib/cut-math.ts (browser-safe); ffmpeg stitch/speed in lib/cut.ts. `/api/trim` now takes `drops` + `speed`.
 - 2026-09-26 — Select all + delete selected on Library Finished and Multiply outputs. Shared `dropCards` / `uniqueIds` so two looks of the same video count as one delete. Single-video delete uses the same path.
 - 2026-09-26 — Output titles include the hook line so copy 1 and copy 2 of the same mix are not mistaken for different hooks.
 - 2026-09-26 — Hook clips store `postCaption` (the text that posts under videos from that hook); batch caption is the fallback. Spoken captions take the file's look (TikTok shadow vs Instagram box) inside the per-look render.

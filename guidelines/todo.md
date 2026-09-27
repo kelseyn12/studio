@@ -163,3 +163,6 @@
 
 - [X] Select all + delete generated videos
   Library Finished and the Multiply output list have Select all / Delete selected. One click marks every video; delete removes the cards, files, and batch rows.
+
+- [X] Cut dragging parts and speed a video in Studio
+  Live (and Multiply clip tiles) can drop one or more middle sections and speed 1.25× / 1.5× / 2×. Save cut writes a new file; schedule it on Live — no editor or download.

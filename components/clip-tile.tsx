@@ -60,7 +60,7 @@ export function ClipTile({
         onClick={() => setCutting(!cutting)}
         className="mt-2 w-full rounded-lg border border-line px-2 py-1 text-xs text-mute"
       >
-        {cutting ? "Done cutting" : "Trim"}
+        {cutting ? "Done cutting" : "Cut"}
       </button>
       {showHook ? (
         <>

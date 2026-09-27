@@ -1,8 +1,9 @@
 import { stat } from "fs/promises";
 import path from "path";
 import { NextResponse } from "next/server";
+import { cutVideo } from "@/lib/cut";
+import { isPlayableCut, keepRanges, parseDrops, parseSpeed } from "@/lib/cut-math";
 import { writeThumb } from "@/lib/ffmpeg";
-import { isValidCut, trimVideo } from "@/lib/trim";
 import { deleteUpload, ensureLocal, localRoot, uploadLocalToR2 } from "@/lib/files";
 import { hasR2 } from "@/lib/r2";
 import { prisma } from "@/lib/prisma";
@@ -23,8 +24,10 @@ export async function POST(request: Request) {
   const id = String(body?.id || "");
   const start = Number(body?.start);
   const end = Number(body?.end);
-  if (!id || !isValidCut(start, end)) {
-    return NextResponse.json({ error: "Pick a start and end at least half a second apart" }, { status: 400 });
+  const ranges = keepRanges({ start, end }, parseDrops(body?.drops));
+  const speed = parseSpeed(body?.speed);
+  if (!id || !isPlayableCut(ranges)) {
+    return NextResponse.json({ error: "Keep at least half a second after the cuts" }, { status: 400 });
   }
 
   try {
@@ -33,7 +36,7 @@ export async function POST(request: Request) {
       if (!clip) return NextResponse.json({ error: "Missing clip" }, { status: 404 });
       const sourceAbs = await ensureLocal(clip.path);
       const outputRel = `repurpose/${clip.batchId}/cut-${Date.now()}.mp4`;
-      await trimVideo({ sourceAbs, outputRel, start, end });
+      await cutVideo({ sourceAbs, outputRel, ranges, speed });
       await uploadLocalToR2(outputRel, "video/mp4");
       const size = (await stat(path.join(localRoot(), outputRel))).size;
       let thumbPath = "";
@@ -59,7 +62,7 @@ export async function POST(request: Request) {
       }
       const sourceAbs = await ensureLocal(asset.path);
       const outputRel = `cards/${asset.cardId}/cut-${Date.now()}.mp4`;
-      await trimVideo({ sourceAbs, outputRel, start, end });
+      await cutVideo({ sourceAbs, outputRel, ranges, speed });
       const publicUrl = await uploadLocalToR2(outputRel, "video/mp4");
       const size = (await stat(path.join(localRoot(), outputRel))).size;
       await prisma.asset.create({

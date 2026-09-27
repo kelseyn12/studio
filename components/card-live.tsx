@@ -52,7 +52,7 @@ export function CardLive({
       </a>
       {card.status === "REVIEW" || (card.status === "READY" && !card.scheduledAt) ? (
         <details className="rounded-card border border-line bg-panel px-5 py-4">
-          <summary className="cursor-pointer text-sm font-semibold">Quick cut — trim the start or end</summary>
+          <summary className="cursor-pointer text-sm font-semibold">Cut and speed — drop dragging parts, then post from here</summary>
           <div className="mt-3">
             <QuickCut
               src={watchUrl(edited.path)}
