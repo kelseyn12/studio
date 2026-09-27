@@ -40,7 +40,7 @@ export default async function BatchPage({
   const outputCards = outputCardIds.length
     ? await prisma.card.findMany({
         where: { id: { in: outputCardIds } },
-        select: { id: true, status: true, scheduledAt: true },
+        select: { id: true, status: true, scheduledAt: true, assets: { select: { id: true, path: true } } },
       })
     : [];
   const hooks = batch.clips.filter((clip) => clip.slot === "HOOK");

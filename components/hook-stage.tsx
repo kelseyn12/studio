@@ -174,17 +174,17 @@ export function HookStage({
         </button>
         <button
           type="button"
-          onClick={() => void save(setLookBox(pos, preview, nextBox(lookBox)))}
+          onClick={() => preview !== "instagram" && void save(setLookBox(pos, preview, nextBox(lookBox)))}
           className={`rounded-lg px-2 py-1 text-[11px] ${boxed ? "bg-sun font-semibold text-ink" : "border border-line text-mute"}`}
         >
-          {boxLabel(lookBox, preview)}
+          {preview === "instagram" ? "IG font" : boxLabel(lookBox, preview)}
         </button>
       </div>
       <div ref={stageRef} className="relative overflow-hidden rounded-xl bg-ink">
         <video ref={videoRef} src={src} controls playsInline className="aspect-[9/16] w-full object-cover" />
         {guides ? <AlignGuides horizontals={[pos.y, ...axes.ys]} verticals={axes.xs} /> : null}
         <div
-          className="absolute z-10 w-[78%] cursor-grab"
+          className="absolute z-10 w-max max-w-[62%] cursor-grab"
           style={{ left: `${pos.x * 100}%`, top: `${pos.y * 100}%`, transform: "translate(-50%, -50%)" }}
           onPointerDown={(event) => event.currentTarget.setPointerCapture(event.pointerId)}
           onPointerMove={(event) => {
@@ -197,7 +197,7 @@ export function HookStage({
           }}
         >
           <p className="mb-1 text-center text-[10px] text-white/70">Drag</p>
-          <div className="relative min-h-[4.5rem]">
+          <div className="relative">
             {boxed ? <WordChips lines={chips} together={preview === "tiktok"} className={`${typeSize} ${inkClass} ${plate}`} /> : null}
             <textarea
               value={text}
@@ -245,7 +245,7 @@ export function HookStage({
                 void moveItem(item, event);
               }}
               className={`absolute z-30 flex -translate-x-1/2 -translate-y-1/2 cursor-grab touch-none select-none items-center justify-center bg-transparent text-white [text-shadow:0_1px_0_#000,0_-1px_0_#000,1px_0_0_#000,-1px_0_0_#000] active:cursor-grabbing ${picked === itemKey(item) ? "ring-2 ring-white/40" : ""}`}
-              style={{ left: `${at.x * 100}%`, top: `${at.y * 100}%`, width: px + 16, height: px + 16, fontSize: Math.round(24 * scale) }}
+              style={{ left: `${at.x * 100}%`, top: `${at.y * 100}%`, width: px + 4, height: px + 4, fontSize: Math.round(24 * scale) }}
               title="Drag"
             >
               {isLogoFile(item) ? (

@@ -4,6 +4,19 @@ import { useRef, useState } from "react";
 import { tuneOutput } from "@/app/repurposer/output-actions";
 import type { TuneSection } from "@/lib/output-recipe";
 
+async function saveCover(assetId: string, at: number, setNote: (note: string) => void) {
+  if (!assetId) {
+    setNote("Generate again, then pick the cover.");
+    return;
+  }
+  const response = await fetch("/api/cover", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id: assetId, at }),
+  });
+  setNote(response.ok ? "Cover saved." : "Could not set that frame.");
+}
+
 export function OutputTune({
   outputId,
   src,
@@ -13,6 +26,7 @@ export function OutputTune({
   sections,
   mates,
   ready,
+  assetId,
 }: {
   outputId: string;
   src: string;
@@ -22,15 +36,37 @@ export function OutputTune({
   sections: TuneSection[];
   mates: number;
   ready: boolean;
+  assetId: string;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState<"off" | "tune" | "cover">("off");
   const [start, setStart] = useState(musicStart > 0 ? musicStart.toFixed(1) : "0");
-  if (!open) {
+  const [coverNote, setCoverNote] = useState("");
+  if (open === "off") {
     return (
-      <button type="button" onClick={() => setOpen(true)} className="mt-2 text-xs text-mute">
-        Words + music
-      </button>
+      <div className="mt-2 flex gap-3">
+        <button type="button" onClick={() => setOpen("tune")} className="text-xs text-mute">
+          Words + music
+        </button>
+        <button type="button" onClick={() => setOpen("cover")} className="text-xs text-mute">
+          Cover
+        </button>
+      </div>
+    );
+  }
+  if (open === "cover") {
+    return (
+      <div className="mt-3 space-y-2 border-t border-line pt-3">
+        <video ref={videoRef} src={src} controls playsInline className="aspect-[9/16] w-36 rounded-lg bg-ink" />
+        <button
+          type="button"
+          className="rounded-lg border border-line px-2 py-1 text-xs"
+          onClick={() => void saveCover(assetId, videoRef.current?.currentTime ?? 0, setCoverNote)}
+        >
+          Use this frame as the cover
+        </button>
+        {coverNote ? <p className="text-xs text-mute">{coverNote}</p> : null}
+      </div>
     );
   }
   if (!ready) {

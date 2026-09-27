@@ -83,7 +83,7 @@ describe("buildHookAss", () => {
       /Style: Head,Arial,76,&HFFFFFF&,&HFFFFFF&,&H000000&,&H00000000&,-1,0,0,0,100,100,0,0,3,8,0,8,/,
     );
     expect(buildHookAss({ text: "hello there", style: "tiktok", box: true, font: "Arial" })).toMatch(
-      /Style: Head,Arial,82,.*,3,16,0,8,/,
+      /Style: Head,Arial,82,.*,3,12,0,8,/,
     );
     expect(buildHookAss({ text: "hello there", style: "tiktok", box: "white", font: "Arial" })).toMatch(
       /Style: Head,Arial,82,&H000000&,&H000000&,&HFFFFFF&/,

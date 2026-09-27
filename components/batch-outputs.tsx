@@ -17,7 +17,7 @@ type Output = {
 };
 type Clip = { id: string; slot: string; captionsJson: string };
 type Track = { id: string; filename: string };
-type CardState = { id: string; status: string; scheduledAt: Date | null };
+type CardState = { id: string; status: string; scheduledAt: Date | null; assets: Array<{ id: string; path: string }> };
 type Editor = { id: string; name: string; defaultEditor: boolean };
 
 const STATE_LABEL: Record<string, string> = {
@@ -101,7 +101,9 @@ export function BatchOutputs({
         <div className="space-y-2">
           <SelectDeleteBar total={outputs.length} batchId={batchId} field="outputId" />
           {outputs.map((output) => {
-            const state = stateLabel(output.cardId ? cardById.get(output.cardId) : undefined);
+            const card = output.cardId ? cardById.get(output.cardId) : undefined;
+            const state = stateLabel(card);
+            const assetId = card?.assets.find((asset) => asset.path === output.path)?.id ?? "";
             const recipe = parseRecipe(output.recipeJson);
             const selectedMusic = output.musicTrackId === "none" ? "none" : output.musicTrackId || recipe?.trackId || "none";
             return (
@@ -127,6 +129,7 @@ export function BatchOutputs({
                   sections={recipe ? tuneSections(recipe, clips, output.captionsJson) : []}
                   mates={bodyMates(outputs.map((row) => row.recipeJson), recipe?.bodyClipId || "")}
                   ready={Boolean(recipe)}
+                  assetId={assetId}
                 />
               </div>
             );

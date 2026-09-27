@@ -96,10 +96,10 @@ function parseBoxes(raw: unknown): { boxes: LookBoxes } | Record<string, never> 
   return { boxes: { ...(tiktok ? { tiktok } : {}), ...(instagram ? { instagram } : {}) } };
 }
 
-/** Box for one look. A shared `box` applies to both until you set them apart. */
+/** TikTok can wear a plate. Instagram stays the font, with no plate. */
 export function boxFor(pos: Pick<HookPos, "box" | "boxes"> | null | undefined, style: string): BoxChoice | undefined {
-  const look = style === "instagram" ? "instagram" : "tiktok";
-  const specific = pos?.boxes?.[look];
+  if (style === "instagram") return undefined;
+  const specific = pos?.boxes?.tiktok;
   if (specific === "off") return undefined;
   if (specific) return specific;
   if (pos?.boxes) return undefined;

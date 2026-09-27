@@ -81,12 +81,12 @@
 - `parseLogoItems` / `parseLogos` / `boxesFromItems` / `defaultLogoPos` / `alignLogoRow` / `snapLogoPos` / `itemScale` / `writeLogoSheet` — `lib/hook-logos-math.ts` / `lib/hook-logos.ts` — files plus `+` `=` emoji / short text. `scale` 0.5–2.5 (Bigger / Smaller / Match type on Words). Align evens a row; drag snaps to a neighbor. Unused items line up at `LOGO_ROW_Y` (0.15). First 4s. Tested in `lib/hook-logos.test.ts`.
 - `HookLogos` — `components/hook-logos.tsx` — Add logo, +, =, 🔥, or a typed chip. Headline under the formula is Words.
 - `CutTrack` — `components/cut-track.tsx` — yellow ends = keep window. Click scrubs. Dark = dropped middles. Repeat Cut from/to for more than one middle.
-- `listStack` / `sharedListPlan` / `lookPaint` / `wordBoxClass` / `LOOK_METRICS` — `lib/list-layout.ts` — native TT 82 / IG 76. Box on paints one black chip per wrapped line (TT pill, IG tight block). libass cannot round corners; preview can.
+- `listStack` / `sharedListPlan` / `lookPaint` / `wordBoxClass` / `LOOK_METRICS` — `lib/list-layout.ts` — native TT 82 / IG 76. TikTok box is one card with a small corner (`rounded-md`). Instagram has no plate. libass plates stay square.
 - `matchTypeScale` / `previewLogoPx` / `LOGO_TO_TYPE` — `lib/hook-logos-math.ts` — Match type sizes a logo to ~2.4 type-lines. Preview px tracks TT 20 / IG 17 so logos sit with the look.
 - `WordChips` — `components/word-chips.tsx` — hugging per-line box preview under the Words textarea.
 - `sharedAxes` / `snapLogoPos` — `lib/hook-logos-math.ts` — snap to a neighbor or the center line. Align shows guides; it does not reshuffle chips.
 - `HookStage` / `HookList` / `ListOverlay` / `AlignGuides` / `SpokenFix` — Words: TT/IG preview, Align guides, Box off / Black / White. Mix numbers on the hook; body lines lock to those rows. SpokenFix is on bodies and CTAs after the first listen.
-- `boxFor` / `setLookBox` / `nextBox` / `boxLabel` — `lib/hook-layout.ts` — Box is per look (TT card, IG chips). Cycling TT does not change IG.
+- `boxFor` / `setLookBox` / `nextBox` / `boxLabel` — `lib/hook-layout.ts` — TikTok cycles off / black / white. Instagram always returns no box.
 - `applyCaptionLines` / `captionLines` — `lib/captions-math.ts` — rewrite spoken phrases and keep their clocks.
-- `CoverPick` — `components/cover-pick.tsx` — pick a still on Live. Copies also get staggered cover times on generate.
+- `CoverPick` — `components/cover-pick.tsx` — pick a still on Live. Each finished video also has Cover (`OutputTune` → `/api/cover`). Generate still staggers cover times.
 - `addLink` / `deleteLink` — `app/dms/actions.ts` — tracked short links for auto-DMs. Public redirect at `/l/[slug]` counts every click.
