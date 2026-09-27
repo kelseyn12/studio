@@ -145,7 +145,7 @@ export function HookStage({
                 event.stopPropagation();
                 void moveItem(item, event);
               }}
-              className="absolute z-30 flex h-16 min-w-16 -translate-x-1/2 -translate-y-1/2 cursor-grab touch-none select-none items-center justify-center rounded-xl border-2 border-white bg-ink/70 px-2 text-2xl active:cursor-grabbing"
+              className="absolute z-30 flex h-16 min-w-16 -translate-x-1/2 -translate-y-1/2 cursor-grab touch-none select-none items-center justify-center bg-transparent px-2 text-2xl text-white [text-shadow:0_1px_0_#000,0_-1px_0_#000,1px_0_0_#000,-1px_0_0_#000] active:cursor-grabbing active:ring-2 active:ring-white/50"
               style={{ left: `${at.x * 100}%`, top: `${at.y * 100}%` }}
               title="Drag"
             >

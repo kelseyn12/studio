@@ -187,3 +187,6 @@
 
 - [X] Logo chips easier to drag
   New chips start in a top row (not on the play button). Words preview is wider. Pads are larger, sit above the text layer, and keep pointer capture so the video/words do not steal the drag.
+
+- [X] Logo chips have no white boxes
+  The rounded white borders were only the Words grab handle. Preview is now the logo / + / = / emoji with no pill. Generate never drew those boxes.
