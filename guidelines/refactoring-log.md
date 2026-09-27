@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-09-27 — Save cut plays the short clip instead of jumping back to the full recording. Leaving Words writes the letters, including capitals, before the cut screen opens.
 - 2026-09-27 — The words on the video are the letters you type, including capitals. The old box painted a copy underneath and hid the keys.
 - 2026-09-26 — Hook stroke matches the apps on a 1080 frame: TikTok 5px, Instagram 4px. The 12px Instagram edge was a Hormozi stroke and it clipped capital letters.
 - 2026-09-26 — TikTok card matches the native plate: wide (94% of the frame), radius 14, pad 18×8, lines stay on one row so a sentence stays two lines.

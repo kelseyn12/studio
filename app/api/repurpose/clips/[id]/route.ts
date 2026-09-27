@@ -12,7 +12,7 @@ export async function PATCH(
   if (!user) return NextResponse.json({ error: "Auth required" }, { status: 401 });
   const { id } = await context.params;
   const body = (await request.json()) as { hookText?: unknown; postCaption?: unknown; hookLayout?: unknown; captionsJson?: unknown };
-  await prisma.repurposeClip.update({
+  const clip = await prisma.repurposeClip.update({
     where: { id },
     data: {
       ...(body.hookText !== undefined ? { hookText: String(body.hookText || "") } : {}),
@@ -21,6 +21,7 @@ export async function PATCH(
       ...(body.captionsJson !== undefined ? { captionsJson: String(body.captionsJson || "") } : {}),
     },
   });
+  revalidatePath(`/repurposer/${clip.batchId}`);
   return NextResponse.json({ ok: true });
 }
 

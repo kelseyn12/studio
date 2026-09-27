@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { HookLogos } from "@/components/hook-logos";
 import { SpokenFix } from "@/components/spoken-fix";
@@ -46,6 +46,7 @@ export function ClipTile({
 }) {
   const router = useRouter();
   const [mode, setMode] = useState<"idle" | "cut" | "place">("idle");
+  const captionRef = useRef(postCaption ?? "");
 
   async function remove() {
     await fetch(`/api/repurpose/clips/${id}`, { method: "DELETE" });
@@ -68,7 +69,7 @@ export function ClipTile({
           target="clip"
           id={id}
           canUndo={Boolean(cutUndo)}
-          note="Every video made from this clip uses the cut."
+          note="Save cut, then you will see the short clip. Every video from this clip uses it."
         />
       ) : mode === "place" ? (
         <HookStage
@@ -99,6 +100,7 @@ export function ClipTile({
         <button
           type="button"
           onClick={() => {
+            void saveCaption(captionRef.current);
             if (mode === "cut") router.refresh();
             setMode(mode === "cut" ? "idle" : "cut");
           }}
@@ -108,7 +110,10 @@ export function ClipTile({
         </button>
         <button
           type="button"
-          onClick={() => setMode(mode === "place" ? "idle" : "place")}
+          onClick={() => {
+            void saveCaption(captionRef.current);
+            setMode(mode === "place" ? "idle" : "place");
+          }}
           className="flex-1 rounded-lg border border-line px-2 py-1 text-xs text-mute"
         >
           {mode === "place" ? "Done" : "Words"}
@@ -119,6 +124,9 @@ export function ClipTile({
           defaultValue={postCaption}
           placeholder="Caption that posts under videos from this hook"
           className="field mt-2 min-h-16 px-2 py-1 text-xs"
+          onChange={(event) => {
+            captionRef.current = event.target.value;
+          }}
           onBlur={(event) => saveCaption(event.target.value)}
         />
       ) : (

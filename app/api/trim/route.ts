@@ -1,4 +1,5 @@
 import { stat } from "fs/promises";
+import { revalidatePath } from "next/cache";
 import path from "path";
 import { NextResponse } from "next/server";
 import { cutVideo } from "@/lib/cut";
@@ -31,6 +32,7 @@ async function undoCut(target: string, id: string) {
             : "",
         },
       });
+    revalidatePath(`/repurposer/${clip.batchId}`);
     return NextResponse.json({ ok: true, path: prior.path });
   }
   if (target === "asset") {
@@ -104,6 +106,7 @@ export async function POST(request: Request) {
           }),
         },
       });
+      revalidatePath(`/repurposer/${clip.batchId}`);
       return NextResponse.json({ ok: true, path: outputRel, basePath });
     }
 

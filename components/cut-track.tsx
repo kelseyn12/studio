@@ -83,8 +83,7 @@ export function CutTrack({
         />
       </div>
       <p className="text-[11px] text-mute">
-        Yellow ends = keep this window. Click the bar to scrub, not to cut. Dark = a middle you dropped. For each
-        dragging part: Cut from here, then Cut to here.
+        Drag the yellow ends to chop the start or the end. Click the bar to move through the clip. A dark band is a middle you threw away.
       </p>
     </div>
   );

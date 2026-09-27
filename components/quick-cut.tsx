@@ -32,9 +32,11 @@ export function QuickCut({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [undoReady, setUndoReady] = useState(Boolean(canUndo));
+  const [reviewing, setReviewing] = useState(false);
+  const reviewingRef = useRef(false);
 
   useEffect(() => {
-    setPlaySrc(src);
+    if (!reviewingRef.current) setPlaySrc(src);
     setUndoReady(Boolean(canUndo));
   }, [src, canUndo]);
 
@@ -67,7 +69,7 @@ export function QuickCut({
   function addDrop() {
     const to = playhead();
     if (dropFrom === null || to - dropFrom < 0.15) {
-      setError("Play to the end of the dragging part, then tap Cut to here.");
+      setError("Play to the end of the part you want to throw away, then tap Drop to here.");
       return;
     }
     setDrops((current) => [...current, { start: dropFrom, end: to }]);
@@ -92,16 +94,28 @@ export function QuickCut({
     return payload as { ok: true; path?: string };
   }
 
+  function showOriginal() {
+    reviewingRef.current = false;
+    setReviewing(false);
+    setPlaySrc(src);
+    resetWindow(0);
+  }
+
   async function save() {
     const payload = await postTrim({ target, id, start, end, drops, speed });
     if (!payload) return;
-    setPlaySrc(src);
+    reviewingRef.current = true;
+    setReviewing(true);
+    setPlaySrc(payload.path ? publicFileUrl(payload.path) : src);
     setUndoReady(true);
+    resetWindow(0);
   }
 
   async function undo() {
     const payload = await postTrim({ target, id, undo: true });
     if (!payload) return;
+    reviewingRef.current = false;
+    setReviewing(false);
     setPlaySrc(payload.path ? publicFileUrl(payload.path) : src);
     setUndoReady(false);
     resetWindow(0);
@@ -135,46 +149,54 @@ export function QuickCut({
           }
         }}
       />
-      <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={() => setStart(Math.min(playhead(), end))}
-          className="rounded-xl border border-line px-3 py-1.5 text-sm"
-        >
-          Start here
-        </button>
-        <button
-          type="button"
-          onClick={() => setEnd(Math.max(playhead(), start))}
-          className="rounded-xl border border-line px-3 py-1.5 text-sm"
-        >
-          End here
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            setDropFrom(playhead());
-            setError("");
-          }}
-          className="rounded-xl border border-line px-3 py-1.5 text-sm"
-        >
-          Cut from here
-        </button>
-        <button type="button" onClick={addDrop} className="rounded-xl border border-line px-3 py-1.5 text-sm">
-          Cut to here
-        </button>
-        <button
-          type="button"
-          onClick={() => resetWindow(duration)}
-          className="rounded-xl border border-line px-3 py-1.5 text-sm text-mute"
-        >
-          Reset
-        </button>
-      </div>
-      <p className="text-[11px] text-mute">
-        Yellow ends trim the keep window. Each extra middle: play to the start, Cut from here, play to the end, Cut to
-        here. Repeat. Clicking the bar only scrubs.
-      </p>
+      {reviewing ? (
+        <p className="text-[11px] text-mute">Saved. This is the clip the videos will use.</p>
+      ) : (
+        <>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setStart(Math.min(playhead(), end))}
+              className="rounded-xl border border-line px-3 py-1.5 text-sm"
+            >
+              Keep from here
+            </button>
+            <button
+              type="button"
+              onClick={() => setEnd(Math.max(playhead(), start))}
+              className="rounded-xl border border-line px-3 py-1.5 text-sm"
+            >
+              Keep until here
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setDropFrom(playhead());
+                setError("");
+              }}
+              className="rounded-xl border border-line px-3 py-1.5 text-sm"
+            >
+              Drop from here
+            </button>
+            <button type="button" onClick={addDrop} className="rounded-xl border border-line px-3 py-1.5 text-sm">
+              Drop to here
+            </button>
+            <button
+              type="button"
+              onClick={() => resetWindow(duration)}
+              className="rounded-xl border border-line px-3 py-1.5 text-sm text-mute"
+            >
+              Reset
+            </button>
+          </div>
+          <p className="text-[11px] text-mute">
+            Yellow is what you keep. Drag the yellow ends in to chop the start or the end. To throw away a middle: play
+            to where it starts, Drop from here, play to where it ends, Drop to here.
+          </p>
+        </>
+      )}
+      {reviewing ? null : (
+      <>
       <CutTrack
         duration={duration}
         current={now}
@@ -188,7 +210,7 @@ export function QuickCut({
         onStart={setStart}
         onEnd={setEnd}
       />
-      {dropFrom !== null ? <p className="text-xs text-sun">Dropping from {dropFrom.toFixed(1)}s — play to the end of it, then Cut to here.</p> : null}
+      {dropFrom !== null ? <p className="text-xs text-sun">Throwing away from {dropFrom.toFixed(1)}s — play to the end of that part, then Drop to here.</p> : null}
       {drops.length > 0 ? (
         <div className="flex flex-wrap gap-2">
           {drops.map((drop, index) => (
@@ -225,6 +247,8 @@ export function QuickCut({
         {drops.length ? ` · drops ${drops.length} part${drops.length === 1 ? "" : "s"}` : ""}
         {speed !== 1 ? ` · playing ${speed}×` : ""} · posts as {remaining.toFixed(1)}s
       </p>
+      </>
+      )}
       {note ? <p className="text-xs text-mute">{note}</p> : null}
       {error ? <p className="text-xs text-review">{error}</p> : null}
       <div className="flex gap-2">
@@ -238,14 +262,20 @@ export function QuickCut({
             Undo last cut
           </button>
         ) : null}
-        <button
-          type="button"
-          onClick={save}
-          disabled={!canSave}
-          className="w-full rounded-xl bg-sun px-3 py-2 text-sm font-semibold text-ink disabled:opacity-40"
-        >
-          {busy ? "Cutting…" : "Save cut"}
-        </button>
+        {reviewing ? (
+          <button type="button" onClick={showOriginal} className="w-full rounded-xl border border-line px-3 py-2 text-sm">
+            Trim again
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={save}
+            disabled={!canSave}
+            className="w-full rounded-xl bg-sun px-3 py-2 text-sm font-semibold text-ink disabled:opacity-40"
+          >
+            {busy ? "Cutting…" : "Save cut"}
+          </button>
+        )}
       </div>
     </div>
   );

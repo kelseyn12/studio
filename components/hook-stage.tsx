@@ -40,6 +40,8 @@ export function HookStage({
   const [text, setText] = useState(hookText);
   const [list, setList] = useState((saved.list ?? []).join("\n"));
   const [pos, setPos] = useState<HookPos>(saved);
+  const draft = useRef({ text: hookText, pos: saved, list: (saved.list ?? []).join("\n") });
+  draft.current = { text, pos, list };
   const [preview, setPreview] = useState<DrawnStyle>(look);
   const [places, setPlaces] = useState<Record<string, { x: number; y: number }>>({});
   const [scales, setScales] = useState<Record<string, number>>({});
@@ -100,8 +102,23 @@ export function HookStage({
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ hookText: value, hookLayout: stringifyHookLayout(packed) }),
+      keepalive: true,
     });
   }
+
+  useEffect(() => {
+    return () => {
+      const latest = draft.current;
+      const items = latest.list.split("\n").map((line) => line.trim()).filter(Boolean);
+      const packed = { ...latest.pos, list: items, listAt: (latest.pos.listAt ?? []).slice(0, items.length) };
+      void fetch(`/api/repurpose/clips/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hookText: latest.text, hookLayout: stringifyHookLayout(packed) }),
+        keepalive: true,
+      });
+    };
+  }, [id]);
 
   function shiftItem(item: (typeof logos)[number], event: PointerEvent<HTMLButtonElement>) {
     const raw = point(event);
@@ -210,8 +227,11 @@ export function HookStage({
             ref={typeRef}
             value={text}
             placeholder="Type here"
-            onChange={(event) => setText(event.target.value)}
-            onBlur={() => save(pos, text)}
+            onChange={(event) => {
+              draft.current.text = event.target.value;
+              setText(event.target.value);
+            }}
+            onBlur={(event) => save(draft.current.pos, event.target.value, draft.current.list)}
             onPointerDown={(event) => event.stopPropagation()}
             rows={2}
             className={`block w-full resize-none overflow-hidden bg-transparent text-center outline-none [field-sizing:content] ${typeSize} ${

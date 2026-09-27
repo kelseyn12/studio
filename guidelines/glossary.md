@@ -77,10 +77,10 @@
 - `keepRanges` / `parseSpeed` / `parseDrops` / `isPlayableCut` / `speedVideoFilter` / `speedAudioFilter` — `lib/cut-math.ts` — leftover ranges after dropping draggy parts; speed allowlist 1 / 1.25 / 1.5 / 2; `setpts=(PTS-STARTPTS)/n` + `atempo` (no fps/-r after, those undo the speed). Used by QuickCut and `/api/trim`. Tested in `lib/cut.test.ts`.
 - `cutPreviewPath` / `parseCutUndo` — `lib/hook-layout.ts` — 1× is the recorded file (`basePath`). 1.25 / 1.5 / 2 step up from that, never from a previous sped cut.
 - `cutVideo` — `lib/cut.ts` — stitches kept ranges and applies speed (`setpts` + `atempo`). Used by `/api/trim`.
-- `QuickCut` — `components/quick-cut.tsx` — Start here / End here, Cut from here / Cut to here (drop a middle), speed pills 1 / 1.25 / 1.5 / 2. Tapping a pill plays at that rate; Save writes it into the file.
+- `QuickCut` — `components/quick-cut.tsx` — Keep from here / Keep until here chop the ends. Drop from here / Drop to here throws away a middle. Save cut plays the short clip. Trim again goes back to the recording.
 - `parseLogoItems` / `parseLogos` / `boxesFromItems` / `defaultLogoPos` / `alignLogoRow` / `snapLogoPos` / `itemScale` / `writeLogoSheet` — `lib/hook-logos-math.ts` / `lib/hook-logos.ts` — files plus `+` `=` emoji / short text. `scale` 0.5–2.5 (Bigger / Smaller / Match type on Words). Align evens a row; drag snaps to a neighbor. Unused items line up at `LOGO_ROW_Y` (0.15). First 4s. Tested in `lib/hook-logos.test.ts`.
 - `HookLogos` — `components/hook-logos.tsx` — Add logo, +, =, 🔥, or a typed chip. Headline under the formula is Words.
-- `CutTrack` — `components/cut-track.tsx` — yellow ends = keep window. Click scrubs. Dark = dropped middles. Repeat Cut from/to for more than one middle.
+- `CutTrack` — `components/cut-track.tsx` — yellow ends = the part you keep. Click scrubs. Dark = a middle you dropped.
 - `listStack` / `sharedListPlan` / `lookPaint` / `wordBoxClass` / `LOOK_METRICS` — `lib/list-layout.ts` — native TT 82 / IG 104. Unboxed stroke on a 1080 frame is 5px TikTok and 4px Instagram. TikTok box is one card. Instagram has no plate.
 - `roundedPlatePath` / `plateSize` / `measureTextPx` — `lib/ass-plate.ts`, `lib/font-measure.ts` — the finished TikTok card is a rounded drawing (radius 14, pad 18×8 on 1080). Text width comes from the font file.
 - `matchTypeScale` / `previewLogoPx` / `previewGrab` / `LOGO_TO_TYPE` — `lib/hook-logos-math.ts` — Match type sizes a logo to ~2.4 type-lines. Preview px tracks TT 20 / IG 17. `previewGrab` keeps +, =, and emoji on a glyph-sized hit box.
