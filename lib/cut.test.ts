@@ -4,7 +4,7 @@ import path from "path";
 import { describe, expect, it } from "vitest";
 import { runFfmpeg } from "@/lib/ffmpeg";
 import { cutVideo } from "@/lib/cut";
-import { isPlayableCut, keepRanges, parseDrops, parseSpeed, speedAudioFilter, speedVideoFilter } from "@/lib/cut-math";
+import { isPlayableCut, keepPlayback, keepRanges, parseDrops, parseSpeed, speedAudioFilter, speedVideoFilter } from "@/lib/cut-math";
 import { cutPreviewPath, parseCutUndo, parseHookLayout, posFor, setLookPos, stringifyHookLayout } from "@/lib/hook-layout";
 import { ffprobeBin, runCommand } from "@/lib/ffmpeg";
 import { clipDuration } from "@/lib/trim";
@@ -51,6 +51,24 @@ describe("keepRanges", () => {
   it("returns nothing when the drops eat the keep window", () => {
     expect(keepRanges({ start: 0, end: 4 }, [{ start: 0, end: 4 }])).toEqual([]);
     expect(isPlayableCut([])).toBe(false);
+  });
+});
+
+describe("keepPlayback", () => {
+  const kept = [
+    { start: 1, end: 3 },
+    { start: 5, end: 8 },
+  ];
+
+  it("jumps to the yellow start and over each dropped middle", () => {
+    expect(keepPlayback(0, kept)).toEqual({ seek: 1 });
+    expect(keepPlayback(1.4, kept)).toBe("stay");
+    expect(keepPlayback(3.2, kept)).toEqual({ seek: 5 });
+    expect(keepPlayback(6, kept)).toBe("stay");
+  });
+
+  it("stops once the yellow end has played", () => {
+    expect(keepPlayback(8.1, kept)).toBe("end");
   });
 });
 

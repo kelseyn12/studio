@@ -74,3 +74,14 @@ export function keptSeconds(ranges: TimeRange[]): number {
 export function isPlayableCut(ranges: TimeRange[]): boolean {
   return ranges.length > 0 && keptSeconds(ranges) >= MIN_CLIP_SECONDS;
 }
+
+/** Stay inside a kept range. Otherwise jump to the next keep, or stop at the end. */
+export function keepPlayback(time: number, ranges: TimeRange[]): { seek: number } | "stay" | "end" {
+  if (!ranges.length || !Number.isFinite(time)) return "stay";
+  const inside = ranges.some((range) => time >= range.start - 0.03 && time < range.end - 0.04);
+  if (inside) return "stay";
+  const next = ranges.find((range) => range.end - 0.04 > time);
+  if (!next) return "end";
+  if (Math.abs(time - next.start) <= 0.03) return "stay";
+  return { seek: next.start };
+}

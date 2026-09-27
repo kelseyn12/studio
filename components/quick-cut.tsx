@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { CutTrack } from "@/components/cut-track";
-import { SPEED_CHOICES, isPlayableCut, keepRanges, keptSeconds } from "@/lib/cut-math";
+import { SPEED_CHOICES, isPlayableCut, keepPlayback, keepRanges, keptSeconds } from "@/lib/cut-math";
 import { publicFileUrl } from "@/lib/urls";
 
 type Drop = { start: number; end: number };
@@ -54,6 +54,26 @@ export function QuickCut({
 
   const playhead = () => videoRef.current?.currentTime ?? 0;
   const ranges = keepRanges({ start, end }, drops);
+  const rangesRef = useRef(ranges);
+  rangesRef.current = ranges;
+
+  function followKeep(video: HTMLVideoElement, fromPlay: boolean) {
+    if (reviewingRef.current) return;
+    const kept = rangesRef.current;
+    const step = keepPlayback(video.currentTime, kept);
+    if (step === "stay") return;
+    if (step === "end") {
+      if (fromPlay && kept[0]) {
+        video.currentTime = kept[0].start;
+        return;
+      }
+      video.pause();
+      const last = kept[kept.length - 1];
+      if (last && Math.abs(video.currentTime - last.end) > 0.05) video.currentTime = last.end;
+      return;
+    }
+    video.currentTime = step.seek;
+  }
   const remaining = keptSeconds(ranges) / speed;
   const canSave = isPlayableCut(ranges) && !busy;
 
@@ -139,10 +159,16 @@ export function QuickCut({
           setEnd((current) => (current <= 0 || current > total ? total : current));
           applyRate(speed);
         }}
-        onPlay={() => applyRate(speed)}
+        onPlay={(event) => {
+          applyRate(speed);
+          followKeep(event.currentTarget, true);
+        }}
         onPlaying={() => applyRate(speed)}
         onSeeked={() => applyRate(speed)}
-        onTimeUpdate={(event) => setNow(event.currentTarget.currentTime)}
+        onTimeUpdate={(event) => {
+          if (!event.currentTarget.paused) followKeep(event.currentTarget, false);
+          setNow(event.currentTarget.currentTime);
+        }}
         onRateChange={() => {
           if (videoRef.current && Math.abs(videoRef.current.playbackRate - speed) > 0.01) {
             applyRate(speed);
@@ -190,8 +216,8 @@ export function QuickCut({
             </button>
           </div>
           <p className="text-[11px] text-mute">
-            Yellow is what you keep. Drag the yellow ends in to chop the start or the end. To throw away a middle: play
-            to where it starts, Drop from here, play to where it ends, Drop to here.
+            Yellow is what you keep. Play starts there, skips each dark band, and stops at the yellow end. Drag the
+            yellow ends to chop the start or the end. For a middle: Drop from here, play to the end of it, Drop to here.
           </p>
         </>
       )}

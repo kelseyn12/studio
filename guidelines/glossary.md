@@ -74,7 +74,7 @@
 - `fileMaxBytes` — `lib/storage.ts` — per-file cap from `STUDIO_FILE_MAX_MB` (1GB default, 250 on Fly). Feeds `STUDIO_FILE_MAX_BYTES`.
 - `pickFinished` — `lib/card-desk.ts` — the file that ships: newest EDITED first, else newest GENERATED. Used by queueCard and the video page.
 - `trimVideo` / `isValidCut` — `lib/trim.ts` — simple start/end re-encode (min half a second). Used by `cutVideo` when there is one keep range and no speed change.
-- `keepRanges` / `parseSpeed` / `parseDrops` / `isPlayableCut` / `speedVideoFilter` / `speedAudioFilter` — `lib/cut-math.ts` — leftover ranges after dropping draggy parts; speed allowlist 1 / 1.25 / 1.5 / 2; `setpts=(PTS-STARTPTS)/n` + `atempo` (no fps/-r after, those undo the speed). Used by QuickCut and `/api/trim`. Tested in `lib/cut.test.ts`.
+- `keepRanges` / `keepPlayback` / `parseSpeed` / `parseDrops` / `isPlayableCut` / `speedVideoFilter` / `speedAudioFilter` — `lib/cut-math.ts` — leftover ranges after dropping draggy parts. `keepPlayback` jumps play to the next kept range and stops at the yellow end. Speed allowlist 1 / 1.25 / 1.5 / 2; `setpts=(PTS-STARTPTS)/n` + `atempo` (no fps/-r after, those undo the speed). Used by QuickCut and `/api/trim`. Tested in `lib/cut.test.ts`.
 - `cutPreviewPath` / `parseCutUndo` — `lib/hook-layout.ts` — 1× is the recorded file (`basePath`). 1.25 / 1.5 / 2 step up from that, never from a previous sped cut.
 - `cutVideo` — `lib/cut.ts` — stitches kept ranges and applies speed (`setpts` + `atempo`). Used by `/api/trim`.
 - `QuickCut` — `components/quick-cut.tsx` — Keep from here / Keep until here chop the ends. Drop from here / Drop to here throws away a middle. Save cut plays the short clip. Trim again goes back to the recording.
