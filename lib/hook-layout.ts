@@ -4,6 +4,8 @@ import type { DrawnStyle } from "@/lib/text-style";
 export type BoxChoice = boolean | "white";
 export type LookBox = BoxChoice | "off";
 export type LookBoxes = { tiktok?: LookBox; instagram?: LookBox };
+export type LookPoint = { x: number; y: number };
+export type LookPlaces = { tiktok?: LookPoint; instagram?: LookPoint };
 
 export type HookPos = {
   x: number;
@@ -16,6 +18,8 @@ export type HookPos = {
   /** Shared box from before looks could differ. Ignored once `boxes` is set. */
   box?: BoxChoice;
   boxes?: LookBoxes;
+  /** Per-look text spot. Shared `x`/`y` apply to both until you drag one look. */
+  places?: LookPlaces;
 };
 
 function clamp01(value: number, low: number, high: number): number {
@@ -62,6 +66,7 @@ export function parseHookLayout(raw: string | null | undefined): HookPos | null 
       ...(parsed.logoEq ? { logoEq: true } : {}),
       ...(parsed.box === "white" ? { box: "white" as const } : parsed.box ? { box: true } : {}),
       ...parseBoxes(parsed.boxes),
+      ...parsePlaces(parsed.places),
     };
   } catch {
     return null;
@@ -78,7 +83,51 @@ export function stringifyHookLayout(pos: HookPos): string {
     ...(pos.to != null ? { to: pos.to } : {}),
     ...(pos.logoEq ? { logoEq: true } : {}),
     ...(pos.boxes ? { boxes: pos.boxes } : pos.box === "white" ? { box: "white" as const } : pos.box ? { box: true } : {}),
+    ...(pos.places ? { places: pos.places } : {}),
   });
+}
+
+function parsePoint(value: unknown): LookPoint | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const row = value as { x?: unknown; y?: unknown };
+  const x = Number(row.x);
+  const y = Number(row.y);
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return undefined;
+  return { x: clamp01(x, 0.08, 0.92), y: clamp01(y, 0.08, 0.88) };
+}
+
+function parsePlaces(raw: unknown): { places: LookPlaces } | Record<string, never> {
+  if (!raw || typeof raw !== "object") return {};
+  const row = raw as { tiktok?: unknown; instagram?: unknown };
+  const tiktok = parsePoint(row.tiktok);
+  const instagram = parsePoint(row.instagram);
+  if (!tiktok && !instagram) return {};
+  return { places: { ...(tiktok ? { tiktok } : {}), ...(instagram ? { instagram } : {}) } };
+}
+
+/** Where this look's headline sits. A shared point applies until you drag one look. */
+export function posFor(pos: Pick<HookPos, "x" | "y" | "places"> | null | undefined, style: string): LookPoint {
+  const look = style === "instagram" ? "instagram" : "tiktok";
+  const specific = pos?.places?.[look];
+  if (specific) return specific;
+  const top = LOOK_METRICS[look].top;
+  return {
+    x: clamp01(pos?.x ?? 0.5, 0.08, 0.92),
+    y: clamp01(pos?.y ?? top, 0.08, 0.88),
+  };
+}
+
+/** Move the look you are previewing. The other look keeps the spot it already had. */
+export function setLookPos(pos: HookPos, style: string, x: number, y: number): HookPos {
+  const look = style === "instagram" ? "instagram" : "tiktok";
+  const other = look === "tiktok" ? "instagram" : "tiktok";
+  return {
+    ...pos,
+    places: {
+      [look]: { x: clamp01(x, 0.08, 0.92), y: clamp01(y, 0.08, 0.88) },
+      [other]: pos.places?.[other] ?? { x: pos.x, y: pos.y },
+    },
+  };
 }
 
 function parseOneBox(value: unknown): LookBox | undefined {

@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { runFfmpeg } from "@/lib/ffmpeg";
 import { cutVideo } from "@/lib/cut";
 import { isPlayableCut, keepRanges, parseDrops, parseSpeed, speedAudioFilter, speedVideoFilter } from "@/lib/cut-math";
-import { cutPreviewPath, parseCutUndo, parseHookLayout, stringifyHookLayout } from "@/lib/hook-layout";
+import { cutPreviewPath, parseCutUndo, parseHookLayout, posFor, setLookPos, stringifyHookLayout } from "@/lib/hook-layout";
 import { ffprobeBin, runCommand } from "@/lib/ffmpeg";
 import { clipDuration } from "@/lib/trim";
 
@@ -80,6 +80,12 @@ describe("parseSpeed / parseDrops", () => {
       boxes: { tiktok: "white", instagram: "off" },
     });
     expect(parseHookLayout(split)?.boxes).toEqual({ tiktok: "white", instagram: "off" });
+    const moved = setLookPos({ x: 0.5, y: 0.2 }, "instagram", 0.5, 0.45);
+    expect(posFor(moved, "tiktok")).toEqual({ x: 0.5, y: 0.2 });
+    expect(posFor(moved, "instagram").y).toBe(0.45);
+    const back = setLookPos(moved, "tiktok", 0.5, 0.12);
+    expect(posFor(back, "instagram").y).toBe(0.45);
+    expect(posFor(parseHookLayout(stringifyHookLayout(back)), "tiktok").y).toBe(0.12);
   });
 
   it("treats 1× as the recorded file, not a previous sped cut", () => {

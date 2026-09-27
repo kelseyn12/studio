@@ -4,7 +4,7 @@ import { useRef, useState, type PointerEvent } from "react";
 import { AlignGuides } from "@/components/align-guides";
 import { HookList } from "@/components/hook-list";
 import { ListOverlay } from "@/components/list-overlay";
-import { boxFor, boxLabel, hookDefaultPos, nextBox, parseHookLayout, setLookBox, stringifyHookLayout, type HookPos } from "@/lib/hook-layout";
+import { boxFor, boxLabel, hookDefaultPos, nextBox, parseHookLayout, posFor, setLookBox, setLookPos, stringifyHookLayout, type HookPos } from "@/lib/hook-layout";
 import { LogoScaleBar } from "@/components/logo-scale-bar";
 import { WordChips } from "@/components/word-chips";
 import { ALIGN_SNAP, clampLogoScale, defaultLogoPos, isLogoFile, itemScale, LOGO_SCALE_STEP, matchTypeScale, parseLogoItems, previewGrab, sharedAxes, snapLogoPos } from "@/lib/hook-logos-math";
@@ -32,7 +32,7 @@ export function HookStage({
   look: DrawnStyle;
   slot?: string;
   listCount?: number;
-  listFromHook?: { headline: string; x: number; y: number };
+  listFromHook?: { headline: string; x: number; y: number; places?: HookPos["places"] };
 }) {
   const stageRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -86,6 +86,12 @@ export function HookStage({
     };
   }
 
+  function dragged(event: PointerEvent<HTMLElement>): HookPos {
+    const raw = point(event);
+    const x = Math.abs(raw.x - 0.5) < ALIGN_SNAP ? 0.5 : raw.x;
+    return setLookPos(pos, preview, x, raw.y);
+  }
+
   async function save(next: HookPos, value = text, lines = list) {
     const items = lines.split("\n").map((line) => line.trim()).filter(Boolean);
     const packed = { ...next, list: items, listAt: (next.listAt ?? pos.listAt)?.slice(0, items.length) };
@@ -100,7 +106,7 @@ export function HookStage({
   function shiftItem(item: (typeof logos)[number], event: PointerEvent<HTMLButtonElement>) {
     const raw = point(event);
     const next = snapLogoPos(raw.x, raw.y, [
-      { x: 0.5, y: pos.y },
+      { x: 0.5, y: posFor(pos, preview).y },
       ...logos.flatMap((row, index) => (itemKey(row) === itemKey(item) ? [] : [loc(row, index)])),
     ]);
     setPlaces((current) => ({ ...current, [itemKey(item)]: next }));
@@ -133,11 +139,13 @@ export function HookStage({
   const lines = list.split("\n").map((line) => line.trim()).filter(Boolean);
   const count = Math.max(listCount, lines.length);
   const onHook = slot === "HOOK" || !listFromHook;
+  const at = posFor(pos, preview);
+  const anchor = onHook || !listFromHook ? at : posFor(listFromHook, preview);
   const stack = listStack({
     style: preview,
     headline: onHook ? text : listFromHook.headline,
-    x: onHook ? pos.x : listFromHook.x,
-    y: onHook ? pos.y : listFromHook.y,
+    x: anchor.x,
+    y: anchor.y,
     count,
   });
   const typeSize = `${LOOK_FONT_CLASS[preview]} ${preview === "instagram" ? "text-[17px] font-semibold leading-tight" : "text-[20px] font-bold leading-tight"}`;
@@ -150,7 +158,7 @@ export function HookStage({
     ? "[text-shadow:0_1px_0_#000,0_-1px_0_#000,1px_0_0_#000,-1px_0_0_#000]"
     : "[text-shadow:0_1px_0_#000,0_-1px_0_#000,1px_0_0_#000,-1px_0_0_#000,0_2px_5px_#000]";
   const active = logos.find((row) => itemKey(row) === picked) ?? logos[0];
-  const axes = sharedAxes([{ x: pos.x, y: pos.y }, ...logos.map((item, index) => loc(item, index))]);
+  const axes = sharedAxes([{ x: at.x, y: at.y }, ...logos.map((item, index) => loc(item, index))]);
 
   return (
     <div className="space-y-2">
@@ -182,19 +190,16 @@ export function HookStage({
       </div>
       <div ref={stageRef} className="relative overflow-hidden rounded-xl bg-ink">
         <video ref={videoRef} src={src} controls playsInline className="aspect-[9/16] w-full object-cover" />
-        {guides ? <AlignGuides horizontals={[pos.y, ...axes.ys]} verticals={axes.xs} /> : null}
+        {guides ? <AlignGuides horizontals={[at.y, ...axes.ys]} verticals={axes.xs} /> : null}
         <div
           className="absolute z-10 w-max max-w-[62%] cursor-grab"
-          style={{ left: `${pos.x * 100}%`, top: `${pos.y * 100}%`, transform: "translate(-50%, -50%)" }}
+          style={{ left: `${at.x * 100}%`, top: `${at.y * 100}%`, transform: "translate(-50%, -50%)" }}
           onPointerDown={(event) => event.currentTarget.setPointerCapture(event.pointerId)}
           onPointerMove={(event) => {
             if (event.buttons !== 1) return;
-            setPos({ ...point(event), x: Math.abs(point(event).x - 0.5) < ALIGN_SNAP ? 0.5 : point(event).x });
+            setPos(dragged(event));
           }}
-          onPointerUp={(event) => {
-            const next = point(event);
-            void save({ ...next, x: Math.abs(next.x - 0.5) < ALIGN_SNAP ? 0.5 : next.x });
-          }}
+          onPointerUp={(event) => void save(dragged(event))}
         >
           <p className="mb-1 text-center text-[10px] text-white/70">Drag</p>
           <div className="relative">
@@ -266,18 +271,10 @@ export function HookStage({
         />
       ) : null}
       <div className="flex gap-1">
-        <button
-          type="button"
-          onClick={() => save({ ...pos, from: videoRef.current?.currentTime ?? 0 })}
-          className="flex-1 rounded-lg border border-line px-2 py-1 text-[11px] text-mute"
-        >
+        <button type="button" onClick={() => save({ ...pos, from: videoRef.current?.currentTime ?? 0 })} className="flex-1 rounded-lg border border-line px-2 py-1 text-[11px] text-mute">
           Show text now
         </button>
-        <button
-          type="button"
-          onClick={() => save({ ...pos, to: videoRef.current?.currentTime ?? 0 })}
-          className="flex-1 rounded-lg border border-line px-2 py-1 text-[11px] text-mute"
-        >
+        <button type="button" onClick={() => save({ ...pos, to: videoRef.current?.currentTime ?? 0 })} className="flex-1 rounded-lg border border-line px-2 py-1 text-[11px] text-mute">
           Hide text after now
         </button>
       </div>

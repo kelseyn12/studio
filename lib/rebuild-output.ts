@@ -5,7 +5,7 @@ import { spokenOnClip } from "@/lib/captions-math";
 import { assembleVideo, type ClipTrim } from "@/lib/ffmpeg";
 import { deleteUpload, ensureLocal, localRoot, uploadLocalToR2 } from "@/lib/files";
 import { isLogoFile, parseLogoItems, writeLogoSheet } from "@/lib/hook-logos";
-import { boxFor, parseHookLayout } from "@/lib/hook-layout";
+import { boxFor, parseHookLayout, posFor } from "@/lib/hook-layout";
 import {
   chosenTrackId,
   parseCaptionMap,
@@ -78,8 +78,8 @@ async function burn(output: Loaded, recipe: OutputRecipe): Promise<void> {
         path: await ensureLocal(clip.path),
         hookText: row.hookText || undefined,
         trim: trimOf(row),
-        hookX: layout?.x,
-        hookY: layout?.y,
+        hookX: posFor(layout, recipe.look).x,
+        hookY: posFor(layout, recipe.look).y,
         listItems: layout?.list,
         listAt: layout?.listAt,
         textFrom: layout?.from,
@@ -105,8 +105,8 @@ async function burn(output: Loaded, recipe: OutputRecipe): Promise<void> {
     musicPath,
     musicStart: musicPath ? output.musicStart : 0,
     logoPath: await logoPathFor(hook),
-    hookX: hookPos?.x,
-    hookY: hookPos?.y,
+    hookX: posFor(hookPos, recipe.look).x,
+    hookY: posFor(hookPos, recipe.look).y,
   });
   const size = (await stat(path.join(localRoot(), outputRel))).size;
   const publicUrl = await uploadLocalToR2(outputRel, "video/mp4");

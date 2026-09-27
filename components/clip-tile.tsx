@@ -42,7 +42,7 @@ export function ClipTile({
   look?: DrawnStyle;
   slot?: string;
   listCount?: number;
-  listFromHook?: { headline: string; x: number; y: number };
+  listFromHook?: { headline: string; x: number; y: number; places?: { tiktok?: { x: number; y: number }; instagram?: { x: number; y: number } } };
 }) {
   const router = useRouter();
   const [mode, setMode] = useState<"idle" | "cut" | "place">("idle");

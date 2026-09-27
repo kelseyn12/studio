@@ -51,6 +51,7 @@ export default async function BatchPage({
     headline: hooks[0]?.hookText ?? "",
     x: hookPos?.x ?? 0.5,
     y: hookPos?.y ?? 0.17,
+    places: hookPos?.places,
   };
   const look = batch.textStyle === "instagram" ? "instagram" : batch.textStyle === "plain" ? "plain" : "tiktok";
 

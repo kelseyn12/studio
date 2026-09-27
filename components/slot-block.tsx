@@ -25,7 +25,7 @@ export function SlotBlock({
   hookText?: string;
   look?: DrawnStyle;
   listCount?: number;
-  listFromHook?: { headline: string; x: number; y: number };
+  listFromHook?: { headline: string; x: number; y: number; places?: { tiktok?: { x: number; y: number }; instagram?: { x: number; y: number } } };
   clips: Array<{
     id: string;
     filename: string;

@@ -3,7 +3,7 @@ import path from "path";
 import { groupWords, parseCaptionWords, spokenOnClip, transcribeWords, writeCaptionAss, type CaptionPhrase } from "@/lib/captions";
 import { assembleVideo, NO_TRIM, writeThumb, type ClipTrim } from "@/lib/ffmpeg";
 import { isLogoFile, parseLogoItems, writeLogoSheet } from "@/lib/hook-logos";
-import { boxFor, parseHookLayout } from "@/lib/hook-layout";
+import { boxFor, parseHookLayout, posFor } from "@/lib/hook-layout";
 import { quietEnds } from "@/lib/trim";
 import { ensureLocal, localRoot, uploadLocalToR2 } from "@/lib/files";
 import { hasR2 } from "@/lib/r2";
@@ -100,6 +100,7 @@ export async function renderBatch(input: {
                 phrases,
                 hookX: layout?.x,
                 hookY: layout?.y,
+                places: layout?.places,
                 listItems: layout?.list,
                 listAt: layout?.listAt,
                 textFrom: layout?.from,
@@ -165,21 +166,24 @@ export async function renderBatch(input: {
             const suffix = looks.length > 1 ? `-${look}` : "";
             const outputRel = await assembleVideo({
               clips: await Promise.all(
-                clips.map(async (clip) => ({
-                  path: clip.path,
-                  hookText: clip.hookText,
-                  trim: clip.trim,
-                  hookX: clip.hookX,
-                  hookY: clip.hookY,
-                  listItems: clip.listItems,
-                  listAt: clip.listAt,
-                  textFrom: clip.textFrom,
-                  textTo: clip.textTo,
-                  box: boxFor(clip, look),
-                  captionFilters: clip.phrases?.length
-                    ? [await writeCaptionAss(clip.phrases, clip.trim.start, look)]
-                    : undefined,
-                })),
+                clips.map(async (clip) => {
+                  const at = posFor({ x: clip.hookX ?? 0.5, y: clip.hookY ?? 0.17, places: clip.places }, look);
+                  return {
+                    path: clip.path,
+                    hookText: clip.hookText,
+                    trim: clip.trim,
+                    hookX: at.x,
+                    hookY: at.y,
+                    listItems: clip.listItems,
+                    listAt: clip.listAt,
+                    textFrom: clip.textFrom,
+                    textTo: clip.textTo,
+                    box: boxFor(clip, look),
+                    captionFilters: clip.phrases?.length
+                      ? [await writeCaptionAss(clip.phrases, clip.trim.start, look)]
+                      : undefined,
+                  };
+                }),
               ),
               outputName: `${id}-${fileNumber}${suffix}.mp4`,
               ...variation,
@@ -188,8 +192,8 @@ export async function renderBatch(input: {
               musicPath,
               musicStart: 0,
               logoPath,
-              hookX: hookPos?.x,
-              hookY: hookPos?.y,
+              hookX: posFor(hookPos, look).x,
+              hookY: posFor(hookPos, look).y,
             });
             const coverAt = 0.4 + copy * 0.9;
             const coverRel = `thumbs/${outputRel}.jpg`;
