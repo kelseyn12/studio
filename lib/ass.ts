@@ -187,8 +187,9 @@ export function buildHookAss(input: {
     mv: number,
     primary = ink,
     outlineColor = edge,
+    spacing = 0,
   ) =>
-    `Style: ${name},${font},${size},${primary},${primary},${outlineColor},&H00000000&,-1,0,0,0,100,100,0,0,${border},${outline},${shadow},${align},60,60,${mv},1`;
+    `Style: ${name},${font},${size},${primary},${primary},${outlineColor},&H00000000&,-1,0,0,0,100,100,${spacing},0,${border},${outline},${shadow},${align},60,60,${mv},1`;
   return [
     "[Script Info]",
     "ScriptType: v4.00+",
@@ -200,7 +201,7 @@ export function buildHookAss(input: {
     "[V4+ Styles]",
     "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding",
     ...(drawnCard ? [styleRow("Plate", 1, 1, 0, 0, 5, 0, plateFill)] : []),
-    styleRow("Head", look.fontsize, paint.borderStyle, paint.outline, paint.shadow, 8, marginV),
+    styleRow("Head", look.fontsize, paint.borderStyle, paint.outline, paint.shadow, 8, marginV, ink, edge, input.style === "tiktok" ? Math.round(look.fontsize * 0.04) : 0),
     styleRow(
       "List",
       Math.round(look.fontsize * 0.95),
@@ -211,6 +212,7 @@ export function buildHookAss(input: {
       0,
       drawnCard ? assColor(base) : ink,
       drawnCard ? assColor("black") : edge,
+      input.style === "tiktok" ? Math.round(look.fontsize * 0.04) : 0,
     ),
     "",
     "[Events]",

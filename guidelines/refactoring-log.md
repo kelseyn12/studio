@@ -1,5 +1,5 @@
 # Refactoring log
-- 2026-09-27 — TikTok white card matches the native one-line plate. Corner and pad scale with the type, so the tile is a rounded rectangle instead of a pill.
+- 2026-09-27 — TikTok letters match the app. The type was tracking-tight; the native line is opened by 0.04em. The white card shape is unchanged.
 - 2026-09-27 — Done on Words keeps the line on the tile. Reopening Words was reloading the old sentence from the first page load.
 - 2026-09-27 — Cut preview plays the yellow keep only. It starts at the yellow start, skips each dark band, and stops at the yellow end.
 - 2026-09-27 — Save cut plays the short clip instead of jumping back to the full recording. Leaving Words writes the letters, including capitals, before the cut screen opens.

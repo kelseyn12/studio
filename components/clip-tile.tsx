@@ -109,7 +109,7 @@ export function ClipTile({
           </button>
           {lines.length ? (
             <div
-              className={`pointer-events-none absolute z-10 w-max max-w-[94%] -translate-x-1/2 -translate-y-1/2 text-center text-[11px] font-bold ${LOOK_FONT_CLASS[previewLook]} ${isBoxed(plate) ? `${boxIsWhite(plate) ? "text-black" : "text-white"} ${wordBoxClass(previewLook, plate)}` : "text-white stroke-tt leading-snug"}`}
+              className={`pointer-events-none absolute z-10 w-max max-w-[94%] -translate-x-1/2 -translate-y-1/2 text-center text-[11px] font-bold leading-snug ${LOOK_FONT_CLASS[previewLook]} ${isBoxed(plate) ? `${boxIsWhite(plate) ? "text-black" : "text-white"} ${wordBoxClass(previewLook, plate)}` : "text-white stroke-tt"}`}
               style={{ left: `${at.x * 100}%`, top: `${at.y * 100}%` }}
             >
               {lines.map((line, index) => (

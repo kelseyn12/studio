@@ -38,9 +38,7 @@ export function lookPaint(style: DrawnStyle, box?: boolean | "white"): { borderS
 export function wordBoxClass(style: DrawnStyle, box?: boolean | "white"): string {
   if (!isBoxed(box)) return "";
   const fill = boxIsWhite(box) ? "bg-white text-black" : "bg-black text-white";
-  return style === "instagram"
-    ? `rounded-[4px] px-[7px] py-[2px] ${fill}`
-    : `rounded-[0.28em] px-[0.42em] py-[0.4em] leading-[1.05] ${fill}`;
+  return style === "instagram" ? `rounded-[4px] px-[7px] py-[2px] ${fill}` : `rounded-[5px] px-2 py-0.5 ${fill}`;
 }
 
 export function clampListCount(count: number): number {

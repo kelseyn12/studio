@@ -1,7 +1,7 @@
 import type { DrawnStyle } from "@/lib/text-style";
 
 export const LOOK_FONT_CLASS: Record<DrawnStyle, string> = {
-  tiktok: "font-tiktok tracking-tight",
+  tiktok: "font-tiktok tracking-[0.04em]",
   instagram: "font-ig tracking-tight",
   plain: "font-sans",
 };
