@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import { runFfmpeg } from "@/lib/ffmpeg";
 import { cutVideo } from "@/lib/cut";
 import { isPlayableCut, keepRanges, parseDrops, parseSpeed, speedAudioFilter, speedVideoFilter } from "@/lib/cut-math";
+import { cutPreviewPath, parseCutUndo } from "@/lib/hook-layout";
 import { ffprobeBin, runCommand } from "@/lib/ffmpeg";
 import { clipDuration } from "@/lib/trim";
 
@@ -65,6 +66,15 @@ describe("parseSpeed / parseDrops", () => {
     expect(speedVideoFilter(1.25)).toBe("setpts=(PTS-STARTPTS)/1.25");
     expect(speedVideoFilter(2)).not.toContain("fps");
     expect(speedAudioFilter(2)).toBe("atempo=2");
+  });
+
+  it("treats 1× as the recorded file, not a previous sped cut", () => {
+    const undo = parseCutUndo(
+      JSON.stringify({ path: "repurpose/a/cut-1.mp4", thumbPath: "", size: 1, basePath: "repurpose/a/orig.mp4" }),
+    );
+    expect(undo?.basePath).toBe("repurpose/a/orig.mp4");
+    expect(cutPreviewPath("repurpose/a/cut-1.mp4", JSON.stringify(undo))).toBe("repurpose/a/orig.mp4");
+    expect(cutPreviewPath("repurpose/a/orig.mp4", "")).toBe("repurpose/a/orig.mp4");
   });
 
   it("drops junk ranges", () => {

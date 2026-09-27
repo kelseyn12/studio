@@ -23,15 +23,27 @@ export function stringifyHookLayout(pos: HookPos): string {
   return JSON.stringify({ x: pos.x, y: pos.y });
 }
 
-export type CutUndo = { path: string; thumbPath: string; size: number };
+export type CutUndo = { path: string; thumbPath: string; size: number; basePath: string };
+
+function safeRel(value: unknown): string {
+  if (typeof value !== "string" || !value || value.includes("..")) return "";
+  return value;
+}
 
 export function parseCutUndo(raw: string | null | undefined): CutUndo | null {
   if (!raw?.trim()) return null;
   try {
-    const parsed = JSON.parse(raw) as CutUndo;
-    if (!parsed.path || parsed.path.includes("..")) return null;
-    return { path: parsed.path, thumbPath: parsed.thumbPath || "", size: Number(parsed.size) || 0 };
+    const parsed = JSON.parse(raw) as Partial<CutUndo>;
+    const path = safeRel(parsed.path);
+    if (!path) return null;
+    const basePath = safeRel(parsed.basePath) || path;
+    return { path, thumbPath: safeRel(parsed.thumbPath), size: Number(parsed.size) || 0, basePath };
   } catch {
     return null;
   }
+}
+
+/** 1× source — the recorded file, not a previous sped cut. */
+export function cutPreviewPath(path: string, cutUndo?: string): string {
+  return parseCutUndo(cutUndo)?.basePath || path;
 }

@@ -175,3 +175,6 @@
 
 - [X] Speed pills write a real 2× file
   Dropped fps/-r after setpts and the 4K playbackRate preview (2× looked slower than 1.25×). Save cut encodes `setpts`+`atempo`, then plays that file at 1×. Video and audio durations match in lib/cut.test.ts.
+
+- [X] 1× is recorded speed
+  After a sped save, 1 was playing the sped file and sounded fast. Preview and encode stay on the original (`basePath`). 1 is normal; 1.25 / 1.5 / 2 go up from there.

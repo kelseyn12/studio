@@ -37,6 +37,9 @@ export default async function CardPage({
   const desk = user.role === "EDITOR";
   const stage = desk ? "editor" : isDeskStage(query.step) ? query.step : deskStage(card.status);
   const edited = pickFinished(card.assets);
+  const cutSource = card.assets
+    .filter((asset) => asset.kind === "GENERATED" || (asset.kind === "EDITED" && !asset.filename.startsWith("cut-")))
+    .sort((left, right) => +right.createdAt - +left.createdAt)[0];
   const packet = editorNeeds(card);
 
   return (
@@ -78,6 +81,7 @@ export default async function CardPage({
             card={card}
             accounts={accounts}
             edited={edited}
+            cutSrc={cutSource?.path}
             canUndo={card.assets.some((asset) => asset.kind === "EDITED" && asset.filename.startsWith("cut-"))}
           />
         ) : null}

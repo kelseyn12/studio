@@ -12,6 +12,7 @@ export function CardLive({
   accounts,
   edited,
   canUndo,
+  cutSrc,
 }: {
   card: {
     id: string;
@@ -36,6 +37,7 @@ export function CardLive({
   }>;
   edited?: { id: string; path: string; filename: string; publicUrl: string | null; coverPath?: string };
   canUndo?: boolean;
+  cutSrc?: string;
 }) {
   const dealTargets = dealAccounts(accounts, card.campaignId);
   if (!edited) {
@@ -58,7 +60,7 @@ export function CardLive({
           <summary className="cursor-pointer text-sm font-semibold">Cut and speed — drop dragging parts, then post from here</summary>
           <div className="mt-3">
             <QuickCut
-              src={watchUrl(edited.path)}
+              src={watchUrl(cutSrc || edited.path)}
               target="asset"
               id={edited.id}
               canUndo={canUndo}

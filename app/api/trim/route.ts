@@ -19,9 +19,17 @@ async function undoCut(target: string, id: string) {
     if (!clip || !prior) return NextResponse.json({ error: "Nothing to undo" }, { status: 400 });
     await deleteUpload(clip.path);
     if (clip.thumbPath) await deleteUpload(clip.thumbPath);
+    const keepBase = prior.basePath && prior.basePath !== prior.path;
     await prisma.repurposeClip.update({
         where: { id },
-        data: { path: prior.path, thumbPath: prior.thumbPath, size: prior.size, cutUndo: "" },
+        data: {
+          path: prior.path,
+          thumbPath: prior.thumbPath,
+          size: prior.size,
+          cutUndo: keepBase
+            ? JSON.stringify({ path: prior.basePath, thumbPath: "", size: 0, basePath: prior.basePath })
+            : "",
+        },
       });
     return NextResponse.json({ ok: true, path: prior.path });
   }
@@ -64,7 +72,9 @@ export async function POST(request: Request) {
     if (target === "clip") {
       const clip = await prisma.repurposeClip.findUnique({ where: { id } });
       if (!clip) return NextResponse.json({ error: "Missing clip" }, { status: 404 });
-      const sourceAbs = await ensureLocal(clip.path);
+      const prior = parseCutUndo(clip.cutUndo);
+      const basePath = prior?.basePath || clip.path;
+      const sourceAbs = await ensureLocal(basePath);
       const outputRel = `repurpose/${clip.batchId}/cut-${Date.now()}.mp4`;
       await cutVideo({ sourceAbs, outputRel, ranges, speed });
       await uploadLocalToR2(outputRel, "video/mp4");
@@ -76,8 +86,7 @@ export async function POST(request: Request) {
       } catch {
         thumbPath = clip.thumbPath;
       }
-      const prior = parseCutUndo(clip.cutUndo);
-      if (prior) {
+      if (prior && prior.path !== basePath) {
         await deleteUpload(prior.path);
         if (prior.thumbPath) await deleteUpload(prior.thumbPath);
       }
@@ -87,10 +96,15 @@ export async function POST(request: Request) {
           path: outputRel,
           size,
           thumbPath,
-          cutUndo: JSON.stringify({ path: clip.path, thumbPath: clip.thumbPath, size: clip.size }),
+          cutUndo: JSON.stringify({
+            path: clip.path,
+            thumbPath: clip.thumbPath,
+            size: clip.size,
+            basePath,
+          }),
         },
       });
-      return NextResponse.json({ ok: true, path: outputRel });
+      return NextResponse.json({ ok: true, path: outputRel, basePath });
     }
 
     if (target === "asset") {
@@ -98,7 +112,15 @@ export async function POST(request: Request) {
       if (!asset || (asset.kind !== "EDITED" && asset.kind !== "GENERATED")) {
         return NextResponse.json({ error: "Only finished videos can be cut here" }, { status: 400 });
       }
-      const sourceAbs = await ensureLocal(asset.path);
+      const baseAsset = await prisma.asset.findFirst({
+        where: {
+          cardId: asset.cardId,
+          kind: { in: ["GENERATED", "EDITED"] },
+          NOT: { filename: { startsWith: "cut-" } },
+        },
+        orderBy: { createdAt: "desc" },
+      });
+      const sourceAbs = await ensureLocal((baseAsset ?? asset).path);
       const outputRel = `cards/${asset.cardId}/cut-${Date.now()}.mp4`;
       await cutVideo({ sourceAbs, outputRel, ranges, speed });
       const publicUrl = await uploadLocalToR2(outputRel, "video/mp4");

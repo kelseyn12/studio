@@ -93,9 +93,8 @@ export function QuickCut({
   async function save() {
     const payload = await postTrim({ target, id, start, end, drops, speed });
     if (!payload) return;
-    if (payload.path) setPlaySrc(publicFileUrl(payload.path));
+    setPlaySrc(src);
     setUndoReady(true);
-    resetWindow(0);
   }
 
   async function undo() {

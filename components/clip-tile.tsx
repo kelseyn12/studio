@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { HookLogos } from "@/components/hook-logos";
 import { HookStage } from "@/components/hook-stage";
 import { QuickCut } from "@/components/quick-cut";
+import { cutPreviewPath } from "@/lib/hook-layout";
 import { publicFileUrl } from "@/lib/urls";
 import type { DrawnStyle } from "@/lib/text-style";
 
@@ -53,7 +54,7 @@ export function ClipTile({
     <div className={`${mode !== "idle" ? "w-64" : showHook ? "w-52" : "w-32"} shrink-0`}>
       {mode === "cut" ? (
         <QuickCut
-          src={publicFileUrl(path)}
+          src={publicFileUrl(cutPreviewPath(path, cutUndo))}
           target="clip"
           id={id}
           canUndo={Boolean(cutUndo)}
