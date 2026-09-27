@@ -141,7 +141,7 @@ export function BatchSettings({
           <Row label="Numbered list under the headline">
             <div className="flex items-center gap-3">
               <p className="max-w-56 text-right text-xs text-mute">
-                Empty 1–5 from the start. Type the words on the clip. Scrub and tap This line now as you say each one.
+                Empty 1–5 from the start. Type the words on the body clip. Play and tap This line now as you say each one.
               </p>
               <select
                 value={listCount}

@@ -3,7 +3,7 @@
 import { useRef, useState, type PointerEvent } from "react";
 import { HookList } from "@/components/hook-list";
 import { hookDefaultPos, parseHookLayout, stringifyHookLayout, type HookPos } from "@/lib/hook-layout";
-import { clampLogoScale, defaultLogoPos, isLogoFile, itemScale, LOGO_SCALE_STEP, parseLogoItems } from "@/lib/hook-logos-math";
+import { ALIGN_SNAP, alignLogoRow, clampLogoScale, defaultLogoPos, isLogoFile, itemScale, LOGO_SCALE_STEP, parseLogoItems, snapLogoPos } from "@/lib/hook-logos-math";
 import { publicFileUrl } from "@/lib/urls";
 import type { DrawnStyle } from "@/lib/text-style";
 
@@ -85,9 +85,37 @@ export function HookStage({
   }
 
   function shiftItem(item: (typeof logos)[number], event: PointerEvent<HTMLButtonElement>) {
-    const next = { x: point(event).x, y: point(event).y };
+    const raw = point(event);
+    const next = snapLogoPos(
+      raw.x,
+      raw.y,
+      logos.flatMap((row, index) => (itemKey(row) === itemKey(item) ? [] : [loc(row, index)])),
+    );
     setPlaces((current) => ({ ...current, [itemKey(item)]: next }));
     return next;
+  }
+
+  async function alignPieces() {
+    const row = alignLogoRow(logos.length, logos[0] ? loc(logos[0], 0).y : undefined);
+    const nextPlaces: Record<string, { x: number; y: number }> = {};
+    await Promise.all(
+      logos.map((item, index) => {
+        const at = row[index];
+        nextPlaces[itemKey(item)] = at;
+        return fetch(`/api/repurpose/clips/${id}/logos`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            path: isLogoFile(item) ? item.path : undefined,
+            id: !isLogoFile(item) ? item.id : undefined,
+            x: at.x,
+            y: at.y,
+          }),
+        });
+      }),
+    );
+    setPlaces((current) => ({ ...current, ...nextPlaces }));
+    await save({ ...pos, x: 0.5, y: hookDefaultPos(preview).y });
   }
 
   async function moveItem(item: (typeof logos)[number], event: PointerEvent<HTMLButtonElement>) {
@@ -115,7 +143,7 @@ export function HookStage({
 
   const native =
     preview === "instagram"
-      ? "rounded-md bg-black/70 px-2 py-1 text-center text-[20px] font-semibold leading-tight text-white"
+      ? "text-center text-[21px] font-semibold leading-tight text-white [text-shadow:0_2px_0_#000,0_-2px_0_#000,2px_0_0_#000,-2px_0_0_#000]"
       : "text-center text-[22px] font-bold leading-tight text-white [text-shadow:0_1px_0_#000,0_-1px_0_#000,1px_0_0_#000,-1px_0_0_#000,0_2px_6px_#000]";
 
   return (
@@ -131,6 +159,9 @@ export function HookStage({
             {choice === "tiktok" ? "TT size" : "IG size"}
           </button>
         ))}
+        <button type="button" onClick={() => void alignPieces()} className="rounded-lg border border-line px-2 py-1 text-[11px] text-mute">
+          Align
+        </button>
       </div>
       <div ref={stageRef} className="relative overflow-hidden rounded-xl bg-ink">
         <video ref={videoRef} src={src} controls playsInline className="aspect-[9/16] w-full object-cover" />
@@ -140,10 +171,11 @@ export function HookStage({
           onPointerDown={(event) => event.currentTarget.setPointerCapture(event.pointerId)}
           onPointerMove={(event) => {
             if (event.buttons !== 1) return;
-            setPos(point(event));
+            setPos({ ...point(event), x: Math.abs(point(event).x - 0.5) < ALIGN_SNAP ? 0.5 : point(event).x });
           }}
           onPointerUp={(event) => {
-            void save(point(event));
+            const next = point(event);
+            void save({ ...next, x: Math.abs(next.x - 0.5) < ALIGN_SNAP ? 0.5 : next.x });
           }}
         >
           <p className="mb-1 text-center text-[10px] text-white/70">Drag</p>

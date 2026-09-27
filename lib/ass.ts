@@ -59,7 +59,7 @@ type LookSpec = { fontsize: number; borderStyle: 1 | 3; outline: number; shadow:
 /** Same safe-zone numbers as drawtext looks: clear of app headers (top 9–12%). */
 const LOOKS: Record<DrawnStyle, LookSpec> = {
   tiktok: { fontsize: 88, borderStyle: 1, outline: 6, shadow: 3, top: 0.17, lineGap: 1.12 },
-  instagram: { fontsize: 80, borderStyle: 3, outline: 20, shadow: 0, top: 0.16, lineGap: 1.25 },
+  instagram: { fontsize: 86, borderStyle: 1, outline: 8, shadow: 0, top: 0.15, lineGap: 1.18 },
   plain: { fontsize: 84, borderStyle: 1, outline: 6, shadow: 0, top: 0.12, lineGap: 1.12 },
 };
 
@@ -122,26 +122,26 @@ export function buildHookAss(input: {
     : headline(segments, base, accent);
   const startAt = assClock(input.from ?? 0);
   const endAt = assClock(input.to && input.to > (input.from ?? 0) ? input.to : 9 * 3600 + 59 * 60 + 59);
-  const events = [`Dialogue: 0,${startAt},${endAt},Head,,0,0,0,,${head}`];
+  const events: string[] = [];
+  if (input.text.trim()) events.push(`Dialogue: 0,${startAt},${endAt},Head,,0,0,0,,${head}`);
   const listItems = (input.listItems ?? []).map((line) => line.trim()).filter(Boolean).slice(0, LIST_MAX);
   const listCount = listItems.length || Math.min(Math.max(Math.floor(input.listCount ?? 0), 0), LIST_MAX);
   if (listCount > 0) {
     const lineHeight = look.fontsize * look.lineGap;
-    const listTop = (placed ? py : marginV) + Math.round(lines.length * lineHeight) + 120;
+    const listTop = input.text.trim()
+      ? (placed ? py : marginV) + Math.round(Math.max(lines.length, 1) * lineHeight) + 80
+      : Math.round(FRAME_H * look.top);
     const gap = Math.min(140, Math.floor((FRAME_H * 0.62 - listTop) / listCount));
-    const stagger = (input.listAt ?? []).some((time) => Number.isFinite(time));
     for (let index = 0; index < listCount; index += 1) {
       const y = listTop + index * gap;
       const number = `${index + 1}.`;
       const words = listItems[index] ? `${number} ${escapeAssText(listItems[index])}` : number;
       const wordAt = Number(input.listAt?.[index]);
-      if (stagger && listItems[index] && Number.isFinite(wordAt)) {
+      if (listItems[index] && Number.isFinite(wordAt)) {
         events.push(`Dialogue: 0,${assClock(0)},${assClock(wordAt)},List,,0,0,0,,{\\pos(90,${y})}${number}`);
         events.push(`Dialogue: 0,${assClock(wordAt)},${endAt},List,,0,0,0,,{\\pos(90,${y})}${words}`);
-      } else if (stagger) {
-        events.push(`Dialogue: 0,${assClock(0)},${endAt},List,,0,0,0,,{\\pos(90,${y})}${number}`);
       } else {
-        events.push(`Dialogue: 0,${startAt},${endAt},List,,0,0,0,,{\\pos(90,${y})}${words}`);
+        events.push(`Dialogue: 0,${assClock(0)},${endAt},List,,0,0,0,,{\\pos(90,${y})}${number}`);
       }
     }
   }

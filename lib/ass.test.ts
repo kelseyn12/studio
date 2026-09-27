@@ -61,14 +61,17 @@ describe("buildHookAss", () => {
     expect(track).toContain("5.");
     expect(
       buildHookAss({ text: "x", style: "plain", listItems: ["Nobody talks about this", "Your month"], font: "Arial" }),
-    ).toContain("1. Nobody talks about this");
+    ).toContain("1.");
+    expect(
+      buildHookAss({ text: "x", style: "plain", listItems: ["Nobody talks about this", "Your month"], font: "Arial" }),
+    ).not.toContain("1. Nobody talks about this");
     expect(track).toContain("Style: Head,Arial,88");
   });
 
-  it("gives Instagram a box and TikTok an outline with shadow", () => {
+  it("gives Instagram a Sasha stroke and TikTok an outline with shadow", () => {
     const instagram = buildHookAss({ text: "hello there", style: "instagram", font: "Arial" });
     const tiktok = buildHookAss({ text: "hello there", style: "tiktok", font: "Arial" });
-    expect(instagram).toMatch(/Style: Head,Arial,80,.*,3,20,0,8,/);
+    expect(instagram).toMatch(/Style: Head,Arial,86,.*,1,8,0,8,/);
     expect(tiktok).toMatch(/Style: Head,Arial,88,.*,1,6,3,8,/);
     expect(buildHookAss({ text: "x", style: "plain", font: "Arial" }).match(/,List,/g)).toBeNull();
   });
@@ -90,6 +93,13 @@ describe("buildHookAss", () => {
     expect(track).toContain("0:00:00.00,0:00:02.00,List,");
     expect(track).toContain("1. January");
     expect(track.match(/,List,/g)).toHaveLength(4);
+  });
+
+  it("burns a body list with no headline", () => {
+    const track = buildHookAss({ text: "", style: "instagram", listItems: ["Your month"], listAt: [3], font: "Arial" });
+    expect(track).not.toMatch(/Dialogue:.*,Head,/);
+    expect(track).toContain("1.");
+    expect(track).toContain("1. Your month");
   });
 
   it("caps the list at ten", () => {

@@ -101,7 +101,7 @@ export default async function BatchPage({
             slot="DEMO"
             title="Bodies"
             meta={`${bodies.length} options · middle clip · usually one, can be more`}
-            hint="Product / demo. Cut, speed, and Words. Scrub to the second you say the point, then Show text now / Hide text after now."
+            hint="Product / demo. List points live here: type them on Words, then This line now as you say each one. Cut and speed too."
             clips={bodies}
           />
           <SlotBlock

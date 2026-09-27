@@ -196,3 +196,6 @@
 
 - [X] Bigger hook type + Sasha list clocks
   Headline is TT 88 / IG 80. Numbers stay from the first frame. Type the points, scrub, tap This line now for each one (`listAt` in hookLayout). Studio still does not hear the list.
+
+- [X] IG-native Sasha, body list, Align
+  Instagram is outline stroke like Sasha Reels. List can live on the body (ASS without a headline). Align evens the logo row and centers Words. This line now fills each body line as you say it.

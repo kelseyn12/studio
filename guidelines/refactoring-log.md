@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-09-26 — IG look is Sasha Reels stroke (not a gray box). List burns on the body without a headline. Align evens logos and centers the line. List words wait for This line now even before the first tap.
 - 2026-09-26 — Bigger Sasha hook type (TT 88 / IG 80) and staggered list: empty numbers from 0:00, words at `listAt`. This line now on Words. Preview type 22px so it matches the burn-in.
 - 2026-09-26 — Logo `scale` (0.5–2.5, step 0.25). Words has Smaller / Bigger for the tapped chip. PATCH can set scale without wiping x/y.
 - 2026-09-26 — Logo chips on Words have no white pills; grab pad is invisible. Burn-in was already just the files and drawtext.

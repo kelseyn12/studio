@@ -12,6 +12,32 @@ export function defaultLogoPos(index: number, count: number): { x: number; y: nu
   return { x: Math.min(0.92, Math.max(0.08, x)), y: LOGO_ROW_Y };
 }
 
+export const ALIGN_SNAP = 0.03;
+
+export function alignLogoRow(count: number, y = LOGO_ROW_Y): Array<{ x: number; y: number }> {
+  return Array.from({ length: Math.max(0, count) }, (_, index) => ({
+    x: defaultLogoPos(index, count).x,
+    y: Math.min(0.88, Math.max(0.08, y)),
+  }));
+}
+
+export function snapLogoPos(
+  x: number,
+  y: number,
+  others: Array<{ x: number; y: number }>,
+): { x: number; y: number } {
+  let nextX = x;
+  let nextY = y;
+  for (const other of others) {
+    if (Math.abs(other.y - y) < ALIGN_SNAP) nextY = other.y;
+    if (Math.abs(other.x - x) < ALIGN_SNAP) nextX = other.x;
+  }
+  return {
+    x: Math.min(0.92, Math.max(0.08, nextX)),
+    y: Math.min(0.88, Math.max(0.08, nextY)),
+  };
+}
+
 export const LOGO_SCALE_MIN = 0.5;
 export const LOGO_SCALE_MAX = 2.5;
 export const LOGO_SCALE_STEP = 0.25;

@@ -12,6 +12,8 @@ export {
   stringifyLogos,
   isLogoFile,
   defaultLogoPos,
+  alignLogoRow,
+  snapLogoPos,
   clampLogoScale,
   itemScale,
   logoBoxes,

@@ -29,8 +29,8 @@ export function HookList({
         This line now
       </button>
       <p className="text-[11px] text-mute">
-        Numbers stay up from the start. Scrub to when you say a point, tap This line now
-        {filled ? ` (${filled}/${lines.length || 0} filled).` : "."} Words do not listen — you tap each one.
+        Put this list on the body if the points live there. Numbers stay from the first frame. Play, tap This
+        line now when you say each one{filled ? ` (${filled}/${lines.length || 0} filled)` : ""}. Studio does not hear you.
       </p>
     </div>
   );

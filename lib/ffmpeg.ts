@@ -214,21 +214,24 @@ export async function assembleVideo(input: {
   const chains: string[] = [];
   for (let index = 0; index < n; index += 1) {
     const clip = input.clips[index];
-    const hookFilter = clip.hookText
-      ? await writeHookAss({
-          text: clip.hookText,
-          style: input.hookStyle ?? "plain",
-          baseColor: input.hookColor,
-          accentColor: input.accentColor,
-          listCount: index === 0 ? input.hookList : 0,
-          listItems: clip.listItems,
-          listAt: clip.listAt,
-          x: clip.hookX ?? (index === 0 ? input.hookX : undefined),
-          y: clip.hookY ?? (index === 0 ? input.hookY : undefined),
-          from: clip.textFrom,
-          to: clip.textTo,
-        })
-      : undefined;
+    const listHost = input.clips.findIndex((row) => row.listItems?.length);
+    const emptyList = listHost < 0 && index === 0 ? input.hookList : 0;
+    const hookFilter =
+      clip.hookText || clip.listItems?.length || emptyList
+        ? await writeHookAss({
+            text: clip.hookText || "",
+            style: input.hookStyle ?? "plain",
+            baseColor: input.hookColor,
+            accentColor: input.accentColor,
+            listCount: clip.listItems?.length ? 0 : emptyList,
+            listItems: clip.listItems,
+            listAt: clip.listAt,
+            x: clip.hookX ?? (index === 0 ? input.hookX : undefined),
+            y: clip.hookY ?? (index === 0 ? input.hookY : undefined),
+            from: clip.textFrom,
+            to: clip.textTo,
+          })
+        : undefined;
     const vf = videoFilter({
       speed: input.speed,
       saturation: input.saturation,
