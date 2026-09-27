@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { nextStatusFor, sendBackStatus, type DeskStage } from "@/lib/card-desk";
 import { cardPatch } from "@/lib/card-patch";
+import { dropCards } from "@/lib/drop-cards";
 import { deleteUpload, saveUpload, mimeFromName } from "@/lib/files";
 import { isDirectMediaUrl } from "@/lib/media-url";
 import { rejectStudioFile } from "@/lib/storage";
@@ -208,12 +209,7 @@ export async function deleteVideo(formData: FormData) {
   if (user.role === "EDITOR") redirect("/edits");
   const id = String(formData.get("id") || "");
   if (!id) redirect("/plan");
-  const card = await prisma.card.findUnique({ where: { id }, include: { assets: true } });
-  if (!card) redirect("/plan");
-  for (const asset of card.assets) {
-    await deleteUpload(asset.path);
-  }
-  await prisma.card.delete({ where: { id } });
+  await dropCards([id]);
   revalidatePath("/plan");
   revalidatePath("/calendar");
   revalidatePath("/edits");

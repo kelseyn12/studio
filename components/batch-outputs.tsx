@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { sendBatchToEditor } from "@/app/repurposer/actions";
+import { PickBox, SelectDeleteBar, VideoPick } from "@/components/select-videos";
 import { publicFileUrl } from "@/lib/urls";
 
 type Output = { id: string; label: string; path: string; cardId: string | null };
@@ -44,6 +45,7 @@ export function BatchOutputs({
   const cardById = new Map(cards.map((card) => [card.id, card]));
   const message = polishMessage(polish);
   const defaultEditor = editors.find((person) => person.defaultEditor)?.id ?? editors[0]?.id ?? "";
+  const cardIds = outputs.flatMap((output) => (output.cardId ? [output.cardId] : []));
   return (
     <div className="mt-8 space-y-4">
       {message ? <p className="text-sm text-sun">{message}</p> : null}
@@ -73,22 +75,28 @@ export function BatchOutputs({
           </button>
         </form>
       ) : null}
-      <div className="space-y-2">
-        {outputs.map((output) => {
-          const state = stateLabel(output.cardId ? cardById.get(output.cardId) : undefined);
-          return (
-            <div key={output.id} className="flex items-center justify-between gap-3 rounded-card border border-line bg-panel px-4 py-3">
-              <a className="text-sun" href={publicFileUrl(output.path)}>
-                {output.label}
-              </a>
-              <div className="flex items-center gap-3 text-sm text-mute">
-                {state ? <span>{state}</span> : null}
-                {output.cardId ? <Link href={`/cards/${output.cardId}`}>Open video</Link> : null}
+      <VideoPick ids={cardIds}>
+        <div className="space-y-2">
+          <SelectDeleteBar total={new Set(cardIds).size} batchId={batchId} />
+          {outputs.map((output) => {
+            const state = stateLabel(output.cardId ? cardById.get(output.cardId) : undefined);
+            return (
+              <div key={output.id} className="flex items-center justify-between gap-3 rounded-card border border-line bg-panel px-4 py-3">
+                <div className="flex min-w-0 items-center gap-3">
+                  {output.cardId ? <PickBox id={output.cardId} /> : null}
+                  <a className="truncate text-sun" href={publicFileUrl(output.path)}>
+                    {output.label}
+                  </a>
+                </div>
+                <div className="flex items-center gap-3 text-sm text-mute">
+                  {state ? <span>{state}</span> : null}
+                  {output.cardId ? <Link href={`/cards/${output.cardId}`}>Open video</Link> : null}
+                </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      </VideoPick>
     </div>
   );
 }

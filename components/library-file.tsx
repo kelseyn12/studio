@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { deleteAsset } from "@/app/library/actions";
 import { StatusPill } from "@/components/status-pill";
@@ -8,6 +9,7 @@ import { watchUrl } from "@/lib/urls";
 export function LibraryFile({
   asset,
   liveLabel,
+  pick,
 }: {
   asset: {
     id: string;
@@ -20,12 +22,14 @@ export function LibraryFile({
     card: { id: string; title: string; status: PipelineStatus; campaign: { name: string } | null };
   };
   liveLabel?: string;
+  pick?: ReactNode;
 }) {
   const href = watchUrl(asset.path);
   const audio = asset.mime.startsWith("audio");
   const video = asset.mime.startsWith("video");
   return (
     <article className="rounded-card border border-line bg-panel p-4">
+      {pick ? <div className="mb-3">{pick}</div> : null}
       {video ? (
         <video controls src={href} className="mb-3 aspect-[9/16] max-h-80 w-full rounded-xl bg-ink object-cover" />
       ) : null}

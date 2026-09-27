@@ -1,4 +1,5 @@
 import { LibraryFile } from "@/components/library-file";
+import { PickBox, SelectDeleteBar, VideoPick } from "@/components/select-videos";
 import { groupByDeal } from "@/lib/library-groups";
 import type { PipelineStatus } from "@/lib/pipeline";
 
@@ -21,30 +22,35 @@ export function LibraryDeals({ assets }: { assets: FinishedAsset[] }) {
       </p>
     );
   }
+  const videoIds = assets.map((asset) => asset.card.id);
   return (
-    <div className="space-y-8">
-      {groupByDeal(assets).map((group) => (
-        <div key={group.deal}>
-          <h3 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-mute">
-            {group.deal} · {group.items.length}
-          </h3>
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-            {group.items.map((asset) => (
-              <LibraryFile
-                key={asset.id}
-                asset={asset}
-                liveLabel={
-                  asset.card.status === "REVIEW"
-                    ? "Approve / schedule"
-                    : asset.card.status === "READY"
-                      ? "Schedule"
-                      : "Open"
-                }
-              />
-            ))}
+    <VideoPick ids={videoIds}>
+      <div className="space-y-8">
+        <SelectDeleteBar total={new Set(videoIds).size} />
+        {groupByDeal(assets).map((group) => (
+          <div key={group.deal}>
+            <h3 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-mute">
+              {group.deal} · {group.items.length}
+            </h3>
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {group.items.map((asset) => (
+                <LibraryFile
+                  key={asset.id}
+                  asset={asset}
+                  pick={<PickBox id={asset.card.id} />}
+                  liveLabel={
+                    asset.card.status === "REVIEW"
+                      ? "Approve / schedule"
+                      : asset.card.status === "READY"
+                        ? "Schedule"
+                        : "Open"
+                  }
+                />
+              ))}
+            </div>
           </div>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
+    </VideoPick>
   );
 }

@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-09-26 — Select all + delete selected on Library Finished and Multiply outputs. Shared `dropCards` / `uniqueIds` so two looks of the same video count as one delete. Single-video delete uses the same path.
 - 2026-09-26 — Output titles include the hook line so copy 1 and copy 2 of the same mix are not mistaken for different hooks.
 - 2026-09-26 — Hook clips store `postCaption` (the text that posts under videos from that hook); batch caption is the fallback. Spoken captions take the file's look (TikTok shadow vs Instagram box) inside the per-look render.
 - 2026-09-26 — Copy 1 and copy 2 no longer share the same crop (`CROP_STEPS` instead of `abs(speed step)`). Output labels are mix / copy / look. Mix settings copy explains mixes vs copies vs both looks.

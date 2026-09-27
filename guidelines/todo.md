@@ -160,3 +160,6 @@
 
 - [X] Spoken words on screen in Multiply
   Toggle on Mix settings. Whisper timestamps → 2–3 word phrases burned through the whole video. Cached per clip. Needs ffmpeg-full + OPENAI_API_KEY.
+
+- [X] Select all + delete generated videos
+  Library Finished and the Multiply output list have Select all / Delete selected. One click marks every video; delete removes the cards, files, and batch rows.

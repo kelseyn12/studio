@@ -1,10 +1,25 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
+import { dropCards } from "@/lib/drop-cards";
 import { deleteUpload } from "@/lib/files";
 import { prisma } from "@/lib/prisma";
 import { sweepStale } from "@/lib/sweep";
+
+export async function deleteSelectedVideos(formData: FormData) {
+  const user = await requireUser();
+  if (user.role === "EDITOR") redirect("/edits");
+  const batchId = String(formData.get("batchId") || "");
+  await dropCards(formData.getAll("cardId").map(String));
+  revalidatePath("/library");
+  revalidatePath("/plan");
+  revalidatePath("/calendar");
+  revalidatePath("/edits");
+  revalidatePath("/");
+  if (batchId) revalidatePath(`/repurposer/${batchId}`);
+}
 
 export async function deleteAsset(formData: FormData) {
   await requireUser();

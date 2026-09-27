@@ -48,7 +48,10 @@
 - `sendForTouchUp` — `app/cards/[id]/actions.ts` — sends a finished (usually generated) video to the editor to polish; back to Cuts as EDITING. Used on Live for unscheduled Ready videos.
 - `sendBatchToEditor` — `app/repurposer/actions.ts` — sends every built, unscheduled video in a Multiply batch to the editor at once (EDITING, cutBy EDITOR, one ping). Used by BatchOutputs on the batch page.
 - `cardsToPolish` / `polishNote` — `lib/batch-polish.ts` — which batch outputs are still READY and unscheduled; note text tagged with the batch name. Tested in `lib/batch-polish.test.ts`.
-- `BatchOutputs` — `components/batch-outputs.tsx` — built-video list with per-video state (Ready / Scheduled / With editor) and the Send all to editor form.
+- `BatchOutputs` — `components/batch-outputs.tsx` — built-video list with per-video state (Ready / Scheduled / With editor), Select all / Delete selected, and the Send all to editor form.
+- `dropCards` / `uniqueIds` — `lib/drop-cards.ts` — deletes videos and their files (and Multiply output rows that point at them). Used by Delete this video and Delete selected. Tested in `lib/drop-cards.test.ts`.
+- `deleteSelectedVideos` — `app/library/actions.ts` — form action for the Select all bar. Used by Library Finished and BatchOutputs.
+- `SelectDeleteBar` / `usePicked` / `PickBox` — `components/select-videos.tsx` — checkbox selection + confirm-before-delete toolbar.
 - `hookLooks` / `looksForNetworks` — `lib/text-style.ts` — which looks to render for one Multiply output (`both` always Instagram + TikTok; `auto` does the same when the deal spans those looks) / distinct looks a set of accounts needs. Tested in `lib/card-desk-look.test.ts` and `lib/text-style.test.ts`.
 - `targetsByLook` — `lib/targets.ts` — groups a video's target accounts by app look so each look's file posts to its own accounts. Used by `queueCard`.
 - `pickForLook` — `lib/card-desk.ts` — file to ship for one look: newest EDITED, else GENERATED built in that look, else `pickFinished`.
