@@ -4,6 +4,7 @@ import path from "path";
 import { randomUUID } from "crypto";
 import { hookFontFamily, hookFontsDir } from "@/lib/hook-font-files";
 import { wrapHook, type DrawnStyle } from "@/lib/text-style";
+import { lineStep, plateSize, roundedPlatePath } from "@/lib/ass-plate";
 import { clampListCount, FRAME_H, FRAME_W, listStack, LOOK_METRICS, lookPaint, type ListStack } from "@/lib/list-layout";
 import { LIST_MAX } from "@/lib/variations";
 
@@ -102,7 +103,9 @@ export function buildHookAss(input: {
   listStack?: ListStack;
 }): string {
   const look = LOOK_METRICS[input.style];
-  const paint = lookPaint(input.style, input.box);
+  const drawnCard = Boolean(input.box) && input.style === "tiktok";
+  const paint = drawnCard ? { borderStyle: 1 as const, outline: 0, shadow: 0 } : lookPaint(input.style, input.box);
+  const listPaint = drawnCard ? lookPaint(input.style) : paint;
   const font = input.font ?? hookFontFamily(input.style);
   const base = input.baseColor || "white";
   const accent = input.accentColor || DEFAULT_ACCENT;
@@ -130,8 +133,21 @@ export function buildHookAss(input: {
     } else {
       const ink = input.box === "white" ? "black" : input.box ? "white" : base;
       const body = headline(lines.map(parseHighlight), ink, accent);
-      const head = placed ? `{\\an5\\pos(${px},${py})}${body}` : body;
-      events.push(`Dialogue: 0,${startAt},${endAt},Head,,0,0,0,,${head}`);
+      const step = lineStep(look.fontsize);
+      const blockH = lines.length * step;
+      const cx = placed ? px : Math.round(FRAME_W / 2);
+      const cy = placed ? py : Math.round(marginV + blockH / 2);
+      if (drawnCard) {
+        const size = plateSize(input.style, lines.map(stripHighlight), look.fontsize);
+        const fill = input.box === "white" ? "white" : "black";
+        events.push(
+          `Dialogue: 0,${startAt},${endAt},Plate,,0,0,0,,{\\an5\\pos(${cx},${cy})\\p1}${roundedPlatePath(size.width, size.height)}`,
+        );
+        events.push(`Dialogue: 0,${startAt},${endAt},Head,,0,0,0,,{\\an5\\pos(${cx},${cy})}${body}`);
+      } else {
+        const head = placed ? `{\\an5\\pos(${px},${py})}${body}` : body;
+        events.push(`Dialogue: 0,${startAt},${endAt},Head,,0,0,0,,${head}`);
+      }
     }
   }
   const listItems = (input.listItems ?? []).map((line) => line.trim()).filter(Boolean).slice(0, LIST_MAX);
@@ -159,9 +175,20 @@ export function buildHookAss(input: {
     }
   }
   const ink = input.box ? assColor(input.box === "white" ? "black" : "white") : assColor(base);
-  const edge = input.box ? assColor(input.box === "white" ? "white" : "black") : "&H00000000&";
-  const styleRow = (name: string, size: number, border: 1 | 3, outline: number, shadow: number, align: number, mv: number) =>
-    `Style: ${name},${font},${size},${ink},${ink},${edge},&H00000000&,-1,0,0,0,100,100,0,0,${border},${outline},${shadow},${align},60,60,${mv},1`;
+  const edge = input.box && !drawnCard ? assColor(input.box === "white" ? "white" : "black") : "&H00000000&";
+  const plateFill = assColor(input.box === "white" ? "white" : "black");
+  const styleRow = (
+    name: string,
+    size: number,
+    border: 1 | 3,
+    outline: number,
+    shadow: number,
+    align: number,
+    mv: number,
+    primary = ink,
+    outlineColor = edge,
+  ) =>
+    `Style: ${name},${font},${size},${primary},${primary},${outlineColor},&H00000000&,-1,0,0,0,100,100,0,0,${border},${outline},${shadow},${align},60,60,${mv},1`;
   return [
     "[Script Info]",
     "ScriptType: v4.00+",
@@ -172,8 +199,19 @@ export function buildHookAss(input: {
     "",
     "[V4+ Styles]",
     "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding",
+    ...(drawnCard ? [styleRow("Plate", 1, 1, 0, 0, 5, 0, plateFill)] : []),
     styleRow("Head", look.fontsize, paint.borderStyle, paint.outline, paint.shadow, 8, marginV),
-    styleRow("List", Math.round(look.fontsize * 0.95), paint.borderStyle, paint.outline, paint.shadow, 7, 0),
+    styleRow(
+      "List",
+      Math.round(look.fontsize * 0.95),
+      listPaint.borderStyle,
+      listPaint.outline,
+      listPaint.shadow,
+      7,
+      0,
+      drawnCard ? assColor(base) : ink,
+      drawnCard ? assColor("black") : edge,
+    ),
     "",
     "[Events]",
     "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text",

@@ -83,10 +83,15 @@ describe("buildHookAss", () => {
       /Style: Head,Arial,76,&HFFFFFF&,&HFFFFFF&,&H000000&,&H00000000&,-1,0,0,0,100,100,0,0,3,8,0,8,/,
     );
     expect(buildHookAss({ text: "hello there", style: "tiktok", box: true, font: "Arial" })).toMatch(
-      /Style: Head,Arial,82,.*,3,12,0,8,/,
+      /Style: Head,Arial,82,.*,1,0,0,8,/,
+    );
+    expect(buildHookAss({ text: "hello there", style: "tiktok", box: "white", font: "Arial" })).toContain("\\p1");
+    expect(buildHookAss({ text: "hello there", style: "tiktok", box: "white", font: "Arial" })).toContain(" b ");
+    expect(buildHookAss({ text: "hello there", style: "tiktok", box: "white", font: "Arial" })).toMatch(
+      /Style: Plate,Arial,1,&HFFFFFF&/,
     );
     expect(buildHookAss({ text: "hello there", style: "tiktok", box: "white", font: "Arial" })).toMatch(
-      /Style: Head,Arial,82,&H000000&,&H000000&,&HFFFFFF&/,
+      /Style: Head,Arial,82,&H000000&,&H000000&,&H00000000&/,
     );
     expect(buildHookAss({ text: "x", style: "plain", font: "Arial" }).match(/,List,/g)).toBeNull();
   });
@@ -190,6 +195,57 @@ describe("Sasha frame renders with real ffmpeg", () => {
       expect(await countPixels(frame, "1080:200:0:1500", isGreen)).toBe(0);
       expect(await countPixels(frame, "120:600:70:520", isWhite)).toBeGreaterThan(50);
       expect(await countPixels(frame, "120:600:500:520", isWhite)).toBe(0);
+    },
+    60_000,
+  );
+
+  it(
+    "keeps the TikTok card corners rounded in the frame",
+    async () => {
+      dir = dir || (await mkdtemp(path.join(os.tmpdir(), "studio-ass-")));
+      const frame = path.join(dir, "card.png");
+      const filter = await writeHookAss({ text: "Hello there", style: "tiktok", box: "white", x: 0.5, y: 0.3 });
+      await runFfmpeg([
+        "-f",
+        "lavfi",
+        "-i",
+        "color=c=black:s=1080x1920:d=0.2",
+        "-vf",
+        filter,
+        "-frames:v",
+        "1",
+        frame,
+      ]);
+      const raw = `${frame}.rgb`;
+      await runFfmpeg(["-i", frame, "-vf", "format=rgb24", "-f", "rawvideo", raw]);
+      const bytes = await readFile(raw);
+      const width = 1080;
+      const height = 1920;
+      let minX = width;
+      let minY = height;
+      let maxX = 0;
+      let maxY = 0;
+      const whiteAt = (x: number, y: number) => {
+        const index = (y * width + x) * 3;
+        return bytes[index] > 220 && bytes[index + 1] > 220 && bytes[index + 2] > 220;
+      };
+      for (let y = 0; y < height; y += 1) {
+        for (let x = 0; x < width; x += 1) {
+          if (!whiteAt(x, y)) continue;
+          if (x < minX) minX = x;
+          if (y < minY) minY = y;
+          if (x > maxX) maxX = x;
+          if (y > maxY) maxY = y;
+        }
+      }
+      const boxW = maxX - minX;
+      const boxH = maxY - minY;
+      expect(boxW).toBeGreaterThan(80);
+      expect(boxW).toBeLessThan(900);
+      expect(boxH).toBeGreaterThan(40);
+      expect(boxH).toBeLessThan(400);
+      expect(whiteAt(minX, minY)).toBe(false);
+      expect(whiteAt(minX + Math.round(boxW / 2), minY + 4)).toBe(true);
     },
     60_000,
   );

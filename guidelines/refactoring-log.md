@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-09-26 — TikTok text card is a rounded ASS drawing (`roundedPlatePath`, radius 28) so the finished file keeps the curve. libass plates stay off for that look.
 - 2026-09-26 — +, =, and emoji grab boxes use `previewGrab` (glyph size). Logo files still use the image size.
 - 2026-09-26 — TikTok plate corners tightened (`rounded-md`, outline 12). Instagram never gets a plate. Headline grab is `w-max max-w-[62%]`; logo hit pad is 4px. Cover sits on each finished video via the existing `/api/cover`.
 - 2026-09-26 — TikTok box is one card around every line. Instagram stays a chip per line. Each look stores its own box, so TT white does not force IG.
