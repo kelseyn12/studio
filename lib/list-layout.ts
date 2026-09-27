@@ -30,7 +30,7 @@ export function lookPaint(style: DrawnStyle, box?: boolean | "white"): { borderS
   if (isBoxed(box) && style === "instagram") return { borderStyle: 3, outline: 8, shadow: 0 };
   if (isBoxed(box)) return { borderStyle: 3, outline: 10, shadow: 0 };
   if (style === "instagram") return { borderStyle: 1, outline: 5, shadow: 1 };
-  if (style === "tiktok") return { borderStyle: 1, outline: 5, shadow: 2 };
+  if (style === "tiktok") return { borderStyle: 1, outline: 10, shadow: 0 };
   return { borderStyle: 1, outline: 6, shadow: 0 };
 }
 

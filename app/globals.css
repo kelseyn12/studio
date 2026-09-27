@@ -52,3 +52,14 @@ textarea {
   text-transform: uppercase;
   color: #a89f91;
 }
+
+/* Hard outline, same idea as the TikTok text tool. Stroke is painted under the fill. */
+.stroke-tt {
+  -webkit-text-stroke: 6px #000;
+  paint-order: stroke fill;
+}
+
+.stroke-ig {
+  -webkit-text-stroke: 3px #000;
+  paint-order: stroke fill;
+}
