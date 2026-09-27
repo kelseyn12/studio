@@ -242,7 +242,7 @@ model RepurposeBatch {
   cropAmt      Int              @default(4)
   allCombos   Boolean          @default(true)
   count       Int              @default(12)
-  variants    Int              @default(2)
+  variants    Int              @default(1)
   mirrorOn    Boolean          @default(false)
   trimOn      Boolean          @default(false)
   hookColorOn Boolean          @default(false)

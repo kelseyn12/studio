@@ -102,16 +102,21 @@ export function BatchSettings({
       <div className="rounded-card bg-sun px-5 py-4 text-ink">
         <p className="text-xs font-semibold uppercase tracking-[0.16em]">This batch will make</p>
         <p className="mt-1 text-2xl font-semibold">
-          {hooks} hooks × {bodies} bodies × {ctas} CTAs = {mixes} mixes
-          {textCount > 0 ? ` × ${textCount} text hook${textCount === 1 ? "" : "s"}` : ""}
-          {variants > 1 ? ` × ${variants} unique copies` : ""} = {files} videos
+          {hooks} hook{hooks === 1 ? "" : "s"}
+          {bodies > 0 ? ` × ${bodies} body` : ""}
+          {ctas > 0 ? ` × ${ctas} CTA` : ""}
+          {textCount > 0 ? ` × ${textCount} text line` : ""}
+          {variants > 1 ? ` × ${variants} copies` : ""} = {mixes * Math.max(textCount, 1) * Math.max(variants, 1)}{" "}
+          stor{mixes * Math.max(textCount, 1) * Math.max(variants, 1) === 1 ? "y" : "ies"}
         </p>
-        {looks > 1 ? (
-          <p className="mt-1 text-sm text-ink/80">
-            Each video is built in {looks} looks (Instagram + TikTok text), so {files * looks} files. Each look posts to
-            its own accounts.
-          </p>
-        ) : null}
+        <p className="mt-2 text-sm text-ink/80">
+          {hooks > 1 && bodies <= 1 && ctas === 0
+            ? "Each hook is its own video, same body under all of them. That is enough — you do not need extra copies unless you will post the same hook twice."
+            : "Each mix is one hook + body + CTA."}
+          {looks > 1
+            ? ` Both looks doubles the files (${files * looks}) — same video, Instagram text and TikTok text.`
+            : ""}
+        </p>
       </div>
 
       <section className="rounded-card border border-line bg-panel p-5">
@@ -171,9 +176,9 @@ export function BatchSettings({
       <section className="rounded-card border border-line bg-panel p-5">
         <p className="label">Mix settings</p>
         <p className="mt-2 text-sm text-mute">
-          A mix is one hook + body + CTA — a different story. Copies are the same story with a slightly different
-          speed, light, and crop so the apps do not treat them as the same file. Both looks is the same copy twice:
-          Instagram text and TikTok text — same speed and crop on purpose.
+          Leave copies at 1 unless you will post the same hook more than once. Copies look almost the same on purpose —
+          a tiny speed and crop change so TikTok or Instagram does not treat two posts as the same file. You will not
+          see a new story. Text color per copy only runs if copies is 2 or more (starred word goes green, then red).
         </p>
         <div className="mt-5 space-y-4">
           <Row label="Use every mix">
@@ -200,6 +205,8 @@ export function BatchSettings({
               className="field max-w-28"
             />
           </Row>
+          {variants > 1 ? (
+            <>
           <Slider
             name="speedAmt"
             label="Speed"
@@ -239,20 +246,28 @@ export function BatchSettings({
           <Row label="Mirror later copies">
             <Toggle name="mirrorOn" on={mirrorOn} onChange={setMirrorOn} />
           </Row>
+          <Row label="Text color changes per copy">
+            <div className="flex items-center gap-3">
+              <p className="max-w-56 text-right text-xs text-mute">
+                Copy 1 stays white (or your starred color). Copy 2+ cycles the starred word green → red → yellow → blue.
+              </p>
+              <Toggle name="hookColorOn" on={hookColorOn} onChange={setHookColorOn} />
+            </div>
+          </Row>
+            </>
+          ) : (
+            <>
+              <input type="hidden" name="speedAmt" value={speedAmt} />
+              <input type="hidden" name="colorAmt" value={colorAmt} />
+              <input type="hidden" name="cropAmt" value={cropAmt} />
+            </>
+          )}
           <Row label="Spoken words on screen">
             <div className="flex items-center gap-3">
               <p className="max-w-56 text-right text-xs text-mute">
                 What you say, phrase by phrase, in that file&apos;s look — TikTok text or Instagram text.
               </p>
               <Toggle name="captionsOn" on={captionsOn} onChange={setCaptionsOn} />
-            </div>
-          </Row>
-          <Row label="Text color changes per copy">
-            <div className="flex items-center gap-3">
-              <p className="max-w-56 text-right text-xs text-mute">
-                Starred word cycles green, red, yellow, blue. Lines without stars change color as a whole.
-              </p>
-              <Toggle name="hookColorOn" on={hookColorOn} onChange={setHookColorOn} />
             </div>
           </Row>
           <Row label="Cut dead air off clip ends">
@@ -269,7 +284,7 @@ export function BatchSettings({
             onAccountIdsChange={setAccountIds}
           />
         </div>
-        <p className="mt-5 text-sm text-mute">Copy 2 preview: {preview.label}</p>
+        {variants > 1 ? <p className="mt-5 text-sm text-mute">Copy 2 preview: {preview.label}</p> : null}
         <button
           className="mt-4 rounded-xl bg-sun px-6 py-3 font-semibold text-ink disabled:opacity-40"
           disabled={files < 1}
