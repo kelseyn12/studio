@@ -1,9 +1,8 @@
 "use client";
 
 import { useRef, useState, type PointerEvent } from "react";
-import { useRouter } from "next/navigation";
 import { hookDefaultPos, parseHookLayout, stringifyHookLayout, type HookPos } from "@/lib/hook-layout";
-import { isLogoFile, parseLogoItems } from "@/lib/hook-logos-math";
+import { defaultLogoPos, isLogoFile, parseLogoItems } from "@/lib/hook-logos-math";
 import { publicFileUrl } from "@/lib/urls";
 import type { DrawnStyle } from "@/lib/text-style";
 
@@ -22,7 +21,6 @@ export function HookStage({
   logosJson: string;
   look: DrawnStyle;
 }) {
-  const router = useRouter();
   const stageRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const saved = parseHookLayout(hookLayout) ?? hookDefaultPos(look);
@@ -30,7 +28,16 @@ export function HookStage({
   const [list, setList] = useState((saved.list ?? []).join("\n"));
   const [pos, setPos] = useState<HookPos>(saved);
   const [preview, setPreview] = useState<DrawnStyle>(look);
+  const [places, setPlaces] = useState<Record<string, { x: number; y: number }>>({});
   const logos = parseLogoItems(logosJson);
+
+  function itemKey(item: (typeof logos)[number]): string {
+    return isLogoFile(item) ? item.path : item.id;
+  }
+
+  function loc(item: (typeof logos)[number], index: number): { x: number; y: number } {
+    return places[itemKey(item)] ?? (item.x != null && item.y != null ? { x: item.x, y: item.y } : defaultLogoPos(index, logos.length));
+  }
 
   function point(event: PointerEvent<HTMLElement>): HookPos {
     const box = stageRef.current?.getBoundingClientRect();
@@ -52,8 +59,14 @@ export function HookStage({
     });
   }
 
+  function shiftItem(item: (typeof logos)[number], event: PointerEvent<HTMLButtonElement>) {
+    const next = { x: point(event).x, y: point(event).y };
+    setPlaces((current) => ({ ...current, [itemKey(item)]: next }));
+    return next;
+  }
+
   async function moveItem(item: (typeof logos)[number], event: PointerEvent<HTMLButtonElement>) {
-    const next = point(event);
+    const next = shiftItem(item, event);
     await fetch(`/api/repurpose/clips/${id}/logos`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -64,7 +77,6 @@ export function HookStage({
         y: next.y,
       }),
     });
-    router.refresh();
   }
 
   const native =
@@ -111,30 +123,41 @@ export function HookStage({
             rows={3}
           />
         </div>
-        {logos.map((item) => (
-          <button
-            key={isLogoFile(item) ? item.path : item.id}
-            type="button"
-            onPointerDown={(event) => event.currentTarget.setPointerCapture(event.pointerId)}
-            onPointerMove={(event) => {
-              if (event.buttons !== 1) return;
-              const next = point(event);
-              event.currentTarget.style.left = `${next.x * 100}%`;
-              event.currentTarget.style.top = `${next.y * 100}%`;
-            }}
-            onPointerUp={(event) => moveItem(item, event)}
-            className="absolute z-20 flex h-12 min-w-12 -translate-x-1/2 -translate-y-1/2 cursor-grab items-center justify-center overflow-hidden rounded-lg border border-white/40 bg-ink/40 px-1 text-lg"
-            style={{ left: `${(item.x ?? 0.5) * 100}%`, top: `${(item.y ?? 0.5) * 100}%` }}
-            title="Drag"
-          >
-            {isLogoFile(item) ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={publicFileUrl(item.path)} alt={item.filename} className="h-full w-full object-contain" />
-            ) : (
-              item.text
-            )}
-          </button>
-        ))}
+        {logos.map((item, index) => {
+          const at = loc(item, index);
+          return (
+            <button
+              key={itemKey(item)}
+              type="button"
+              onPointerDown={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                event.currentTarget.setPointerCapture(event.pointerId);
+              }}
+              onPointerMove={(event) => {
+                if (event.buttons !== 1) return;
+                event.preventDefault();
+                event.stopPropagation();
+                shiftItem(item, event);
+              }}
+              onPointerUp={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                void moveItem(item, event);
+              }}
+              className="absolute z-30 flex h-16 min-w-16 -translate-x-1/2 -translate-y-1/2 cursor-grab touch-none select-none items-center justify-center rounded-xl border-2 border-white bg-ink/70 px-2 text-2xl active:cursor-grabbing"
+              style={{ left: `${at.x * 100}%`, top: `${at.y * 100}%` }}
+              title="Drag"
+            >
+              {isLogoFile(item) ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={publicFileUrl(item.path)} alt={item.filename} className="pointer-events-none h-12 w-12 object-contain" />
+              ) : (
+                item.text
+              )}
+            </button>
+          );
+        })}
       </div>
       <div className="flex gap-1">
         <button

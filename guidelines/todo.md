@@ -184,3 +184,6 @@
 
 - [X] Words timing, multi-cut, formula logos
   Words do not hear speech — Show text now / Hide text after now is a clock window; Spoken words in Mix follows talking. Logos accept +, =, emoji, and a short chip next to files. Yellow track ends trim; Cut from/to drops each middle and can be repeated.
+
+- [X] Logo chips easier to drag
+  New chips start in a top row (not on the play button). Words preview is wider. Pads are larger, sit above the text layer, and keep pointer capture so the video/words do not steal the drag.

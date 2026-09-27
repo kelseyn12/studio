@@ -40,7 +40,7 @@ export function HookLogos({ id, logosJson }: { id: string; logosJson: string; ho
   return (
     <div className="mt-2 space-y-1">
       <p className="text-[11px] text-mute">
-        First seconds: logos, +, =, emoji, or a short line. Drag on Words. Headline text is Words, not a logo.
+        First seconds: logos, +, =, emoji, or a short line. Open Words — chips sit in a row up top, white border, drag those. Headline is Words.
       </p>
       <div className="flex flex-wrap items-center gap-1">
         {items.map((item) => (

@@ -4,7 +4,7 @@ import path from "path";
 import { describe, expect, it } from "vitest";
 import { runFfmpeg } from "@/lib/ffmpeg";
 import { writeLogoSheet } from "@/lib/hook-logos";
-import { boxesFromItems, logoBoxes, parseLogoItems, parseLogos, stringifyLogos } from "@/lib/hook-logos-math";
+import { boxesFromItems, CANVAS_H, defaultLogoPos, logoBoxes, parseLogoItems, parseLogos, stringifyLogos } from "@/lib/hook-logos-math";
 
 describe("parseLogos", () => {
   it("keeps safe relative paths and caps at 4", () => {
@@ -39,6 +39,14 @@ describe("parseLogos", () => {
       "🔥",
     ]);
     expect(boxesFromItems(items).some((box) => box.kind === "mark" && box.text === "+")).toBe(true);
+  });
+
+  it("lines unused logos across the top, not the play button", () => {
+    expect(defaultLogoPos(0, 3)).toEqual({ x: 0.16, y: 0.15 });
+    expect(defaultLogoPos(2, 3).x).toBeCloseTo(0.84);
+    const [box] = boxesFromItems([{ path: "a.png", filename: "a.png" }]);
+    expect(box.kind).toBe("logo");
+    if (box.kind === "logo") expect(box.y + box.h / 2).toBeCloseTo(CANVAS_H * 0.15);
   });
 });
 

@@ -3,6 +3,14 @@ export const MAX_HOOK_LOGOS = 4;
 export const MAX_LOGO_ITEMS = 8;
 export const CANVAS_W = 1080;
 export const CANVAS_H = 1920;
+/** Above the headline / play button so new chips are grabable. */
+export const LOGO_ROW_Y = 0.15;
+
+export function defaultLogoPos(index: number, count: number): { x: number; y: number } {
+  const n = Math.max(1, count);
+  const x = n <= 1 ? 0.5 : 0.16 + (0.68 * index) / (n - 1);
+  return { x: Math.min(0.92, Math.max(0.08, x)), y: LOGO_ROW_Y };
+}
 
 export type HookLogo = { path: string; filename: string; x?: number; y?: number };
 export type LogoMark = { kind: "mark"; id: string; text: string; x?: number; y?: number };
@@ -66,6 +74,10 @@ function centerY(size: number): number {
   return Math.round((CANVAS_H - size) / 2);
 }
 
+function rowTop(size: number): number {
+  return Math.round(CANVAS_H * LOGO_ROW_Y - size / 2);
+}
+
 /** 1 centered, 2–4 in a row. Pass equation for the optional A + B = C layout. */
 export function logoBoxes(count: number, equation = false): LogoBox[] {
   if (count < 1 || count > MAX_HOOK_LOGOS) return [];
@@ -118,7 +130,7 @@ export function boxesFromItems(items: LogoItem[]): LogoBox[] {
   return items.map((item, index) => {
     const width = widths[index];
     if (isLogoFile(item)) {
-      const box: LogoBox = { kind: "logo", index: fileIndex, x, y: centerY(fileSize), w: fileSize, h: fileSize };
+      const box: LogoBox = { kind: "logo", index: fileIndex, x, y: rowTop(fileSize), w: fileSize, h: fileSize };
       if (item.x != null && item.y != null) {
         box.x = Math.round(item.x * CANVAS_W - fileSize / 2);
         box.y = Math.round(item.y * CANVAS_H - fileSize / 2);
@@ -132,7 +144,7 @@ export function boxesFromItems(items: LogoItem[]): LogoBox[] {
       kind: "mark",
       text: item.text,
       x: item.x != null ? Math.round(item.x * CANVAS_W - width / 2) : x,
-      y: item.y != null ? Math.round(item.y * CANVAS_H - size / 2) : centerY(fileSize) + Math.round((fileSize - size) / 2),
+      y: item.y != null ? Math.round(item.y * CANVAS_H - size / 2) : rowTop(fileSize) + Math.round((fileSize - size) / 2),
       size,
     };
     x += width + gap;

@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-09-26 — Logo drag: default row at y=0.15 (`defaultLogoPos`), bigger z-30 pads, local pointer capture, Words tile `w-96`. Chips were 48px on the play button and lost the drag to video/words.
 - 2026-09-26 — Logo marks: +, =, emoji, short text sit next to logo files (`parseLogoItems` / `boxesFromItems`). Words from/to renamed Show text now / Hide text after now — typed text, not speech. Cut track copy: yellow ends vs repeatable Cut from/to middles.
 - 2026-09-26 — Clip mini-edit: drag-to-place (pointer capture), CutTrack, Words on body/CTA, typed list lines in hookLayout, optional logo equation, per-clip ASS with from/to. Four apps stay two looks (IG+FB / TT+YT).
 - 2026-09-26 — 1× is the recorded file (`cutUndo.basePath`). After a sped save, 1 was playing the sped cut and sounded fast. Preview + encode always start from the original; 1.25 / 1.5 / 2 step up from there.

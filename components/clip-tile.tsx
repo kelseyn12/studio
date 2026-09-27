@@ -51,7 +51,7 @@ export function ClipTile({
   }
 
   return (
-    <div className={`${mode !== "idle" ? "w-64" : "w-52"} shrink-0`}>
+    <div className={`${mode === "place" ? "w-96" : mode === "cut" ? "w-64" : "w-52"} shrink-0`}>
       {mode === "cut" ? (
         <QuickCut
           src={publicFileUrl(cutPreviewPath(path, cutUndo))}

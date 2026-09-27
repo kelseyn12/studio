@@ -11,6 +11,7 @@ export {
   parseLogoItems,
   stringifyLogos,
   isLogoFile,
+  defaultLogoPos,
   logoBoxes,
   boxesFromItems,
   logoOverlayFilter,
