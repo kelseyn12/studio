@@ -11,6 +11,7 @@ import { prisma } from "@/lib/prisma";
 import { pickTracks } from "@/lib/combinations";
 import { targetAccounts } from "@/lib/targets";
 import { stripHighlight } from "@/lib/ass";
+import type { OutputRecipe } from "@/lib/output-recipe";
 import { hookLooks } from "@/lib/text-style";
 import { parseHookLines, variationFor } from "@/lib/variations";
 import type { RepurposeBatch, RepurposeClip, RepurposeTrack } from "@prisma/client";
@@ -133,35 +134,58 @@ export async function renderBatch(input: {
             .filter(Boolean)
             .join(" · ");
           // Cross-posting deals get one file per app look; each ships to its own accounts.
+          const recipeClips = combo.map((clip, index) => {
+            const trim = trims.get(clip.path) ?? NO_TRIM;
+            return {
+              id: clip.id,
+              hookText: index === 0 ? line || clip.hookText || "" : clip.hookText || "",
+              trimStart: trim.start,
+              trimEnd: trim.end,
+            };
+          });
           const looks = hookLooks(
             batch.textStyle,
             networks,
             Boolean(hookLine) || batch.listCount > 0 || batch.captionsOn || clips.some((clip) => clip.listItems?.length),
           );
-          const files = [];
+          const files: Array<{
+            kind: "GENERATED";
+            filename: string;
+            path: string;
+            mime: string;
+            size: number;
+            publicUrl: string;
+            textStyle: string;
+            coverPath: string;
+            coverAt: number;
+            recipe: OutputRecipe;
+          }> = [];
           for (const look of looks) {
             const suffix = looks.length > 1 ? `-${look}` : "";
             const outputRel = await assembleVideo({
-              clips: clips.map((clip) => ({
-                path: clip.path,
-                hookText: clip.hookText,
-                trim: clip.trim,
-                hookX: clip.hookX,
-                hookY: clip.hookY,
-                listItems: clip.listItems,
-                listAt: clip.listAt,
-                textFrom: clip.textFrom,
-                textTo: clip.textTo,
-                box: clip.box,
-                captionFilters: clip.phrases?.length
-                  ? [await writeCaptionAss(clip.phrases, clip.trim.start, look)]
-                  : undefined,
-              })),
+              clips: await Promise.all(
+                clips.map(async (clip) => ({
+                  path: clip.path,
+                  hookText: clip.hookText,
+                  trim: clip.trim,
+                  hookX: clip.hookX,
+                  hookY: clip.hookY,
+                  listItems: clip.listItems,
+                  listAt: clip.listAt,
+                  textFrom: clip.textFrom,
+                  textTo: clip.textTo,
+                  box: clip.box,
+                  captionFilters: clip.phrases?.length
+                    ? [await writeCaptionAss(clip.phrases, clip.trim.start, look)]
+                    : undefined,
+                })),
+              ),
               outputName: `${id}-${fileNumber}${suffix}.mp4`,
               ...variation,
               hookStyle: look,
               hookList: batch.listCount,
               musicPath,
+              musicStart: 0,
               logoPath,
               hookX: hookPos?.x,
               hookY: hookPos?.y,
@@ -185,6 +209,21 @@ export async function renderBatch(input: {
               textStyle: look,
               coverPath,
               coverAt,
+              recipe: {
+                look,
+                speed: variation.speed,
+                saturation: variation.saturation,
+                contrast: variation.contrast,
+                hue: variation.hue,
+                crop: variation.crop,
+                mirror: variation.mirror,
+                hookColor: variation.hookColor,
+                accentColor: variation.accentColor,
+                hookList: batch.listCount,
+                clips: recipeClips,
+                trackId: music?.id ?? "",
+                bodyClipId: combo.find((clip) => clip.slot === "DEMO")?.id ?? "",
+              },
             });
           }
           const card = await prisma.card.create({
@@ -200,7 +239,7 @@ export async function renderBatch(input: {
               caption: hookClip?.postCaption?.trim() || batch.caption,
               editorNote: `Uniqueness: ${variation.label}`,
               payoutCents: basePayCents,
-              assets: { create: files },
+              assets: { create: files.map(({ recipe: _recipe, ...file }) => file) },
             },
           });
           await prisma.repurposeOut.createMany({
@@ -209,6 +248,9 @@ export async function renderBatch(input: {
               cardId: card.id,
               path: file.path,
               label: `${title}${looks.length > 1 ? ` · ${LOOK_TAG[file.textStyle]}` : ""}`,
+              recipeJson: JSON.stringify(file.recipe),
+              musicTrackId: file.recipe.trackId ? "" : "none",
+              musicStart: 0,
             })),
           });
           await prisma.repurposeBatch.update({

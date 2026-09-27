@@ -1,4 +1,6 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
+import { deleteUpload } from "@/lib/files";
 import { prisma } from "@/lib/prisma";
 import { readSession } from "@/lib/session";
 
@@ -29,6 +31,11 @@ export async function DELETE(
   const user = await readSession();
   if (!user) return NextResponse.json({ error: "Auth required" }, { status: 401 });
   const { id } = await context.params;
+  const clip = await prisma.repurposeClip.findUnique({ where: { id } });
+  if (!clip) return NextResponse.json({ ok: true });
   await prisma.repurposeClip.delete({ where: { id } });
+  await deleteUpload(clip.path);
+  if (clip.thumbPath) await deleteUpload(clip.thumbPath);
+  revalidatePath(`/repurposer/${clip.batchId}`);
   return NextResponse.json({ ok: true });
 }

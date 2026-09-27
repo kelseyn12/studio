@@ -44,7 +44,15 @@ function usePick(): PickState {
   return pick;
 }
 
-export function SelectDeleteBar({ total, batchId }: { total: number; batchId?: string }) {
+export function SelectDeleteBar({
+  total,
+  batchId,
+  field = "cardId",
+}: {
+  total: number;
+  batchId?: string;
+  field?: "cardId" | "outputId";
+}) {
   const { picked, allOn, selectAll } = usePick();
   if (total === 0) return null;
   const count = picked.size;
@@ -64,7 +72,7 @@ export function SelectDeleteBar({ total, batchId }: { total: number; batchId?: s
         >
           {batchId ? <input type="hidden" name="batchId" value={batchId} /> : null}
           {[...picked].map((id) => (
-            <input key={id} type="hidden" name="cardId" value={id} />
+            <input key={id} type="hidden" name={field} value={id} />
           ))}
           <button className="rounded-xl border border-line px-4 py-2 text-sm text-mute">
             Delete {count} selected

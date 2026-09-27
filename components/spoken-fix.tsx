@@ -20,7 +20,7 @@ export function SpokenFix({ id, captionsJson }: { id: string; captionsJson: stri
   if (!words.length) {
     return (
       <p className="mt-2 text-[11px] text-mute">
-        Spoken words: Generate once with Spoken words on. CapCut-style captions land here so you can fix them, then Generate again.
+        Shared listen for this take. Per-video word and music fixes are on the finished video.
       </p>
     );
   }

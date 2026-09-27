@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
-import { dropCards } from "@/lib/drop-cards";
+import { dropCards, dropOutputs } from "@/lib/drop-cards";
 import { deleteUpload } from "@/lib/files";
 import { prisma } from "@/lib/prisma";
 import { sweepStale } from "@/lib/sweep";
@@ -12,13 +12,16 @@ export async function deleteSelectedVideos(formData: FormData) {
   const user = await requireUser();
   if (user.role === "EDITOR") redirect("/edits");
   const batchId = String(formData.get("batchId") || "");
-  await dropCards(formData.getAll("cardId").map(String));
+  const outputIds = formData.getAll("outputId").map(String);
+  if (outputIds.length) await dropOutputs(outputIds);
+  else await dropCards(formData.getAll("cardId").map(String));
   revalidatePath("/library");
   revalidatePath("/plan");
   revalidatePath("/calendar");
   revalidatePath("/edits");
   revalidatePath("/");
-  if (batchId) revalidatePath(`/repurposer/${batchId}`);
+  if (batchId) redirect(`/repurposer/${batchId}`);
+  redirect("/library");
 }
 
 export async function deleteAsset(formData: FormData) {

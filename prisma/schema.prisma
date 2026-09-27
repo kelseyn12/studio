@@ -291,12 +291,16 @@ model RepurposeTrack {
 }
 
 model RepurposeOut {
-  id      String         @id @default(cuid())
-  batchId String
-  batch   RepurposeBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
-  cardId  String?
-  path    String
-  label   String
+  id           String         @id @default(cuid())
+  batchId      String
+  batch        RepurposeBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  cardId       String?
+  path         String
+  label        String
+  recipeJson   String         @default("")
+  musicTrackId String         @default("")
+  musicStart   Float          @default(0)
+  captionsJson String         @default("")
 }
 
 model WeeklyReview {

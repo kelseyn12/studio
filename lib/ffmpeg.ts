@@ -6,6 +6,7 @@ import { localRoot } from "@/lib/files";
 import { writeHookAss } from "@/lib/ass";
 import { logoOverlayFilter } from "@/lib/hook-logos-math";
 import { sharedListPlan } from "@/lib/list-layout";
+import { musicDelayPrefix } from "@/lib/output-recipe";
 import type { DrawnStyle } from "@/lib/text-style";
 
 const FFMPEG_FULL = "/opt/homebrew/opt/ffmpeg-full/bin/ffmpeg";
@@ -187,6 +188,7 @@ export async function assembleVideo(input: {
   hookStyle?: DrawnStyle;
   hookList?: number;
   musicPath?: string;
+  musicStart?: number;
   logoPath?: string;
   hookX?: number;
   hookY?: number;
@@ -271,8 +273,7 @@ export async function assembleVideo(input: {
   const concatIn = Array.from({ length: n }, (_, index) => `[v${index}][a${index}]`).join("");
   chains.push(`${concatIn}concat=n=${n}:v=1:a=1[outv][outa]`);
   if (input.musicPath && musicIndex >= 0) {
-    chains.push(`[${musicIndex}:a]volume=0.22,aresample=44100[mus]`);
-    chains.push(`[outa][mus]amix=inputs=2:duration=first:dropout_transition=2[mix]`);
+    chains.push(`[${musicIndex}:a]${musicDelayPrefix(input.musicStart ?? 0)}volume=0.22,aresample=44100[mus];[outa][mus]amix=inputs=2:duration=first:dropout_transition=2[mix]`);
   }
   args.push("-filter_complex", chains.join(";"));
   args.push("-map", "[outv]", "-map", input.musicPath ? "[mix]" : "[outa]");

@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-09-26 — Finished videos can be rebuilt one at a time (words + music start). Delete targets the output row and redirects so the list updates. Recipe is stored on RepurposeOut.
 - 2026-09-26 — Spoken captions match the CapCut refs: both looks are white + black outline, IG thinner, TT fatter. Box and karaoke removed.
 - 2026-09-26 — Spoken captions left drawtext ALL CAPS. They now burn CapCut-style ASS on bodies/CTAs only.
 - 2026-09-26 — Box cycles Off / Black / White. Spoken words can be rewritten on the clip (`captions-math` + SpokenFix). Caption listen still happens only when captionsJson is empty.

@@ -265,7 +265,7 @@ export function BatchSettings({
           <Row label="Spoken words on screen">
             <div className="flex items-center gap-3">
               <p className="max-w-56 text-right text-xs text-mute">
-                Bodies and CTAs only. White type, black outline — IG thinner, TT fatter. Hooks stay clean.
+                Listens on bodies and CTAs. Fix words and music on each finished video. Hooks stay clean.
               </p>
               <Toggle name="captionsOn" on={captionsOn} onChange={setCaptionsOn} />
             </div>

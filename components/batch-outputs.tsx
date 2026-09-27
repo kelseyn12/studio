@@ -1,9 +1,22 @@
 import Link from "next/link";
 import { sendBatchToEditor } from "@/app/repurposer/actions";
+import { OutputTune } from "@/components/output-tune";
 import { PickBox, SelectDeleteBar, VideoPick } from "@/components/select-videos";
+import { bodyMates, parseRecipe, tuneSections } from "@/lib/output-recipe";
 import { publicFileUrl } from "@/lib/urls";
 
-type Output = { id: string; label: string; path: string; cardId: string | null };
+type Output = {
+  id: string;
+  label: string;
+  path: string;
+  cardId: string | null;
+  recipeJson: string;
+  musicTrackId: string;
+  musicStart: number;
+  captionsJson: string;
+};
+type Clip = { id: string; slot: string; captionsJson: string };
+type Track = { id: string; filename: string };
 type CardState = { id: string; status: string; scheduledAt: Date | null };
 type Editor = { id: string; name: string; defaultEditor: boolean };
 
@@ -34,6 +47,9 @@ export function BatchOutputs({
   editors,
   canPolish,
   polish,
+  tuned,
+  clips,
+  tracks,
 }: {
   batchId: string;
   outputs: Output[];
@@ -41,13 +57,19 @@ export function BatchOutputs({
   editors: Editor[];
   canPolish: number;
   polish?: string;
+  tuned?: string;
+  clips: Clip[];
+  tracks: Track[];
 }) {
   const cardById = new Map(cards.map((card) => [card.id, card]));
   const message = polishMessage(polish);
   const defaultEditor = editors.find((person) => person.defaultEditor)?.id ?? editors[0]?.id ?? "";
-  const cardIds = outputs.flatMap((output) => (output.cardId ? [output.cardId] : []));
+  const outputIds = outputs.map((output) => output.id);
+  const tunedNote =
+    tuned === "1" ? "Rebuilt. The new file is on this row." : tuned === "old" ? "That video needs a fresh Generate before it can be tuned." : "";
   return (
     <div className="mt-8 space-y-4">
+      {tunedNote ? <p className="text-sm text-sun">{tunedNote}</p> : null}
       {message ? <p className="text-sm text-sun">{message}</p> : null}
       {canPolish > 0 ? (
         <form action={sendBatchToEditor} className="space-y-3 rounded-card border border-line bg-panel p-5">
@@ -75,23 +97,37 @@ export function BatchOutputs({
           </button>
         </form>
       ) : null}
-      <VideoPick ids={cardIds}>
+      <VideoPick ids={outputIds}>
         <div className="space-y-2">
-          <SelectDeleteBar total={new Set(cardIds).size} batchId={batchId} />
+          <SelectDeleteBar total={outputs.length} batchId={batchId} field="outputId" />
           {outputs.map((output) => {
             const state = stateLabel(output.cardId ? cardById.get(output.cardId) : undefined);
+            const recipe = parseRecipe(output.recipeJson);
+            const selectedMusic = output.musicTrackId === "none" ? "none" : output.musicTrackId || recipe?.trackId || "none";
             return (
-              <div key={output.id} className="flex items-center justify-between gap-3 rounded-card border border-line bg-panel px-4 py-3">
-                <div className="flex min-w-0 items-center gap-3">
-                  {output.cardId ? <PickBox id={output.cardId} /> : null}
-                  <a className="truncate text-sun" href={publicFileUrl(output.path)}>
-                    {output.label}
-                  </a>
+              <div key={output.id} className="rounded-card border border-line bg-panel px-4 py-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <PickBox id={output.id} />
+                    <a className="truncate text-sun" href={publicFileUrl(output.path)}>
+                      {output.label}
+                    </a>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm text-mute">
+                    {state ? <span>{state}</span> : null}
+                    {output.cardId ? <Link href={`/cards/${output.cardId}`}>Open video</Link> : null}
+                  </div>
                 </div>
-                <div className="flex items-center gap-3 text-sm text-mute">
-                  {state ? <span>{state}</span> : null}
-                  {output.cardId ? <Link href={`/cards/${output.cardId}`}>Open video</Link> : null}
-                </div>
+                <OutputTune
+                  outputId={output.id}
+                  src={publicFileUrl(output.path)}
+                  tracks={tracks}
+                  musicTrackId={selectedMusic}
+                  musicStart={output.musicStart}
+                  sections={recipe ? tuneSections(recipe, clips, output.captionsJson) : []}
+                  mates={bodyMates(outputs.map((row) => row.recipeJson), recipe?.bodyClipId || "")}
+                  ready={Boolean(recipe)}
+                />
               </div>
             );
           })}

@@ -19,7 +19,7 @@ export default async function BatchPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ hook?: string; polish?: string }>;
+  searchParams: Promise<{ hook?: string; polish?: string; tuned?: string }>;
 }) {
   const { id } = await params;
   const query = await searchParams;
@@ -110,7 +110,7 @@ export default async function BatchPage({
             slot="DEMO"
             title="Bodies"
             meta={`${bodies.length} options · middle clip · usually one, can be more`}
-            hint="Type the points on Words. They lock to the hook numbers. Spoken words in Mix put CapCut-style captions on this take."
+            hint="Type the points on Words. Spoken sentences are fixed on each finished video, under Words + music."
             clips={bodies}
             look={look}
             listCount={batch.listCount}
@@ -215,6 +215,9 @@ export default async function BatchPage({
         editors={editors.map((person) => ({ id: person.id, name: person.name, defaultEditor: person.defaultEditor }))}
         canPolish={isRendering(batch.status) ? 0 : cardsToPolish(outputCards).length}
         polish={query.polish}
+        tuned={query.tuned}
+        clips={batch.clips.map((clip) => ({ id: clip.id, slot: clip.slot, captionsJson: clip.captionsJson }))}
+        tracks={batch.tracks.map((track) => ({ id: track.id, filename: track.filename }))}
       />
     </Shell>
   );

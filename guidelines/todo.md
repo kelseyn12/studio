@@ -217,3 +217,6 @@
 
 - [X] CapCut-style spoken captions
   Spoken on burns lower-third white + black outline (IG thinner, TT fatter). No box, no karaoke. Hooks skipped. Bodies and CTAs keep SpokenFix.
+
+- [X] Per-video words, music start, and delete
+  Each finished video has Words + music (song or none, Music starts now) and Rebuild this video. Delete removes that file only and refreshes the list. Older videos need one new Generate before they can be tuned.
