@@ -1,0 +1,85 @@
+export const LOGO_SECONDS = 2.5;
+export const MAX_HOOK_LOGOS = 4;
+export const CANVAS_W = 1080;
+export const CANVAS_H = 1920;
+
+export type HookLogo = { path: string; filename: string };
+export type LogoBox =
+  | { kind: "logo"; index: number; x: number; y: number; w: number; h: number }
+  | { kind: "mark"; text: string; x: number; y: number; size: number };
+
+function fileName(pathValue: string): string {
+  const parts = pathValue.split("/");
+  return parts[parts.length - 1] || pathValue;
+}
+
+export function parseLogos(raw: string | null | undefined): HookLogo[] {
+  if (!raw?.trim()) return [];
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .flatMap((item) => {
+        if (!item || typeof item !== "object") return [];
+        const pathValue = String((item as HookLogo).path || "").replace(/\\/g, "/");
+        const filename = String((item as HookLogo).filename || "").trim();
+        if (!pathValue || pathValue.includes("..") || pathValue.startsWith("/")) return [];
+        return [{ path: pathValue, filename: filename || fileName(pathValue) }];
+      })
+      .slice(0, MAX_HOOK_LOGOS);
+  } catch {
+    return [];
+  }
+}
+
+export function stringifyLogos(logos: HookLogo[]): string {
+  return JSON.stringify(logos.slice(0, MAX_HOOK_LOGOS));
+}
+
+function centerY(size: number): number {
+  return Math.round((CANVAS_H - size) / 2);
+}
+
+/** 1 logo centered, 3 logos become A + B = C, 2 or 4 sit in a row. */
+export function logoBoxes(count: number): LogoBox[] {
+  if (count < 1 || count > MAX_HOOK_LOGOS) return [];
+  if (count === 1) {
+    const size = 360;
+    return [{ kind: "logo", index: 0, x: Math.round((CANVAS_W - size) / 2), y: centerY(size), w: size, h: size }];
+  }
+  if (count === 3) {
+    const size = 240;
+    const mark = 96;
+    const gap = 20;
+    const total = size * 3 + mark * 2 + gap * 4;
+    let x = Math.round((CANVAS_W - total) / 2);
+    const boxes: LogoBox[] = [];
+    const addLogo = (index: number) => {
+      boxes.push({ kind: "logo", index, x, y: centerY(size), w: size, h: size });
+      x += size + gap;
+    };
+    const addMark = (text: string) => {
+      boxes.push({ kind: "mark", text, x, y: centerY(size) + Math.round((size - mark) / 2), size: mark });
+      x += mark + gap;
+    };
+    addLogo(0);
+    addMark("+");
+    addLogo(1);
+    addMark("=");
+    addLogo(2);
+    return boxes;
+  }
+  const size = count === 2 ? 280 : 180;
+  const gap = 28;
+  const total = size * count + gap * (count - 1);
+  let x = Math.round((CANVAS_W - total) / 2);
+  return Array.from({ length: count }, (_, index) => {
+    const box: LogoBox = { kind: "logo", index, x, y: centerY(size), w: size, h: size };
+    x += size + gap;
+    return box;
+  });
+}
+
+export function logoOverlayFilter(baseLabel: string, logoLabel: string, outLabel: string): string {
+  return `[${baseLabel}][${logoLabel}]overlay=0:0:enable='lte(t,${LOGO_SECONDS})'[${outLabel}]`;
+}

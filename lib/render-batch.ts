@@ -2,6 +2,7 @@ import { stat } from "fs/promises";
 import path from "path";
 import { captionFilters, groupWords, parseCaptionWords, transcribeWords, type CaptionPhrase } from "@/lib/captions";
 import { assembleVideo, NO_TRIM, type ClipTrim } from "@/lib/ffmpeg";
+import { parseLogos, writeLogoSheet } from "@/lib/hook-logos";
 import { quietEnds } from "@/lib/trim";
 import { ensureLocal, localRoot, uploadLocalToR2 } from "@/lib/files";
 import { prisma } from "@/lib/prisma";
@@ -96,6 +97,10 @@ export async function renderBatch(input: {
             }),
           );
           const musicPath = music ? await ensureLocal(music.path) : undefined;
+          const logoFiles = parseLogos(hookClip?.logosJson);
+          const logoPath = logoFiles.length
+            ? path.join(localRoot(), await writeLogoSheet(await Promise.all(logoFiles.map((logo) => ensureLocal(logo.path)))))
+            : undefined;
           const hookTag = (stripHighlight(hookLine) || hookClip?.filename || `hook ${mixNumber}`).slice(0, 36);
           const title = [
             batch.name,
@@ -125,6 +130,7 @@ export async function renderBatch(input: {
               hookStyle: look,
               hookList: batch.listCount,
               musicPath,
+              logoPath,
             });
             files.push({
               kind: "GENERATED" as const,

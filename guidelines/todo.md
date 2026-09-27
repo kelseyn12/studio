@@ -166,3 +166,6 @@
 
 - [X] Cut dragging parts and speed a video in Studio
   Live (and Multiply clip tiles) can drop one or more middle sections and speed 1.25× / 1.5× / 2×. Save cut writes a new file; schedule it on Live — no editor or download.
+
+- [X] Logos on the first beat of a hook
+  Drop PNG/JPG on a hook clip. They show for 2.5s. Three files layout as A + B = C. Generate burns them in.

@@ -1,0 +1,59 @@
+import { mkdtemp, rm } from "fs/promises";
+import os from "os";
+import path from "path";
+import { describe, expect, it } from "vitest";
+import { runFfmpeg } from "@/lib/ffmpeg";
+import { writeLogoSheet } from "@/lib/hook-logos";
+import { logoBoxes, parseLogos, stringifyLogos } from "@/lib/hook-logos-math";
+
+describe("parseLogos", () => {
+  it("keeps safe relative paths and caps at 4", () => {
+    const raw = JSON.stringify([
+      { path: "repurpose/a/logo.png", filename: "logo.png" },
+      { path: "../etc/passwd", filename: "no" },
+      { path: "/abs.png", filename: "no" },
+      { path: "b.png", filename: "b.png" },
+      { path: "c.png", filename: "c.png" },
+      { path: "d.png", filename: "d.png" },
+      { path: "e.png", filename: "e.png" },
+    ]);
+    expect(parseLogos(raw).map((logo) => logo.path)).toEqual(["repurpose/a/logo.png", "b.png", "c.png", "d.png"]);
+    expect(stringifyLogos(parseLogos(raw)).startsWith("[")).toBe(true);
+  });
+});
+
+describe("logoBoxes", () => {
+  it("centers one logo", () => {
+    const [box] = logoBoxes(1);
+    expect(box).toMatchObject({ kind: "logo", index: 0, w: 360, h: 360 });
+    if (box.kind === "logo") expect(box.x + box.w / 2).toBe(540);
+  });
+
+  it("turns three logos into A + B = C", () => {
+    const kinds = logoBoxes(3).map((box) => (box.kind === "mark" ? box.text : "logo"));
+    expect(kinds).toEqual(["logo", "+", "logo", "=", "logo"]);
+  });
+});
+
+describe("writeLogoSheet", () => {
+  it(
+    "writes a 1080×1920 sheet from three squares",
+    async () => {
+      const dir = await mkdtemp(path.join(os.tmpdir(), "studio-logos-"));
+      const files = await Promise.all(
+        ["red", "green", "blue"].map(async (color, index) => {
+          const file = path.join(dir, `${index}.png`);
+          await runFfmpeg(["-f", "lavfi", "-i", `color=c=${color}:s=200x200:d=1`, "-frames:v", "1", file]);
+          return file;
+        }),
+      );
+      const rel = await writeLogoSheet(files);
+      const { localRoot } = await import("@/lib/files");
+      const { stat } = await import("fs/promises");
+      expect((await stat(path.join(localRoot(), rel))).size).toBeGreaterThan(800);
+      await rm(path.join(localRoot(), rel), { force: true });
+      await rm(dir, { recursive: true, force: true });
+    },
+    20_000,
+  );
+});

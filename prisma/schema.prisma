@@ -274,6 +274,7 @@ model RepurposeClip {
   thumbPath String        @default("")
   size     Int            @default(0)
   captionsJson String     @default("")
+  logosJson    String     @default("")
 }
 
 model RepurposeTrack {

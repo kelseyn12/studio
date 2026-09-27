@@ -90,7 +90,7 @@ export default async function BatchPage({
             slot="HOOK"
             title="Hooks"
             meta={`${hooks.length} options · first clip · one picked per video`}
-            hint="Openings. Words on a clip match that take. The caption box on a hook is what posts under videos that start with that hook."
+            hint="Openings. Words on a clip match that take. Cut, speed, and drop logos on the hook — three logos become A + B = $. Then generate and schedule."
             clips={hooks}
             showHook
             hookText={winningHook}
@@ -252,6 +252,7 @@ function SlotBlock({
     thumbPath: string;
     hookText: string;
     postCaption?: string;
+    logosJson?: string;
   }>;
 }) {
   return (

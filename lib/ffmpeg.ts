@@ -4,6 +4,7 @@ import { mkdir } from "fs/promises";
 import path from "path";
 import { localRoot } from "@/lib/files";
 import { writeHookAss } from "@/lib/ass";
+import { logoOverlayFilter } from "@/lib/hook-logos-math";
 import type { DrawnStyle } from "@/lib/text-style";
 
 const FFMPEG_FULL = "/opt/homebrew/opt/ffmpeg-full/bin/ffmpeg";
@@ -172,6 +173,7 @@ export async function assembleVideo(input: {
   hookStyle?: DrawnStyle;
   hookList?: number;
   musicPath?: string;
+  logoPath?: string;
 }): Promise<string> {
   await mkdir(path.join(localRoot(), "generated"), { recursive: true });
   const outputRel = path.join("generated", input.outputName);
@@ -187,10 +189,12 @@ export async function assembleVideo(input: {
     if (trim.end !== null) args.push("-t", (trim.end - trim.start).toFixed(2));
     args.push("-i", clip.path);
   }
+  const logoIndex = input.logoPath ? n : -1;
+  if (input.logoPath) args.push("-i", input.logoPath);
   args.push("-f", "lavfi", "-i", "anullsrc=channel_layout=stereo:sample_rate=44100");
   if (input.musicPath) args.push("-i", input.musicPath);
-  const silentIndex = n;
-  const musicIndex = input.musicPath ? n + 1 : -1;
+  const silentIndex = n + (input.logoPath ? 1 : 0);
+  const musicIndex = input.musicPath ? silentIndex + 1 : -1;
 
   const tempo = input.speed !== 1 ? `atempo=${input.speed},` : "";
   const chains: string[] = [];
@@ -215,7 +219,13 @@ export async function assembleVideo(input: {
       hookFilter: index === 0 ? hookFilter : undefined,
       captionFilters: input.clips[index].captionFilters,
     });
-    chains.push(`[${index}:v]${vf}[v${index}]`);
+    if (index === 0 && logoIndex >= 0) {
+      chains.push(`[${index}:v]${vf}[v${index}base]`);
+      chains.push(`[${logoIndex}:v]format=rgba[logo]`);
+      chains.push(logoOverlayFilter(`v${index}base`, "logo", `v${index}`));
+    } else {
+      chains.push(`[${index}:v]${vf}[v${index}]`);
+    }
     if (audioFlags[index]) {
       chains.push(`[${index}:a]${tempo}aresample=44100,aformat=channel_layouts=stereo[a${index}]`);
     } else {

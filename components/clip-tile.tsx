@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { HookLogos } from "@/components/hook-logos";
 import { QuickCut } from "@/components/quick-cut";
 import { publicFileUrl } from "@/lib/urls";
 
@@ -12,6 +13,7 @@ export function ClipTile({
   thumbPath,
   hookText,
   postCaption,
+  logosJson,
   showHook,
 }: {
   id: string;
@@ -20,6 +22,7 @@ export function ClipTile({
   thumbPath: string;
   hookText: string;
   postCaption?: string;
+  logosJson?: string;
   showHook: boolean;
 }) {
   const router = useRouter();
@@ -76,6 +79,7 @@ export function ClipTile({
             className="field mt-2 min-h-16 px-2 py-1 text-xs"
             onBlur={(event) => save("postCaption", event.target.value)}
           />
+          <HookLogos id={id} logosJson={logosJson ?? ""} />
         </>
       ) : (
         <p className="mt-2 truncate text-xs text-mute">{filename}</p>

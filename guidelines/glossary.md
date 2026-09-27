@@ -75,4 +75,6 @@
 - `keepRanges` / `parseSpeed` / `parseDrops` / `isPlayableCut` — `lib/cut-math.ts` — leftover ranges after dropping draggy parts; speed allowlist 1 / 1.25 / 1.5 / 2. Used by QuickCut and `/api/trim`. Tested in `lib/cut.test.ts`.
 - `cutVideo` — `lib/cut.ts` — stitches kept ranges and applies speed (`setpts` + `atempo`). Used by `/api/trim`.
 - `QuickCut` — `components/quick-cut.tsx` — Start here / End here, Cut from here / Cut to here (drop a middle), speed pills, Save cut. On Multiply clip tiles (replaces the clip) and on Live for finished videos (newest cut ships).
+- `parseLogos` / `logoBoxes` / `writeLogoSheet` — `lib/hook-logos-math.ts` / `lib/hook-logos.ts` — hook logo files (max 4). Three files layout as A + B = C. Sheet overlays the first 2.5s of the hook. Used by ClipTile and `renderBatch`. Tested in `lib/hook-logos.test.ts`.
+- `HookLogos` — `components/hook-logos.tsx` — Add logo on a hook clip.
 - `addLink` / `deleteLink` — `app/dms/actions.ts` — tracked short links for auto-DMs. Public redirect at `/l/[slug]` counts every click.
