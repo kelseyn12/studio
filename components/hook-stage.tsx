@@ -167,7 +167,7 @@ export function HookStage({
     y: anchor.y,
     count,
   });
-  const typeSize = `${LOOK_FONT_CLASS[preview]} ${preview === "instagram" ? "text-[26px] font-bold leading-snug" : "text-[20px] font-bold leading-snug"}`;
+  const typeSize = `${LOOK_FONT_CLASS[preview]} ${preview === "instagram" ? "text-[26px] font-bold leading-snug" : "text-[20px] font-bold"}`;
   const lookBox = boxFor(pos, preview);
   const boxed = isBoxed(lookBox);
   const inkClass = boxed && boxIsWhite(lookBox) ? "text-black" : "text-white";
@@ -238,7 +238,7 @@ export function HookStage({
             onPointerDown={(event) => event.stopPropagation()}
             rows={2}
             className={`block w-full resize-none overflow-hidden bg-transparent text-center outline-none [field-sizing:content] ${typeSize} ${
-              boxed ? `${inkClass} ${plate}` : `text-white ${stroke}`
+              boxed ? `${inkClass} ${plate}` : `text-white leading-snug ${stroke}`
             } ${boxed && boxIsWhite(lookBox) ? "caret-black" : "caret-white"}`}
           />
         </div>
@@ -246,7 +246,7 @@ export function HookStage({
           <ListOverlay
             rows={listRows(stack, count)}
             lines={lines}
-            className={`${typeSize} ${boxed ? `${inkClass} ${plate} w-fit` : `text-white ${stroke}`}`}
+            className={`${typeSize} ${boxed ? `${inkClass} ${plate} w-fit` : `text-white leading-snug ${stroke}`}`}
           />
         ) : null}
         {logos.map((item, index) => {
