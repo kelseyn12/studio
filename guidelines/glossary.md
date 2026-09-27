@@ -86,7 +86,7 @@
 - `WordChips` — `components/word-chips.tsx` — hugging per-line box preview under the Words textarea.
 - `sharedAxes` / `snapLogoPos` — `lib/hook-logos-math.ts` — snap to a neighbor or the center line. Align shows guides; it does not reshuffle chips.
 - `HookStage` / `HookList` / `ListOverlay` / `AlignGuides` / `SpokenFix` — Words: TT/IG preview, Align guides, Box off / Black / White. Mix numbers on the hook; body lines lock to those rows. SpokenFix is on bodies and CTAs after the first listen.
-- `nextBox` / `boxLabel` / `isBoxed` / `boxIsWhite` — `lib/hook-layout.ts` / `lib/list-layout.ts` — Box cycles off → black plate → white plate.
+- `boxFor` / `setLookBox` / `nextBox` / `boxLabel` — `lib/hook-layout.ts` — Box is per look (TT card, IG chips). Cycling TT does not change IG.
 - `applyCaptionLines` / `captionLines` — `lib/captions-math.ts` — rewrite spoken phrases and keep their clocks.
 - `CoverPick` — `components/cover-pick.tsx` — pick a still on Live. Copies also get staggered cover times on generate.
 - `addLink` / `deleteLink` — `app/dms/actions.ts` — tracked short links for auto-DMs. Public redirect at `/l/[slug]` counts every click.

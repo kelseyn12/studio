@@ -83,7 +83,7 @@ describe("buildHookAss", () => {
       /Style: Head,Arial,76,&HFFFFFF&,&HFFFFFF&,&H000000&,&H00000000&,-1,0,0,0,100,100,0,0,3,8,0,8,/,
     );
     expect(buildHookAss({ text: "hello there", style: "tiktok", box: true, font: "Arial" })).toMatch(
-      /Style: Head,Arial,82,.*,3,10,0,8,/,
+      /Style: Head,Arial,82,.*,3,16,0,8,/,
     );
     expect(buildHookAss({ text: "hello there", style: "tiktok", box: "white", font: "Arial" })).toMatch(
       /Style: Head,Arial,82,&H000000&,&H000000&,&HFFFFFF&/,
@@ -97,15 +97,13 @@ describe("buildHookAss", () => {
     expect(track).toContain("{\\c&H5CFF5C&}weird");
   });
 
-  it("boxes each wrapped line as its own plate", () => {
-    const track = buildHookAss({
-      text: "Nobody talks about this one weird trick",
-      style: "tiktok",
-      box: true,
-      font: "Arial",
-    });
-    expect((track.match(/Dialogue: 0,.*,Head,/g) ?? []).length).toBeGreaterThan(1);
-    expect(track).not.toMatch(/Head,,0,0,0,,.*\\N/);
+  it("puts TikTok lines in one card and Instagram lines in their own chips", () => {
+    const text = "Nobody talks about this one weird trick";
+    const tiktok = buildHookAss({ text, style: "tiktok", box: true, font: "Arial" });
+    const instagram = buildHookAss({ text, style: "instagram", box: true, font: "Arial" });
+    expect((tiktok.match(/Dialogue: 0,.*,Head,/g) ?? []).length).toBe(1);
+    expect(tiktok).toContain("\\N");
+    expect((instagram.match(/Dialogue: 0,.*,Head,/g) ?? []).length).toBeGreaterThan(1);
   });
 
   it("keeps empty numbers up, then fills a line at its clock", () => {

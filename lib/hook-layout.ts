@@ -1,6 +1,10 @@
 import { LOOK_METRICS } from "@/lib/list-layout";
 import type { DrawnStyle } from "@/lib/text-style";
 
+export type BoxChoice = boolean | "white";
+export type LookBox = BoxChoice | "off";
+export type LookBoxes = { tiktok?: LookBox; instagram?: LookBox };
+
 export type HookPos = {
   x: number;
   y: number;
@@ -9,7 +13,9 @@ export type HookPos = {
   from?: number;
   to?: number;
   logoEq?: boolean;
-  box?: boolean | "white";
+  /** Shared box from before looks could differ. Ignored once `boxes` is set. */
+  box?: BoxChoice;
+  boxes?: LookBoxes;
 };
 
 function clamp01(value: number, low: number, high: number): number {
@@ -55,6 +61,7 @@ export function parseHookLayout(raw: string | null | undefined): HookPos | null 
       ...(Number.isFinite(to) && to > 0 ? { to } : {}),
       ...(parsed.logoEq ? { logoEq: true } : {}),
       ...(parsed.box === "white" ? { box: "white" as const } : parsed.box ? { box: true } : {}),
+      ...parseBoxes(parsed.boxes),
     };
   } catch {
     return null;
@@ -70,8 +77,47 @@ export function stringifyHookLayout(pos: HookPos): string {
     ...(pos.from != null ? { from: pos.from } : {}),
     ...(pos.to != null ? { to: pos.to } : {}),
     ...(pos.logoEq ? { logoEq: true } : {}),
-    ...(pos.box === "white" ? { box: "white" as const } : pos.box ? { box: true } : {}),
+    ...(pos.boxes ? { boxes: pos.boxes } : pos.box === "white" ? { box: "white" as const } : pos.box ? { box: true } : {}),
   });
+}
+
+function parseOneBox(value: unknown): LookBox | undefined {
+  if (value === "off" || value === "white") return value;
+  if (value === true) return true;
+  return undefined;
+}
+
+function parseBoxes(raw: unknown): { boxes: LookBoxes } | Record<string, never> {
+  if (!raw || typeof raw !== "object") return {};
+  const row = raw as { tiktok?: unknown; instagram?: unknown };
+  const tiktok = parseOneBox(row.tiktok);
+  const instagram = parseOneBox(row.instagram);
+  if (!tiktok && !instagram) return {};
+  return { boxes: { ...(tiktok ? { tiktok } : {}), ...(instagram ? { instagram } : {}) } };
+}
+
+/** Box for one look. A shared `box` applies to both until you set them apart. */
+export function boxFor(pos: Pick<HookPos, "box" | "boxes"> | null | undefined, style: string): BoxChoice | undefined {
+  const look = style === "instagram" ? "instagram" : "tiktok";
+  const specific = pos?.boxes?.[look];
+  if (specific === "off") return undefined;
+  if (specific) return specific;
+  if (pos?.boxes) return undefined;
+  return pos?.box;
+}
+
+/** Cycle the box on the look you are previewing. The other look stays as it is. */
+export function setLookBox(pos: HookPos, style: string, next: BoxChoice | undefined): HookPos {
+  const look = style === "instagram" ? "instagram" : "tiktok";
+  const other = look === "tiktok" ? "instagram" : "tiktok";
+  return {
+    ...pos,
+    box: undefined,
+    boxes: {
+      [look]: next ?? "off",
+      [other]: boxFor(pos, other) ?? "off",
+    },
+  };
 }
 
 export function nextBox(box?: boolean | "white"): boolean | "white" | undefined {
@@ -80,10 +126,11 @@ export function nextBox(box?: boolean | "white"): boolean | "white" | undefined 
   return undefined;
 }
 
-export function boxLabel(box?: boolean | "white"): string {
-  if (box === "white") return "White box";
-  if (box) return "Black box";
-  return "Box off";
+export function boxLabel(box?: BoxChoice, style?: string): string {
+  const who = style === "instagram" ? "IG " : style === "tiktok" ? "TT " : "";
+  if (box === "white") return `${who}white box`;
+  if (box) return `${who}black box`;
+  return `${who}box off`;
 }
 
 export type CutUndo = { path: string; thumbPath: string; size: number; basePath: string };

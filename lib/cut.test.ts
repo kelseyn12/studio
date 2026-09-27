@@ -74,6 +74,12 @@ describe("parseSpeed / parseDrops", () => {
     expect(parseHookLayout(raw)?.listAt).toEqual([2, 5]);
     expect(parseHookLayout(stringifyHookLayout({ x: 0.5, y: 0.2, box: true }))?.box).toBe(true);
     expect(parseHookLayout(stringifyHookLayout({ x: 0.5, y: 0.2, box: "white" }))?.box).toBe("white");
+    const split = stringifyHookLayout({
+      x: 0.5,
+      y: 0.2,
+      boxes: { tiktok: "white", instagram: "off" },
+    });
+    expect(parseHookLayout(split)?.boxes).toEqual({ tiktok: "white", instagram: "off" });
   });
 
   it("treats 1× as the recorded file, not a previous sped cut", () => {

@@ -26,7 +26,7 @@ export function boxIsWhite(box?: boolean | "white"): boolean {
 }
 
 export function lookPaint(style: DrawnStyle, box?: boolean | "white"): { borderStyle: 1 | 3; outline: number; shadow: number } {
-  if (isBoxed(box) && style === "tiktok") return { borderStyle: 3, outline: 10, shadow: 0 };
+  if (isBoxed(box) && style === "tiktok") return { borderStyle: 3, outline: 16, shadow: 0 };
   if (isBoxed(box) && style === "instagram") return { borderStyle: 3, outline: 8, shadow: 0 };
   if (isBoxed(box)) return { borderStyle: 3, outline: 10, shadow: 0 };
   if (style === "instagram") return { borderStyle: 1, outline: 5, shadow: 1 };
@@ -34,11 +34,11 @@ export function lookPaint(style: DrawnStyle, box?: boolean | "white"): { borderS
   return { borderStyle: 1, outline: 6, shadow: 0 };
 }
 
-/** Preview plate: one chip per line. TT is the pill; IG is the tighter block. */
+/** Preview plate. TikTok is one card around every line. Instagram is a chip per line. */
 export function wordBoxClass(style: DrawnStyle, box?: boolean | "white"): string {
   if (!isBoxed(box)) return "";
   const fill = boxIsWhite(box) ? "bg-white text-black" : "bg-black text-white";
-  return style === "instagram" ? `rounded-[4px] px-[7px] py-[2px] ${fill}` : `rounded-full px-3 py-[3px] ${fill}`;
+  return style === "instagram" ? `rounded-[4px] px-[7px] py-[2px] ${fill}` : `rounded-2xl px-4 py-2 ${fill}`;
 }
 
 export function clampListCount(count: number): number {

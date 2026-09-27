@@ -5,7 +5,7 @@ import { spokenOnClip } from "@/lib/captions-math";
 import { assembleVideo, type ClipTrim } from "@/lib/ffmpeg";
 import { deleteUpload, ensureLocal, localRoot, uploadLocalToR2 } from "@/lib/files";
 import { isLogoFile, parseLogoItems, writeLogoSheet } from "@/lib/hook-logos";
-import { parseHookLayout } from "@/lib/hook-layout";
+import { boxFor, parseHookLayout } from "@/lib/hook-layout";
 import {
   chosenTrackId,
   parseCaptionMap,
@@ -84,7 +84,7 @@ async function burn(output: Loaded, recipe: OutputRecipe): Promise<void> {
         listAt: layout?.listAt,
         textFrom: layout?.from,
         textTo: layout?.to,
-        box: layout?.box,
+        box: boxFor(layout, recipe.look),
         captionFilters: phrases.length ? [await writeCaptionAss(phrases, row.trimStart, recipe.look)] : undefined,
       };
     }),

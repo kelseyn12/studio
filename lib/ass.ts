@@ -115,7 +115,7 @@ export function buildHookAss(input: {
   const endAt = assClock(input.to && input.to > (input.from ?? 0) ? input.to : 9 * 3600 + 59 * 60 + 59);
   const events: string[] = [];
   if (input.text.trim()) {
-    if (input.box) {
+    if (input.box && input.style !== "tiktok") {
       const lineH = Math.round(look.fontsize * look.lineGap);
       const mid = (lines.length - 1) / 2;
       const boxX = placed ? px : Math.round(FRAME_W * 0.5);
@@ -128,7 +128,8 @@ export function buildHookAss(input: {
         );
       });
     } else {
-      const body = headline(lines.map(parseHighlight), base, accent);
+      const ink = input.box === "white" ? "black" : input.box ? "white" : base;
+      const body = headline(lines.map(parseHighlight), ink, accent);
       const head = placed ? `{\\an5\\pos(${px},${py})}${body}` : body;
       events.push(`Dialogue: 0,${startAt},${endAt},Head,,0,0,0,,${head}`);
     }

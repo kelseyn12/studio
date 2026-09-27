@@ -3,7 +3,7 @@ import path from "path";
 import { groupWords, parseCaptionWords, spokenOnClip, transcribeWords, writeCaptionAss, type CaptionPhrase } from "@/lib/captions";
 import { assembleVideo, NO_TRIM, writeThumb, type ClipTrim } from "@/lib/ffmpeg";
 import { isLogoFile, parseLogoItems, writeLogoSheet } from "@/lib/hook-logos";
-import { parseHookLayout } from "@/lib/hook-layout";
+import { boxFor, parseHookLayout } from "@/lib/hook-layout";
 import { quietEnds } from "@/lib/trim";
 import { ensureLocal, localRoot, uploadLocalToR2 } from "@/lib/files";
 import { hasR2 } from "@/lib/r2";
@@ -105,6 +105,7 @@ export async function renderBatch(input: {
                 textFrom: layout?.from,
                 textTo: layout?.to,
                 box: layout?.box,
+                boxes: layout?.boxes,
               };
             }),
           );
@@ -174,7 +175,7 @@ export async function renderBatch(input: {
                   listAt: clip.listAt,
                   textFrom: clip.textFrom,
                   textTo: clip.textTo,
-                  box: clip.box,
+                  box: boxFor(clip, look),
                   captionFilters: clip.phrases?.length
                     ? [await writeCaptionAss(clip.phrases, clip.trim.start, look)]
                     : undefined,

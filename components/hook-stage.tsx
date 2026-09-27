@@ -4,7 +4,7 @@ import { useRef, useState, type PointerEvent } from "react";
 import { AlignGuides } from "@/components/align-guides";
 import { HookList } from "@/components/hook-list";
 import { ListOverlay } from "@/components/list-overlay";
-import { boxLabel, hookDefaultPos, nextBox, parseHookLayout, stringifyHookLayout, type HookPos } from "@/lib/hook-layout";
+import { boxFor, boxLabel, hookDefaultPos, nextBox, parseHookLayout, setLookBox, stringifyHookLayout, type HookPos } from "@/lib/hook-layout";
 import { LogoScaleBar } from "@/components/logo-scale-bar";
 import { WordChips } from "@/components/word-chips";
 import { ALIGN_SNAP, clampLogoScale, defaultLogoPos, isLogoFile, itemScale, LOGO_SCALE_STEP, matchTypeScale, parseLogoItems, previewLogoPx, sharedAxes, snapLogoPos } from "@/lib/hook-logos-math";
@@ -141,9 +141,10 @@ export function HookStage({
     count,
   });
   const typeSize = `${LOOK_FONT_CLASS[preview]} ${preview === "instagram" ? "text-[17px] font-semibold leading-tight" : "text-[20px] font-bold leading-tight"}`;
-  const boxed = isBoxed(pos.box);
-  const inkClass = boxed && boxIsWhite(pos.box) ? "text-black" : "text-white";
-  const plate = wordBoxClass(preview, pos.box);
+  const lookBox = boxFor(pos, preview);
+  const boxed = isBoxed(lookBox);
+  const inkClass = boxed && boxIsWhite(lookBox) ? "text-black" : "text-white";
+  const plate = wordBoxClass(preview, lookBox);
   const chips = wrapHook(text);
   const stroke = boxed ? "" : preview === "instagram"
     ? "[text-shadow:0_1px_0_#000,0_-1px_0_#000,1px_0_0_#000,-1px_0_0_#000]"
@@ -173,10 +174,10 @@ export function HookStage({
         </button>
         <button
           type="button"
-          onClick={() => void save({ ...pos, box: nextBox(pos.box) })}
+          onClick={() => void save(setLookBox(pos, preview, nextBox(lookBox)))}
           className={`rounded-lg px-2 py-1 text-[11px] ${boxed ? "bg-sun font-semibold text-ink" : "border border-line text-mute"}`}
         >
-          {boxLabel(pos.box)}
+          {boxLabel(lookBox, preview)}
         </button>
       </div>
       <div ref={stageRef} className="relative overflow-hidden rounded-xl bg-ink">
@@ -197,7 +198,7 @@ export function HookStage({
         >
           <p className="mb-1 text-center text-[10px] text-white/70">Drag</p>
           <div className="relative min-h-[4.5rem]">
-            {boxed ? <WordChips lines={chips} className={`${typeSize} ${inkClass} ${plate}`} /> : null}
+            {boxed ? <WordChips lines={chips} together={preview === "tiktok"} className={`${typeSize} ${inkClass} ${plate}`} /> : null}
             <textarea
               value={text}
               placeholder="Type here"
