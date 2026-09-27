@@ -71,8 +71,12 @@ export async function renderBatch(input: {
       }
     }
     let fileNumber = 0;
+    let mixNumber = 0;
     for (const combo of combos) {
+      mixNumber += 1;
+      let textNumber = 0;
       for (const line of lines) {
+        textNumber += 1;
         for (let copy = 0; copy < copies; copy += 1) {
           const variation = variationFor(fileNumber, batch);
           const music = musicQueue[fileNumber];
@@ -91,7 +95,14 @@ export async function renderBatch(input: {
             }),
           );
           const musicPath = music ? await ensureLocal(music.path) : undefined;
-          const title = `${batch.name} · ${fileNumber}`;
+          const title = [
+            batch.name,
+            `mix ${mixNumber}`,
+            textLines.length > 1 ? `text ${textNumber}` : null,
+            copies > 1 ? `copy ${copy + 1}` : null,
+          ]
+            .filter(Boolean)
+            .join(" · ");
           // Cross-posting deals get one file per app look; each ships to its own accounts.
           const looks = hookLooks(batch.textStyle, networks, Boolean(hookLine));
           const files = [];
@@ -136,7 +147,7 @@ export async function renderBatch(input: {
               batchId: id,
               cardId: card.id,
               path: file.path,
-              label: `${title} · ${variation.label}${looks.length > 1 ? ` · ${LOOK_TAG[file.textStyle]}` : ""}`,
+              label: `${title}${looks.length > 1 ? ` · ${LOOK_TAG[file.textStyle]}` : ""}`,
             })),
           });
           await prisma.repurposeBatch.update({

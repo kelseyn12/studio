@@ -11,6 +11,8 @@ export type Variation = {
 };
 
 const STEPS = [1, -1, 0.55, -0.7, 1.15];
+/** Crop cannot follow the signed speed step — abs(1) and abs(-1) were the same zoom on copy 1 and 2. */
+const CROP_STEPS = [1, 0.55, 1.15, 0.7, 0.4];
 
 /** Sasha's trick: same text, different color, and the platform sees a new video. */
 export const HOOK_COLORS = ["white", "yellow", "#5CFF5C", "#FF5C5C"] as const;
@@ -37,7 +39,7 @@ export function variationFor(
   const saturation = colorAmt ? Number((1 + (colorAmt / 100) * step).toFixed(3)) : 1;
   const contrast = colorAmt ? Number((1 + (colorAmt / 200) * Math.abs(step)).toFixed(3)) : 1;
   const hue = colorAmt ? Math.round(colorAmt * step * 1.2) : 0;
-  const crop = cropAmt ? Number((cropAmt * Math.abs(step)).toFixed(1)) : 0;
+  const crop = cropAmt ? Number((cropAmt * CROP_STEPS[index % CROP_STEPS.length]).toFixed(1)) : 0;
   const mirror = Boolean(input.mirrorOn) && index % 2 === 1;
   const hookColor = input.hookColorOn ? HOOK_COLORS[index % HOOK_COLORS.length] : HOOK_COLORS[0];
   const accentColor = input.hookColorOn ? ACCENT_COLORS[index % ACCENT_COLORS.length] : ACCENT_COLORS[0];

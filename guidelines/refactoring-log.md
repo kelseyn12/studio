@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-09-26 — Copy 1 and copy 2 no longer share the same crop (`CROP_STEPS` instead of `abs(speed step)`). Output labels are mix / copy / look. Mix settings copy explains mixes vs copies vs both looks.
 - 2026-09-26 — Watch/Download use `/api/files` (`watchUrl`). Stored R2 S3 API URLs (`*.r2.cloudflarestorage.com`) are not public — they opened as an empty XML error. `isPublicMediaUrl` / `r2PublicUrl` refuse that host. Mix settings and Live use account checkboxes so a batch can post to IG + TT without a deal assignment; `accountIds` on batch and card; `targetAccounts` reads the list when the deal has no accounts yet.
 - 2026-09-26 — Text look gained an explicit "Both looks (TikTok + Instagram)" choice so a batch can make two files without relying on "Match the accounts" + deal accounts.
 - 2026-09-26 — Removed the color-wash slider (`tintAmt` / `tintFilter`). Colored rooms come from an LED at filming. Starred words and the numbered list stay.

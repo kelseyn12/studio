@@ -7,6 +7,7 @@ describe("variationFor", () => {
     const second = variationFor(1, { speedAmt: 3, colorAmt: 8, cropAmt: 4 });
     expect(first.speed).not.toBe(second.speed);
     expect(first.saturation).not.toBe(second.saturation);
+    expect(first.crop).not.toBe(second.crop);
     expect(first.crop).toBeGreaterThan(0);
   });
 

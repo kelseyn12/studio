@@ -84,6 +84,7 @@ export function BatchSettings({
   );
   const files = outputCount(mixes, variants) * Math.max(textCount, 1);
   const looks = textCount > 0 ? hookLooks(textStyle, targetNetworks, true).length : 1;
+  const copy1 = variationFor(0, { speedAmt, colorAmt, cropAmt, mirrorOn, hookColorOn });
   const preview = variationFor(1, { speedAmt, colorAmt, cropAmt, mirrorOn, hookColorOn });
 
   return (
@@ -169,10 +170,12 @@ export function BatchSettings({
       <section className="rounded-card border border-line bg-panel p-5">
         <p className="label">Mix settings</p>
         <p className="mt-2 text-sm text-mute">
-          Mixes change the story. If every mix is off, we shuffle and take that many. Sliders change the file so platforms do not match copies.
+          A mix is one hook + body + CTA — a different story. Copies are the same story with a slightly different
+          speed, light, and crop so the apps do not treat them as the same file. Both looks is the same copy twice:
+          Instagram text and TikTok text — same speed and crop on purpose.
         </p>
         <div className="mt-5 space-y-4">
-          <Row label="Every mix">
+          <Row label="Use every mix">
             <Toggle name="allCombos" on={allCombos} onChange={setAllCombos} />
           </Row>
           <Row label="If not every mix, stop after">
@@ -185,7 +188,7 @@ export function BatchSettings({
               className="field max-w-28"
             />
           </Row>
-          <Row label="Different copies of each mix">
+          <Row label="Copies of each mix (same clips, different file)">
             <input
               name="variants"
               type="number"
@@ -199,7 +202,11 @@ export function BatchSettings({
           <Slider
             name="speedAmt"
             label="Speed"
-            hint={speedAmt ? `±${speedAmt}% · copy 2 is ${Math.round(preview.speed * 100)}%` : "Off — identical timing"}
+            hint={
+              speedAmt
+                ? `copy 1 is ${Math.round(copy1.speed * 100)}% · copy 2 is ${Math.round(preview.speed * 100)}%`
+                : "Off — copies keep the same timing"
+            }
             value={speedAmt}
             max={8}
             onChange={setSpeedAmt}
@@ -207,7 +214,11 @@ export function BatchSettings({
           <Slider
             name="colorAmt"
             label="Light / color"
-            hint={colorAmt ? `sat ${preview.saturation.toFixed(2)} · hue ${preview.hue}` : "Off — identical color"}
+            hint={
+              colorAmt
+                ? `copy 2 sat ${preview.saturation.toFixed(2)} · hue ${preview.hue} — a nudge, not a wash`
+                : "Off — copies keep the same color"
+            }
             value={colorAmt}
             max={20}
             onChange={setColorAmt}
@@ -215,7 +226,11 @@ export function BatchSettings({
           <Slider
             name="cropAmt"
             label="Crop / zoom"
-            hint={cropAmt ? `${preview.crop}% zoom-in on later copies` : "Off — identical frame"}
+            hint={
+              cropAmt
+                ? `copy 1 zooms ${copy1.crop}% · copy 2 zooms ${preview.crop}%`
+                : "Off — copies keep the same frame"
+            }
             value={cropAmt}
             max={12}
             onChange={setCropAmt}
