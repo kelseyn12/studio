@@ -1,8 +1,15 @@
+import { LOOK_METRICS } from "@/lib/list-layout";
+import type { DrawnStyle } from "@/lib/text-style";
+
 export const LOGO_SECONDS = 4;
 export const MAX_HOOK_LOGOS = 4;
 export const MAX_LOGO_ITEMS = 8;
 export const CANVAS_W = 1080;
 export const CANVAS_H = 1920;
+export const LOGO_FILE_ONE = 280;
+export const LOGO_FILE_ROW = 200;
+/** Scale 1 on a row is about this many type-lines tall. */
+export const LOGO_TO_TYPE = 2.4;
 /** Above the headline / play button so new chips are grabable. */
 export const LOGO_ROW_Y = 0.15;
 
@@ -80,6 +87,18 @@ export function clampLogoScale(value: unknown): number {
   if (!Number.isFinite(n)) return 1;
   const stepped = Math.round(n / LOGO_SCALE_STEP) * LOGO_SCALE_STEP;
   return Math.min(LOGO_SCALE_MAX, Math.max(LOGO_SCALE_MIN, stepped));
+}
+
+/** Logo scale that sits with this look's type (about 2.4 lines tall). */
+export function matchTypeScale(style: DrawnStyle, fileCount = 2): number {
+  const fileBase = fileCount <= 1 ? LOGO_FILE_ONE : LOGO_FILE_ROW;
+  return clampLogoScale((LOOK_METRICS[style].fontsize * LOGO_TO_TYPE) / fileBase);
+}
+
+/** Preview px so a logo at scale 1 tracks TT 20 / IG 17 type. */
+export function previewLogoPx(style: DrawnStyle, scale: number): number {
+  const typePx = style === "instagram" ? 17 : style === "tiktok" ? 20 : 21;
+  return Math.max(16, Math.round((typePx / LOOK_METRICS[style].fontsize) * LOGO_FILE_ROW * scale));
 }
 
 export function itemScale(item: LogoItem): number {
@@ -182,7 +201,7 @@ export function logoBoxes(count: number, equation = false): LogoBox[] {
 /** Mixed row: files, +, =, emoji, short text. Uses x/y when the item was dragged. */
 export function boxesFromItems(items: LogoItem[]): LogoBox[] {
   if (!items.length) return [];
-  const fileBase = items.filter(isLogoFile).length <= 1 ? 280 : 200;
+  const fileBase = items.filter(isLogoFile).length <= 1 ? LOGO_FILE_ONE : LOGO_FILE_ROW;
   const widths = items.map((item) => {
     const scale = itemScale(item);
     return isLogoFile(item) ? Math.round(fileBase * scale) : Math.min(400, Math.round(28 * Math.max(1, item.text.length) * scale));

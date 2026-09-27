@@ -205,3 +205,6 @@
 
 - [X] Native black/white boxes + Align guides
   Box on is solid black + white type: TT rounded chip, IG tight block. Align shows the center line and shared axes; it does not reshuffle logos.
+
+- [X] Per-line native boxes + Match type
+  Box was one wide slab on the textarea. Preview is now a hugging chip per wrap (TT pill, IG block). Burn-in is one ASS plate per line. Match type sizes a logo to the look; Bigger/Smaller still nudge.

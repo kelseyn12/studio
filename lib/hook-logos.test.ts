@@ -4,7 +4,7 @@ import path from "path";
 import { describe, expect, it } from "vitest";
 import { runFfmpeg } from "@/lib/ffmpeg";
 import { writeLogoSheet } from "@/lib/hook-logos";
-import { alignLogoRow, boxesFromItems, CANVAS_H, defaultLogoPos, logoBoxes, parseLogoItems, parseLogos, sharedAxes, snapLogoPos, stringifyLogos } from "@/lib/hook-logos-math";
+import { alignLogoRow, boxesFromItems, CANVAS_H, defaultLogoPos, logoBoxes, matchTypeScale, parseLogoItems, parseLogos, previewLogoPx, sharedAxes, snapLogoPos, stringifyLogos } from "@/lib/hook-logos-math";
 
 describe("parseLogos", () => {
   it("keeps safe relative paths and caps at 4", () => {
@@ -39,6 +39,13 @@ describe("parseLogos", () => {
       "🔥",
     ]);
     expect(boxesFromItems(items).some((box) => box.kind === "mark" && box.text === "+")).toBe(true);
+  });
+
+  it("matches a logo to the look's type size", () => {
+    expect(matchTypeScale("tiktok", 2)).toBe(1);
+    expect(matchTypeScale("tiktok", 1)).toBe(0.75);
+    expect(previewLogoPx("tiktok", 1)).toBe(49);
+    expect(previewLogoPx("instagram", 1)).toBe(45);
   });
 
   it("scales a logo when you ask for bigger", () => {

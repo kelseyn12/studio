@@ -16,20 +16,20 @@ export const LOOK_METRICS: Record<DrawnStyle, LookMetrics> = {
 };
 
 export function lookPaint(style: DrawnStyle, box?: boolean): { borderStyle: 1 | 3; outline: number; shadow: number } {
-  if (box && style === "tiktok") return { borderStyle: 3, outline: 20, shadow: 0 };
-  if (box && style === "instagram") return { borderStyle: 3, outline: 12, shadow: 0 };
-  if (box) return { borderStyle: 3, outline: 16, shadow: 0 };
+  if (box && style === "tiktok") return { borderStyle: 3, outline: 10, shadow: 0 };
+  if (box && style === "instagram") return { borderStyle: 3, outline: 8, shadow: 0 };
+  if (box) return { borderStyle: 3, outline: 10, shadow: 0 };
   if (style === "instagram") return { borderStyle: 1, outline: 5, shadow: 1 };
   if (style === "tiktok") return { borderStyle: 1, outline: 5, shadow: 2 };
   return { borderStyle: 1, outline: 6, shadow: 0 };
 }
 
-/** Preview plate: solid black + white type. TT is the rounded chip; IG is the tighter block. */
+/** Preview plate: one chip per line. TT is the pill; IG is the tighter block. */
 export function wordBoxClass(style: DrawnStyle, box?: boolean): string {
   if (!box) return "";
   return style === "instagram"
-    ? "rounded-[3px] bg-black px-2 py-[3px] text-white"
-    : "rounded-md bg-black px-[10px] py-1 text-white";
+    ? "rounded-[4px] bg-black px-[7px] py-[2px] text-white"
+    : "rounded-full bg-black px-3 py-[3px] text-white";
 }
 
 export function clampListCount(count: number): number {

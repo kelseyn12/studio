@@ -107,18 +107,32 @@ export function buildHookAss(input: {
   const base = input.baseColor || "white";
   const accent = input.accentColor || DEFAULT_ACCENT;
   const lines = wrapHookKeepingStars(input.text);
-  const segments = lines.map(parseHighlight);
   const placed = Number.isFinite(input.x) && Number.isFinite(input.y);
   const px = Math.round(FRAME_W * Math.min(0.92, Math.max(0.08, input.x ?? 0.5)));
   const py = Math.round(FRAME_H * Math.min(0.88, Math.max(0.08, input.y ?? look.top)));
   const marginV = placed ? 0 : Math.round(FRAME_H * look.top);
-  const head = placed
-    ? `{\\an5\\pos(${px},${py})}${headline(segments, base, accent)}`
-    : headline(segments, base, accent);
   const startAt = assClock(input.from ?? 0);
   const endAt = assClock(input.to && input.to > (input.from ?? 0) ? input.to : 9 * 3600 + 59 * 60 + 59);
   const events: string[] = [];
-  if (input.text.trim()) events.push(`Dialogue: 0,${startAt},${endAt},Head,,0,0,0,,${head}`);
+  if (input.text.trim()) {
+    if (input.box) {
+      const lineH = Math.round(look.fontsize * look.lineGap);
+      const mid = (lines.length - 1) / 2;
+      const boxX = placed ? px : Math.round(FRAME_W * 0.5);
+      lines.forEach((line, index) => {
+        const y = placed
+          ? py + Math.round((index - mid) * lineH)
+          : Math.round(marginV + look.fontsize * 0.5 + index * lineH);
+        events.push(
+          `Dialogue: 0,${startAt},${endAt},Head,,0,0,0,,{\\an5\\pos(${boxX},${y})}${headline([parseHighlight(line)], "white", accent)}`,
+        );
+      });
+    } else {
+      const body = headline(lines.map(parseHighlight), base, accent);
+      const head = placed ? `{\\an5\\pos(${px},${py})}${body}` : body;
+      events.push(`Dialogue: 0,${startAt},${endAt},Head,,0,0,0,,${head}`);
+    }
+  }
   const listItems = (input.listItems ?? []).map((line) => line.trim()).filter(Boolean).slice(0, LIST_MAX);
   const listCount = clampListCount(Math.max(listItems.length, input.listCount ?? 0));
   if (listCount > 0) {

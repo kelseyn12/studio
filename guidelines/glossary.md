@@ -76,10 +76,12 @@
 - `cutPreviewPath` / `parseCutUndo` — `lib/hook-layout.ts` — 1× is the recorded file (`basePath`). 1.25 / 1.5 / 2 step up from that, never from a previous sped cut.
 - `cutVideo` — `lib/cut.ts` — stitches kept ranges and applies speed (`setpts` + `atempo`). Used by `/api/trim`.
 - `QuickCut` — `components/quick-cut.tsx` — Start here / End here, Cut from here / Cut to here (drop a middle), speed pills 1 / 1.25 / 1.5 / 2. Tapping a pill plays at that rate; Save writes it into the file.
-- `parseLogoItems` / `parseLogos` / `boxesFromItems` / `defaultLogoPos` / `alignLogoRow` / `snapLogoPos` / `itemScale` / `writeLogoSheet` — `lib/hook-logos-math.ts` / `lib/hook-logos.ts` — files plus `+` `=` emoji / short text. `scale` 0.5–2.5 (Bigger / Smaller on Words). Align evens a row; drag snaps to a neighbor. Unused items line up at `LOGO_ROW_Y` (0.15). First 4s. Tested in `lib/hook-logos.test.ts`.
+- `parseLogoItems` / `parseLogos` / `boxesFromItems` / `defaultLogoPos` / `alignLogoRow` / `snapLogoPos` / `itemScale` / `writeLogoSheet` — `lib/hook-logos-math.ts` / `lib/hook-logos.ts` — files plus `+` `=` emoji / short text. `scale` 0.5–2.5 (Bigger / Smaller / Match type on Words). Align evens a row; drag snaps to a neighbor. Unused items line up at `LOGO_ROW_Y` (0.15). First 4s. Tested in `lib/hook-logos.test.ts`.
 - `HookLogos` — `components/hook-logos.tsx` — Add logo, +, =, 🔥, or a typed chip. Headline under the formula is Words.
 - `CutTrack` — `components/cut-track.tsx` — yellow ends = keep window. Click scrubs. Dark = dropped middles. Repeat Cut from/to for more than one middle.
-- `listStack` / `sharedListPlan` / `lookPaint` / `wordBoxClass` / `LOOK_METRICS` — `lib/list-layout.ts` — native TT 82 / IG 76. Box on is solid black + white: TT rounded chip, IG tight block.
+- `listStack` / `sharedListPlan` / `lookPaint` / `wordBoxClass` / `LOOK_METRICS` — `lib/list-layout.ts` — native TT 82 / IG 76. Box on paints one black chip per wrapped line (TT pill, IG tight block). libass cannot round corners; preview can.
+- `matchTypeScale` / `previewLogoPx` / `LOGO_TO_TYPE` — `lib/hook-logos-math.ts` — Match type sizes a logo to ~2.4 type-lines. Preview px tracks TT 20 / IG 17 so logos sit with the look.
+- `WordChips` — `components/word-chips.tsx` — hugging per-line box preview under the Words textarea.
 - `sharedAxes` / `snapLogoPos` — `lib/hook-logos-math.ts` — snap to a neighbor or the center line. Align shows guides; it does not reshuffle chips.
 - `HookStage` / `HookList` / `ListOverlay` / `AlignGuides` — Words: TT/IG preview, Align guides, Box on/off. Mix numbers on the hook; body lines lock to those rows.
 - `CoverPick` — `components/cover-pick.tsx` — pick a still on Live. Copies also get staggered cover times on generate.

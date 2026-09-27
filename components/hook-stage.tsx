@@ -5,10 +5,11 @@ import { AlignGuides } from "@/components/align-guides";
 import { HookList } from "@/components/hook-list";
 import { ListOverlay } from "@/components/list-overlay";
 import { hookDefaultPos, parseHookLayout, stringifyHookLayout, type HookPos } from "@/lib/hook-layout";
-import { ALIGN_SNAP, clampLogoScale, defaultLogoPos, isLogoFile, itemScale, LOGO_SCALE_STEP, parseLogoItems, sharedAxes, snapLogoPos } from "@/lib/hook-logos-math";
+import { WordChips } from "@/components/word-chips";
+import { ALIGN_SNAP, clampLogoScale, defaultLogoPos, isLogoFile, itemScale, LOGO_SCALE_STEP, matchTypeScale, parseLogoItems, previewLogoPx, sharedAxes, snapLogoPos } from "@/lib/hook-logos-math";
 import { listRows, listStack, wordBoxClass } from "@/lib/list-layout";
 import { publicFileUrl } from "@/lib/urls";
-import type { DrawnStyle } from "@/lib/text-style";
+import { wrapHook, type DrawnStyle } from "@/lib/text-style";
 
 export function HookStage({
   id,
@@ -56,19 +57,19 @@ export function HookStage({
     return scales[itemKey(item)] ?? itemScale(item);
   }
 
-  async function bumpScale(delta: number) {
+  async function setScale(next: number) {
     const item = logos.find((row) => itemKey(row) === picked) ?? logos[0];
     if (!item) return;
-    const next = clampLogoScale(scaleOf(item) + delta);
+    const scale = clampLogoScale(next);
     setPicked(itemKey(item));
-    setScales((current) => ({ ...current, [itemKey(item)]: next }));
+    setScales((current) => ({ ...current, [itemKey(item)]: scale }));
     await fetch(`/api/repurpose/clips/${id}/logos`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         path: isLogoFile(item) ? item.path : undefined,
         id: !isLogoFile(item) ? item.id : undefined,
-        scale: next,
+        scale,
       }),
     });
   }
@@ -145,6 +146,8 @@ export function HookStage({
       ? "text-[17px] font-semibold leading-tight text-white [text-shadow:0_1px_0_#000,0_-1px_0_#000,1px_0_0_#000,-1px_0_0_#000]"
       : "text-[20px] font-bold leading-tight text-white [text-shadow:0_1px_0_#000,0_-1px_0_#000,1px_0_0_#000,-1px_0_0_#000,0_2px_5px_#000]";
   const plate = wordBoxClass(preview, pos.box);
+  const chips = wrapHook(text);
+  const active = logos.find((row) => itemKey(row) === picked) ?? logos[0];
   const axes = sharedAxes([{ x: pos.x, y: pos.y }, ...logos.map((item, index) => loc(item, index))]);
 
   return (
@@ -192,21 +195,24 @@ export function HookStage({
           }}
         >
           <p className="mb-1 text-center text-[10px] text-white/70">Drag</p>
-          <textarea
-            value={text}
-            placeholder="Type here"
-            onChange={(event) => setText(event.target.value)}
-            onBlur={() => save(pos, text)}
-            onPointerDown={(event) => event.stopPropagation()}
-            className={`w-full resize-none text-center outline-none ${pos.box ? "" : "bg-transparent"} ${native} ${plate}`}
-            rows={3}
-          />
+          <div className="relative min-h-[4.5rem]">
+            {pos.box ? <WordChips lines={chips} className={`${native} ${plate}`} /> : null}
+            <textarea
+              value={text}
+              placeholder="Type here"
+              onChange={(event) => setText(event.target.value)}
+              onBlur={() => save(pos, text)}
+              onPointerDown={(event) => event.stopPropagation()}
+              className={`w-full resize-none text-center outline-none ${pos.box ? "absolute inset-0 bg-transparent text-transparent caret-white" : "bg-transparent"} ${native}`}
+              rows={Math.max(2, chips.length || 3)}
+            />
+          </div>
         </div>
-        {count ? <ListOverlay rows={listRows(stack, count)} lines={lines} className={`${native} ${plate}`} /> : null}
+        {count ? <ListOverlay rows={listRows(stack, count)} lines={lines} className={`${native} ${plate}${pos.box ? " w-fit" : ""}`} /> : null}
         {logos.map((item, index) => {
           const at = loc(item, index);
           const scale = scaleOf(item);
-          const px = Math.round(48 * scale);
+          const px = previewLogoPx(preview, scale);
           return (
             <button
               key={itemKey(item)}
@@ -243,13 +249,19 @@ export function HookStage({
         })}
       </div>
       {logos.length ? (
-        <div className="flex gap-1">
-          <button type="button" onClick={() => bumpScale(-LOGO_SCALE_STEP)} className="flex-1 rounded-lg border border-line px-2 py-1 text-[11px] text-mute">
-            Smaller
-          </button>
-          <button type="button" onClick={() => bumpScale(LOGO_SCALE_STEP)} className="flex-1 rounded-lg border border-line px-2 py-1 text-[11px] text-mute">
-            Bigger
-          </button>
+        <div className="space-y-1">
+          <div className="flex gap-1">
+            <button type="button" onClick={() => active && void setScale(scaleOf(active) - LOGO_SCALE_STEP)} className="flex-1 rounded-lg border border-line px-2 py-1 text-[11px] text-mute">
+              Smaller
+            </button>
+            <button type="button" onClick={() => void setScale(matchTypeScale(preview, logos.filter(isLogoFile).length))} className="flex-1 rounded-lg border border-line px-2 py-1 text-[11px] text-mute">
+              Match type
+            </button>
+            <button type="button" onClick={() => active && void setScale(scaleOf(active) + LOGO_SCALE_STEP)} className="flex-1 rounded-lg border border-line px-2 py-1 text-[11px] text-mute">
+              Bigger
+            </button>
+          </div>
+          <p className="text-[11px] text-mute">Type is locked to TT/IG size. Tap a logo, Match type, then Bigger/Smaller if it still shouts.</p>
         </div>
       ) : null}
       <div className="flex gap-1">

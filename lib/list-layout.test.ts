@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { listRows, listStack, lookPaint, sharedListPlan } from "@/lib/list-layout";
+import { listRows, listStack, lookPaint, sharedListPlan, wordBoxClass } from "@/lib/list-layout";
 
 describe("listStack", () => {
   it("keeps body words on the hook number rows", () => {
@@ -28,7 +28,9 @@ describe("listStack", () => {
   it("paints a plate only when box is on", () => {
     expect(lookPaint("tiktok").borderStyle).toBe(1);
     expect(lookPaint("instagram").outline).toBe(5);
-    expect(lookPaint("tiktok", true)).toEqual({ borderStyle: 3, outline: 20, shadow: 0 });
-    expect(lookPaint("instagram", true)).toEqual({ borderStyle: 3, outline: 12, shadow: 0 });
+    expect(lookPaint("tiktok", true)).toEqual({ borderStyle: 3, outline: 10, shadow: 0 });
+    expect(lookPaint("instagram", true)).toEqual({ borderStyle: 3, outline: 8, shadow: 0 });
+    expect(wordBoxClass("tiktok", true)).toContain("rounded-full");
+    expect(wordBoxClass("instagram", true)).toContain("rounded-[4px]");
   });
 });
