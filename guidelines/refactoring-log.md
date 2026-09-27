@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-09-26 — TikTok card matches the native plate: wide (94% of the frame), radius 14, pad 18×8, lines stay on one row so a sentence stays two lines.
 - 2026-09-26 — Instagram headline is 104px bold in the file and 26px bold in Words. 76px semibold was reading like a caption next to the logos.
 - 2026-09-26 — Headline drag is per look (`places`). Moving Instagram text no longer moves the TikTok card.
 - 2026-09-26 — TikTok text card is a rounded ASS drawing (`roundedPlatePath`, radius 28) so the finished file keeps the curve. libass plates stay off for that look.

@@ -2,11 +2,11 @@ import { measureTextPx } from "@/lib/font-measure";
 import { hookFontFile } from "@/lib/hook-font-files";
 import type { DrawnStyle } from "@/lib/text-style";
 
-/** TikTok text-tool card on a 1080 frame: modest corner, not a pill. */
-export const TT_BOX_RADIUS = 28;
-const PAD_X = 26;
-const PAD_Y = 18;
-const LINE_STEP = 1.15;
+/** TikTok text-tool card on a 1080 frame: small corner, tight pad, like the native plate. */
+export const TT_BOX_RADIUS = 14;
+const PAD_X = 18;
+const PAD_Y = 8;
+const LINE_STEP = 1.05;
 
 export function plateSize(style: DrawnStyle, lines: string[], fontSize: number): { width: number; height: number } {
   const file = hookFontFile(style);

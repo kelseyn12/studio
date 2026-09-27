@@ -221,5 +221,8 @@
 - [X] Tighter TT card, IG font only, smaller grabs, cover on each video
   TikTok plate uses a small corner (rounded-md), not a pill. Instagram stays Inter Tight with no plate. Drag targets hug the text and logos. Each finished video has Cover: play to a frame and save it.
 
+- [X] TikTok card matches the native plate
+  The card spans the frame (94%) so a sentence stays two full lines. Corner is 5px in Words and radius 14 in the file, with a tight pad. Already generated videos keep the old plate until the next Generate.
+
 - [X] Per-video words, music start, and delete
   Each finished video has Words + music (song or none, Music starts now) and Rebuild this video. Delete removes that file only and refreshes the list. Older videos need one new Generate before they can be tuned.

@@ -30,7 +30,7 @@ describe("listStack", () => {
     expect(lookPaint("instagram").outline).toBe(5);
     expect(lookPaint("tiktok", true)).toEqual({ borderStyle: 3, outline: 12, shadow: 0 });
     expect(lookPaint("instagram", true)).toEqual({ borderStyle: 3, outline: 8, shadow: 0 });
-    expect(wordBoxClass("tiktok", true)).toContain("rounded-md");
+    expect(wordBoxClass("tiktok", true)).toContain("rounded-[5px]");
     expect(wordBoxClass("instagram", true)).toContain("rounded-[4px]");
     expect(wordBoxClass("tiktok", "white")).toContain("bg-white");
     expect(wordBoxClass("tiktok", "white")).toContain("text-black");

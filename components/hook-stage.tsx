@@ -148,7 +148,7 @@ export function HookStage({
     y: anchor.y,
     count,
   });
-  const typeSize = `${LOOK_FONT_CLASS[preview]} ${preview === "instagram" ? "text-[26px] font-bold leading-tight" : "text-[20px] font-bold leading-tight"}`;
+  const typeSize = `${LOOK_FONT_CLASS[preview]} ${preview === "instagram" ? "text-[26px] font-bold leading-tight" : "text-[20px] font-bold leading-[1.05]"}`;
   const lookBox = boxFor(pos, preview);
   const boxed = isBoxed(lookBox);
   const inkClass = boxed && boxIsWhite(lookBox) ? "text-black" : "text-white";
@@ -192,7 +192,7 @@ export function HookStage({
         <video ref={videoRef} src={src} controls playsInline className="aspect-[9/16] w-full object-cover" />
         {guides ? <AlignGuides horizontals={[at.y, ...axes.ys]} verticals={axes.xs} /> : null}
         <div
-          className="absolute z-10 w-max max-w-[62%] cursor-grab"
+          className="absolute z-10 w-max max-w-[94%] cursor-grab"
           style={{ left: `${at.x * 100}%`, top: `${at.y * 100}%`, transform: "translate(-50%, -50%)" }}
           onPointerDown={(event) => event.currentTarget.setPointerCapture(event.pointerId)}
           onPointerMove={(event) => {
