@@ -45,7 +45,7 @@ describe("parseLogos", () => {
     expect(matchTypeScale("tiktok", 2)).toBe(1);
     expect(matchTypeScale("tiktok", 1)).toBe(0.75);
     expect(previewLogoPx("tiktok", 1)).toBe(49);
-    expect(previewLogoPx("instagram", 1)).toBe(45);
+    expect(previewLogoPx("instagram", 1)).toBe(50);
     const equals = previewGrab("tiktok", { kind: "mark", id: "eq", text: "=" }, 1);
     const flame = previewGrab("tiktok", { kind: "mark", id: "fire", text: "🔥" }, 1);
     expect(equals.width).toBeLessThan(30);

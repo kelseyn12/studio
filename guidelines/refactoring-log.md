@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-09-26 — Instagram headline is 104px bold in the file and 26px bold in Words. 76px semibold was reading like a caption next to the logos.
 - 2026-09-26 — Headline drag is per look (`places`). Moving Instagram text no longer moves the TikTok card.
 - 2026-09-26 — TikTok text card is a rounded ASS drawing (`roundedPlatePath`, radius 28) so the finished file keeps the curve. libass plates stay off for that look.
 - 2026-09-26 — +, =, and emoji grab boxes use `previewGrab` (glyph size). Logo files still use the image size.

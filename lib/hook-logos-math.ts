@@ -95,9 +95,9 @@ export function matchTypeScale(style: DrawnStyle, fileCount = 2): number {
   return clampLogoScale((LOOK_METRICS[style].fontsize * LOGO_TO_TYPE) / fileBase);
 }
 
-/** Preview px so a logo at scale 1 tracks TT 20 / IG 17 type. */
+/** Preview px so a logo at scale 1 tracks TT 20 / IG 26 type. */
 export function previewLogoPx(style: DrawnStyle, scale: number): number {
-  const typePx = style === "instagram" ? 17 : style === "tiktok" ? 20 : 21;
+  const typePx = style === "instagram" ? 26 : style === "tiktok" ? 20 : 21;
   return Math.max(16, Math.round((typePx / LOOK_METRICS[style].fontsize) * LOGO_FILE_ROW * scale));
 }
 
@@ -111,7 +111,7 @@ export function previewGrab(
     const px = previewLogoPx(style, scale);
     return { width: px, height: px, fontSize: 0 };
   }
-  const typePx = style === "instagram" ? 17 : style === "tiktok" ? 20 : 21;
+  const typePx = style === "instagram" ? 26 : style === "tiktok" ? 20 : 21;
   const ratio = typePx / LOOK_METRICS[style].fontsize;
   const text = item.text.trim();
   const fontSize = Math.max(12, Math.round((text.length <= 2 ? 88 : 48) * scale * ratio));

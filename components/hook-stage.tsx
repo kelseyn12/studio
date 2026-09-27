@@ -148,7 +148,7 @@ export function HookStage({
     y: anchor.y,
     count,
   });
-  const typeSize = `${LOOK_FONT_CLASS[preview]} ${preview === "instagram" ? "text-[17px] font-semibold leading-tight" : "text-[20px] font-bold leading-tight"}`;
+  const typeSize = `${LOOK_FONT_CLASS[preview]} ${preview === "instagram" ? "text-[26px] font-bold leading-tight" : "text-[20px] font-bold leading-tight"}`;
   const lookBox = boxFor(pos, preview);
   const boxed = isBoxed(lookBox);
   const inkClass = boxed && boxIsWhite(lookBox) ? "text-black" : "text-white";

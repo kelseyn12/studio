@@ -8,10 +8,10 @@ export const LIST_LEFT = 90;
 export type LookMetrics = { fontsize: number; top: number; lineGap: number };
 export type ListStack = { left: number; top: number; gap: number };
 
-/** App text-tool sizes on 1080×1920. TikTok Classic sits bigger; Reels Classic is a bit tighter. */
+/** App text-tool sizes on 1080×1920. Both looks read as a hook, not a caption. */
 export const LOOK_METRICS: Record<DrawnStyle, LookMetrics> = {
   tiktok: { fontsize: 82, top: 0.17, lineGap: 1.12 },
-  instagram: { fontsize: 76, top: 0.14, lineGap: 1.16 },
+  instagram: { fontsize: 104, top: 0.14, lineGap: 1.16 },
   plain: { fontsize: 84, top: 0.12, lineGap: 1.12 },
 };
 
