@@ -148,15 +148,13 @@ export function HookStage({
     y: anchor.y,
     count,
   });
-  const typeSize = `${LOOK_FONT_CLASS[preview]} ${preview === "instagram" ? "text-[26px] font-bold leading-tight" : "text-[20px] font-bold leading-[1.05]"}`;
+  const typeSize = `${LOOK_FONT_CLASS[preview]} ${preview === "instagram" ? "text-[26px] font-bold leading-snug" : "text-[20px] font-bold leading-snug"}`;
   const lookBox = boxFor(pos, preview);
   const boxed = isBoxed(lookBox);
   const inkClass = boxed && boxIsWhite(lookBox) ? "text-black" : "text-white";
   const plate = wordBoxClass(preview, lookBox);
   const chips = wrapHook(text);
-  const stroke = boxed ? "" : preview === "instagram"
-    ? "stroke-ig"
-    : "[text-shadow:0_1px_0_#000,0_-1px_0_#000,1px_0_0_#000,-1px_0_0_#000,0_2px_5px_#000]";
+  const stroke = boxed ? "" : preview === "instagram" ? "stroke-ig" : "stroke-tt";
   const active = logos.find((row) => itemKey(row) === picked) ?? logos[0];
   const axes = sharedAxes([{ x: at.x, y: at.y }, ...logos.map((item, index) => loc(item, index))]);
 

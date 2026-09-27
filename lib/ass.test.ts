@@ -77,8 +77,8 @@ describe("buildHookAss", () => {
   it("gives Instagram Reels Classic and TikTok Classic their own stroke", () => {
     const instagram = buildHookAss({ text: "hello there", style: "instagram", font: "Arial" });
     const tiktok = buildHookAss({ text: "hello there", style: "tiktok", font: "Arial" });
-    expect(instagram).toMatch(/Style: Head,Arial,104,.*,1,12,0,8,/);
-    expect(tiktok).toMatch(/Style: Head,Arial,82,.*,1,5,2,8,/);
+    expect(instagram).toMatch(/Style: Head,Arial,104,.*,1,4,0,8,/);
+    expect(tiktok).toMatch(/Style: Head,Arial,82,.*,1,5,0,8,/);
     expect(buildHookAss({ text: "hello there", style: "instagram", box: true, font: "Arial" })).toMatch(
       /Style: Head,Arial,104,&HFFFFFF&,&HFFFFFF&,&H000000&,&H00000000&,-1,0,0,0,100,100,0,0,3,8,0,8,/,
     );

@@ -53,31 +53,16 @@ textarea {
   color: #a89f91;
 }
 
-/* Instagram text-tool stroke: white fill, hard black edge. TikTok stays a light shadow. */
-.stroke-ig {
+/* ~4px stroke on a 1080 frame. Preview column is about a third of that, so the edge is 1px. */
+.stroke-ig,
+.stroke-tt {
   text-shadow:
     -1px -1px 0 #000,
     1px -1px 0 #000,
     -1px 1px 0 #000,
     1px 1px 0 #000,
-    -2px 0 0 #000,
-    2px 0 0 #000,
-    0 -2px 0 #000,
-    0 2px 0 #000,
-    -2px -2px 0 #000,
-    2px -2px 0 #000,
-    -2px 2px 0 #000,
-    2px 2px 0 #000,
-    -3px 0 0 #000,
-    3px 0 0 #000,
-    0 -3px 0 #000,
-    0 3px 0 #000,
-    -3px -1px 0 #000,
-    3px -1px 0 #000,
-    -1px -3px 0 #000,
-    1px -3px 0 #000,
-    -3px 1px 0 #000,
-    3px 1px 0 #000,
-    -1px 3px 0 #000,
-    1px 3px 0 #000;
+    0 -1px 0 #000,
+    0 1px 0 #000,
+    -1px 0 0 #000,
+    1px 0 0 #000;
 }

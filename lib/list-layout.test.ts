@@ -27,7 +27,8 @@ describe("listStack", () => {
 
   it("paints a plate only when box is on", () => {
     expect(lookPaint("tiktok").borderStyle).toBe(1);
-    expect(lookPaint("instagram").outline).toBe(12);
+    expect(lookPaint("instagram").outline).toBe(4);
+    expect(lookPaint("tiktok").outline).toBe(5);
     expect(lookPaint("tiktok", true)).toEqual({ borderStyle: 3, outline: 12, shadow: 0 });
     expect(lookPaint("instagram", true)).toEqual({ borderStyle: 3, outline: 8, shadow: 0 });
     expect(wordBoxClass("tiktok", true)).toContain("rounded-[5px]");
