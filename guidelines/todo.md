@@ -239,3 +239,6 @@
 
 - [ ] Split `assembleVideo` out of `lib/ffmpeg.ts`
   The file is past 300 lines again after the emoji overlay inputs. Probe/run helpers and `videoFilter` can stay; the assembly belongs in its own module. `parseLogoItems` in `lib/hook-logos-math.ts` also still has two `unknown[]` type errors.
+
+- [X] Words never sit on the logo row; Words wraps like the file
+  Two hooks had an Instagram spot stranded on the logos from before the follow fix, so the IG files put the words on the logos. A headline that lands on a logo now steps just clear of it in Words, on the tile, and in the file, and lines break at the same width in all three. Generate or Rebuild the batch to redo the finished videos.

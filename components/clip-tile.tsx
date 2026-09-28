@@ -8,11 +8,12 @@ import { SpokenFix } from "@/components/spoken-fix";
 import { HookStage } from "@/components/hook-stage";
 import { QuickCut } from "@/components/quick-cut";
 import { spokenOnClip } from "@/lib/captions-math";
-import { LOOK_STROKE_CLASS, LOOK_TYPE_CLASS } from "@/lib/hook-fonts";
+import { useKeepClear } from "@/components/use-keep-clear";
+import { HOOK_LINE_CLASS, LOOK_STROKE_CLASS, LOOK_TYPE_CLASS } from "@/lib/hook-fonts";
 import { boxFor, cutPreviewPath, hookDefaultPos, parseHookLayout, posFor } from "@/lib/hook-layout";
-import { defaultLogoPos, isLogoFile, itemScale, parseLogoItems, previewGrab, stageCss, type LogoItem } from "@/lib/hook-logos-math";
+import { CANVAS_H, CANVAS_W, defaultLogoPos, isLogoFile, itemScale, parseLogoItems, previewGrab, stageCss, type LogoItem } from "@/lib/hook-logos-math";
 import { boxIsWhite, isBoxed, listRows, listStack, wordBoxClass } from "@/lib/list-layout";
-import { wrapHook, type DrawnStyle } from "@/lib/text-style";
+import type { DrawnStyle } from "@/lib/text-style";
 import { publicFileUrl } from "@/lib/urls";
 
 export function ClipTile({
@@ -57,14 +58,26 @@ export function ClipTile({
   const captionRef = useRef(postCaption ?? "");
   const previewLook = look ?? "tiktok";
   const savedPos = parseHookLayout(layoutText) ?? hookDefaultPos(previewLook);
-  const at = posFor(savedPos, previewLook);
   const plate = boxFor(savedPos, previewLook);
-  const lines = wrapHook(words, previewLook);
+  const headline = words.trim();
   const listLines = savedPos.list ?? [];
   const listShown = Math.max(listCount ?? 0, listLines.length);
-  const stack = listShown ? listStack({ style: previewLook, headline: words, x: at.x, y: at.y, count: listShown }) : null;
   const typeClass = `${LOOK_TYPE_CLASS[previewLook]} ${isBoxed(plate) ? `${boxIsWhite(plate) ? "text-black" : "text-white"} ${wordBoxClass(previewLook, plate)}` : `text-white ${LOOK_STROKE_CLASS[previewLook]}`}`;
   const fileCount = logoItems.filter(isLogoFile).length;
+  const logoSpots = logoItems.map((item, index) => ({
+    spot: item.x != null && item.y != null ? { x: item.x, y: item.y } : defaultLogoPos(index, logoItems.length),
+    grab: previewGrab(item, itemScale(item), fileCount),
+  }));
+  const stageRef = useRef<HTMLDivElement>(null);
+  const headlineRef = useRef<HTMLDivElement>(null);
+  const at = useKeepClear(
+    headlineRef,
+    stageRef,
+    posFor(savedPos, previewLook),
+    logoSpots.map(({ spot, grab }) => ({ x: spot.x, y: spot.y, halfW: grab.width / 2 / CANVAS_W, halfH: grab.height / 2 / CANVAS_H })),
+    mode,
+  );
+  const stack = listShown ? listStack({ style: previewLook, headline: words, x: at.x, y: at.y, count: listShown }) : null;
 
   useEffect(() => {
     if (!editing.current) setWords(hookText);
@@ -117,7 +130,7 @@ export function ClipTile({
           listFromHook={listFromHook}
         />
       ) : (
-        <div className="relative overflow-hidden rounded-xl bg-ink [container-type:inline-size]">
+        <div ref={stageRef} className="relative overflow-hidden rounded-xl bg-ink [container-type:inline-size]">
           {thumbPath ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={publicFileUrl(thumbPath)} alt={filename} className="aspect-[9/16] w-full object-cover" />
@@ -127,16 +140,13 @@ export function ClipTile({
           <button type="button" onClick={remove} className="absolute right-1 top-1 z-20 rounded-full bg-ink/80 px-2 text-xs">
             ×
           </button>
-          {lines.length ? (
+          {headline ? (
             <div
-              className={`pointer-events-none absolute z-10 w-max max-w-full -translate-x-1/2 -translate-y-1/2 text-center ${typeClass}`}
+              ref={headlineRef}
+              className={`pointer-events-none absolute z-10 w-max -translate-x-1/2 -translate-y-1/2 text-center ${HOOK_LINE_CLASS} ${typeClass}`}
               style={{ left: `${at.x * 100}%`, top: `${at.y * 100}%` }}
             >
-              {lines.map((line, index) => (
-                <div key={`${index}-${line}`} className="whitespace-nowrap">
-                  {line}
-                </div>
-              ))}
+              {headline}
             </div>
           ) : null}
           {stack ? (
@@ -147,8 +157,7 @@ export function ClipTile({
             />
           ) : null}
           {logoItems.map((item, index) => {
-            const spot = item.x != null && item.y != null ? { x: item.x, y: item.y } : defaultLogoPos(index, logoItems.length);
-            const grab = previewGrab(item, itemScale(item), fileCount);
+            const { spot, grab } = logoSpots[index];
             return (
               <div
                 key={isLogoFile(item) ? item.path : item.id}

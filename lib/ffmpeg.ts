@@ -6,7 +6,7 @@ import { localRoot } from "@/lib/files";
 import { hookEmojiSpots, writeHookAss, type HookAssInput } from "@/lib/ass";
 import { chainOverlays, emojiArtFor, emojiOverlayFilter, emojiPrepFilter, type EmojiArt, type OverlayStage } from "@/lib/emoji-overlay";
 import { logoOverlayFilter } from "@/lib/hook-logos-math";
-import { sharedListPlan } from "@/lib/list-layout";
+import { sharedListPlan, type Box } from "@/lib/list-layout";
 import { musicDelayPrefix } from "@/lib/output-recipe";
 import type { DrawnStyle } from "@/lib/text-style";
 
@@ -191,6 +191,8 @@ export async function assembleVideo(input: {
   musicPath?: string;
   musicStart?: number;
   logoPath?: string;
+  /** Logo row boxes the first clip's headline keeps clear of. */
+  avoid?: Box[];
   hookX?: number;
   hookY?: number;
 }): Promise<string> {
@@ -238,6 +240,7 @@ export async function assembleVideo(input: {
       y: clip.hookY ?? (index === 0 ? input.hookY : undefined),
       from: clip.textFrom,
       to: clip.textTo,
+      ...(index === 0 && input.avoid?.length ? { avoid: input.avoid } : {}),
     };
   });
   // Colour emoji in headlines ride on top of the ASS text as PNG inputs, one per emoji.

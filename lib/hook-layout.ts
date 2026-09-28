@@ -1,5 +1,15 @@
-import { clampInZone, LOOK_METRICS } from "@/lib/list-layout";
+import { boxesFromItems, CANVAS_H, CANVAS_W, type LogoItem } from "@/lib/hook-logos-math";
+import { clampInZone, LOOK_METRICS, type Box } from "@/lib/list-layout";
 import type { DrawnStyle } from "@/lib/text-style";
+
+/** The logo row as boxes the headline keeps clear of, at the spots and sizes the sheet burns. */
+export function logoAvoidBoxes(items: LogoItem[]): Box[] {
+  return boxesFromItems(items).map((box) => {
+    const w = box.kind === "logo" ? box.w : Math.max(box.w ?? 0, box.size);
+    const h = box.kind === "logo" ? box.h : box.size;
+    return { x: (box.x + w / 2) / CANVAS_W, y: (box.y + h / 2) / CANVAS_H, halfW: w / 2 / CANVAS_W, halfH: h / 2 / CANVAS_H };
+  });
+}
 
 export type BoxChoice = boolean | "white";
 export type LookBox = BoxChoice | "off";

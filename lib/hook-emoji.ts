@@ -1,7 +1,8 @@
 import path from "path";
 import { emPerAssUnit, measureTextPx } from "@/lib/font-measure";
 import { bundledFontsDir, hookFontFile } from "@/lib/hook-font-files";
-import type { DrawnStyle } from "@/lib/text-style";
+import { HOOK_LINE_MAX_PX } from "@/lib/list-layout";
+import { HOOK_MAX_CHARS, type DrawnStyle } from "@/lib/text-style";
 
 /**
  * Emoji inside a headline. TikTok Sans and Inter Tight have no emoji glyphs, so libass
@@ -57,6 +58,27 @@ export function runWidth(run: TextRun, style: DrawnStyle, em: number, fontSize: 
 /** Line width the way libass will lay it out, emoji advances included. */
 export function lineWidthPx(line: string, style: DrawnStyle, em: number, fontSize: number): number {
   return splitEmojiRuns(line).reduce((sum, run) => sum + runWidth(run, style, em, fontSize), 0);
+}
+
+/**
+ * Word-wraps a headline on measured width, the way the browser wraps Words at the same max width
+ * with the same font. A single word wider than the line stays on its own line.
+ */
+export function wrapHookToWidth(text: string, style: DrawnStyle, em: number, fontSize: number, maxPx = HOOK_LINE_MAX_PX): string[] {
+  const words = text.trim().slice(0, HOOK_MAX_CHARS).split(/\s+/).filter(Boolean);
+  const lines: string[] = [];
+  let current = "";
+  for (const word of words) {
+    const candidate = current ? `${current} ${word}` : word;
+    if (current && lineWidthPx(candidate, style, em, fontSize) > maxPx) {
+      lines.push(current);
+      current = word;
+    } else {
+      current = candidate;
+    }
+  }
+  if (current) lines.push(current);
+  return lines;
 }
 
 /** Centre and size of every emoji on a line whose centre is at (cx, cy). */

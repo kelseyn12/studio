@@ -38,6 +38,9 @@ export const LOOK_STROKE_CLASS: Record<DrawnStyle, string> = {
 /** Room for the stroke and the bold overshoot; a textarea clips anything past its box. */
 export const LOOK_STROKE_PAD_CLASS = "px-[0.75cqw]";
 
+/** Headline lines wrap at the safe-zone width (`HOOK_LINE_W`, 80% of the stage), padding outside, like the burn. */
+export const HOOK_LINE_CLASS = "box-content max-w-[80cqw]";
+
 export function lookFontName(style: DrawnStyle): string {
   if (style === "tiktok") return "TikTok Sans";
   if (style === "instagram") return "Inter Tight";

@@ -3,7 +3,7 @@ import path from "path";
 import { groupWords, parseCaptionWords, spokenOnClip, transcribeWords, writeCaptionAss, type CaptionPhrase } from "@/lib/captions";
 import { assembleVideo, NO_TRIM, writeThumb, type ClipTrim } from "@/lib/ffmpeg";
 import { isLogoFile, parseLogoItems, writeLogoSheet } from "@/lib/hook-logos";
-import { boxFor, parseHookLayout, posFor } from "@/lib/hook-layout";
+import { boxFor, logoAvoidBoxes, parseHookLayout, posFor } from "@/lib/hook-layout";
 import { quietEnds } from "@/lib/trim";
 import { ensureLocal, localRoot, uploadLocalToR2 } from "@/lib/files";
 import { hasR2 } from "@/lib/r2";
@@ -192,6 +192,7 @@ export async function renderBatch(input: {
               musicPath,
               musicStart: 0,
               logoPath,
+              avoid: logoAvoidBoxes(logoItems),
               hookX: posFor(hookPos, look).x,
               hookY: posFor(hookPos, look).y,
             });

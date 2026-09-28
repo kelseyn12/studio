@@ -5,7 +5,7 @@ import { spokenOnClip } from "@/lib/captions-math";
 import { assembleVideo, type ClipTrim } from "@/lib/ffmpeg";
 import { deleteUpload, ensureLocal, localRoot, uploadLocalToR2 } from "@/lib/files";
 import { isLogoFile, parseLogoItems, writeLogoSheet } from "@/lib/hook-logos";
-import { boxFor, parseHookLayout, posFor } from "@/lib/hook-layout";
+import { boxFor, logoAvoidBoxes, parseHookLayout, posFor } from "@/lib/hook-layout";
 import {
   chosenTrackId,
   parseCaptionMap,
@@ -105,6 +105,7 @@ async function burn(output: Loaded, recipe: OutputRecipe): Promise<void> {
     musicPath,
     musicStart: musicPath ? output.musicStart : 0,
     logoPath: await logoPathFor(hook),
+    avoid: logoAvoidBoxes(parseLogoItems(hook?.logosJson)),
     hookX: posFor(hookPos, recipe.look).x,
     hookY: posFor(hookPos, recipe.look).y,
   });

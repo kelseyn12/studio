@@ -22,6 +22,29 @@ export function clampInZone(x: number, y: number, halfW = 0, halfH = 0): { x: nu
   };
 }
 
+/** Widest a headline line can be: the safe zone, edge to edge. Words and the tile wrap at `HOOK_LINE_CLASS`. */
+export const HOOK_LINE_W = SAFE_ZONE.right - SAFE_ZONE.left;
+export const HOOK_LINE_MAX_PX = Math.round(HOOK_LINE_W * FRAME_W);
+
+/** A centred box on the frame, as shares of width and height. */
+export type Box = { x: number; y: number; halfW: number; halfH: number };
+const CLEAR_GAP = 12 / FRAME_H;
+
+/**
+ * Words never sit on a logo. A text box that lands on one is pushed just clear of it — down if the
+ * words are below that logo's middle, up if above — then kept inside the zone. Touching is fine.
+ */
+export function keepClear(point: { x: number; y: number }, halfW: number, halfH: number, boxes: Box[]): { x: number; y: number } {
+  let at = clampInZone(point.x, point.y, halfW, halfH);
+  for (let pass = 0; pass <= boxes.length; pass += 1) {
+    const hit = boxes.find((box) => Math.abs(box.x - at.x) < box.halfW + halfW && Math.abs(box.y - at.y) < box.halfH + halfH);
+    if (!hit) break;
+    const y = at.y >= hit.y ? hit.y + hit.halfH + CLEAR_GAP + halfH : hit.y - hit.halfH - CLEAR_GAP - halfH;
+    at = clampInZone(at.x, y, halfW, halfH);
+  }
+  return at;
+}
+
 export type LookMetrics = { fontsize: number; top: number; lineGap: number };
 export type ListStack = { left: number; top: number; gap: number };
 

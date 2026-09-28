@@ -53,7 +53,6 @@ describe("buildHookAss", () => {
       style: "tiktok",
       accentColor: "#5CFF5C",
       listCount: 5,
-      font: "Arial",
     });
     expect(track).toContain("{\\c&H5CFF5C&}WORST{\\c&HFFFFFF&} birthday months");
     expect(track.match(/^Dialogue: .*,List,/gm)).toHaveLength(5);
@@ -66,7 +65,7 @@ describe("buildHookAss", () => {
     expect(
       buildHookAss({ text: "x", style: "plain", listItems: ["Nobody talks about this", "Your month"], font: "Arial" }),
     ).not.toContain("1. Nobody talks about this");
-    expect(track).toContain("Style: Head,Arial,82");
+    expect(track).toContain("Style: Head,TikTok Sans,82");
   });
 
   it("uses TikTok Sans and Inter Tight unless you pass a font", () => {

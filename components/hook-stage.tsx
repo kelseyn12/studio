@@ -7,8 +7,9 @@ import { ListOverlay } from "@/components/list-overlay";
 import { boxFor, boxLabel, hookDefaultPos, nextBox, parseHookLayout, posFor, setLookBox, setLookPos, stringifyHookLayout, type HookPos } from "@/lib/hook-layout";
 import { LogoScaleBar } from "@/components/logo-scale-bar";
 import { ALIGN_SNAP, CANVAS_H, CANVAS_W, clampLogoScale, defaultLogoPos, isLogoFile, itemScale, LOGO_SCALE_STEP, matchTypeScale, parseLogoItems, previewGrab, sharedAxes, snapLogoPos, stageCss } from "@/lib/hook-logos-math";
-import { LOOK_STROKE_CLASS, LOOK_STROKE_PAD_CLASS, LOOK_TYPE_CLASS } from "@/lib/hook-fonts";
-import { boxIsWhite, clampInZone, isBoxed, listRows, listStack, SAFE_ZONE, wordBoxClass } from "@/lib/list-layout";
+import { HOOK_LINE_CLASS, LOOK_STROKE_CLASS, LOOK_STROKE_PAD_CLASS, LOOK_TYPE_CLASS } from "@/lib/hook-fonts";
+import { boxIsWhite, clampInZone, isBoxed, keepClear, listRows, listStack, SAFE_ZONE, wordBoxClass } from "@/lib/list-layout";
+import { useKeepClear } from "@/components/use-keep-clear";
 import { publicFileUrl } from "@/lib/urls";
 import type { DrawnStyle } from "@/lib/text-style";
 
@@ -95,13 +96,20 @@ export function HookStage({
     return { x: (event.clientX - box.left) / box.width, y: (event.clientY - box.top) / box.height };
   }
 
+  /** The logo row at its shown spots and sizes, so the words step clear of it while you drag. */
+  const avoid = logos.map((item, index) => {
+    const spot = loc(item, index);
+    const grab = previewGrab(item, scaleOf(item), fileCount);
+    return { x: spot.x, y: spot.y, halfW: grab.width / 2 / CANVAS_W, halfH: grab.height / 2 / CANVAS_H };
+  });
+
   function point(event: PointerEvent<HTMLElement>): HookPos {
     const raw = pointerAt(event);
     const stage = stageRef.current;
     const type = typeRef.current;
     const halfW = stage && type ? type.offsetWidth / 2 / stage.clientWidth : 0;
     const halfH = stage && type ? type.offsetHeight / 2 / stage.clientHeight : 0;
-    return { ...pos, ...clampInZone(raw.x, raw.y, halfW, halfH) };
+    return { ...pos, ...keepClear(raw, halfW, halfH, avoid) };
   }
 
   function dragged(event: PointerEvent<HTMLElement>): HookPos {
@@ -189,7 +197,7 @@ export function HookStage({
   const lines = list.split("\n").map((line) => line.trim()).filter(Boolean);
   const count = Math.max(listCount, lines.length);
   const onHook = slot === "HOOK" || !listFromHook;
-  const at = posFor(pos, preview);
+  const at = useKeepClear(typeRef, stageRef, posFor(pos, preview), avoid);
   const anchor = onHook || !listFromHook ? at : posFor(listFromHook, preview);
   const stack = listStack({
     style: preview,
@@ -277,7 +285,7 @@ export function HookStage({
             onBlur={(event) => save(draft.current.pos, event.target.value, draft.current.list)}
             onPointerDown={(event) => event.stopPropagation()}
             rows={2}
-            className={`block w-full resize-none overflow-hidden bg-transparent text-center outline-none [field-sizing:content] ${typeSize} ${
+            className={`block resize-none overflow-hidden bg-transparent text-center outline-none [field-sizing:content] ${HOOK_LINE_CLASS} ${typeSize} ${
               boxed ? `${inkClass} ${plate}` : `text-white ${stroke}`
             } ${boxed && boxIsWhite(lookBox) ? "caret-black" : "caret-white"}`}
           />

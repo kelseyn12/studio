@@ -69,7 +69,7 @@ export type LogoMark = { kind: "mark"; id: string; text: string; x?: number; y?:
 export type LogoItem = (HookLogo & { kind?: "file" }) | LogoMark;
 export type LogoBox =
   | { kind: "logo"; index: number; x: number; y: number; w: number; h: number }
-  | { kind: "mark"; text: string; x: number; y: number; size: number };
+  | { kind: "mark"; text: string; x: number; y: number; size: number; w?: number };
 
 function fileName(pathValue: string): string {
   const parts = pathValue.split("/");
@@ -267,6 +267,7 @@ export function boxesFromItems(items: LogoItem[]): LogoBox[] {
       x: item.x != null ? Math.round(item.x * CANVAS_W - width / 2) : x,
       y: item.y != null ? Math.round(item.y * CANVAS_H - size / 2) : rowTop(fileBase) + Math.round((fileBase - size) / 2),
       size,
+      w: width,
     };
     x += width + gap;
     return box;

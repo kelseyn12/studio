@@ -3,10 +3,10 @@ import os from "os";
 import path from "path";
 import { randomUUID } from "crypto";
 import { hookFontFamily, hookFontsDir } from "@/lib/hook-font-files";
-import { wrapHook, type DrawnStyle } from "@/lib/text-style";
+import type { DrawnStyle } from "@/lib/text-style";
 import { lineStep, lookEm, plateSize, roundedPlatePath } from "@/lib/ass-plate";
-import { EMOJI_FONT_NAME, hasEmoji, lineEmojiSpots, lineWidthPx, splitEmojiRuns, type EmojiSpot } from "@/lib/hook-emoji";
-import { clampInZone, clampListCount, FRAME_H, FRAME_W, listStack, LOOK_METRICS, lookPaint, type ListStack } from "@/lib/list-layout";
+import { EMOJI_FONT_NAME, hasEmoji, lineEmojiSpots, lineWidthPx, splitEmojiRuns, wrapHookToWidth, type EmojiSpot } from "@/lib/hook-emoji";
+import { clampListCount, FRAME_H, FRAME_W, keepClear, listStack, LOOK_METRICS, lookPaint, type Box, type ListStack } from "@/lib/list-layout";
 import { LIST_MAX } from "@/lib/variations";
 
 export { FRAME_H, FRAME_W };
@@ -105,18 +105,22 @@ type HookLayout = {
 function layoutHook(input: HookAssInput): HookLayout {
   const look = LOOK_METRICS[input.style];
   const drawnCard = Boolean(input.box) && input.style === "tiktok";
-  const lines = wrapHookKeepingStars(input.text, input.style);
   const em = lookEm(input.style, look.fontsize, input.font);
+  const lines = wrapHookKeepingStars(input.text, input.style, em, look.fontsize);
   const step = lineStep(em);
   const widths = lines.map((line) => lineWidthPx(stripHighlight(line), input.style, em, look.fontsize));
   const blockH = Math.max(1, lines.length) * step;
   const plate = drawnCard ? plateSize(widths, em) : null;
   const boxW = plate?.width ?? widths.reduce((max, width) => Math.max(max, width), em);
   const boxH = plate?.height ?? blockH;
-  const placed = Number.isFinite(input.x) && Number.isFinite(input.y);
-  const at = clampInZone(input.x ?? 0.5, input.y ?? look.top, boxW / 2 / FRAME_W, boxH / 2 / FRAME_H);
-  const px = Math.round(FRAME_W * (placed ? at.x : 0.5));
-  const py = Math.round(FRAME_H * (placed ? at.y : look.top));
+  const avoid = input.avoid ?? [];
+  // Words you dragged, or the look's default top. With logos on the clip the spot is always pinned so it can step clear of them.
+  const dragged = Number.isFinite(input.x) && Number.isFinite(input.y);
+  const wanted = dragged ? { x: input.x as number, y: input.y as number } : { x: 0.5, y: look.top + boxH / 2 / FRAME_H };
+  const at = keepClear(wanted, boxW / 2 / FRAME_W, boxH / 2 / FRAME_H, avoid);
+  const placed = dragged || avoid.length > 0;
+  const px = Math.round(FRAME_W * at.x);
+  const py = Math.round(FRAME_H * at.y);
   const marginV = placed ? 0 : Math.round(FRAME_H * look.top);
   const mid = (lines.length - 1) / 2;
   const center = { x: placed ? px : Math.round(FRAME_W / 2), y: placed ? py : Math.round(marginV + blockH / 2) };
@@ -170,6 +174,8 @@ export type HookAssInput = {
   listStack?: ListStack;
   /** Colour emoji art will be overlaid, so emoji glyphs only hold their space. */
   emojiArt?: boolean;
+  /** Logo row boxes the headline keeps clear of. */
+  avoid?: Box[];
 };
 
 export function buildHookAss(input: HookAssInput): string {
@@ -265,10 +271,10 @@ export function buildHookAss(input: HookAssInput): string {
   ].join("\n");
 }
 
-/** Wrap on the plain text, then put the stars back on the same words. */
-function wrapHookKeepingStars(text: string, style: DrawnStyle): string[] {
+/** Wrap on the plain text at the burn width, then put the stars back on the same words. */
+function wrapHookKeepingStars(text: string, style: DrawnStyle, em: number, fontSize: number): string[] {
   const accented = new Set(parseHighlight(text).filter((s) => s.accent).flatMap((s) => s.text.split(/\s+/)));
-  return wrapHook(stripHighlight(text), style).map((line) =>
+  return wrapHookToWidth(stripHighlight(text), style, em, fontSize).map((line) =>
     line
       .split(" ")
       .map((word) => (accented.has(word) ? `*${word}*` : word))
