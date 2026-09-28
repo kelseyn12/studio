@@ -3,6 +3,7 @@ import { sendBatchToEditor } from "@/app/repurposer/actions";
 import { OutputTune } from "@/components/output-tune";
 import { PickBox, SelectDeleteBar, VideoPick } from "@/components/select-videos";
 import { bodyMates, parseRecipe, tuneSections } from "@/lib/output-recipe";
+import { LOOK_TAG } from "@/lib/text-style";
 import { publicFileUrl } from "@/lib/urls";
 
 type Output = {
@@ -31,6 +32,11 @@ function stateLabel(card: CardState | undefined): string {
   if (!card) return "";
   if (card.status === "READY") return card.scheduledAt ? "Scheduled" : "Ready";
   return STATE_LABEL[card.status] ?? "";
+}
+
+/** Rows made before the look pill carried "· IG look" in the label; the pill says it now. */
+function rowTitle(label: string): string {
+  return label.replace(/ · (IG|TT) look$/, "");
 }
 
 function polishMessage(polish: string | undefined): string | null {
@@ -106,17 +112,23 @@ export function BatchOutputs({
             const assetId = card?.assets.find((asset) => asset.path === output.path)?.id ?? "";
             const recipe = parseRecipe(output.recipeJson);
             const selectedMusic = output.musicTrackId === "none" ? "none" : output.musicTrackId || recipe?.trackId || "none";
+            const title = rowTitle(output.label);
+            const goesTo = recipe ? LOOK_TAG[recipe.look] : "";
             return (
               <div key={output.id} className="rounded-card border border-line bg-panel px-4 py-3">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex min-w-0 items-center gap-3">
-                    <PickBox id={output.id} />
-                    <a className="truncate text-sun" href={publicFileUrl(output.path)}>
-                      {output.label}
-                    </a>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm text-mute">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <PickBox id={output.id} />
+                  <a className="min-w-0 flex-1 basis-56 break-words text-sun" href={publicFileUrl(output.path)}>
+                    {title}
+                  </a>
+                  {goesTo ? (
+                    <span className="shrink-0 rounded-full bg-sun px-2.5 py-0.5 text-xs font-semibold text-ink">{goesTo}</span>
+                  ) : null}
+                  <div className="ml-auto flex shrink-0 items-center gap-3 text-sm text-mute">
                     {state ? <span>{state}</span> : null}
+                    <a href={publicFileUrl(output.path)} download={`${title}${goesTo ? ` · ${goesTo}` : ""}.mp4`}>
+                      Download
+                    </a>
                     {output.cardId ? <Link href={`/cards/${output.cardId}`}>Open video</Link> : null}
                   </div>
                 </div>

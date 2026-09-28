@@ -5,6 +5,7 @@ import { afterAll, describe, expect, it } from "vitest";
 import { writeHookAss } from "@/lib/ass";
 import { runFfmpeg } from "@/lib/ffmpeg";
 import {
+  LOOK_TAG,
   looksForNetworks,
   parseTextStyle,
   resolveTextStyle,
@@ -24,6 +25,12 @@ describe("text style choice", () => {
     expect(textStyleForNetwork(null)).toBe("plain");
     expect(resolveTextStyle("auto", "tiktok")).toBe("tiktok");
     expect(resolveTextStyle("instagram", "tiktok")).toBe("instagram");
+  });
+
+  it("names where each finished file goes", () => {
+    expect(LOOK_TAG[textStyleForNetwork("facebook")]).toBe("IG · FB");
+    expect(LOOK_TAG[textStyleForNetwork("youtube")]).toBe("TT · YT");
+    expect(LOOK_TAG.plain).toBe("");
   });
 
   it("picks one look for a deal's set of accounts", () => {

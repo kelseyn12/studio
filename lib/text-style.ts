@@ -16,6 +16,9 @@ export const TEXT_STYLE_LABEL: Record<TextStyle, string> = {
   plain: "Plain bold",
 };
 
+/** Where a finished file goes, in the shorthand card footers use. Plain text fits any app. */
+export const LOOK_TAG: Record<DrawnStyle, string> = { instagram: "IG · FB", tiktok: "TT · YT", plain: "" };
+
 export const HOOK_MAX_CHARS = 80;
 /** Instagram type is wider, so it wraps a little sooner to stay left of the icon column. */
 const WRAP_AT: Record<DrawnStyle, number> = { tiktok: 26, instagram: 23, plain: 26 };

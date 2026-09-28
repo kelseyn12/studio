@@ -14,7 +14,6 @@ import {
   type OutputRecipe,
 } from "@/lib/output-recipe";
 import { prisma } from "@/lib/prisma";
-import { hasR2 } from "@/lib/r2";
 import type { RepurposeClip, RepurposeOut, RepurposeTrack } from "@prisma/client";
 
 type Loaded = RepurposeOut & { batch: { clips: RepurposeClip[]; tracks: RepurposeTrack[]; listCount: number } };

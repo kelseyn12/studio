@@ -137,7 +137,7 @@ export function parseLogoItems(raw: string | null | undefined): LogoItem[] {
     const parsed = JSON.parse(raw) as unknown;
     if (!Array.isArray(parsed)) return [];
     return parsed
-      .flatMap((item, index) => {
+      .flatMap((item, index): LogoItem[] => {
         if (!item || typeof item !== "object") return [];
         const row = item as LogoItem & { kind?: string; text?: string; id?: string };
         if (row.kind === "mark") {

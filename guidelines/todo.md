@@ -242,3 +242,7 @@
 
 - [X] Words never sit on the logo row; Words wraps like the file
   Two hooks had an Instagram spot stranded on the logos from before the follow fix, so the IG files put the words on the logos. A headline that lands on a logo now steps just clear of it in Words, on the tile, and in the file, and lines break at the same width in all three. Generate or Rebuild the batch to redo the finished videos.
+
+- [X] Say which finished file is IG/FB and which is TT/YT
+  Each batch row shows an IG · FB or TT · YT pill (from the recipe, so older batches get it without a Rebuild) and a Download link that names the file the same way. Audit pass: tsc clean, 186 tests pass, one pre-existing lint warning left.
+- [ ] Dependency audit: postcss (via next) and deepmerge-ts (via prisma CLI) flagged high; both transitive build-time tools. Fix is a pnpm override when Next/Prisma ship the bump, or pin now if the deal side asks.

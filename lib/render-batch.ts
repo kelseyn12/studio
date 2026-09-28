@@ -12,13 +12,11 @@ import { pickTracks } from "@/lib/combinations";
 import { targetAccounts } from "@/lib/targets";
 import { stripHighlight } from "@/lib/ass";
 import type { OutputRecipe } from "@/lib/output-recipe";
-import { hookLooks } from "@/lib/text-style";
+import { hookLooks, LOOK_TAG } from "@/lib/text-style";
 import { parseHookLines, variationFor } from "@/lib/variations";
 import type { RepurposeBatch, RepurposeClip, RepurposeTrack } from "@prisma/client";
 
 type Combo = RepurposeClip[];
-
-const LOOK_TAG: Record<string, string> = { instagram: "IG look", tiktok: "TT look", plain: "plain" };
 
 export function renderStatus(done: number, total: number): string {
   return `rendering ${done}/${total}`;
@@ -207,7 +205,7 @@ export async function renderBatch(input: {
             }
             files.push({
               kind: "GENERATED" as const,
-              filename: `${title}${suffix}.mp4`,
+              filename: `${title}${LOOK_TAG[look] ? ` · ${LOOK_TAG[look]}` : ""}.mp4`,
               path: outputRel,
               mime: "video/mp4",
               size: (await stat(path.join(localRoot(), outputRel))).size,
@@ -253,7 +251,7 @@ export async function renderBatch(input: {
               batchId: id,
               cardId: card.id,
               path: file.path,
-              label: `${title}${looks.length > 1 ? ` · ${LOOK_TAG[file.textStyle]}` : ""}`,
+              label: title,
               recipeJson: JSON.stringify(file.recipe),
               musicTrackId: file.recipe.trackId ? "" : "none",
               musicStart: 0,
