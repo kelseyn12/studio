@@ -11,8 +11,8 @@
 - `perVideoCents(monthlyPayCents, videoCount)` — `lib/deal-bonuses.ts` — a flat month spread over the videos owed; `updateDeal` and `createCampaign` stamp it into `basePayCents` so every card keeps getting one number. Tested in `lib/deal-bonuses.test.ts`.
 - `DealEdit` — `components/deal-edit.tsx` (client) — the deal form: how they pay (flat month or per video, live "each video is worth"), CPM, view bonuses, posts owed / most allowed (`postsPerDayMax`), accounts, status. `blurOnWheel` (in deal-bonuses) stops trackpad scroll from ticking money fields.
 - `studioSnapshot` — `lib/queries.ts` — money + active deals by kind + Cuts counts. Used on Today, Deals, Numbers.
-- `transcribeFile` — `lib/whisper.ts` — Whisper a voice or video file. Used by Transcribe and card voice notes.
-- `isNoCredits` / `openAiFailStatus` / `openAiUserError` / `OPENAI_BILLING_URL` — `lib/whisper.ts` — OpenAI billing failures. Multiply stores `no-credits` instead of clipping the API URL at 80 chars; the batch page links to billing. Transcribe, Rewrite hook, and Generate script print the full URL.
+- `transcribeFile` — `lib/whisper.ts` — Whisper a voice or video file. Used by Transcribe and card voice notes. Videos and files over 25 MB first become a 16 kHz mono mp3 (`audioForListen`) so OpenAI's upload cap is not hit.
+- `isNoCredits` / `isListenTooBig` / `openAiFailStatus` / `openAiUserError` / `OPENAI_BILLING_URL` — `lib/whisper.ts` — OpenAI billing failures and Whisper's 25 MB upload cap. Multiply stores `no-credits` or `listen-too-big` instead of clipping the API URL; Generate sends voice-only after a 413.
 - `pingStudio` — `lib/manychat.ts` — optional DM when a job is sent or parked. Recipes live on `/dms`.
 - `deskStage` — `lib/card-desk.ts` — maps pipeline status to Brief / Footage / Editor / Live. Used on the card page.
 - `cardPatch` — `lib/card-patch.ts` — writes only fields present on the form so a Brief save cannot wipe editor notes.

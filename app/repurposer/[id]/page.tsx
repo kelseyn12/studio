@@ -14,7 +14,7 @@ import { LiveRefresh } from "@/components/live-refresh";
 import { prisma } from "@/lib/prisma";
 import { createBatch, renameBatch, resetBatch } from "../actions";
 import { handle } from "@/lib/targets";
-import { OPENAI_BILLING_URL, isNoCredits } from "@/lib/whisper";
+import { OPENAI_BILLING_URL, isListenTooBig, isNoCredits } from "@/lib/whisper";
 
 export default async function BatchPage({
   params,
@@ -224,6 +224,11 @@ export default async function BatchPage({
               Add credits
             </a>
             , then Generate again. Or turn Spoken words off and generate without them.
+          </p>
+        ) : isListenTooBig(batch.status) ? (
+          <p className="mt-6 text-sm text-review">
+            This clip was just over Whisper’s 25 MB file cap. Generate again — Studio now sends only the voice, not the
+            video.
           </p>
         ) : (
           <p className="mt-6 text-sm text-review">{batch.status}</p>
