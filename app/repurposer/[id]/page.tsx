@@ -16,6 +16,8 @@ import { createBatch, renameBatch, resetBatch } from "../actions";
 import { handle } from "@/lib/targets";
 import { OPENAI_BILLING_URL, isListenTooBig, isNoCredits } from "@/lib/whisper";
 
+export const maxDuration = 300;
+
 export default async function BatchPage({
   params,
   searchParams,

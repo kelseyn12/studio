@@ -8,8 +8,6 @@ import { parseCaptionMap, parseRecipe, rebuildsEveryBodyMate, wordsForClip } fro
 import { prisma } from "@/lib/prisma";
 import { rebuildBody, rebuildOutput } from "@/lib/rebuild-output";
 
-export const maxDuration = 300;
-
 export async function tuneThisVideo(formData: FormData) {
   formData.set("scope", "one");
   await tuneOutput(formData);
