@@ -3,7 +3,8 @@ import { accessSync, constants } from "fs";
 import { mkdir } from "fs/promises";
 import path from "path";
 import { localRoot } from "@/lib/files";
-import { writeHookAss } from "@/lib/ass";
+import { hookEmojiSpots, writeHookAss, type HookAssInput } from "@/lib/ass";
+import { chainOverlays, emojiArtFor, emojiOverlayFilter, emojiPrepFilter, type EmojiArt, type OverlayStage } from "@/lib/emoji-overlay";
 import { logoOverlayFilter } from "@/lib/hook-logos-math";
 import { sharedListPlan } from "@/lib/list-layout";
 import { musicDelayPrefix } from "@/lib/output-recipe";
@@ -209,12 +210,7 @@ export async function assembleVideo(input: {
   }
   const logoIndex = input.logoPath ? n : -1;
   if (input.logoPath) args.push("-i", input.logoPath);
-  args.push("-f", "lavfi", "-i", "anullsrc=channel_layout=stereo:sample_rate=44100");
-  if (input.musicPath) args.push("-i", input.musicPath);
-  const silentIndex = n + (input.logoPath ? 1 : 0);
-  const musicIndex = input.musicPath ? silentIndex + 1 : -1;
 
-  const tempo = input.speed !== 1 ? `atempo=${input.speed},` : "";
   const look = input.hookStyle ?? "plain";
   const hook = input.clips[0];
   const { count: listCount, stack } = sharedListPlan({
@@ -225,28 +221,44 @@ export async function assembleVideo(input: {
     hookList: input.hookList,
     itemCounts: input.clips.map((row) => row.listItems?.length ?? 0),
   });
+  const assInputs = input.clips.map((clip, index): HookAssInput | undefined => {
+    const showList = (index === 0 && listCount > 0) || Boolean(clip.listItems?.length);
+    if (!clip.hookText && !showList) return undefined;
+    return {
+      text: clip.hookText || "",
+      style: look,
+      baseColor: input.hookColor,
+      accentColor: input.accentColor,
+      listCount: showList ? listCount : 0,
+      listItems: clip.listItems,
+      listAt: clip.listAt,
+      listStack: stack,
+      box: clip.box,
+      x: clip.hookX ?? (index === 0 ? input.hookX : undefined),
+      y: clip.hookY ?? (index === 0 ? input.hookY : undefined),
+      from: clip.textFrom,
+      to: clip.textTo,
+    };
+  });
+  // Colour emoji in headlines ride on top of the ASS text as PNG inputs, one per emoji.
+  const arts = await Promise.all(assInputs.map((ass) => (ass ? emojiArtFor(hookEmojiSpots(ass)) : null)));
+  const artInputIndex = new Map<EmojiArt, number>();
+  for (const art of arts.flatMap((list) => list ?? [])) {
+    artInputIndex.set(art, n + (input.logoPath ? 1 : 0) + artInputIndex.size);
+    args.push("-i", art.file);
+  }
+  args.push("-f", "lavfi", "-i", "anullsrc=channel_layout=stereo:sample_rate=44100");
+  if (input.musicPath) args.push("-i", input.musicPath);
+  const silentIndex = n + (input.logoPath ? 1 : 0) + artInputIndex.size;
+  const musicIndex = input.musicPath ? silentIndex + 1 : -1;
+  const tempo = input.speed !== 1 ? `atempo=${input.speed},` : "";
+
   const chains: string[] = [];
   for (let index = 0; index < n; index += 1) {
     const clip = input.clips[index];
-    const showList = (index === 0 && listCount > 0) || Boolean(clip.listItems?.length);
-    const hookFilter =
-      clip.hookText || showList
-        ? await writeHookAss({
-            text: clip.hookText || "",
-            style: look,
-            baseColor: input.hookColor,
-            accentColor: input.accentColor,
-            listCount: showList ? listCount : 0,
-            listItems: clip.listItems,
-            listAt: clip.listAt,
-            listStack: stack,
-            box: clip.box,
-            x: clip.hookX ?? (index === 0 ? input.hookX : undefined),
-            y: clip.hookY ?? (index === 0 ? input.hookY : undefined),
-            from: clip.textFrom,
-            to: clip.textTo,
-          })
-        : undefined;
+    const ass = assInputs[index];
+    const art = arts[index] ?? [];
+    const hookFilter = ass ? await writeHookAss({ ...ass, emojiArt: art.length > 0 }) : undefined;
     const vf = videoFilter({
       speed: input.speed,
       saturation: input.saturation,
@@ -257,13 +269,18 @@ export async function assembleVideo(input: {
       hookFilter,
       captionFilters: clip.captionFilters,
     });
+    // Overlay stages after the text: each emoji's colour art, then the logo row (first clip) on top.
+    const stages: OverlayStage[] = art.map((spot, k) => {
+      const label = `emoji${index}_${k}`;
+      return {
+        prep: emojiPrepFilter(artInputIndex.get(spot) ?? 0, spot, label),
+        overlay: (from, to) => emojiOverlayFilter(from, label, to, spot, clip.textFrom, clip.textTo),
+      };
+    });
     if (index === 0 && logoIndex >= 0) {
-      chains.push(`[${index}:v]${vf}[v${index}base]`);
-      chains.push(`[${logoIndex}:v]format=rgba[logo]`);
-      chains.push(logoOverlayFilter(`v${index}base`, "logo", `v${index}`));
-    } else {
-      chains.push(`[${index}:v]${vf}[v${index}]`);
+      stages.push({ prep: `[${logoIndex}:v]format=rgba[logo]`, overlay: (from, to) => logoOverlayFilter(from, "logo", to) });
     }
+    chains.push(...chainOverlays(`[${index}:v]${vf}`, `v${index}`, stages));
     if (audioFlags[index]) {
       chains.push(`[${index}:a]${tempo}aresample=44100,aformat=channel_layouts=stereo[a${index}]`);
     } else {

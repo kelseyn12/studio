@@ -29,7 +29,7 @@
   Footage: I’ll cut this (`cutBy=SELF`) or Send to editor (`cutBy=EDITOR`). Today says Cut N vs Send N. SELF never pings ManyChat.
 
 - [X] Clarify repurposer: mixes vs unique copies
-  Hooks × bodies × CTAs is the story mix. Distinct is another filmed hook or body, not a sat/speed copy. Copies stay at 1 unless you post that exact cut twice. When the same hook file is paired again, Generate starts that opening 0.2s later (`reuseHookTrim`).
+  Hooks × bodies × CTAs is the story mix. Distinct is another filmed hook or body, not a sat/speed copy. Copies stay at 1 unless you post that exact cut twice. `mixStoryNote` spells both layouts (1 hook × 3 bodies, 3 hooks × 1 body).
 
 - [X] Volume pass: repurposer, library, bulk calendar, calmer palette
   Hooks × demos × CTAs now keep audio, optional music, hook text, and land as Ready cards.
@@ -234,3 +234,8 @@
 
 - [X] Per-video words, music start, and delete
   Each finished video has Words + music (song or none, Music starts now) and Rebuild this video. Delete removes that file only and refreshes the list. Older videos need one new Generate before they can be tuned.
+- [X] Emoji in the headline burn as emoji
+  "BANGER 💥" burned a hollow box because the look fonts have no emoji glyphs. The emoji now holds its space in the line and the colour art is drawn there for the same window as the words; offline it is the outline glyph. Already generated videos keep the box until the next Generate or Rebuild.
+
+- [ ] Split `assembleVideo` out of `lib/ffmpeg.ts`
+  The file is past 300 lines again after the emoji overlay inputs. Probe/run helpers and `videoFilter` can stay; the assembly belongs in its own module. `parseLogoItems` in `lib/hook-logos-math.ts` also still has two `unknown[]` type errors.

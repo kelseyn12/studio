@@ -2,10 +2,10 @@ import { mkdir, writeFile } from "fs/promises";
 import os from "os";
 import path from "path";
 import { randomUUID } from "crypto";
-import { hookFontFamily, hookFontFile, hookFontsDir } from "@/lib/hook-font-files";
+import { hookFontFamily, hookFontsDir } from "@/lib/hook-font-files";
 import { wrapHook, type DrawnStyle } from "@/lib/text-style";
 import { lineStep, lookEm, plateSize, roundedPlatePath } from "@/lib/ass-plate";
-import { measureTextPx } from "@/lib/font-measure";
+import { EMOJI_FONT_NAME, hasEmoji, lineEmojiSpots, lineWidthPx, splitEmojiRuns, type EmojiSpot } from "@/lib/hook-emoji";
 import { clampInZone, clampListCount, FRAME_H, FRAME_W, listStack, LOOK_METRICS, lookPaint, type ListStack } from "@/lib/list-layout";
 import { LIST_MAX } from "@/lib/variations";
 
@@ -66,14 +66,80 @@ export function fontsDir(style: DrawnStyle = "plain"): string {
   return hookFontsDir(style);
 }
 
-function headline(segments: Segment[][], base: string, accent: string): string {
+/** One line of headline text. Emoji runs switch to Noto Emoji; with art coming they go transparent and only hold their advance. */
+function headline(segments: Segment[], base: string, accent: string, font: string, hideEmoji: boolean): string {
+  const hide = hideEmoji ? "\\alpha&HFF&" : "";
+  const show = hideEmoji ? "\\alpha&H00&" : "";
   return segments
-    .map((line) =>
-      line
-        .map((segment) => `{\\c${assColor(segment.accent ? accent : base)}}${escapeAssText(segment.text)}`)
-        .join(""),
-    )
-    .join("\\N");
+    .map((segment) => {
+      const colour = `{\\c${assColor(segment.accent ? accent : base)}}`;
+      const runs = splitEmojiRuns(segment.text)
+        .map((run) =>
+          run.emoji
+            ? `{\\fn${EMOJI_FONT_NAME}${hide}}${escapeAssText(run.text)}{\\fn${font}${show}}`
+            : escapeAssText(run.text),
+        )
+        .join("");
+      return `${colour}${runs}`;
+    })
+    .join("");
+}
+
+type HookRow = { line: string; x: number; y: number };
+
+type HookLayout = {
+  look: (typeof LOOK_METRICS)[DrawnStyle];
+  lines: string[];
+  em: number;
+  placed: boolean;
+  px: number;
+  py: number;
+  marginV: number;
+  plate: { width: number; height: number } | null;
+  /** Middle of the headline block; the TikTok card is drawn here. */
+  center: { x: number; y: number };
+  rows: HookRow[];
+};
+
+/** Where every headline line lands on the frame; events and emoji art both read from this. */
+function layoutHook(input: HookAssInput): HookLayout {
+  const look = LOOK_METRICS[input.style];
+  const drawnCard = Boolean(input.box) && input.style === "tiktok";
+  const lines = wrapHookKeepingStars(input.text, input.style);
+  const em = lookEm(input.style, look.fontsize, input.font);
+  const step = lineStep(em);
+  const widths = lines.map((line) => lineWidthPx(stripHighlight(line), input.style, em, look.fontsize));
+  const blockH = Math.max(1, lines.length) * step;
+  const plate = drawnCard ? plateSize(widths, em) : null;
+  const boxW = plate?.width ?? widths.reduce((max, width) => Math.max(max, width), em);
+  const boxH = plate?.height ?? blockH;
+  const placed = Number.isFinite(input.x) && Number.isFinite(input.y);
+  const at = clampInZone(input.x ?? 0.5, input.y ?? look.top, boxW / 2 / FRAME_W, boxH / 2 / FRAME_H);
+  const px = Math.round(FRAME_W * (placed ? at.x : 0.5));
+  const py = Math.round(FRAME_H * (placed ? at.y : look.top));
+  const marginV = placed ? 0 : Math.round(FRAME_H * look.top);
+  const mid = (lines.length - 1) / 2;
+  const center = { x: placed ? px : Math.round(FRAME_W / 2), y: placed ? py : Math.round(marginV + blockH / 2) };
+  const rows: HookRow[] = [];
+  if (input.text.trim()) {
+    if (input.box && input.style !== "tiktok") {
+      const lineH = Math.round(look.fontsize * look.lineGap);
+      lines.forEach((line, index) => {
+        const y = placed ? py + Math.round((index - mid) * lineH) : Math.round(marginV + look.fontsize * 0.5 + index * lineH);
+        rows.push({ line, x: center.x, y });
+      });
+    } else {
+      lines.forEach((line, index) => rows.push({ line, x: center.x, y: center.y + Math.round((index - mid) * step) }));
+    }
+  }
+  return { look, lines, em, placed, px, py, marginV, plate, center, rows };
+}
+
+/** Colour emoji art to overlay on the burn, centred where each headline emoji sits. */
+export function hookEmojiSpots(input: HookAssInput): EmojiSpot[] {
+  if (!hasEmoji(input.text)) return [];
+  const layout = layoutHook(input);
+  return layout.rows.flatMap((row) => lineEmojiSpots(stripHighlight(row.line), input.style, layout.em, layout.look.fontsize, row.x, row.y));
 }
 
 /** ASS clock: H:MM:SS.CC */
@@ -87,7 +153,7 @@ export function assClock(seconds: number): string {
   return `${hours}:${String(minutes).padStart(2, "0")}:${String(whole).padStart(2, "0")}.${String(hundredths).padStart(2, "0")}`;
 }
 
-export function buildHookAss(input: {
+export type HookAssInput = {
   text: string;
   style: DrawnStyle;
   baseColor?: string;
@@ -102,58 +168,32 @@ export function buildHookAss(input: {
   to?: number;
   box?: boolean | "white";
   listStack?: ListStack;
-}): string {
-  const look = LOOK_METRICS[input.style];
+  /** Colour emoji art will be overlaid, so emoji glyphs only hold their space. */
+  emojiArt?: boolean;
+};
+
+export function buildHookAss(input: HookAssInput): string {
   const drawnCard = Boolean(input.box) && input.style === "tiktok";
   const paint = drawnCard ? { borderStyle: 1 as const, outline: 0, shadow: 0 } : lookPaint(input.style, input.box);
   const listPaint = drawnCard ? lookPaint(input.style) : paint;
   const font = input.font ?? hookFontFamily(input.style);
   const base = input.baseColor || "white";
   const accent = input.accentColor || DEFAULT_ACCENT;
-  const lines = wrapHookKeepingStars(input.text, input.style);
-  const em = lookEm(input.style, look.fontsize, input.font);
-  const step = lineStep(em);
-  const blockH = Math.max(1, lines.length) * step;
-  const plate = drawnCard ? plateSize(input.style, lines.map(stripHighlight), em) : null;
-  const boxW = plate?.width ?? lines.reduce((max, line) => Math.max(max, measureTextPx(hookFontFile(input.style), stripHighlight(line), em)), em);
-  const boxH = plate?.height ?? blockH;
-  const placed = Number.isFinite(input.x) && Number.isFinite(input.y);
-  const at = clampInZone(input.x ?? 0.5, input.y ?? look.top, boxW / 2 / FRAME_W, boxH / 2 / FRAME_H);
-  const px = Math.round(FRAME_W * (placed ? at.x : 0.5));
-  const py = Math.round(FRAME_H * (placed ? at.y : look.top));
-  const marginV = placed ? 0 : Math.round(FRAME_H * look.top);
+  const { look, plate, marginV, rows, center } = layoutHook(input);
   const startAt = assClock(input.from ?? 0);
   const endAt = assClock(input.to && input.to > (input.from ?? 0) ? input.to : 9 * 3600 + 59 * 60 + 59);
   const events: string[] = [];
-  if (input.text.trim()) {
-    if (input.box && input.style !== "tiktok") {
-      const lineH = Math.round(look.fontsize * look.lineGap);
-      const mid = (lines.length - 1) / 2;
-      const boxX = placed ? px : Math.round(FRAME_W * 0.5);
-      lines.forEach((line, index) => {
-        const y = placed
-          ? py + Math.round((index - mid) * lineH)
-          : Math.round(marginV + look.fontsize * 0.5 + index * lineH);
-        events.push(
-          `Dialogue: 0,${startAt},${endAt},Head,,0,0,0,,{\\an5\\pos(${boxX},${y})}${headline([parseHighlight(line)], input.box === "white" ? "black" : "white", accent)}`,
-        );
-      });
-    } else {
-      const ink = input.box === "white" ? "black" : input.box ? "white" : base;
-      const cx = placed ? px : Math.round(FRAME_W / 2);
-      const cy = placed ? py : Math.round(marginV + blockH / 2);
-      if (drawnCard && plate) {
-        events.push(
-          `Dialogue: 0,${startAt},${endAt},Plate,,0,0,0,,{\\an5\\pos(${cx},${cy})\\p1}${roundedPlatePath(plate.width, plate.height)}`,
-        );
-      }
-      // One event per line on our own pitch, so the file stacks lines the way Words shows them.
-      const mid = (lines.length - 1) / 2;
-      lines.forEach((line, index) => {
-        const y = cy + Math.round((index - mid) * step);
-        events.push(`Dialogue: 0,${startAt},${endAt},Head,,0,0,0,,{\\an5\\pos(${cx},${y})}${headline([parseHighlight(line)], ink, accent)}`);
-      });
-    }
+  const headInk = input.box === "white" ? "black" : input.box ? "white" : base;
+  if (drawnCard && plate && rows.length) {
+    events.push(
+      `Dialogue: 0,${startAt},${endAt},Plate,,0,0,0,,{\\an5\\pos(${center.x},${center.y})\\p1}${roundedPlatePath(plate.width, plate.height)}`,
+    );
+  }
+  // One event per line on our own pitch, so the file stacks lines the way Words shows them.
+  for (const row of rows) {
+    events.push(
+      `Dialogue: 0,${startAt},${endAt},Head,,0,0,0,,{\\an5\\pos(${row.x},${row.y})}${headline(parseHighlight(row.line), headInk, accent, font, Boolean(input.emojiArt))}`,
+    );
   }
   const listItems = (input.listItems ?? []).map((line) => line.trim()).filter(Boolean).slice(0, LIST_MAX);
   const listCount = clampListCount(Math.max(listItems.length, input.listCount ?? 0));

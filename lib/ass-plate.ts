@@ -1,4 +1,4 @@
-import { emPerAssUnit, measureTextPx } from "@/lib/font-measure";
+import { emPerAssUnit } from "@/lib/font-measure";
 import { hookFontFile } from "@/lib/hook-font-files";
 import type { DrawnStyle } from "@/lib/text-style";
 
@@ -14,10 +14,10 @@ export function lookEm(style: DrawnStyle, fontSize: number, customFont?: string)
   return customFont ? fontSize : fontSize * emPerAssUnit(hookFontFile(style));
 }
 
-export function plateSize(style: DrawnStyle, lines: string[], em: number): { width: number; height: number } {
-  const file = hookFontFile(style);
-  const widest = lines.reduce((max, line) => Math.max(max, measureTextPx(file, line, em)), Math.round(em));
-  const height = Math.max(1, lines.length) * lineStep(em) + PAD_Y * 2;
+/** Card around the lines; `widths` are the burn widths of each line (emoji advances included). */
+export function plateSize(widths: number[], em: number): { width: number; height: number } {
+  const widest = widths.reduce((max, width) => Math.max(max, width), Math.round(em));
+  const height = Math.max(1, widths.length) * lineStep(em) + PAD_Y * 2;
   return { width: widest + PAD_X * 2, height };
 }
 

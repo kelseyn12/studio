@@ -25,10 +25,10 @@ describe("look fonts", () => {
 
   it("sizes the TikTok card to the words at that em", () => {
     const em = lookEm("tiktok", 82);
-    const one = plateSize("tiktok", ["Hello there"], em);
+    const one = plateSize([measureTextPx(hookFontFile("tiktok"), "Hello there", em)], em);
     expect(one.width).toBe(measureTextPx(hookFontFile("tiktok"), "Hello there", em) + 36);
     expect(one.height).toBe(lineStep(em) + 16);
-    expect(plateSize("tiktok", ["Hello there", "friend"], em).height).toBe(2 * lineStep(em) + 16);
+    expect(plateSize([400, 200], em).height).toBe(2 * lineStep(em) + 16);
     expect(lineStep(60)).toBe(66);
   });
 
