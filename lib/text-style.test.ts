@@ -51,6 +51,7 @@ describe("text style choice", () => {
   it("wraps hooks on word boundaries near 26 characters", () => {
     expect(wrapHook("I quit my 9-5 for this")).toEqual(["I quit my 9-5 for this"]);
     expect(wrapHook("Nobody talks about this one weird trick")).toEqual(["Nobody talks about this", "one weird trick"]);
+    expect(wrapHook("I gave two AIs one job", "instagram")).toEqual(["I gave two AIs one job"]);
     expect(wrapHook("   ")).toEqual([]);
     expect(wrapHook("a".repeat(120)).join("").length).toBeLessThanOrEqual(80);
   });

@@ -6,9 +6,9 @@ import { HookList } from "@/components/hook-list";
 import { ListOverlay } from "@/components/list-overlay";
 import { boxFor, boxLabel, hookDefaultPos, nextBox, parseHookLayout, posFor, setLookBox, setLookPos, stringifyHookLayout, type HookPos } from "@/lib/hook-layout";
 import { LogoScaleBar } from "@/components/logo-scale-bar";
-import { ALIGN_SNAP, clampLogoScale, defaultLogoPos, isLogoFile, itemScale, LOGO_SCALE_STEP, matchTypeScale, parseLogoItems, previewGrab, sharedAxes, snapLogoPos, stageCss } from "@/lib/hook-logos-math";
+import { ALIGN_SNAP, CANVAS_H, CANVAS_W, clampLogoScale, defaultLogoPos, isLogoFile, itemScale, LOGO_SCALE_STEP, matchTypeScale, parseLogoItems, previewGrab, sharedAxes, snapLogoPos, stageCss } from "@/lib/hook-logos-math";
 import { LOOK_STROKE_CLASS, LOOK_STROKE_PAD_CLASS, LOOK_TYPE_CLASS } from "@/lib/hook-fonts";
-import { boxIsWhite, isBoxed, listRows, listStack, wordBoxClass } from "@/lib/list-layout";
+import { boxIsWhite, clampInZone, isBoxed, listRows, listStack, SAFE_ZONE, wordBoxClass } from "@/lib/list-layout";
 import { publicFileUrl } from "@/lib/urls";
 import type { DrawnStyle } from "@/lib/text-style";
 
@@ -54,6 +54,7 @@ export function HookStage({
   const [picked, setPicked] = useState<string | null>(null);
   const [guides, setGuides] = useState(true);
   const logos = parseLogoItems(logosJson);
+  const fileCount = logos.filter(isLogoFile).length;
   const onLayoutRef = useRef(onLayout);
   const onLogosRef = useRef(onLogos);
   onLayoutRef.current = onLayout;
@@ -88,14 +89,19 @@ export function HookStage({
     });
   }
 
-  function point(event: PointerEvent<HTMLElement>): HookPos {
+  function pointerAt(event: PointerEvent<HTMLElement>): { x: number; y: number } {
     const box = stageRef.current?.getBoundingClientRect();
-    if (!box) return pos;
-    return {
-      ...pos,
-      x: Math.min(0.92, Math.max(0.08, (event.clientX - box.left) / box.width)),
-      y: Math.min(0.88, Math.max(0.08, (event.clientY - box.top) / box.height)),
-    };
+    if (!box) return { x: pos.x, y: pos.y };
+    return { x: (event.clientX - box.left) / box.width, y: (event.clientY - box.top) / box.height };
+  }
+
+  function point(event: PointerEvent<HTMLElement>): HookPos {
+    const raw = pointerAt(event);
+    const stage = stageRef.current;
+    const type = typeRef.current;
+    const halfW = stage && type ? type.offsetWidth / 2 / stage.clientWidth : 0;
+    const halfH = stage && type ? type.offsetHeight / 2 / stage.clientHeight : 0;
+    return { ...pos, ...clampInZone(raw.x, raw.y, halfW, halfH) };
   }
 
   function dragged(event: PointerEvent<HTMLElement>): HookPos {
@@ -146,11 +152,13 @@ export function HookStage({
   }, [id]);
 
   function shiftItem(item: (typeof logos)[number], event: PointerEvent<HTMLButtonElement>) {
-    const raw = point(event);
-    const next = snapLogoPos(raw.x, raw.y, [
+    const raw = pointerAt(event);
+    const grab = previewGrab(item, scaleOf(item), fileCount);
+    const snapped = snapLogoPos(raw.x, raw.y, [
       { x: 0.5, y: posFor(pos, preview).y },
       ...logos.flatMap((row, index) => (itemKey(row) === itemKey(item) ? [] : [loc(row, index)])),
     ]);
+    const next = clampInZone(snapped.x, snapped.y, grab.width / 2 / CANVAS_W, grab.height / 2 / CANVAS_H);
     setPlaces((current) => ({ ...current, [itemKey(item)]: next }));
     return next;
   }
@@ -196,7 +204,6 @@ export function HookStage({
   const inkClass = boxed && boxIsWhite(lookBox) ? "text-black" : "text-white";
   const plate = wordBoxClass(preview, lookBox);
   const stroke = boxed ? "" : `${LOOK_STROKE_CLASS[preview]} ${LOOK_STROKE_PAD_CLASS}`;
-  const fileCount = logos.filter(isLogoFile).length;
 
   useEffect(() => {
     const node = typeRef.current;
@@ -237,6 +244,15 @@ export function HookStage({
       </div>
       <div ref={stageRef} className="relative overflow-hidden rounded-xl bg-ink [container-type:inline-size]">
         <video ref={videoRef} src={src} controls playsInline className="aspect-[9/16] w-full object-cover" />
+        <div
+          className="pointer-events-none absolute z-20 border border-dashed border-white/30"
+          style={{
+            left: `${SAFE_ZONE.left * 100}%`,
+            top: `${SAFE_ZONE.top * 100}%`,
+            width: `${(SAFE_ZONE.right - SAFE_ZONE.left) * 100}%`,
+            height: `${(SAFE_ZONE.bottom - SAFE_ZONE.top) * 100}%`,
+          }}
+        />
         {guides ? <AlignGuides horizontals={[at.y, ...axes.ys]} verticals={axes.xs} /> : null}
         <div
           className="absolute z-10 w-max max-w-full cursor-grab"

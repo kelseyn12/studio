@@ -103,11 +103,11 @@ describe("buildHookAss", () => {
 
   it("wraps long lines, one event per line on the Words pitch, and keeps the starred word colored", () => {
     const track = buildHookAss({ text: "Nobody talks about this one *weird* trick", style: "plain", font: "Arial", x: 0.5, y: 0.5 });
-    const heads = track.match(/Dialogue: 0,.*,Head,.*\\pos\(540,(\d+)\)/g) ?? [];
+    const heads = track.match(/Dialogue: 0,.*,Head,.*\\pos\((\d+),(\d+)\)/g) ?? [];
     expect(heads).toHaveLength(2);
     expect(track).not.toContain("\\N");
     expect(track).toContain("{\\c&H5CFF5C&}weird");
-    const ys = heads.map((row) => Number(/\\pos\(540,(\d+)\)/.exec(row)?.[1]));
+    const ys = heads.map((row) => Number(/\\pos\(\d+,(\d+)\)/.exec(row)?.[1]));
     // Arial is a custom font name, so the em is the Fontsize itself: 84 × 1.1 pitch, centered on y.
     expect(ys[1] - ys[0]).toBe(92);
     expect((ys[0] + ys[1]) / 2).toBe(960);

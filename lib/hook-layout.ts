@@ -1,4 +1,4 @@
-import { LOOK_METRICS } from "@/lib/list-layout";
+import { clampInZone, LOOK_METRICS } from "@/lib/list-layout";
 import type { DrawnStyle } from "@/lib/text-style";
 
 export type BoxChoice = boolean | "white";
@@ -21,10 +21,6 @@ export type HookPos = {
   /** Per-look text spot. Shared `x`/`y` apply to both until you drag one look. */
   places?: LookPlaces;
 };
-
-function clamp01(value: number, low: number, high: number): number {
-  return Math.min(high, Math.max(low, value));
-}
 
 /** Same safe-zone tops as native TT / IG metrics. */
 export function hookDefaultPos(style: string): HookPos {
@@ -57,8 +53,7 @@ export function parseHookLayout(raw: string | null | undefined): HookPos | null 
     const from = Number(parsed.from);
     const to = Number(parsed.to);
     return {
-      x: clamp01(x, 0.08, 0.92),
-      y: clamp01(y, 0.08, 0.88),
+      ...clampInZone(x, y),
       list: parseListLines(parsed.list),
       listAt: parseListAt(parsed.listAt),
       ...(Number.isFinite(from) && from >= 0 ? { from } : {}),
@@ -93,7 +88,7 @@ function parsePoint(value: unknown): LookPoint | undefined {
   const x = Number(row.x);
   const y = Number(row.y);
   if (!Number.isFinite(x) || !Number.isFinite(y)) return undefined;
-  return { x: clamp01(x, 0.08, 0.92), y: clamp01(y, 0.08, 0.88) };
+  return clampInZone(x, y);
 }
 
 function parsePlaces(raw: unknown): { places: LookPlaces } | Record<string, never> {
@@ -111,10 +106,7 @@ export function posFor(pos: Pick<HookPos, "x" | "y" | "places"> | null | undefin
   const specific = pos?.places?.[look];
   if (specific) return specific;
   const top = LOOK_METRICS[look].top;
-  return {
-    x: clamp01(pos?.x ?? 0.5, 0.08, 0.92),
-    y: clamp01(pos?.y ?? top, 0.08, 0.88),
-  };
+  return clampInZone(pos?.x ?? 0.5, pos?.y ?? top);
 }
 
 /**
@@ -125,7 +117,7 @@ export function posFor(pos: Pick<HookPos, "x" | "y" | "places"> | null | undefin
 export function setLookPos(pos: HookPos, style: string, x: number, y: number): HookPos {
   const look = style === "instagram" ? "instagram" : "tiktok";
   const other = look === "tiktok" ? "instagram" : "tiktok";
-  const point = { x: clamp01(x, 0.08, 0.92), y: clamp01(y, 0.08, 0.88) };
+  const point = clampInZone(x, y);
   const otherPlaced = pos.places?.[other];
   return {
     ...pos,

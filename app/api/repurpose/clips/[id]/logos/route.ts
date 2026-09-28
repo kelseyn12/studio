@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { clampLogoScale, MAX_HOOK_LOGOS, MAX_LOGO_ITEMS, parseLogoItems, parseLogos, stringifyLogos } from "@/lib/hook-logos-math";
+import { clampInZone } from "@/lib/list-layout";
 import { deleteUpload, mimeFromName, saveUpload } from "@/lib/files";
 import { rejectStudioFile } from "@/lib/storage";
 import { prisma } from "@/lib/prisma";
@@ -69,10 +70,10 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     if (!match && !mark) return item;
     const x = Number(body.x);
     const y = Number(body.y);
+    const at = Number.isFinite(x) && Number.isFinite(y) ? clampInZone(x, y) : null;
     return {
       ...item,
-      ...(Number.isFinite(x) ? { x: Math.min(0.92, Math.max(0.08, x)) } : {}),
-      ...(Number.isFinite(y) ? { y: Math.min(0.88, Math.max(0.08, y)) } : {}),
+      ...(at ? { x: at.x, y: at.y } : {}),
       ...(body.scale != null ? { scale: clampLogoScale(body.scale) } : {}),
     };
   });

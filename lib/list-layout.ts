@@ -5,6 +5,23 @@ export const FRAME_W = 1080;
 export const FRAME_H = 1920;
 export const LIST_LEFT = 90;
 
+/**
+ * TikTok / Instagram overlay on 1080×1920. Headline, logos, and marks stay in this box:
+ * below the header, above the caption/music block, and left of the like/share column.
+ */
+export const SAFE_ZONE = { top: 0.13, bottom: 0.74, left: 0.06, right: 0.86 } as const;
+
+export function clampInZone(x: number, y: number, halfW = 0, halfH = 0): { x: number; y: number } {
+  const midX = (SAFE_ZONE.left + SAFE_ZONE.right) / 2;
+  const midY = (SAFE_ZONE.top + SAFE_ZONE.bottom) / 2;
+  const innerW = SAFE_ZONE.right - SAFE_ZONE.left;
+  const innerH = SAFE_ZONE.bottom - SAFE_ZONE.top;
+  return {
+    x: halfW * 2 >= innerW ? midX : Math.min(SAFE_ZONE.right - halfW, Math.max(SAFE_ZONE.left + halfW, x)),
+    y: halfH * 2 >= innerH ? midY : Math.min(SAFE_ZONE.bottom - halfH, Math.max(SAFE_ZONE.top + halfH, y)),
+  };
+}
+
 export type LookMetrics = { fontsize: number; top: number; lineGap: number };
 export type ListStack = { left: number; top: number; gap: number };
 
@@ -60,9 +77,9 @@ export function listStack(input: {
   const look = LOOK_METRICS[input.style];
   const count = clampListCount(input.count) || 1;
   const placed = Number.isFinite(input.x) && Number.isFinite(input.y);
-  const py = Math.round(FRAME_H * Math.min(0.88, Math.max(0.08, input.y ?? look.top)));
+  const py = Math.round(FRAME_H * clampInZone(input.x ?? 0.5, input.y ?? look.top).y);
   const marginV = placed ? 0 : Math.round(FRAME_H * look.top);
-  const lines = wrapHook(input.headline ?? "");
+  const lines = wrapHook(input.headline ?? "", input.style);
   const lineHeight = look.fontsize * look.lineGap;
   const top = (input.headline ?? "").trim()
     ? (placed ? py : marginV) + Math.round(Math.max(lines.length, 1) * lineHeight) + 80

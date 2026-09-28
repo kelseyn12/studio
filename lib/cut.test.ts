@@ -6,6 +6,7 @@ import { runFfmpeg } from "@/lib/ffmpeg";
 import { cutVideo } from "@/lib/cut";
 import { isPlayableCut, keepPlayback, keepRanges, parseDrops, parseSpeed, speedAudioFilter, speedVideoFilter } from "@/lib/cut-math";
 import { cutPreviewPath, parseCutUndo, parseHookLayout, posFor, setLookPos, stringifyHookLayout } from "@/lib/hook-layout";
+import { clampInZone, SAFE_ZONE } from "@/lib/list-layout";
 import { ffprobeBin, runCommand } from "@/lib/ffmpeg";
 import { clipDuration } from "@/lib/trim";
 
@@ -103,13 +104,20 @@ describe("parseSpeed / parseDrops", () => {
     expect(posFor(moved, "tiktok")).toEqual({ x: 0.5, y: 0.45 });
     expect(posFor(moved, "instagram").y).toBe(0.45);
     expect(moved.places?.tiktok).toBeUndefined();
-    // Dragging the other look gives it its own spot; from then on each stays put.
-    const back = setLookPos(moved, "tiktok", 0.5, 0.12);
+    const back = setLookPos(moved, "tiktok", 0.5, 0.2);
     expect(posFor(back, "instagram").y).toBe(0.45);
-    expect(posFor(parseHookLayout(stringifyHookLayout(back)), "tiktok").y).toBe(0.12);
+    expect(posFor(parseHookLayout(stringifyHookLayout(back)), "tiktok").y).toBe(0.2);
     const again = setLookPos(back, "instagram", 0.5, 0.6);
-    expect(posFor(again, "tiktok").y).toBe(0.12);
+    expect(posFor(again, "tiktok").y).toBe(0.2);
     expect(posFor(again, "instagram").y).toBe(0.6);
+    expect(clampInZone(0.5, 0.54)).toEqual({ x: 0.5, y: 0.54 });
+    expect(clampInZone(0.5, 0.05).y).toBe(SAFE_ZONE.top);
+    expect(clampInZone(0.5, 0.9).y).toBe(SAFE_ZONE.bottom);
+    expect(clampInZone(0.02, 0.4).x).toBe(SAFE_ZONE.left);
+    expect(clampInZone(0.99, 0.4).x).toBe(SAFE_ZONE.right);
+    const wide = clampInZone(0.8, 0.5, 350 / 1080, 40 / 1920);
+    expect(wide.x).toBeCloseTo(SAFE_ZONE.right - 350 / 1080);
+    expect(wide.x + 350 / 1080).toBeLessThanOrEqual(SAFE_ZONE.right);
   });
 
   it("treats 1× as the recorded file, not a previous sped cut", () => {

@@ -17,7 +17,8 @@ export const TEXT_STYLE_LABEL: Record<TextStyle, string> = {
 };
 
 export const HOOK_MAX_CHARS = 80;
-const WRAP_AT = 26;
+/** Instagram type is wider, so it wraps a little sooner to stay left of the icon column. */
+const WRAP_AT: Record<DrawnStyle, number> = { tiktok: 26, instagram: 23, plain: 26 };
 
 export function parseTextStyle(value: unknown): TextStyle {
   return TEXT_STYLES.includes(value as TextStyle) ? (value as TextStyle) : "auto";
@@ -57,14 +58,15 @@ export function resolveTextStyle(style: TextStyle, networks: string | string[] |
   return Array.isArray(networks) ? textStyleForNetworks(networks) : textStyleForNetwork(networks);
 }
 
-/** Breaks a hook into lines the way the apps wrap: word boundaries, about 26 characters. */
-export function wrapHook(text: string): string[] {
+/** Breaks a hook into lines the way the apps wrap: word boundaries, about 26 characters (23 on IG). */
+export function wrapHook(text: string, style: DrawnStyle = "tiktok"): string[] {
   const words = text.trim().slice(0, HOOK_MAX_CHARS).split(/\s+/).filter(Boolean);
   const lines: string[] = [];
   let current = "";
+  const at = WRAP_AT[style] ?? 26;
   for (const word of words) {
     const candidate = current ? `${current} ${word}` : word;
-    if (candidate.length > WRAP_AT && current) {
+    if (candidate.length > at && current) {
       lines.push(current);
       current = word;
     } else {

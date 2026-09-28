@@ -2,10 +2,11 @@ import { mkdir, writeFile } from "fs/promises";
 import os from "os";
 import path from "path";
 import { randomUUID } from "crypto";
-import { hookFontFamily, hookFontsDir } from "@/lib/hook-font-files";
+import { hookFontFamily, hookFontFile, hookFontsDir } from "@/lib/hook-font-files";
 import { wrapHook, type DrawnStyle } from "@/lib/text-style";
 import { lineStep, lookEm, plateSize, roundedPlatePath } from "@/lib/ass-plate";
-import { clampListCount, FRAME_H, FRAME_W, listStack, LOOK_METRICS, lookPaint, type ListStack } from "@/lib/list-layout";
+import { measureTextPx } from "@/lib/font-measure";
+import { clampInZone, clampListCount, FRAME_H, FRAME_W, listStack, LOOK_METRICS, lookPaint, type ListStack } from "@/lib/list-layout";
 import { LIST_MAX } from "@/lib/variations";
 
 export { FRAME_H, FRAME_W };
@@ -109,10 +110,17 @@ export function buildHookAss(input: {
   const font = input.font ?? hookFontFamily(input.style);
   const base = input.baseColor || "white";
   const accent = input.accentColor || DEFAULT_ACCENT;
-  const lines = wrapHookKeepingStars(input.text);
+  const lines = wrapHookKeepingStars(input.text, input.style);
+  const em = lookEm(input.style, look.fontsize, input.font);
+  const step = lineStep(em);
+  const blockH = Math.max(1, lines.length) * step;
+  const plate = drawnCard ? plateSize(input.style, lines.map(stripHighlight), em) : null;
+  const boxW = plate?.width ?? lines.reduce((max, line) => Math.max(max, measureTextPx(hookFontFile(input.style), stripHighlight(line), em)), em);
+  const boxH = plate?.height ?? blockH;
   const placed = Number.isFinite(input.x) && Number.isFinite(input.y);
-  const px = Math.round(FRAME_W * Math.min(0.92, Math.max(0.08, input.x ?? 0.5)));
-  const py = Math.round(FRAME_H * Math.min(0.88, Math.max(0.08, input.y ?? look.top)));
+  const at = clampInZone(input.x ?? 0.5, input.y ?? look.top, boxW / 2 / FRAME_W, boxH / 2 / FRAME_H);
+  const px = Math.round(FRAME_W * (placed ? at.x : 0.5));
+  const py = Math.round(FRAME_H * (placed ? at.y : look.top));
   const marginV = placed ? 0 : Math.round(FRAME_H * look.top);
   const startAt = assClock(input.from ?? 0);
   const endAt = assClock(input.to && input.to > (input.from ?? 0) ? input.to : 9 * 3600 + 59 * 60 + 59);
@@ -132,15 +140,11 @@ export function buildHookAss(input: {
       });
     } else {
       const ink = input.box === "white" ? "black" : input.box ? "white" : base;
-      const em = lookEm(input.style, look.fontsize, input.font);
-      const step = lineStep(em);
-      const blockH = lines.length * step;
       const cx = placed ? px : Math.round(FRAME_W / 2);
       const cy = placed ? py : Math.round(marginV + blockH / 2);
-      if (drawnCard) {
-        const size = plateSize(input.style, lines.map(stripHighlight), em);
+      if (drawnCard && plate) {
         events.push(
-          `Dialogue: 0,${startAt},${endAt},Plate,,0,0,0,,{\\an5\\pos(${cx},${cy})\\p1}${roundedPlatePath(size.width, size.height)}`,
+          `Dialogue: 0,${startAt},${endAt},Plate,,0,0,0,,{\\an5\\pos(${cx},${cy})\\p1}${roundedPlatePath(plate.width, plate.height)}`,
         );
       }
       // One event per line on our own pitch, so the file stacks lines the way Words shows them.
@@ -222,9 +226,9 @@ export function buildHookAss(input: {
 }
 
 /** Wrap on the plain text, then put the stars back on the same words. */
-function wrapHookKeepingStars(text: string): string[] {
+function wrapHookKeepingStars(text: string, style: DrawnStyle): string[] {
   const accented = new Set(parseHighlight(text).filter((s) => s.accent).flatMap((s) => s.text.split(/\s+/)));
-  return wrapHook(stripHighlight(text)).map((line) =>
+  return wrapHook(stripHighlight(text), style).map((line) =>
     line
       .split(" ")
       .map((word) => (accented.has(word) ? `*${word}*` : word))

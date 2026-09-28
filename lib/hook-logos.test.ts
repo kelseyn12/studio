@@ -71,11 +71,12 @@ describe("parseLogos", () => {
   });
 
   it("lines unused logos across the top, not the play button", () => {
-    expect(defaultLogoPos(0, 3)).toEqual({ x: 0.16, y: 0.15 });
-    expect(defaultLogoPos(2, 3).x).toBeCloseTo(0.84);
+    expect(defaultLogoPos(0, 3).y).toBe(0.18);
+    expect(defaultLogoPos(0, 3).x).toBeGreaterThanOrEqual(0.06);
+    expect(defaultLogoPos(2, 3).x).toBeLessThanOrEqual(0.86);
     const [box] = boxesFromItems([{ path: "a.png", filename: "a.png" }]);
     expect(box.kind).toBe("logo");
-    if (box.kind === "logo") expect(box.y + box.h / 2).toBeCloseTo(CANVAS_H * 0.15);
+    if (box.kind === "logo") expect(box.y + box.h / 2).toBe(Math.round(CANVAS_H * 0.18));
   });
 
   it("evens a logo row and snaps a chip to a neighbor", () => {

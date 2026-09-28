@@ -59,7 +59,7 @@ export function ClipTile({
   const savedPos = parseHookLayout(layoutText) ?? hookDefaultPos(previewLook);
   const at = posFor(savedPos, previewLook);
   const plate = boxFor(savedPos, previewLook);
-  const lines = wrapHook(words);
+  const lines = wrapHook(words, previewLook);
   const listLines = savedPos.list ?? [];
   const listShown = Math.max(listCount ?? 0, listLines.length);
   const stack = listShown ? listStack({ style: previewLook, headline: words, x: at.x, y: at.y, count: listShown }) : null;

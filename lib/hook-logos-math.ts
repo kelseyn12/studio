@@ -1,4 +1,4 @@
-import { LOOK_METRICS } from "@/lib/list-layout";
+import { clampInZone, LOOK_METRICS, SAFE_ZONE } from "@/lib/list-layout";
 import type { DrawnStyle } from "@/lib/text-style";
 
 export const LOGO_SECONDS = 4;
@@ -10,22 +10,26 @@ export const LOGO_FILE_ONE = 280;
 export const LOGO_FILE_ROW = 200;
 /** Scale 1 on a row is about this many type-lines tall. */
 export const LOGO_TO_TYPE = 2.4;
-/** Above the headline / play button so new chips are grabable. */
-export const LOGO_ROW_Y = 0.15;
+/** Above the headline / play button so new chips are grabable, and below the header. */
+export const LOGO_ROW_Y = 0.18;
+
+function rowX(index: number, count: number): number {
+  const n = Math.max(1, count);
+  const halfW = LOGO_FILE_ROW / 2 / CANVAS_W;
+  const left = SAFE_ZONE.left + halfW;
+  const right = SAFE_ZONE.right - halfW;
+  return n <= 1 ? 0.5 : left + ((right - left) * index) / (n - 1);
+}
 
 export function defaultLogoPos(index: number, count: number): { x: number; y: number } {
-  const n = Math.max(1, count);
-  const x = n <= 1 ? 0.5 : 0.16 + (0.68 * index) / (n - 1);
-  return { x: Math.min(0.92, Math.max(0.08, x)), y: LOGO_ROW_Y };
+  return clampInZone(rowX(index, count), LOGO_ROW_Y, LOGO_FILE_ROW / 2 / CANVAS_W);
 }
 
 export const ALIGN_SNAP = 0.03;
 
 export function alignLogoRow(count: number, y = LOGO_ROW_Y): Array<{ x: number; y: number }> {
-  return Array.from({ length: Math.max(0, count) }, (_, index) => ({
-    x: defaultLogoPos(index, count).x,
-    y: Math.min(0.88, Math.max(0.08, y)),
-  }));
+  const halfW = LOGO_FILE_ROW / 2 / CANVAS_W;
+  return Array.from({ length: Math.max(0, count) }, (_, index) => clampInZone(rowX(index, count), y, halfW));
 }
 
 export function snapLogoPos(
@@ -40,10 +44,7 @@ export function snapLogoPos(
     if (Math.abs(other.x - x) < ALIGN_SNAP) nextX = other.x;
   }
   if (Math.abs(0.5 - nextX) < ALIGN_SNAP) nextX = 0.5;
-  return {
-    x: Math.min(0.92, Math.max(0.08, nextX)),
-    y: Math.min(0.88, Math.max(0.08, nextY)),
-  };
+  return clampInZone(nextX, nextY);
 }
 
 /** Shared X or Y when two pieces sit on the same line. */
@@ -79,7 +80,7 @@ function placed(item: { x?: unknown; y?: unknown }): { x: number; y: number } | 
   const x = Number(item.x);
   const y = Number(item.y);
   if (!Number.isFinite(x) || !Number.isFinite(y)) return {};
-  return { x: Math.min(0.92, Math.max(0.08, x)), y: Math.min(0.88, Math.max(0.08, y)) };
+  return clampInZone(x, y);
 }
 
 export function clampLogoScale(value: unknown): number {
