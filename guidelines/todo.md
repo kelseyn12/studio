@@ -29,7 +29,7 @@
   Footage: I’ll cut this (`cutBy=SELF`) or Send to editor (`cutBy=EDITOR`). Today says Cut N vs Send N. SELF never pings ManyChat.
 
 - [X] Clarify repurposer: mixes vs unique copies
-  Hooks × bodies × CTAs is the story mix. Distinct is another filmed hook or body, not a sat/speed copy. Copies stay at 1 unless you post that exact cut twice. `mixStoryNote` spells both layouts (1 hook × 3 bodies, 3 hooks × 1 body).
+  Hooks × bodies × CTAs is the story mix. Distinct is another filmed hook or body, not a sat/speed copy. Copies stay at 1 unless you post that exact cut twice. When the same hook file is paired again, Generate starts that opening 0.2s later (`reuseHookTrim`).
 
 - [X] Volume pass: repurposer, library, bulk calendar, calmer palette
   Hooks × demos × CTAs now keep audio, optional music, hook text, and land as Ready cards.

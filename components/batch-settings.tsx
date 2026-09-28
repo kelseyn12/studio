@@ -177,9 +177,9 @@ export function BatchSettings({
       <section className="rounded-card border border-line bg-panel p-5">
         <p className="label">Mix settings</p>
         <p className="mt-2 text-sm text-mute">
-          Distinct is another hook take or another body take, not a sat/speed/crop copy of the same clips. Leave copies
-          at 1. Copies exist only if you will post that exact cut a second time and need the file not to match. Text
-          color per copy only runs if copies is 2 or more.
+          Distinct is another hook take or another body take, not a sat/speed/crop copy. Leave copies at 1. If the same
+          hook clip is used with more than one body, later mixes start that opening a beat later so the delivery is not
+          identical. Text color per copy only runs if copies is 2 or more.
         </p>
         <div className="mt-5 space-y-4">
           <Row label="Use every mix">

@@ -4,7 +4,7 @@ import { groupWords, parseCaptionWords, spokenOnClip, transcribeWords, writeCapt
 import { assembleVideo, NO_TRIM, writeThumb, type ClipTrim } from "@/lib/ffmpeg";
 import { isLogoFile, parseLogoItems, writeLogoSheet } from "@/lib/hook-logos";
 import { boxFor, parseHookLayout, posFor } from "@/lib/hook-layout";
-import { quietEnds } from "@/lib/trim";
+import { quietEnds, clipDuration } from "@/lib/trim";
 import { ensureLocal, localRoot, uploadLocalToR2 } from "@/lib/files";
 import { hasR2 } from "@/lib/r2";
 import { prisma } from "@/lib/prisma";
@@ -13,7 +13,7 @@ import { targetAccounts } from "@/lib/targets";
 import { stripHighlight } from "@/lib/ass";
 import type { OutputRecipe } from "@/lib/output-recipe";
 import { hookLooks } from "@/lib/text-style";
-import { parseHookLines, variationFor } from "@/lib/variations";
+import { parseHookLines, reuseHookTrim, shiftHookTimes, variationFor } from "@/lib/variations";
 import type { RepurposeBatch, RepurposeClip, RepurposeTrack } from "@prisma/client";
 
 type Combo = RepurposeClip[];
@@ -77,8 +77,21 @@ export async function renderBatch(input: {
     }
     let fileNumber = 0;
     let mixNumber = 0;
+    const hookUses = new Map<string, number>();
     for (const combo of combos) {
       mixNumber += 1;
+      const hookClip = combo.find((clip) => clip.slot === "HOOK");
+      const useIndex = hookClip ? (hookUses.get(hookClip.id) ?? 0) : 0;
+      if (hookClip) hookUses.set(hookClip.id, useIndex + 1);
+      const hookBase = hookClip ? (trims.get(hookClip.path) ?? NO_TRIM) : NO_TRIM;
+      let hookShift = 0;
+      let hookTrim = hookBase;
+      if (hookClip && useIndex > 0) {
+        const local = await ensureLocal(hookClip.path);
+        const reused = reuseHookTrim(hookBase, useIndex, await clipDuration(local));
+        hookShift = reused.shift;
+        hookTrim = reused.trim;
+      }
       let textNumber = 0;
       for (const line of lines) {
         textNumber += 1;
@@ -86,13 +99,14 @@ export async function renderBatch(input: {
           const variation = variationFor(fileNumber, batch);
           const music = musicQueue[fileNumber];
           fileNumber += 1;
-          const hookClip = combo.find((clip) => clip.slot === "HOOK");
           const hookLine = line || hookClip?.hookText || "";
           const clips = await Promise.all(
             combo.map(async (clip, index) => {
-              const trim = trims.get(clip.path) ?? NO_TRIM;
+              const onHook = clip.slot === "HOOK";
+              const trim = onHook ? hookTrim : (trims.get(clip.path) ?? NO_TRIM);
               const phrases = spokenOnClip(clip.slot) ? phrasesByClip.get(clip.path) : undefined;
               const layout = parseHookLayout(clip.hookLayout);
+              const shift = onHook ? hookShift : 0;
               return {
                 path: await ensureLocal(clip.path),
                 hookText: index === 0 ? line || clip.hookText || undefined : clip.hookText || undefined,
@@ -102,9 +116,9 @@ export async function renderBatch(input: {
                 hookY: layout?.y,
                 places: layout?.places,
                 listItems: layout?.list,
-                listAt: layout?.listAt,
-                textFrom: layout?.from,
-                textTo: layout?.to,
+                listAt: layout?.listAt?.map((time) => shiftHookTimes(time, shift) ?? time),
+                textFrom: shiftHookTimes(layout?.from, shift),
+                textTo: shiftHookTimes(layout?.to, shift),
                 box: layout?.box,
                 boxes: layout?.boxes,
               };
@@ -137,7 +151,7 @@ export async function renderBatch(input: {
             .join(" · ");
           // Cross-posting deals get one file per app look; each ships to its own accounts.
           const recipeClips = combo.map((clip, index) => {
-            const trim = trims.get(clip.path) ?? NO_TRIM;
+            const trim = clip.slot === "HOOK" ? hookTrim : (trims.get(clip.path) ?? NO_TRIM);
             return {
               id: clip.id,
               hookText: index === 0 ? line || clip.hookText || "" : clip.hookText || "",
@@ -195,7 +209,7 @@ export async function renderBatch(input: {
               hookX: posFor(hookPos, look).x,
               hookY: posFor(hookPos, look).y,
             });
-            const coverAt = 0.4 + copy * 0.9;
+            const coverAt = 0.4 + copy * 0.9 + useIndex * 0.2;
             const coverRel = `thumbs/${outputRel}.jpg`;
             let coverPath = "";
             try {
@@ -242,7 +256,9 @@ export async function renderBatch(input: {
               createdById: userId,
               hook: stripHighlight(hookLine),
               caption: hookClip?.postCaption?.trim() || batch.caption,
-              editorNote: `Uniqueness: ${variation.label}`,
+              editorNote: [variation.label !== "clean" ? `Uniqueness: ${variation.label}` : null, hookShift ? `Opening +${hookShift.toFixed(1)}s` : null]
+                .filter(Boolean)
+                .join(" · ") || "clean mix",
               payoutCents: basePayCents,
               assets: { create: files.map(({ recipe: _recipe, ...file }) => file) },
             },
