@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { readSession } from "@/lib/session";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
 import { pullMedia } from "@/lib/pull-media";
-import { transcribeFile } from "@/lib/whisper";
+import { transcribeFile, openAiUserError } from "@/lib/whisper";
 
 export const maxDuration = 60;
 
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       text = "Drop an audio or video file, or paste a TikTok / Reel / YouTube / mp4 link.";
     }
   } catch (error) {
-    text = error instanceof Error ? error.message : "Transcription failed";
+    text = openAiUserError(error instanceof Error ? error.message : "Transcription failed");
   }
   await prisma.transcript.create({
     data: {

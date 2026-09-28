@@ -253,3 +253,6 @@
 - [X] ADHD pass over every creator page
   Only the next setup step shows; done ones fold away. Live's day forms default to the accounts already on the video instead of the first account in the list. Usernames print one @. Add a deal is grouped like Edit this deal. Shorter lines on Today, Cuts, Numbers, Multiply rows, Text hooks, Mix settings, and the cut tool.
 - [ ] Live "Per day" default is 5 regardless of what the deals owe. Could default to the sum of active deals' posts a day, capped by their max.
+- [X] OpenAI no-credits warning had no link
+  Generate used to store the first 80 characters of the API error, so the billing URL died at `https://`. Out of credits now shows Add credits to the OpenAI billing page. Turn Spoken words off still generates without it.
+

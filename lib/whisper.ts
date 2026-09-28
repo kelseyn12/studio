@@ -1,3 +1,25 @@
+export const OPENAI_BILLING_URL = "https://platform.openai.com/settings/organization/billing";
+export const NO_CREDITS = "no-credits";
+
+/** OpenAI's own warning includes a URL; we used to clip it at "https://". */
+export function isNoCredits(message: string): boolean {
+  return (
+    message === NO_CREDITS ||
+    /no credits remaining|exceeded your current quota|insufficient_quota/i.test(message)
+  );
+}
+
+export function openAiFailStatus(error: unknown): string {
+  const message = error instanceof Error ? error.message : "";
+  if (isNoCredits(message)) return NO_CREDITS;
+  return (message || "failed").trim().slice(0, 160);
+}
+
+export function openAiUserError(message: string): string {
+  if (isNoCredits(message)) return `OpenAI is out of credits. Add some at ${OPENAI_BILLING_URL}`;
+  return message;
+}
+
 export function parseTranscript(body: Record<string, unknown>): string {
   const text = String(body.text || "");
   if (text) return text;
@@ -32,7 +54,7 @@ export async function transcribeFile(file: File): Promise<string> {
       error && typeof error === "object" && "message" in error
         ? String((error as { message: string }).message)
         : response.statusText;
-    throw new Error(message);
+    throw new Error(isNoCredits(message) ? NO_CREDITS : message);
   }
   return parseTranscript(payload);
 }

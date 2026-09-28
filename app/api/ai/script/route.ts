@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
 import { generateScript } from "@/lib/script";
 import { readSession } from "@/lib/session";
-import { transcribeFile } from "@/lib/whisper";
+import { openAiUserError, transcribeFile } from "@/lib/whisper";
 
 export const maxDuration = 60;
 
@@ -69,6 +69,9 @@ export async function POST(request: Request) {
     );
     return NextResponse.json(script);
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : "Script failed" }, { status: 400 });
+    return NextResponse.json(
+      { error: openAiUserError(error instanceof Error ? error.message : "Script failed") },
+      { status: 400 },
+    );
   }
 }

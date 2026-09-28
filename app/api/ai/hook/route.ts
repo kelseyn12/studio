@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { rewriteHook } from "@/lib/rewrite";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
 import { readSession } from "@/lib/session";
+import { openAiUserError } from "@/lib/whisper";
 
 export async function POST(request: Request) {
   if (!rateLimit(clientKey(request, "rewrite"), 20)) {
@@ -18,6 +19,9 @@ export async function POST(request: Request) {
     });
     return NextResponse.json({ hook });
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : "Rewrite failed" }, { status: 400 });
+    return NextResponse.json(
+      { error: openAiUserError(error instanceof Error ? error.message : "Rewrite failed") },
+      { status: 400 },
+    );
   }
 }

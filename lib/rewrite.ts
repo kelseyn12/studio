@@ -1,3 +1,5 @@
+import { isNoCredits, NO_CREDITS } from "@/lib/whisper";
+
 export function rewritePrompt(input: { hook: string; premise: string; script: string }): string {
   return [
     "Rewrite this UGC hook. Keep it spoken, specific, and under 14 words.",
@@ -35,7 +37,7 @@ export async function rewriteHook(input: { hook: string; premise: string; script
   const payload = (await response.json()) as Record<string, unknown>;
   if (!response.ok) {
     const error = payload.error as { message?: string } | undefined;
-    throw new Error(error?.message || response.statusText);
+    throw new Error(isNoCredits(error?.message || "") ? NO_CREDITS : error?.message || response.statusText);
   }
   return parseRewrite(payload);
 }

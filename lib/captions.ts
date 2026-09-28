@@ -1,6 +1,7 @@
 import { readFile } from "fs/promises";
 import path from "path";
 import type { CaptionWord } from "@/lib/captions-math";
+import { isNoCredits, NO_CREDITS } from "@/lib/whisper";
 
 export type { CaptionPhrase, CaptionWord } from "@/lib/captions-math";
 export {
@@ -31,7 +32,8 @@ export async function transcribeWords(fileAbs: string): Promise<CaptionWord[]> {
   });
   const payload = (await response.json()) as { words?: CaptionWord[]; error?: { message?: string } };
   if (!response.ok) {
-    throw new Error(payload.error?.message || response.statusText);
+    const message = payload.error?.message || response.statusText;
+    throw new Error(isNoCredits(message) ? NO_CREDITS : message);
   }
   return (payload.words || []).filter((word) => word.word.trim().length > 0);
 }

@@ -14,6 +14,7 @@ import { LiveRefresh } from "@/components/live-refresh";
 import { prisma } from "@/lib/prisma";
 import { createBatch, renameBatch, resetBatch } from "../actions";
 import { handle } from "@/lib/targets";
+import { OPENAI_BILLING_URL, isNoCredits } from "@/lib/whisper";
 
 export default async function BatchPage({
   params,
@@ -216,7 +217,17 @@ export default async function BatchPage({
           </Link>
         </p>
       ) : batch.status !== "draft" && batch.status !== "ready" ? (
-        <p className="mt-6 text-sm text-review">{batch.status}</p>
+        isNoCredits(batch.status) ? (
+          <p className="mt-6 text-sm text-review">
+            OpenAI is out of credits. Spoken words on screen need a few cents on that key.{" "}
+            <a href={OPENAI_BILLING_URL} className="text-sun underline" target="_blank" rel="noreferrer">
+              Add credits
+            </a>
+            , then Generate again. Or turn Spoken words off and generate without them.
+          </p>
+        ) : (
+          <p className="mt-6 text-sm text-review">{batch.status}</p>
+        )
       ) : null}
 
       <BatchOutputs

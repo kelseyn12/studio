@@ -1,3 +1,5 @@
+import { isNoCredits, NO_CREDITS } from "@/lib/whisper";
+
 export type StudioScript = {
   hook: string;
   body: string;
@@ -78,7 +80,7 @@ export async function generateScript(
   const payload = (await response.json()) as Record<string, unknown>;
   if (!response.ok) {
     const error = payload.error as { message?: string } | undefined;
-    throw new Error(error?.message || response.statusText);
+    throw new Error(isNoCredits(error?.message || "") ? NO_CREDITS : error?.message || response.statusText);
   }
   return parseScript(payload);
 }
