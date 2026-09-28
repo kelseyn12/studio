@@ -100,7 +100,9 @@ model Campaign {
   deadlineAt            DateTime?
   deliverables          String           @default("")
   basePayCents          Int
+  monthlyPayCents       Int              @default(0)
   postsPerDay           Int
+  postsPerDayMax        Int              @default(0)
   accountsAllowed       Int              @default(1)
   minutesPerPost        Int              @default(10)
   minViews              Int              @default(0)
@@ -113,6 +115,7 @@ model Campaign {
   briefSupply           Boolean          @default(false)
   editorIncluded        Boolean          @default(false)
   cpmCents              Int              @default(0)
+  bonusesJson           String           @default("")
   monthlyHoursEstimate  Int              @default(15)
   notes                 String           @default("")
   createdAt             DateTime         @default(now())

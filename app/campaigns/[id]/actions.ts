@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
+import { bonusesFromForm, perVideoCents, serializeBonuses } from "@/lib/deal-bonuses";
 import { prisma } from "@/lib/prisma";
 
 const STATUSES = ["TRIAL", "ACTIVE", "PAUSED", "ENDED"] as const;
@@ -17,17 +18,27 @@ export async function updateDeal(formData: FormData) {
   if (user.role === "EDITOR") redirect("/edits");
   const id = String(formData.get("id") || "");
   if (!id) redirect("/campaigns");
+  const dollars = (field: string) => Math.max(0, Math.round(Number(formData.get(field) || 0) * 100));
+  const count = (field: string, min: number) => Math.max(min, Math.round(Number(formData.get(field) || 0)));
+  const videoCount = count("videoCount", 1);
+  const monthlyPayCents = dollars("monthlyPay");
+  const postsPerDay = count("postsPerDay", 1);
+  const postsPerDayMax = count("postsPerDayMax", 0);
   await prisma.campaign.update({
     where: { id },
     data: {
       name: String(formData.get("name") || "Untitled deal"),
       brand: String(formData.get("brand") || ""),
       status: asStatus(String(formData.get("status") || "ACTIVE")),
-      basePayCents: Math.max(0, Math.round(Number(formData.get("basePay") || 0) * 100)),
-      cpmCents: Math.max(0, Math.round(Number(formData.get("cpm") || 0) * 100)),
-      videoCount: Math.max(1, Number(formData.get("videoCount") || 1)),
-      postsPerDay: Math.max(1, Number(formData.get("postsPerDay") || 1)),
-      accountsAllowed: Math.max(1, Number(formData.get("accountsAllowed") || 1)),
+      // A flat month spreads over the videos owed; that is what each video gets stamped with.
+      basePayCents: monthlyPayCents > 0 ? perVideoCents(monthlyPayCents, videoCount) : dollars("basePay"),
+      monthlyPayCents,
+      cpmCents: dollars("cpm"),
+      bonusesJson: serializeBonuses(bonusesFromForm(formData)),
+      videoCount,
+      postsPerDay,
+      postsPerDayMax: postsPerDayMax > postsPerDay ? postsPerDayMax : 0,
+      accountsAllowed: count("accountsAllowed", 1),
       deliverables: String(formData.get("deliverables") || ""),
     },
   });

@@ -2,22 +2,27 @@ import { redirect } from "next/navigation";
 import { Shell } from "@/components/shell";
 import { isDealKind } from "@/lib/deal-kind";
 import { parseLocalDate } from "@/lib/dates";
+import { perVideoCents } from "@/lib/deal-bonuses";
 import { prisma } from "@/lib/prisma";
 
 async function createCampaign(formData: FormData) {
   "use server";
   const kind = isDealKind(String(formData.get("kind") || "")) ? String(formData.get("kind")) : "UGC";
+  const videoCount = Number(formData.get("videoCount") || 3);
+  const monthlyPayCents = Math.max(0, Math.round(Number(formData.get("monthlyPay") || 0) * 100));
   const campaign = await prisma.campaign.create({
     data: {
       name: String(formData.get("name") || "Untitled deal"),
       brand: String(formData.get("brand") || ""),
       kind: kind as "TECH" | "UGC",
-      videoCount: Number(formData.get("videoCount") || 3),
+      videoCount,
       deadlineAt: formData.get("deadlineAt") ? parseLocalDate(String(formData.get("deadlineAt"))) : null,
       deliverables: String(formData.get("deliverables") || ""),
       status: (formData.get("status") as "TRIAL" | "ACTIVE") || "TRIAL",
-      basePayCents: Math.round(Number(formData.get("basePay") || 0) * 100),
+      monthlyPayCents,
+      basePayCents: monthlyPayCents > 0 ? perVideoCents(monthlyPayCents, videoCount) : Math.round(Number(formData.get("basePay") || 0) * 100),
       postsPerDay: Number(formData.get("postsPerDay") || 1),
+      postsPerDayMax: Number(formData.get("postsPerDayMax") || 0),
       accountsAllowed: Number(formData.get("accountsAllowed") || 1),
       minutesPerPost: Number(formData.get("minutesPerPost") || 10),
       monthlyHoursEstimate: Number(formData.get("monthlyHoursEstimate") || 15),
@@ -65,7 +70,9 @@ export default function NewCampaignPage() {
   return (
     <Shell>
       <h1 className="mb-2 text-3xl font-semibold tracking-tight">Add a deal</h1>
-      <p className="mb-6 text-mute">Canvas / tech is volume. Traditional UGC is a fee and a video count.</p>
+      <p className="mb-6 text-mute">
+        Canvas / tech is volume. Traditional UGC is a fee and a video count. View bonuses go on the deal page after you save.
+      </p>
       <form action={createCampaign} className="grid max-w-3xl gap-4 md:grid-cols-2">
         <label className="block md:col-span-2">
           <span className="mb-1 block text-xs font-semibold uppercase tracking-[0.14em] text-mute">Deal type</span>
@@ -89,8 +96,10 @@ export default function NewCampaignPage() {
             <option value="ACTIVE">Active</option>
           </select>
         </label>
-        <Field name="basePay" label="Base pay $" type="number" defaultValue={40} />
-        <Field name="postsPerDay" label="Posts / day" type="number" defaultValue={5} />
+        <Field name="basePay" label="Pay per video $" type="number" defaultValue={40} />
+        <Field name="monthlyPay" label="Or flat pay for the month $" type="number" defaultValue={0} />
+        <Field name="postsPerDay" label="Posts / day owed" type="number" defaultValue={5} />
+        <Field name="postsPerDayMax" label="Most allowed / day (0 = no cap)" type="number" defaultValue={0} />
         <Field name="accountsAllowed" label="Accounts allowed" type="number" defaultValue={1} />
         <Field name="minutesPerPost" label="Minutes / post" type="number" defaultValue={10} />
         <Field name="monthlyHoursEstimate" label="Your hours / month" type="number" defaultValue={15} />

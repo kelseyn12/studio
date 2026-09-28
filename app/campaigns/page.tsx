@@ -90,7 +90,7 @@ export default async function CampaignsPage({
                   <p className="text-3xl font-semibold">{score.total}</p>
                 </div>
                 <div className="mt-4 grid grid-cols-3 gap-3 text-sm">
-                  <p>{formatMoney(campaign.basePayCents)}</p>
+                  <p>{campaign.monthlyPayCents > 0 ? `${formatMoney(campaign.monthlyPayCents)} / mo` : formatMoney(campaign.basePayCents)}</p>
                   <p>{campaign.kind === "UGC" ? `${campaign.videoCount} videos` : `${campaign.postsPerDay}x/day`}</p>
                   <p>{formatMoney(score.hourlyCents)} / hr</p>
                 </div>

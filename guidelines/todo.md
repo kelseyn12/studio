@@ -246,3 +246,6 @@
 - [X] Say which finished file is IG/FB and which is TT/YT
   Each batch row shows an IG · FB or TT · YT pill (from the recipe, so older batches get it without a Rebuild) and a Download link that names the file the same way. Audit pass: tsc clean, 186 tests pass, one pre-existing lint warning left.
 - [ ] Dependency audit: postcss (via next) and deepmerge-ts (via prisma CLI) flagged high; both transitive build-time tools. Fix is a pnpm override when Next/Prisma ship the bump, or pin now if the deal side asks.
+
+- [X] Deals fit a flat month + view bonuses (Polsia)
+  Deal form: flat pay for the month (spreads over the videos owed, live "each video is worth"), or pay per video; CPM stays; view bonuses list ($ at N views, once per video); posts owed and most allowed a day. They owe you adds crossed bonuses. Schema: monthlyPayCents, postsPerDayMax, bonusesJson on both databases.

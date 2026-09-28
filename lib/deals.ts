@@ -2,6 +2,8 @@ export type DealInput = {
   kind?: "TECH" | "UGC";
   videoCount?: number;
   basePayCents: number;
+  /** Flat fee for the month, when the deal pays that way instead of per post. */
+  monthlyPayCents?: number;
   postsPerDay: number;
   accountsAllowed: number;
   minutesPerPost: number;
@@ -73,7 +75,7 @@ function scoreUgc(deal: DealInput): DealScore {
 export function scoreDeal(deal: DealInput): DealScore {
   if (deal.kind === "UGC") return scoreUgc(deal);
   const dailySlots = deal.postsPerDay * deal.accountsAllowed;
-  const monthlyPayoutCents = deal.basePayCents * dailySlots * 30;
+  const monthlyPayoutCents = deal.monthlyPayCents || deal.basePayCents * dailySlots * 30;
   const hours = Math.max(deal.monthlyHoursEstimate, 1);
   const hourlyCents = Math.round(monthlyPayoutCents / hours);
   const reasons: string[] = [];
@@ -149,6 +151,11 @@ export function formatMoney(cents: number): string {
     currency: "USD",
     maximumFractionDigits: 0,
   }).format(cents / 100);
+}
+
+/** Per-video amounts keep their cents: $11.67, not $12. */
+export function formatMoneyExact(cents: number): string {
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100);
 }
 
 export function formatCompact(value: number): string {

@@ -5,7 +5,11 @@
 - `pickNextAction` — `lib/next-action.ts` — chooses the single Today action. Used on `app/page.tsx`.
 - `machineCounts` — `lib/queries.ts` — pipeline and slot totals for Today.
 - `uploadMedia` — `lib/outstand.ts` — PUT the mp4 into Outstand storage, returns the public URL.
-- `scoreDeal` — `lib/deals.ts` — TECH scores volume; UGC scores fee per video. Used on Deals and deal detail.
+- `scoreDeal` — `lib/deals.ts` — TECH scores volume; UGC scores fee per video. A deal with `monthlyPayCents` set scores that flat fee as the month instead of pay × slots × 30. Used on Deals and deal detail. `formatMoneyExact` keeps cents for per-video amounts.
+- `videoMoneyCents(card, deal)` — `lib/deal-bonuses.ts` — the one place a posted video is priced: stamped `payoutCents` + `cpmEarnedCents` on views + `bonusEarnedCents` for every view bonus the video has crossed. Used by `dashboardTotals`, `viewsByDay`, `studioSnapshot` (`lib/queries.ts`) and the deal page.
+- `parseBonuses` / `serializeBonuses` / `cleanBonuses` / `bonusesFromForm` — `lib/deal-bonuses.ts` — `Campaign.bonusesJson` ⇄ `ViewBonus[]` (`{views, payoutCents}`, sorted, ≤ `MAX_BONUSES`). The form posts repeated `bonusPay` ($) / `bonusViews` fields from `components/deal-bonuses.tsx`.
+- `perVideoCents(monthlyPayCents, videoCount)` — `lib/deal-bonuses.ts` — a flat month spread over the videos owed; `updateDeal` and `createCampaign` stamp it into `basePayCents` so every card keeps getting one number. Tested in `lib/deal-bonuses.test.ts`.
+- `DealEdit` — `components/deal-edit.tsx` (client) — the deal form: how they pay (flat month or per video, live "each video is worth"), CPM, view bonuses, posts owed / most allowed (`postsPerDayMax`), accounts, status. `blurOnWheel` (in deal-bonuses) stops trackpad scroll from ticking money fields.
 - `studioSnapshot` — `lib/queries.ts` — money + active deals by kind + Cuts counts. Used on Today, Deals, Numbers.
 - `transcribeFile` — `lib/whisper.ts` — Whisper a voice or video file. Used by Transcribe and card voice notes.
 - `pingStudio` — `lib/manychat.ts` — optional DM when a job is sent or parked. Recipes live on `/dms`.

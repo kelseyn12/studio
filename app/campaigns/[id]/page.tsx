@@ -4,7 +4,8 @@ import { DealEdit } from "@/components/deal-edit";
 import { Shell } from "@/components/shell";
 import { StatusPill } from "@/components/status-pill";
 import { DEAL_KIND_LABEL } from "@/lib/deal-kind";
-import { cpmEarnedCents, formatMoney, scoreDeal } from "@/lib/deals";
+import { formatViews, parseBonuses, videoMoneyCents } from "@/lib/deal-bonuses";
+import { formatMoney, formatMoneyExact, scoreDeal } from "@/lib/deals";
 import { prisma } from "@/lib/prisma";
 import { describeTargets } from "@/lib/targets";
 
@@ -42,10 +43,14 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
   const delivered = posted.length;
   const promised = Math.max(campaign.videoCount, 1);
   const deliveredPct = Math.min(100, Math.round((delivered / promised) * 100));
-  const money = (card: { payoutCents: number; views: number }) =>
-    card.payoutCents + cpmEarnedCents(card.views, campaign.cpmCents);
+  const money = (card: { payoutCents: number; views: number }) => videoMoneyCents(card, campaign);
   const owed = posted.filter((card) => !card.approved).reduce((sum, card) => sum + money(card), 0);
   const collected = posted.filter((card) => card.approved).reduce((sum, card) => sum + money(card), 0);
+  const bonuses = parseBonuses(campaign.bonusesJson);
+  const flat = campaign.monthlyPayCents > 0;
+  const extras = [flat || campaign.basePayCents > 0 ? "base" : null, campaign.cpmCents > 0 ? "CPM on views" : null, bonuses.length ? "bonuses" : null]
+    .filter(Boolean)
+    .join(" + ");
 
   return (
     <Shell>
@@ -76,16 +81,23 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
           <p className="mt-1 text-sm text-ink/70">{score.verdict}</p>
         </div>
         <div className="rounded-2xl border border-line bg-panel px-5 py-4">
-          <p className="text-xs text-mute">Monthly if you max it</p>
+          <p className="text-xs text-mute">{flat ? "Flat for the month" : "Monthly if you max it"}</p>
           <p className="mt-2 text-2xl font-semibold">{formatMoney(score.monthlyPayoutCents)}</p>
+          <p className="mt-1 text-xs text-mute">
+            {formatMoneyExact(campaign.basePayCents)} a video
+            {bonuses.length
+              ? ` · bonus ${bonuses.map((bonus) => `${formatMoney(bonus.payoutCents)} at ${formatViews(bonus.views)}`).join(", ")}`
+              : ""}
+          </p>
         </div>
         <div className="rounded-2xl border border-line bg-panel px-5 py-4">
           <p className="text-xs text-mute">Creator hourly</p>
           <p className="mt-2 text-2xl font-semibold">{formatMoney(score.hourlyCents)}</p>
         </div>
         <div className="rounded-2xl border border-line bg-panel px-5 py-4">
-          <p className="text-xs text-mute">Daily slots</p>
+          <p className="text-xs text-mute">Posts a day</p>
           <p className="mt-2 text-2xl font-semibold">{campaign.postsPerDay * campaign.accountsAllowed}</p>
+          {campaign.postsPerDayMax > 0 ? <p className="mt-1 text-xs text-mute">up to {campaign.postsPerDayMax} allowed</p> : null}
         </div>
         <div className="rounded-2xl border border-line bg-panel px-5 py-4">
           <p className="text-xs text-mute">Delivered</p>
@@ -100,7 +112,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
           <p className="text-xs text-mute">They owe you</p>
           <p className="mt-2 text-2xl font-semibold">{formatMoney(owed)}</p>
           <p className="mt-1 text-xs text-mute">
-            {formatMoney(collected)} collected · base{campaign.cpmCents > 0 ? " + CPM on pulled views" : ""}
+            {formatMoney(collected)} collected · {extras || "nothing set"}
           </p>
         </div>
       </section>
