@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { comboCount, outputCount, parseHookLines, plannedMixes, variationFor } from "@/lib/variations";
+import { comboCount, mixStoryNote, outputCount, parseHookLines, plannedMixes, variationFor } from "@/lib/variations";
 
 describe("variationFor", () => {
   it("makes later copies different when amounts are set", () => {
@@ -55,5 +55,8 @@ describe("recipe math", () => {
     expect(outputCount(6, 2)).toBe(12);
     expect(plannedMixes(3, 1, 2, true, 2)).toBe(6);
     expect(plannedMixes(3, 1, 2, false, 2)).toBe(2);
+    expect(mixStoryNote(1, 3)).toContain("each body");
+    expect(mixStoryNote(3, 1)).toContain("Each hook");
+    expect(mixStoryNote(3, 3)).toContain("Every hook");
   });
 });

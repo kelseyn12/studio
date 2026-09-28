@@ -19,7 +19,7 @@
 - `ffmpegBin` / `canBurnText` — `lib/ffmpeg.ts` — prefers Homebrew ffmpeg-full so drawtext exists; Generate refuses text if it does not.
 - `groupWords` / `buildCaptionAss` / `writeCaptionAss` / `transcribeWords` / `spokenOnClip` — `lib/captions.ts` / `lib/caption-ass.ts` — Whisper → 2–3 word phrases. Lower-third white + black outline (IG 58/7, TT 64/9). Hooks skip spoken. `writeCaptionAss` returns an `ass=` filter.
 - `parseRecipe` / `chosenTrackId` / `musicDelayPrefix` / `tuneSections` / `rebuildOutput` — `lib/output-recipe.ts` / `lib/rebuild-output.ts` — per finished video: words, song or none, music start. Rebuild burns that file again. `dropOutputs` deletes one file; `dropCards` deletes a whole video.
-- `variationFor` — `lib/variations.ts` — unique speed / light / crop / mirror amounts for each copy of a mix, plus `hookColor` (whole line) and `accentColor` (starred word, `ACCENT_COLORS`).
+- `variationFor` / `mixStoryNote` — `lib/variations.ts` — copies nudge speed / light / crop / mirror on the same clips. Distinct is another hook or body take (`mixStoryNote`). `hookColor` / `accentColor` only cycle when copies is 2+.
 - `pickTracks` — `lib/combinations.ts` — random music per video; uses every track before repeating. Used by Multiply generate.
 - `parseHookLines` — `lib/variations.ts` — batch text hooks, one per line, max 12. Each line multiplies the Multiply batch.
 - `saveUpload` — `lib/files.ts` — writes to R2 when configured; otherwise `data/uploads` on this Mac.

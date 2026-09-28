@@ -6,7 +6,7 @@ import { BatchTargets, Row, type BatchAccount } from "@/components/batch-targets
 import { TextStylePick } from "@/components/text-style-pick";
 import { dealAccounts, parseAccountIds } from "@/lib/targets";
 import { hookLooks, parseTextStyle, type TextStyle } from "@/lib/text-style";
-import { LIST_MAX, outputCount, parseHookLines, plannedMixes, variationFor } from "@/lib/variations";
+import { LIST_MAX, mixStoryNote, outputCount, parseHookLines, plannedMixes, variationFor } from "@/lib/variations";
 
 type Option = { id: string; name: string };
 
@@ -110,9 +110,10 @@ export function BatchSettings({
           stor{mixes * Math.max(textCount, 1) * Math.max(variants, 1) === 1 ? "y" : "ies"}
         </p>
         <p className="mt-2 text-sm text-ink/80">
-          {hooks > 1 && bodies <= 1 && ctas === 0
-            ? "Each hook is its own video, same body under all of them. That is enough — you do not need extra copies unless you will post the same hook twice."
-            : "Each mix is one hook + body + CTA."}
+          {mixStoryNote(hooks, bodies)}
+          {variants > 1
+            ? " Copies are the same clips with a nudge — not a new story."
+            : ""}
           {looks > 1
             ? ` Both looks doubles the files (${files * looks}) — same video, Instagram text and TikTok text.`
             : ""}
@@ -122,8 +123,8 @@ export function BatchSettings({
       <section className="rounded-card border border-line bg-panel p-5">
         <p className="label">Text hooks · optional</p>
         <p className="mt-2 text-sm text-mute">
-          Lines that go on every mix — each line makes another set of videos. 6 mixes × 4 lines = 24 videos. Leave
-          empty and each hook clip keeps the words typed on it above, which do not multiply.
+          Same clips, new overlay — not a new take. Leave empty and each hook keeps the words typed on it above. Do
+          not use extra lines instead of filming another hook.
         </p>
         <textarea
           name="hookLines"
@@ -176,9 +177,9 @@ export function BatchSettings({
       <section className="rounded-card border border-line bg-panel p-5">
         <p className="label">Mix settings</p>
         <p className="mt-2 text-sm text-mute">
-          Leave copies at 1 unless you will post the same hook more than once. Copies look almost the same on purpose —
-          a tiny speed and crop change so TikTok or Instagram does not treat two posts as the same file. You will not
-          see a new story. Text color per copy only runs if copies is 2 or more (starred word goes green, then red).
+          Distinct is another hook take or another body take, not a sat/speed/crop copy of the same clips. Leave copies
+          at 1. Copies exist only if you will post that exact cut a second time and need the file not to match. Text
+          color per copy only runs if copies is 2 or more.
         </p>
         <div className="mt-5 space-y-4">
           <Row label="Use every mix">

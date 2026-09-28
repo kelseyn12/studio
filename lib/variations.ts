@@ -92,3 +92,11 @@ export function plannedMixes(
   if (allCombos) return all;
   return Math.min(all, Math.max(Math.floor(cap), 0));
 }
+
+/** Distinct means another filmed hook or body, not a sat/speed copy of the same clips. */
+export function mixStoryNote(hooks: number, bodies: number): string {
+  if (hooks > 1 && bodies > 1) return "Every hook with every body. Different takes — that is distinct.";
+  if (hooks > 1) return "Each hook with the same body. Different openings — that is distinct.";
+  if (bodies > 1) return "This hook with each body. Different middles — that is distinct.";
+  return "Each mix is one hook + body + CTA. Drop a second hook or body take if you need more than one story.";
+}
