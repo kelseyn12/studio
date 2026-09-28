@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { comboCount, hookReuseShift, mixStoryNote, outputCount, parseHookLines, plannedMixes, reuseHookTrim, shiftHookTimes, variationFor } from "@/lib/variations";
+import { comboCount, mixStoryNote, outputCount, parseHookLines, plannedMixes, variationFor } from "@/lib/variations";
 
 describe("variationFor", () => {
   it("makes later copies different when amounts are set", () => {
@@ -57,20 +57,6 @@ describe("recipe math", () => {
     expect(plannedMixes(3, 1, 2, false, 2)).toBe(2);
     expect(mixStoryNote(1, 3)).toContain("each body");
     expect(mixStoryNote(3, 1)).toContain("Each hook");
-    expect(mixStoryNote(3, 3)).toContain("beat later");
-  });
-});
-
-describe("hook reuse delivery", () => {
-  it("leaves the first use alone and starts later uses a beat in", () => {
-    expect(hookReuseShift(0, 3)).toBe(0);
-    expect(hookReuseShift(1, 3)).toBe(0.2);
-    expect(hookReuseShift(2, 3)).toBe(0.4);
-    expect(hookReuseShift(8, 3)).toBe(0.6);
-    expect(hookReuseShift(2, 0.7)).toBeCloseTo(0.2);
-    expect(reuseHookTrim({ start: 1, end: 4 }, 1, 5).trim.start).toBe(1.2);
-    expect(shiftHookTimes(0.5, 0.2)).toBe(0.3);
-    expect(shiftHookTimes(0.1, 0.2)).toBe(0);
-    expect(shiftHookTimes(undefined, 0.2)).toBeUndefined();
+    expect(mixStoryNote(3, 3)).toContain("Every hook");
   });
 });

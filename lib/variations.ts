@@ -1,6 +1,3 @@
-import { MIN_CLIP_SECONDS } from "@/lib/cut-math";
-import type { ClipTrim } from "@/lib/ffmpeg";
-
 export type Variation = {
   speed: number;
   saturation: number;
@@ -23,30 +20,6 @@ export const HOOK_COLORS = ["white", "yellow", "#5CFF5C", "#FF5C5C"] as const;
 export const ACCENT_COLORS = ["#5CFF5C", "#FF5C5C", "yellow", "#5CB8FF"] as const;
 /** Longest numbered list that fits under a two-line headline and above the caption block. */
 export const LIST_MAX = 10;
-
-/** When the same hook clip is used again, skip this many extra seconds so the opening is not identical. */
-export const HOOK_REUSE_STEP = 0.2;
-export const HOOK_REUSE_MAX = 0.6;
-
-export function hookReuseShift(useIndex: number, keptSeconds: number, minKeep = MIN_CLIP_SECONDS): number {
-  if (useIndex <= 0) return 0;
-  const maxShift = Math.max(0, keptSeconds - minKeep);
-  return Math.min(useIndex * HOOK_REUSE_STEP, HOOK_REUSE_MAX, maxShift);
-}
-
-/** First use is unchanged. Later uses of the same hook file start a beat later. */
-export function reuseHookTrim(base: ClipTrim, useIndex: number, duration: number): { trim: ClipTrim; shift: number } {
-  const start = base.start ?? 0;
-  const kept = Math.max(0, (base.end ?? duration) - start);
-  const shift = hookReuseShift(useIndex, kept);
-  if (shift <= 0) return { trim: base, shift: 0 };
-  return { trim: { start: start + shift, end: base.end }, shift };
-}
-
-export function shiftHookTimes(seconds: number | undefined, shift: number): number | undefined {
-  if (seconds == null || !Number.isFinite(seconds) || shift <= 0) return seconds;
-  return Math.max(0, seconds - shift);
-}
 
 export function variationFor(
   index: number,
@@ -122,12 +95,8 @@ export function plannedMixes(
 
 /** Distinct means another filmed hook or body, not a sat/speed copy of the same clips. */
 export function mixStoryNote(hooks: number, bodies: number): string {
-  if (hooks > 1 && bodies > 1) {
-    return "Every hook with every body. A reused opening starts a beat later so it is not the same take.";
-  }
+  if (hooks > 1 && bodies > 1) return "Every hook with every body. Different takes — that is distinct.";
   if (hooks > 1) return "Each hook with the same body. Different openings — that is distinct.";
-  if (bodies > 1) {
-    return "This hook with each body. Later mixes start the hook a beat later so the opening is not identical.";
-  }
+  if (bodies > 1) return "This hook with each body. Different middles — that is distinct.";
   return "Each mix is one hook + body + CTA. Drop a second hook or body take if you need more than one story.";
 }
