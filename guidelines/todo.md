@@ -257,5 +257,8 @@
   Generate used to store the first 80 characters of the API error, so the billing URL died at `https://`. Out of credits now shows Add credits to the OpenAI billing page. Turn Spoken words off still generates without it.
 - [X] Whisper 413 on a 25.2 MB clip
   Spoken captions now send a tiny voice mp3, not the video. The 25 MB OpenAI cap no longer blocks Generate. Tap Generate again on that batch.
+- [X] Cover saved hid Words + music
+  Cover used to replace the whole row. Both links stay visible; tap Words + music after you save a cover.
+
 
 
