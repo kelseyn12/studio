@@ -98,12 +98,18 @@ describe("parseSpeed / parseDrops", () => {
       boxes: { tiktok: "white", instagram: "off" },
     });
     expect(parseHookLayout(split)?.boxes).toEqual({ tiktok: "white", instagram: "off" });
+    // First drag moves both looks: TikTok was never placed on its own, so it follows.
     const moved = setLookPos({ x: 0.5, y: 0.2 }, "instagram", 0.5, 0.45);
-    expect(posFor(moved, "tiktok")).toEqual({ x: 0.5, y: 0.2 });
+    expect(posFor(moved, "tiktok")).toEqual({ x: 0.5, y: 0.45 });
     expect(posFor(moved, "instagram").y).toBe(0.45);
+    expect(moved.places?.tiktok).toBeUndefined();
+    // Dragging the other look gives it its own spot; from then on each stays put.
     const back = setLookPos(moved, "tiktok", 0.5, 0.12);
     expect(posFor(back, "instagram").y).toBe(0.45);
     expect(posFor(parseHookLayout(stringifyHookLayout(back)), "tiktok").y).toBe(0.12);
+    const again = setLookPos(back, "instagram", 0.5, 0.6);
+    expect(posFor(again, "tiktok").y).toBe(0.12);
+    expect(posFor(again, "instagram").y).toBe(0.6);
   });
 
   it("treats 1× as the recorded file, not a previous sped cut", () => {

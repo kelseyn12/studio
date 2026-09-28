@@ -248,7 +248,7 @@ export function HookStage({
           }}
           onPointerUp={(event) => void save(dragged(event))}
         >
-          <p className="mb-1 text-center text-[10px] text-white/70">Drag</p>
+          <p className="absolute -top-4 left-0 right-0 text-center text-[10px] text-white/70">Drag</p>
           <textarea
             ref={typeRef}
             value={text}

@@ -117,16 +117,20 @@ export function posFor(pos: Pick<HookPos, "x" | "y" | "places"> | null | undefin
   };
 }
 
-/** Move the look you are previewing. The other look keeps the spot it already had. */
+/**
+ * Move the look you are previewing. A look you have never dragged follows along (it reads the shared
+ * x/y), so arranging in TT view does not strand the Instagram words on the logo row. Once you drag a
+ * look itself, it keeps its own spot.
+ */
 export function setLookPos(pos: HookPos, style: string, x: number, y: number): HookPos {
   const look = style === "instagram" ? "instagram" : "tiktok";
   const other = look === "tiktok" ? "instagram" : "tiktok";
+  const point = { x: clamp01(x, 0.08, 0.92), y: clamp01(y, 0.08, 0.88) };
+  const otherPlaced = pos.places?.[other];
   return {
     ...pos,
-    places: {
-      [look]: { x: clamp01(x, 0.08, 0.92), y: clamp01(y, 0.08, 0.88) },
-      [other]: pos.places?.[other] ?? { x: pos.x, y: pos.y },
-    },
+    ...(otherPlaced ? {} : point),
+    places: { ...(otherPlaced ? { [other]: otherPlaced } : {}), [look]: point },
   };
 }
 
