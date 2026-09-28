@@ -1,4 +1,4 @@
-import { measureTextPx } from "@/lib/font-measure";
+import { emPerAssUnit, measureTextPx } from "@/lib/font-measure";
 import { hookFontFile } from "@/lib/hook-font-files";
 import type { DrawnStyle } from "@/lib/text-style";
 
@@ -6,12 +6,18 @@ import type { DrawnStyle } from "@/lib/text-style";
 export const TT_BOX_RADIUS = 14;
 const PAD_X = 18;
 const PAD_Y = 8;
-const LINE_STEP = 1.05;
+/** Line pitch as a share of the em. Words previews with `leading-[1.1]`; headline lines burn on this pitch too. */
+export const LINE_STEP = 1.1;
 
-export function plateSize(style: DrawnStyle, lines: string[], fontSize: number): { width: number; height: number } {
+/** Em pixels of this look's ASS Fontsize with its bundled font (a custom font name is taken as-is). */
+export function lookEm(style: DrawnStyle, fontSize: number, customFont?: string): number {
+  return customFont ? fontSize : fontSize * emPerAssUnit(hookFontFile(style));
+}
+
+export function plateSize(style: DrawnStyle, lines: string[], em: number): { width: number; height: number } {
   const file = hookFontFile(style);
-  const widest = lines.reduce((max, line) => Math.max(max, measureTextPx(file, line, fontSize)), fontSize);
-  const height = Math.round(Math.max(1, lines.length) * fontSize * LINE_STEP) + PAD_Y * 2;
+  const widest = lines.reduce((max, line) => Math.max(max, measureTextPx(file, line, em)), Math.round(em));
+  const height = Math.max(1, lines.length) * lineStep(em) + PAD_Y * 2;
   return { width: widest + PAD_X * 2, height };
 }
 
@@ -38,6 +44,6 @@ export function roundedPlatePath(width: number, height: number, radius = TT_BOX_
   ].join(" ");
 }
 
-export function lineStep(fontSize: number): number {
-  return Math.round(fontSize * LINE_STEP);
+export function lineStep(em: number): number {
+  return Math.round(em * LINE_STEP);
 }

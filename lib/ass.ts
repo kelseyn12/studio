@@ -4,7 +4,7 @@ import path from "path";
 import { randomUUID } from "crypto";
 import { hookFontFamily, hookFontsDir } from "@/lib/hook-font-files";
 import { wrapHook, type DrawnStyle } from "@/lib/text-style";
-import { lineStep, plateSize, roundedPlatePath } from "@/lib/ass-plate";
+import { lineStep, lookEm, plateSize, roundedPlatePath } from "@/lib/ass-plate";
 import { clampListCount, FRAME_H, FRAME_W, listStack, LOOK_METRICS, lookPaint, type ListStack } from "@/lib/list-layout";
 import { LIST_MAX } from "@/lib/variations";
 
@@ -132,22 +132,23 @@ export function buildHookAss(input: {
       });
     } else {
       const ink = input.box === "white" ? "black" : input.box ? "white" : base;
-      const body = headline(lines.map(parseHighlight), ink, accent);
-      const step = lineStep(look.fontsize);
+      const em = lookEm(input.style, look.fontsize, input.font);
+      const step = lineStep(em);
       const blockH = lines.length * step;
       const cx = placed ? px : Math.round(FRAME_W / 2);
       const cy = placed ? py : Math.round(marginV + blockH / 2);
       if (drawnCard) {
-        const size = plateSize(input.style, lines.map(stripHighlight), look.fontsize);
-        const fill = input.box === "white" ? "white" : "black";
+        const size = plateSize(input.style, lines.map(stripHighlight), em);
         events.push(
           `Dialogue: 0,${startAt},${endAt},Plate,,0,0,0,,{\\an5\\pos(${cx},${cy})\\p1}${roundedPlatePath(size.width, size.height)}`,
         );
-        events.push(`Dialogue: 0,${startAt},${endAt},Head,,0,0,0,,{\\an5\\pos(${cx},${cy})}${body}`);
-      } else {
-        const head = placed ? `{\\an5\\pos(${px},${py})}${body}` : body;
-        events.push(`Dialogue: 0,${startAt},${endAt},Head,,0,0,0,,${head}`);
       }
+      // One event per line on our own pitch, so the file stacks lines the way Words shows them.
+      const mid = (lines.length - 1) / 2;
+      lines.forEach((line, index) => {
+        const y = cy + Math.round((index - mid) * step);
+        events.push(`Dialogue: 0,${startAt},${endAt},Head,,0,0,0,,{\\an5\\pos(${cx},${y})}${headline([parseHighlight(line)], ink, accent)}`);
+      });
     }
   }
   const listItems = (input.listItems ?? []).map((line) => line.trim()).filter(Boolean).slice(0, LIST_MAX);

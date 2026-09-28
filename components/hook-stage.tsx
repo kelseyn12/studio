@@ -7,7 +7,7 @@ import { ListOverlay } from "@/components/list-overlay";
 import { boxFor, boxLabel, hookDefaultPos, nextBox, parseHookLayout, posFor, setLookBox, setLookPos, stringifyHookLayout, type HookPos } from "@/lib/hook-layout";
 import { LogoScaleBar } from "@/components/logo-scale-bar";
 import { ALIGN_SNAP, clampLogoScale, defaultLogoPos, isLogoFile, itemScale, LOGO_SCALE_STEP, matchTypeScale, parseLogoItems, previewGrab, sharedAxes, snapLogoPos, stageCss } from "@/lib/hook-logos-math";
-import { LOOK_STROKE_CLASS, LOOK_TYPE_CLASS } from "@/lib/hook-fonts";
+import { LOOK_STROKE_CLASS, LOOK_STROKE_PAD_CLASS, LOOK_TYPE_CLASS } from "@/lib/hook-fonts";
 import { boxIsWhite, isBoxed, listRows, listStack, wordBoxClass } from "@/lib/list-layout";
 import { publicFileUrl } from "@/lib/urls";
 import type { DrawnStyle } from "@/lib/text-style";
@@ -195,7 +195,7 @@ export function HookStage({
   const boxed = isBoxed(lookBox);
   const inkClass = boxed && boxIsWhite(lookBox) ? "text-black" : "text-white";
   const plate = wordBoxClass(preview, lookBox);
-  const stroke = boxed ? "" : LOOK_STROKE_CLASS[preview];
+  const stroke = boxed ? "" : `${LOOK_STROKE_CLASS[preview]} ${LOOK_STROKE_PAD_CLASS}`;
   const fileCount = logos.filter(isLogoFile).length;
 
   useEffect(() => {

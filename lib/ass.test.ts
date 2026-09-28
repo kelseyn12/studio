@@ -101,18 +101,24 @@ describe("buildHookAss", () => {
     expect(buildHookAss({ text: "x", style: "plain", font: "Arial" }).match(/,List,/g)).toBeNull();
   });
 
-  it("wraps long lines and keeps the starred word colored after wrapping", () => {
-    const track = buildHookAss({ text: "Nobody talks about this one *weird* trick", style: "plain", font: "Arial" });
-    expect(track).toContain("\\N");
+  it("wraps long lines, one event per line on the Words pitch, and keeps the starred word colored", () => {
+    const track = buildHookAss({ text: "Nobody talks about this one *weird* trick", style: "plain", font: "Arial", x: 0.5, y: 0.5 });
+    const heads = track.match(/Dialogue: 0,.*,Head,.*\\pos\(540,(\d+)\)/g) ?? [];
+    expect(heads).toHaveLength(2);
+    expect(track).not.toContain("\\N");
     expect(track).toContain("{\\c&H5CFF5C&}weird");
+    const ys = heads.map((row) => Number(/\\pos\(540,(\d+)\)/.exec(row)?.[1]));
+    // Arial is a custom font name, so the em is the Fontsize itself: 84 × 1.1 pitch, centered on y.
+    expect(ys[1] - ys[0]).toBe(92);
+    expect((ys[0] + ys[1]) / 2).toBe(960);
   });
 
-  it("puts TikTok lines in one card and Instagram lines in their own chips", () => {
+  it("puts TikTok lines on one card and Instagram lines in their own chips", () => {
     const text = "Nobody talks about this one weird trick";
     const tiktok = buildHookAss({ text, style: "tiktok", box: true, font: "Arial" });
     const instagram = buildHookAss({ text, style: "instagram", box: true, font: "Arial" });
-    expect((tiktok.match(/Dialogue: 0,.*,Head,/g) ?? []).length).toBe(1);
-    expect(tiktok).toContain("\\N");
+    expect((tiktok.match(/Dialogue: 0,.*,Plate,/g) ?? []).length).toBe(1);
+    expect((tiktok.match(/Dialogue: 0,.*,Head,/g) ?? []).length).toBe(2);
     expect((instagram.match(/Dialogue: 0,.*,Head,/g) ?? []).length).toBeGreaterThan(1);
   });
 

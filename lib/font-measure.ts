@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 
-type FontMetrics = { units: number; advance: (code: number) => number };
+type FontMetrics = { units: number; winHeight: number; advance: (code: number) => number };
 
 const cache = new Map<string, FontMetrics>();
 
@@ -83,8 +83,11 @@ function loadFont(file: string): FontMetrics {
   const units = u16(buf, head + 18);
   const metrics = u16(buf, hhea + 34);
   const lastAdvance = u16(buf, hmtx + (metrics - 1) * 4);
+  const os2 = tableOffset(buf, "OS/2");
+  const winHeight = os2 >= 0 ? u16(buf, os2 + 74) + u16(buf, os2 + 76) : units;
   const parsed: FontMetrics = {
     units,
+    winHeight: winHeight || units,
     advance(code: number) {
       const glyph = glyphOf(buf, cmap, code);
       if (glyph <= 0) return Math.round(units * 0.55);
@@ -96,14 +99,28 @@ function loadFont(file: string): FontMetrics {
   return parsed;
 }
 
-/** Pixel width of one line at this font size. Missing files fall back to a bold average. */
-export function measureTextPx(file: string, text: string, fontSize: number): number {
+/**
+ * Em pixels you get per ASS Fontsize unit. libass (like VSFilter) sizes a font so that
+ * usWinAscent + usWinDescent equals the Fontsize, so an 82 in the track is a 60px em for
+ * TikTok Sans and a 104 is a 73px em for Inter Tight. Previews and plate math use this em.
+ */
+export function emPerAssUnit(file: string): number {
+  try {
+    const font = loadFont(file);
+    return font.units / font.winHeight;
+  } catch {
+    return 1;
+  }
+}
+
+/** Pixel width of one line at this em size. Missing files fall back to a bold average. */
+export function measureTextPx(file: string, text: string, em: number): number {
   try {
     const font = loadFont(file);
     let units = 0;
     for (const char of text) units += font.advance(char.codePointAt(0) ?? 32);
-    return Math.max(fontSize, Math.round((units * fontSize) / font.units));
+    return Math.max(em, Math.round((units * em) / font.units));
   } catch {
-    return Math.round(Math.max(1, text.length) * fontSize * 0.55);
+    return Math.round(Math.max(1, text.length) * em * 0.55);
   }
 }
