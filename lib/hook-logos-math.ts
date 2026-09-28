@@ -95,27 +95,28 @@ export function matchTypeScale(style: DrawnStyle, fileCount = 2): number {
   return clampLogoScale((LOOK_METRICS[style].fontsize * LOGO_TO_TYPE) / fileBase);
 }
 
-/** Preview px so a logo at scale 1 tracks TT 20 / IG 26 type. */
-export function previewLogoPx(style: DrawnStyle, scale: number): number {
-  const typePx = style === "instagram" ? 26 : style === "tiktok" ? 20 : 21;
-  return Math.max(16, Math.round((typePx / LOOK_METRICS[style].fontsize) * LOGO_FILE_ROW * scale));
+/** A frame pixel as a share of the stage width, so Words and the tile show the burn size at any width. */
+export function stageCss(framePx: number): string {
+  return `${((framePx / CANVAS_W) * 100).toFixed(3)}cqw`;
 }
 
-/** Grab box. Logo files stay image-sized. +, =, and emoji hug the glyph. */
-export function previewGrab(
-  style: DrawnStyle,
-  item: LogoItem,
-  scale: number,
-): { width: number; height: number; fontSize: number } {
+function markSize(text: string, scale: number): number {
+  return Math.round((text.length <= 2 ? 88 : 48) * scale);
+}
+
+function markWidth(text: string, scale: number): number {
+  return markNeedsEmoji(text) ? markSize(text, scale) : Math.min(400, Math.round(28 * Math.max(1, text.length) * scale));
+}
+
+/** Grab box in frame pixels, the same size the sheet burns. +, =, and emoji hug the glyph. */
+export function previewGrab(item: LogoItem, scale: number, fileCount = 2): { width: number; height: number; fontSize: number } {
   if (isLogoFile(item)) {
-    const px = previewLogoPx(style, scale);
+    const px = Math.round((fileCount <= 1 ? LOGO_FILE_ONE : LOGO_FILE_ROW) * scale);
     return { width: px, height: px, fontSize: 0 };
   }
-  const typePx = style === "instagram" ? 26 : style === "tiktok" ? 20 : 21;
-  const ratio = typePx / LOOK_METRICS[style].fontsize;
   const text = item.text.trim();
-  const fontSize = Math.max(12, Math.round((text.length <= 2 ? 88 : 48) * scale * ratio));
-  const width = text.length <= 2 ? fontSize : Math.max(fontSize, Math.round(28 * text.length * scale * ratio));
+  const fontSize = markSize(text, scale);
+  const width = text.length <= 2 ? fontSize : Math.max(fontSize, markWidth(text, scale));
   return { width, height: fontSize, fontSize };
 }
 
@@ -170,6 +171,14 @@ export function markNeedsEmoji(text: string): boolean {
     if ((char.codePointAt(0) ?? 0) > 0xff) return true;
   }
   return false;
+}
+
+/** Noto emoji file key: code points in hex, joined with _, without the FE0F presentation mark. */
+export function emojiKey(text: string): string {
+  return [...text.trim()]
+    .map((char) => (char.codePointAt(0) ?? 0).toString(16))
+    .filter((hex) => hex !== "fe0f")
+    .join("_");
 }
 
 export function isLogoFile(item: LogoItem): item is HookLogo {
@@ -230,7 +239,7 @@ export function boxesFromItems(items: LogoItem[]): LogoBox[] {
   const fileBase = items.filter(isLogoFile).length <= 1 ? LOGO_FILE_ONE : LOGO_FILE_ROW;
   const widths = items.map((item) => {
     const scale = itemScale(item);
-    return isLogoFile(item) ? Math.round(fileBase * scale) : Math.min(400, Math.round(28 * Math.max(1, item.text.length) * scale));
+    return isLogoFile(item) ? Math.round(fileBase * scale) : markWidth(item.text, scale);
   });
   const gap = 16;
   const total = widths.reduce((sum, width) => sum + width, 0) + gap * Math.max(0, items.length - 1);
@@ -250,7 +259,7 @@ export function boxesFromItems(items: LogoItem[]): LogoBox[] {
       x += width + gap;
       return box;
     }
-    const size = Math.round((item.text.length <= 2 ? 88 : 48) * scale);
+    const size = markSize(item.text, scale);
     const box: LogoBox = {
       kind: "mark",
       text: item.text,

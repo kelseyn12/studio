@@ -4,7 +4,7 @@ import path from "path";
 import { describe, expect, it } from "vitest";
 import { runFfmpeg } from "@/lib/ffmpeg";
 import { writeLogoSheet } from "@/lib/hook-logos";
-import { alignLogoRow, boxesFromItems, CANVAS_H, defaultLogoPos, logoBoxes, markNeedsEmoji, matchTypeScale, parseLogoItems, parseLogos, previewGrab, previewLogoPx, sharedAxes, snapLogoPos, stringifyLogos } from "@/lib/hook-logos-math";
+import { alignLogoRow, boxesFromItems, CANVAS_H, defaultLogoPos, emojiKey, logoBoxes, markNeedsEmoji, matchTypeScale, parseLogoItems, parseLogos, previewGrab, sharedAxes, snapLogoPos, stageCss, stringifyLogos } from "@/lib/hook-logos-math";
 
 describe("parseLogos", () => {
   it("keeps safe relative paths and caps at 4", () => {
@@ -41,18 +41,25 @@ describe("parseLogos", () => {
     expect(boxesFromItems(items).some((box) => box.kind === "mark" && box.text === "+")).toBe(true);
     expect(markNeedsEmoji("🔥")).toBe(true);
     expect(markNeedsEmoji("+")).toBe(false);
+    expect(emojiKey("🔥")).toBe("1f525");
+    expect(emojiKey("❤️")).toBe("2764");
+    expect(emojiKey("👨‍💻")).toBe("1f468_200d_1f4bb");
   });
 
-  it("matches a logo to the look's type size", () => {
+  it("previews every piece at the size the sheet burns", () => {
     expect(matchTypeScale("tiktok", 2)).toBe(1);
     expect(matchTypeScale("tiktok", 1)).toBe(0.75);
-    expect(previewLogoPx("tiktok", 1)).toBe(49);
-    expect(previewLogoPx("instagram", 1)).toBe(50);
-    const equals = previewGrab("tiktok", { kind: "mark", id: "eq", text: "=" }, 1);
-    const flame = previewGrab("tiktok", { kind: "mark", id: "fire", text: "🔥" }, 1);
-    expect(equals.width).toBeLessThan(30);
-    expect(flame.height).toBe(equals.height);
-    expect(flame.width).toBeLessThan(previewLogoPx("tiktok", 1));
+    expect(previewGrab({ path: "a.png", filename: "a.png" }, 1, 2).width).toBe(200);
+    expect(previewGrab({ path: "a.png", filename: "a.png" }, 1, 1).width).toBe(280);
+    const equals = previewGrab({ kind: "mark", id: "eq", text: "=" }, 1);
+    const flame = previewGrab({ kind: "mark", id: "fire", text: "🔥" }, 2);
+    expect(equals).toEqual({ width: 88, height: 88, fontSize: 88 });
+    expect(flame.height).toBe(176);
+    const [fireBox] = boxesFromItems([{ kind: "mark", id: "fire", text: "🔥", x: 0.5, y: 0.5, scale: 2 }]);
+    expect(fireBox.kind).toBe("mark");
+    if (fireBox.kind === "mark") expect(fireBox.x + fireBox.size / 2).toBe(540);
+    expect(stageCss(82)).toBe("7.593cqw");
+    expect(stageCss(1080)).toBe("100.000cqw");
   });
 
   it("scales a logo when you ask for bigger", () => {

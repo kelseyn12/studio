@@ -227,6 +227,9 @@
 - [X] TikTok letters match the native line
   The bundled face is TikTok Sans Bold at optical size 14, the wider text cut the app uses. The 36pt display file was tighter. Already generated videos keep the old letters until the next Generate.
 
+- [X] Words shows what burns
+  Type, card, stroke, logos, +, =, and emoji in Words and on the tile are the same share of the frame as the file. Before, they were about 70% size, so logos that looked clear in Words landed on the words. The flame burns as a color emoji.
+
 - [X] TikTok card sits on the words
   The white card was pinned to the bottom-right of the line, so the words sat outside it. The drawing now starts at 0,0 and libass centers it. The name at the top of Multiply is what videos start with. Already generated videos keep the old card until the next Generate.
 

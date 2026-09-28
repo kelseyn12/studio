@@ -8,9 +8,9 @@ import { SpokenFix } from "@/components/spoken-fix";
 import { HookStage } from "@/components/hook-stage";
 import { QuickCut } from "@/components/quick-cut";
 import { spokenOnClip } from "@/lib/captions-math";
-import { LOOK_FONT_CLASS } from "@/lib/hook-fonts";
+import { LOOK_STROKE_CLASS, LOOK_TYPE_CLASS } from "@/lib/hook-fonts";
 import { boxFor, cutPreviewPath, hookDefaultPos, parseHookLayout, posFor } from "@/lib/hook-layout";
-import { defaultLogoPos, isLogoFile, itemScale, parseLogoItems, previewGrab, type LogoItem } from "@/lib/hook-logos-math";
+import { defaultLogoPos, isLogoFile, itemScale, parseLogoItems, previewGrab, stageCss, type LogoItem } from "@/lib/hook-logos-math";
 import { boxIsWhite, isBoxed, listRows, listStack, wordBoxClass } from "@/lib/list-layout";
 import { wrapHook, type DrawnStyle } from "@/lib/text-style";
 import { publicFileUrl } from "@/lib/urls";
@@ -63,7 +63,8 @@ export function ClipTile({
   const listLines = savedPos.list ?? [];
   const listShown = Math.max(listCount ?? 0, listLines.length);
   const stack = listShown ? listStack({ style: previewLook, headline: words, x: at.x, y: at.y, count: listShown }) : null;
-  const thumb = 11 / (previewLook === "instagram" ? 26 : 20);
+  const typeClass = `${LOOK_TYPE_CLASS[previewLook]} ${isBoxed(plate) ? `${boxIsWhite(plate) ? "text-black" : "text-white"} ${wordBoxClass(previewLook, plate)}` : `text-white ${LOOK_STROKE_CLASS[previewLook]}`}`;
+  const fileCount = logoItems.filter(isLogoFile).length;
 
   useEffect(() => {
     if (!editing.current) setWords(hookText);
@@ -116,7 +117,7 @@ export function ClipTile({
           listFromHook={listFromHook}
         />
       ) : (
-        <div className="relative overflow-hidden rounded-xl bg-ink">
+        <div className="relative overflow-hidden rounded-xl bg-ink [container-type:inline-size]">
           {thumbPath ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={publicFileUrl(thumbPath)} alt={filename} className="aspect-[9/16] w-full object-cover" />
@@ -128,11 +129,13 @@ export function ClipTile({
           </button>
           {lines.length ? (
             <div
-              className={`pointer-events-none absolute z-10 w-max max-w-[94%] -translate-x-1/2 -translate-y-1/2 text-center text-[11px] font-bold leading-snug ${LOOK_FONT_CLASS[previewLook]} ${isBoxed(plate) ? `${boxIsWhite(plate) ? "text-black" : "text-white"} ${wordBoxClass(previewLook, plate)}` : "text-white stroke-tt"}`}
+              className={`pointer-events-none absolute z-10 w-max max-w-full -translate-x-1/2 -translate-y-1/2 text-center ${typeClass}`}
               style={{ left: `${at.x * 100}%`, top: `${at.y * 100}%` }}
             >
               {lines.map((line, index) => (
-                <div key={`${index}-${line}`}>{line}</div>
+                <div key={`${index}-${line}`} className="whitespace-nowrap">
+                  {line}
+                </div>
               ))}
             </div>
           ) : null}
@@ -140,19 +143,17 @@ export function ClipTile({
             <ListOverlay
               rows={listRows(stack, listShown)}
               lines={listLines}
-              className={`text-[11px] font-bold leading-snug ${LOOK_FONT_CLASS[previewLook]} ${isBoxed(plate) ? `${boxIsWhite(plate) ? "text-black" : "text-white"} ${wordBoxClass(previewLook, plate)}` : "text-white stroke-tt"}`}
+              className={typeClass}
             />
           ) : null}
           {logoItems.map((item, index) => {
             const spot = item.x != null && item.y != null ? { x: item.x, y: item.y } : defaultLogoPos(index, logoItems.length);
-            const grab = previewGrab(previewLook, item, itemScale(item));
-            const width = Math.max(8, Math.round(grab.width * thumb));
-            const height = Math.max(8, Math.round(grab.height * thumb));
+            const grab = previewGrab(item, itemScale(item), fileCount);
             return (
               <div
                 key={isLogoFile(item) ? item.path : item.id}
-                className="pointer-events-none absolute z-30 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center leading-none text-white [text-shadow:0_1px_0_#000,0_-1px_0_#000,1px_0_0_#000,-1px_0_0_#000]"
-                style={{ left: `${spot.x * 100}%`, top: `${spot.y * 100}%`, width, height, fontSize: grab.fontSize ? Math.max(8, Math.round(grab.fontSize * thumb)) : undefined }}
+                className="pointer-events-none absolute z-30 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center leading-none text-white mark-edge"
+                style={{ left: `${spot.x * 100}%`, top: `${spot.y * 100}%`, width: stageCss(grab.width), height: stageCss(grab.height), fontSize: grab.fontSize ? stageCss(grab.fontSize) : undefined }}
               >
                 {isLogoFile(item) ? (
                   // eslint-disable-next-line @next/next/no-img-element

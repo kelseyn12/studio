@@ -34,11 +34,13 @@ export function lookPaint(style: DrawnStyle, box?: boolean | "white"): { borderS
   return { borderStyle: 1, outline: 6, shadow: 0 };
 }
 
-/** Preview plate. TikTok is one card around every line. Instagram is a chip per line. */
+/** Preview plate at burn size (radius 14, pad 18×8 on 1080). TikTok is one card around every line. */
 export function wordBoxClass(style: DrawnStyle, box?: boolean | "white"): string {
   if (!isBoxed(box)) return "";
   const fill = boxIsWhite(box) ? "bg-white text-black" : "bg-black text-white";
-  return style === "instagram" ? `rounded-[4px] px-[7px] py-[2px] ${fill}` : `rounded-[5px] px-2 py-0.5 ${fill}`;
+  return style === "instagram"
+    ? `rounded-[0.741cqw] px-[1.296cqw] py-[0.370cqw] ${fill}`
+    : `rounded-[1.296cqw] px-[1.667cqw] py-[0.741cqw] ${fill}`;
 }
 
 export function clampListCount(count: number): number {

@@ -53,16 +53,32 @@ textarea {
   color: #a89f91;
 }
 
-/* ~4px stroke on a 1080 frame. Preview column is about a third of that, so the edge is 1px. */
+/* +, =, emoji on the sheet burn with a 6px edge on 1080. */
+.mark-edge {
+  --edge: 0.556cqw;
+  text-shadow:
+    0 var(--edge) 0 #000,
+    0 calc(-1 * var(--edge)) 0 #000,
+    var(--edge) 0 0 #000,
+    calc(-1 * var(--edge)) 0 0 #000;
+}
+
+/* Burn stroke over the 1080 frame: TikTok 5px, Instagram 4px. cqw follows the stage width. */
+.stroke-tt {
+  --edge: 0.463cqw;
+}
+.stroke-ig {
+  --edge: 0.37cqw;
+}
 .stroke-ig,
 .stroke-tt {
   text-shadow:
-    -1px -1px 0 #000,
-    1px -1px 0 #000,
-    -1px 1px 0 #000,
-    1px 1px 0 #000,
-    0 -1px 0 #000,
-    0 1px 0 #000,
-    -1px 0 0 #000,
-    1px 0 0 #000;
+    calc(-1 * var(--edge)) calc(-1 * var(--edge)) 0 #000,
+    var(--edge) calc(-1 * var(--edge)) 0 #000,
+    calc(-1 * var(--edge)) var(--edge) 0 #000,
+    var(--edge) var(--edge) 0 #000,
+    0 calc(-1 * var(--edge)) 0 #000,
+    0 var(--edge) 0 #000,
+    calc(-1 * var(--edge)) 0 0 #000,
+    var(--edge) 0 0 #000;
 }

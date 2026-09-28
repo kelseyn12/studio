@@ -6,8 +6,8 @@ import { HookList } from "@/components/hook-list";
 import { ListOverlay } from "@/components/list-overlay";
 import { boxFor, boxLabel, hookDefaultPos, nextBox, parseHookLayout, posFor, setLookBox, setLookPos, stringifyHookLayout, type HookPos } from "@/lib/hook-layout";
 import { LogoScaleBar } from "@/components/logo-scale-bar";
-import { ALIGN_SNAP, clampLogoScale, defaultLogoPos, isLogoFile, itemScale, LOGO_SCALE_STEP, matchTypeScale, parseLogoItems, previewGrab, sharedAxes, snapLogoPos } from "@/lib/hook-logos-math";
-import { LOOK_FONT_CLASS } from "@/lib/hook-fonts";
+import { ALIGN_SNAP, clampLogoScale, defaultLogoPos, isLogoFile, itemScale, LOGO_SCALE_STEP, matchTypeScale, parseLogoItems, previewGrab, sharedAxes, snapLogoPos, stageCss } from "@/lib/hook-logos-math";
+import { LOOK_STROKE_CLASS, LOOK_TYPE_CLASS } from "@/lib/hook-fonts";
 import { boxIsWhite, isBoxed, listRows, listStack, wordBoxClass } from "@/lib/list-layout";
 import { publicFileUrl } from "@/lib/urls";
 import type { DrawnStyle } from "@/lib/text-style";
@@ -190,12 +190,13 @@ export function HookStage({
     y: anchor.y,
     count,
   });
-  const typeSize = `${LOOK_FONT_CLASS[preview]} ${preview === "instagram" ? "text-[26px] font-bold leading-snug" : "text-[20px] font-bold leading-snug"}`;
+  const typeSize = LOOK_TYPE_CLASS[preview];
   const lookBox = boxFor(pos, preview);
   const boxed = isBoxed(lookBox);
   const inkClass = boxed && boxIsWhite(lookBox) ? "text-black" : "text-white";
   const plate = wordBoxClass(preview, lookBox);
-  const stroke = boxed ? "" : preview === "instagram" ? "stroke-ig" : "stroke-tt";
+  const stroke = boxed ? "" : LOOK_STROKE_CLASS[preview];
+  const fileCount = logos.filter(isLogoFile).length;
 
   useEffect(() => {
     const node = typeRef.current;
@@ -234,11 +235,11 @@ export function HookStage({
           {preview === "instagram" ? "IG font" : boxLabel(lookBox, preview)}
         </button>
       </div>
-      <div ref={stageRef} className="relative overflow-hidden rounded-xl bg-ink">
+      <div ref={stageRef} className="relative overflow-hidden rounded-xl bg-ink [container-type:inline-size]">
         <video ref={videoRef} src={src} controls playsInline className="aspect-[9/16] w-full object-cover" />
         {guides ? <AlignGuides horizontals={[at.y, ...axes.ys]} verticals={axes.xs} /> : null}
         <div
-          className="absolute z-10 w-max max-w-[94%] cursor-grab"
+          className="absolute z-10 w-max max-w-full cursor-grab"
           style={{ left: `${at.x * 100}%`, top: `${at.y * 100}%`, transform: "translate(-50%, -50%)" }}
           onPointerDown={(event) => event.currentTarget.setPointerCapture(event.pointerId)}
           onPointerMove={(event) => {
@@ -275,7 +276,8 @@ export function HookStage({
         {logos.map((item, index) => {
           const at = loc(item, index);
           const scale = scaleOf(item);
-          const grab = previewGrab(preview, item, scale);
+          const grab = previewGrab(item, scale, fileCount);
+          const size = { width: stageCss(grab.width), height: stageCss(grab.height) };
           return (
             <button
               key={itemKey(item)}
@@ -297,13 +299,13 @@ export function HookStage({
                 event.stopPropagation();
                 void moveItem(item, event);
               }}
-              className={`absolute z-30 flex -translate-x-1/2 -translate-y-1/2 cursor-grab touch-none select-none items-center justify-center overflow-hidden bg-transparent p-0 leading-none text-white [text-shadow:0_1px_0_#000,0_-1px_0_#000,1px_0_0_#000,-1px_0_0_#000] active:cursor-grabbing ${picked === itemKey(item) ? "ring-2 ring-white/40" : ""}`}
-              style={{ left: `${at.x * 100}%`, top: `${at.y * 100}%`, width: grab.width, height: grab.height, fontSize: grab.fontSize || undefined }}
+              className={`absolute z-30 flex -translate-x-1/2 -translate-y-1/2 cursor-grab touch-none select-none items-center justify-center overflow-hidden bg-transparent p-0 leading-none text-white mark-edge active:cursor-grabbing ${picked === itemKey(item) ? "ring-2 ring-white/40" : ""}`}
+              style={{ left: `${at.x * 100}%`, top: `${at.y * 100}%`, ...size, fontSize: grab.fontSize ? stageCss(grab.fontSize) : undefined }}
               title="Drag"
             >
               {isLogoFile(item) ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={publicFileUrl(item.path)} alt={item.filename} className="pointer-events-none object-contain" style={{ width: grab.width, height: grab.height }} />
+                <img src={publicFileUrl(item.path)} alt={item.filename} className="pointer-events-none object-contain" style={size} />
               ) : (
                 item.text
               )}

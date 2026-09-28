@@ -1,6 +1,7 @@
 import { mkdir } from "fs/promises";
 import path from "path";
 import { randomUUID } from "crypto";
+import { emojiImage } from "@/lib/emoji-image";
 import { HOOK_FONT } from "@/lib/ffmpeg";
 import { localRoot } from "@/lib/files";
 import { boxesFromItems, CANVAS_H, CANVAS_W, logoBoxes, markNeedsEmoji, placeLogoBoxes } from "@/lib/hook-logos-math";
@@ -53,26 +54,34 @@ export async function writeLogoSheet(
   const chains: string[] = ["[0:v]format=rgba[bg]"];
   let last = "bg";
   let step = 0;
+  let inputs = absPaths.length;
+  const placeImage = (inputIndex: number, x: number, y: number, w: number, h: number) => {
+    const scaled = `i${inputIndex}`;
+    chains.push(`[${inputIndex}:v]scale=${w}:${h}:force_original_aspect_ratio=decrease:flags=lanczos,format=rgba[${scaled}]`);
+    const next = `s${step}`;
+    chains.push(`[${last}][${scaled}]overlay=${x}+(${w}-w)/2:${y}+(${h}-h)/2:format=auto[${next}]`);
+    last = next;
+    step += 1;
+  };
   for (const box of boxes) {
     if (box.kind === "logo") {
-      const scaled = `l${box.index}`;
-      chains.push(
-        `[${box.index + 1}:v]scale=${box.w}:${box.h}:force_original_aspect_ratio=decrease:flags=lanczos,format=rgba[${scaled}]`,
-      );
-      const next = `s${step}`;
-      chains.push(
-        `[${last}][${scaled}]overlay=${box.x}+(${box.w}-w)/2:${box.y}+(${box.h}-h)/2:format=auto[${next}]`,
-      );
-      last = next;
-      step += 1;
-    } else {
-      const next = `s${step}`;
-      chains.push(
-        `[${last}]drawtext=fontfile='${fontFile(box.text)}':text='${escapeDraw(box.text)}':fontsize=${box.size}:fontcolor=white:borderw=6:bordercolor=black:x=${box.x}:y=${box.y}[${next}]`,
-      );
-      last = next;
-      step += 1;
+      placeImage(box.index + 1, box.x, box.y, box.w, box.h);
+      continue;
     }
+    // Real color emoji art when we can get it. Otherwise an outline glyph, never an empty box.
+    const art = markNeedsEmoji(box.text) ? await emojiImage(box.text) : null;
+    if (art) {
+      inputs += 1;
+      args.push("-i", art);
+      placeImage(inputs, box.x, box.y, box.size, box.size);
+      continue;
+    }
+    const next = `s${step}`;
+    chains.push(
+      `[${last}]drawtext=fontfile='${fontFile(box.text)}':text='${escapeDraw(box.text)}':fontsize=${box.size}:fontcolor=white:borderw=6:bordercolor=black:x=${box.x}:y=${box.y}[${next}]`,
+    );
+    last = next;
+    step += 1;
   }
   args.push("-filter_complex", chains.join(";"), "-map", `[${last}]`, "-frames:v", "1", outputAbs);
   await runFfmpeg(args);

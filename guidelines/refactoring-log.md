@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-09-27 — Words and the tile draw at the burn size. Type, plate, stroke, logos, and marks were about 70% of the file size, so arrangements that looked spaced in Words overlapped in the video. Sizes are now `cqw` of the stage. Emoji marks burn as color emoji art.
 - 2026-09-27 — TikTok white card is drawn from 0,0. A centered path sat at the bottom-right, so the bar missed the words. Emoji marks use Noto Emoji so a flame is not an empty box. The name at the top of Multiply is what the videos start with. New batch names a separate batch.
 - 2026-09-27 — Done on Words keeps logos, +, =, emoji, and list lines on the tile. Only the headline was painted after Words closed.
 - 2026-09-27 — TikTok text uses the open-source font's text cut (optical size 14), not the tighter 36pt display cut. Extra letter-spacing was removed.
