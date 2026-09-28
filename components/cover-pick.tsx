@@ -37,6 +37,7 @@ export function CoverPick({ id, src }: { id: string; src: string }) {
       >
         {busy ? "Saving…" : "Use this frame as the cover"}
       </button>
+      <p className="text-xs text-mute">This frame posts as the thumbnail on Instagram and YouTube.</p>
       {error ? <p className="text-xs text-review">{error}</p> : null}
     </div>
   );

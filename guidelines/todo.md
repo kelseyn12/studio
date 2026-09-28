@@ -261,6 +261,10 @@
   Cover used to replace the whole row. Both links stay visible; tap Words + music after you save a cover.
 - [X] Rebuild every video from this body did nothing
   The body path required caption words already in the row map, and the second submit button often never sent scope. Each button has its own action now; the form says Rebuilding… while it burns.
+- [X] Saved cover posts as the thumbnail on the apps
+  Schedule now sends the cover frame to Outstand: Instagram gets the JPEG, YouTube gets it best-effort, TikTok gets the frame time. Facebook has no cover field.
+- [ ] Decide TikTok post mode
+  Studio sends no `tiktok` block, so Outstand defaults to MEDIA_UPLOAD (a draft in the TikTok inbox). DIRECT_POST would auto-publish and honor the cover, but needs `privacyLevel` and counts toward TikTok's active-creator cap on managed keys.
 
 
 

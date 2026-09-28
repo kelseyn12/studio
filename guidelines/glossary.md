@@ -4,7 +4,9 @@
 - `dropSuperseded` / `sweepStale` — `lib/sweep.ts` — deletes those files from R2 and the rows. Editor cut calls `dropSuperseded`; Library Free space runs `sweepStale`.
 - `pickNextAction` — `lib/next-action.ts` — chooses the single Today action. Used on `app/page.tsx`.
 - `machineCounts` — `lib/queries.ts` — pipeline and slot totals for Today.
-- `uploadMedia` — `lib/outstand.ts` — PUT the mp4 into Outstand storage, returns the public URL.
+- `uploadMedia` — `lib/outstand.ts` — PUT the mp4 (or cover JPEG) into Outstand storage, returns the public URL.
+- `postBody` / `createPost` — `lib/outstand.ts` — builds the `POST /posts/` body; `options` carries per-network blocks (`instagram`, `youtube`, `tiktok`) and can never override `containers`/`accounts`/`scheduledAt`.
+- `coverOptions`, `wantsCoverUrl`, `coverMs` — `lib/post-cover.ts` — turn an asset's `coverPath`/`coverAt` into Outstand cover fields per network. Used by `queueCard` via `shippableCoverUrl` (R2 public URL, else Outstand upload, else "" → IG offset fallback).
 - `scoreDeal` — `lib/deals.ts` — TECH scores volume; UGC scores fee per video. A deal with `monthlyPayCents` set scores that flat fee as the month instead of pay × slots × 30. Used on Deals and deal detail. `formatMoneyExact` keeps cents for per-video amounts.
 - `videoMoneyCents(card, deal)` — `lib/deal-bonuses.ts` — the one place a posted video is priced: stamped `payoutCents` + `cpmEarnedCents` on views + `bonusEarnedCents` for every view bonus the video has crossed. Used by `dashboardTotals`, `viewsByDay`, `studioSnapshot` (`lib/queries.ts`) and the deal page.
 - `parseBonuses` / `serializeBonuses` / `cleanBonuses` / `bonusesFromForm` — `lib/deal-bonuses.ts` — `Campaign.bonusesJson` ⇄ `ViewBonus[]` (`{views, payoutCents}`, sorted, ≤ `MAX_BONUSES`). The form posts repeated `bonusPay` ($) / `bonusViews` fields from `components/deal-bonuses.tsx`.

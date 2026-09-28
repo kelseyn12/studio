@@ -84,19 +84,28 @@ export function parsePost(body: Record<string, unknown>): OutstandPost {
   return data as unknown as OutstandPost;
 }
 
-export async function createPost(input: {
+export type CreatePostInput = {
   accounts: string[];
   content: string;
   scheduledAt?: string;
   media?: Array<{ url: string; filename: string }>;
-}): Promise<OutstandPost> {
+  /** Per-network blocks (`instagram`, `tiktok`, `youtube`…) merged into the post body as Outstand expects. */
+  options?: Record<string, unknown>;
+};
+
+export function postBody(input: CreatePostInput): Record<string, unknown> {
+  return {
+    ...(input.options ?? {}),
+    containers: [{ content: input.content, media: input.media ?? [] }],
+    accounts: input.accounts,
+    scheduledAt: input.scheduledAt,
+  };
+}
+
+export async function createPost(input: CreatePostInput): Promise<OutstandPost> {
   const payload = await outstand<Record<string, unknown>>("/posts/", {
     method: "POST",
-    body: JSON.stringify({
-      containers: [{ content: input.content, media: input.media ?? [] }],
-      accounts: input.accounts,
-      scheduledAt: input.scheduledAt,
-    }),
+    body: JSON.stringify(postBody(input)),
   });
   return parsePost(payload);
 }

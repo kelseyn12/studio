@@ -1,8 +1,9 @@
 import { postedAtFromPost, createPost, hasOutstand, uploadMedia, type OutstandPost } from "@/lib/outstand";
 import { pickFinished, pickForLook } from "@/lib/card-desk";
 import { ensureLocal } from "@/lib/files";
+import { coverOptions, wantsCoverUrl } from "@/lib/post-cover";
 import { prisma } from "@/lib/prisma";
-import { isPublicMediaUrl } from "@/lib/r2";
+import { isPublicMediaUrl, r2PublicUrl } from "@/lib/r2";
 import { targetAccounts, targetsByLook } from "@/lib/targets";
 import type { Asset, CardStatus, SocialAccount } from "@prisma/client";
 
@@ -33,6 +34,23 @@ async function shippableUrl(asset: Asset): Promise<string> {
 }
 
 /**
+ * A public JPEG URL of the saved cover frame for apps that take one (IG, YT). "" when the video
+ * has no cover, no app in the group wants an image, or the file cannot be reached — the post
+ * still ships, Instagram just falls back to the frame offset.
+ */
+async function shippableCoverUrl(asset: Asset, networks: string[]): Promise<string> {
+  if (!asset.coverPath || !wantsCoverUrl(networks)) return "";
+  const fromR2 = r2PublicUrl(asset.coverPath);
+  if (isPublicMediaUrl(fromR2)) return fromR2;
+  try {
+    const uploaded = await uploadMedia(await ensureLocal(asset.coverPath), `cover-${asset.id}.jpg`, "image/jpeg");
+    return uploaded.url;
+  } catch {
+    return "";
+  }
+}
+
+/**
  * Schedules a video. Deal videos go to every account on the deal; when the deal spans app looks
  * (IG + TT), each look's file ships to its own accounts as its own Outstand post.
  */
@@ -55,11 +73,13 @@ export async function queueCard(cardId: string, when: Date, accountId?: string |
     } else {
       for (const group of targetsByLook(targets)) {
         const asset = pickForLook(card.assets, group.look) ?? finished;
+        const networks = group.accounts.map((account) => account.network);
         const post = await createPost({
           accounts: group.accounts.map((account: SocialAccount) => account.outstandAccountId),
           content: card.caption || card.title,
           scheduledAt: when.toISOString(),
           media: [{ url: await shippableUrl(asset), filename: asset.filename || "video.mp4" }],
+          options: coverOptions(networks, asset, await shippableCoverUrl(asset, networks)),
         });
         posts.push(post);
         const publishedAt = postedAtFromPost(post);

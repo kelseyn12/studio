@@ -21,7 +21,7 @@ async function saveCover(assetId: string, at: number, setNote: (note: string) =>
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ id: assetId, at }),
   });
-  setNote(response.ok ? "Cover saved." : "Could not set that frame.");
+  setNote(response.ok ? "Cover saved. It posts as the thumbnail on Instagram and YouTube." : "Could not set that frame.");
 }
 
 export function OutputTune({

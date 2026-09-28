@@ -1,5 +1,19 @@
 import { describe, expect, it } from "vitest";
-import { parseConfirm, parsePost, parseUploadTicket, postedAtFromPost } from "@/lib/outstand";
+import { parseConfirm, parsePost, parseUploadTicket, postBody, postedAtFromPost } from "@/lib/outstand";
+
+describe("postBody", () => {
+  it("puts network blocks beside containers without letting them override the core fields", () => {
+    const body = postBody({
+      accounts: ["acc_1"],
+      content: "hi",
+      media: [{ url: "https://media.outstand.so/v.mp4", filename: "v.mp4" }],
+      options: { instagram: { reelCoverUrl: "https://media.outstand.so/c.jpg" }, accounts: ["evil"] },
+    });
+    expect(body.accounts).toEqual(["acc_1"]);
+    expect(body.instagram).toEqual({ reelCoverUrl: "https://media.outstand.so/c.jpg" });
+    expect(body.containers).toEqual([{ content: "hi", media: [{ url: "https://media.outstand.so/v.mp4", filename: "v.mp4" }] }]);
+  });
+});
 
 describe("Outstand media parsers", () => {
   it("reads a nested upload ticket", () => {
