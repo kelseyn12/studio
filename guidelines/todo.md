@@ -263,8 +263,8 @@
   The body path required caption words already in the row map, and the second submit button often never sent scope. Each button has its own action now; the form says Rebuilding… while it burns.
 - [X] Saved cover posts as the thumbnail on the apps
   Schedule now sends the cover frame to Outstand: Instagram gets the JPEG, YouTube gets it best-effort, TikTok gets the frame time. Facebook has no cover field.
-- [ ] Decide TikTok post mode
-  Studio sends no `tiktok` block, so Outstand defaults to MEDIA_UPLOAD (a draft in the TikTok inbox). DIRECT_POST would auto-publish and honor the cover, but needs `privacyLevel` and counts toward TikTok's active-creator cap on managed keys.
+- [X] Decide TikTok post mode
+  TikTok now auto-publishes (`DIRECT_POST` + public) so the saved cover frame is the thumbnail. Inbox drafts are gone. If a post fails with `reached_active_user_cap`, wait and ship that one again the next day.
 
 
 

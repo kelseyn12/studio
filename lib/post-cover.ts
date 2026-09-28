@@ -9,10 +9,20 @@ export const MS_PER_SECOND = 1000;
 
 export type CoverSource = { coverPath: string; coverAt: number };
 
+/** Outstand publishes to the profile. Inbox drafts ignore the cover frame. */
+export const TIKTOK_POST_MODE = "DIRECT_POST" as const;
+export const TIKTOK_PRIVACY = "PUBLIC_TO_EVERYONE" as const;
+
+export type TikTokOptions = {
+  postMode: typeof TIKTOK_POST_MODE;
+  privacyLevel: typeof TIKTOK_PRIVACY;
+  videoCoverTimestampMs?: number;
+};
+
 export type NetworkOptions = {
   instagram?: { reelCoverUrl: string } | { reelThumbOffset: number };
   youtube?: { thumbnailUrl: string };
-  tiktok?: { videoCoverTimestampMs: number };
+  tiktok?: TikTokOptions;
 };
 
 /** True when at least one target app can take a cover image URL, so it is worth uploading one. */
@@ -39,6 +49,23 @@ export function coverOptions(networks: string[], cover: CoverSource, coverUrl: s
     options.instagram = coverUrl ? { reelCoverUrl: coverUrl } : { reelThumbOffset: coverMs(cover.coverAt) };
   }
   if (names.has("youtube") && coverUrl) options.youtube = { thumbnailUrl: coverUrl };
-  if (names.has("tiktok")) options.tiktok = { videoCoverTimestampMs: coverMs(cover.coverAt) };
+  if (names.has("tiktok")) options.tiktok = tiktokBlock(coverMs(cover.coverAt));
+  return options;
+}
+
+function tiktokBlock(coverAtMs?: number): TikTokOptions {
+  return {
+    postMode: TIKTOK_POST_MODE,
+    privacyLevel: TIKTOK_PRIVACY,
+    ...(coverAtMs !== undefined ? { videoCoverTimestampMs: coverAtMs } : {}),
+  };
+}
+
+/** Cover fields plus TikTok auto-publish. TikTok still gets DIRECT_POST when no cover is saved. */
+export function postOptions(networks: string[], cover: CoverSource, coverUrl: string): NetworkOptions {
+  const options = coverOptions(networks, cover, coverUrl);
+  if (networks.some((network) => network.toLowerCase() === "tiktok") && !options.tiktok) {
+    options.tiktok = tiktokBlock();
+  }
   return options;
 }

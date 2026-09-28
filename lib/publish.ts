@@ -1,7 +1,7 @@
 import { postedAtFromPost, createPost, hasOutstand, uploadMedia, type OutstandPost } from "@/lib/outstand";
 import { pickFinished, pickForLook } from "@/lib/card-desk";
 import { ensureLocal } from "@/lib/files";
-import { coverOptions, wantsCoverUrl } from "@/lib/post-cover";
+import { postOptions, wantsCoverUrl } from "@/lib/post-cover";
 import { prisma } from "@/lib/prisma";
 import { isPublicMediaUrl, r2PublicUrl } from "@/lib/r2";
 import { targetAccounts, targetsByLook } from "@/lib/targets";
@@ -79,7 +79,7 @@ export async function queueCard(cardId: string, when: Date, accountId?: string |
           content: card.caption || card.title,
           scheduledAt: when.toISOString(),
           media: [{ url: await shippableUrl(asset), filename: asset.filename || "video.mp4" }],
-          options: coverOptions(networks, asset, await shippableCoverUrl(asset, networks)),
+          options: postOptions(networks, asset, await shippableCoverUrl(asset, networks)),
         });
         posts.push(post);
         const publishedAt = postedAtFromPost(post);
