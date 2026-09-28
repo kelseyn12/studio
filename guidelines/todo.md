@@ -259,6 +259,8 @@
   Spoken captions now send a tiny voice mp3, not the video. The 25 MB OpenAI cap no longer blocks Generate. Tap Generate again on that batch.
 - [X] Cover saved hid Words + music
   Cover used to replace the whole row. Both links stay visible; tap Words + music after you save a cover.
+- [X] Rebuild every video from this body did nothing
+  The body path required caption words already in the row map, and the second submit button often never sent scope. Each button has its own action now; the form says Rebuilding… while it burns.
 
 
 

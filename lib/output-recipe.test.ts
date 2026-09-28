@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bodyMates, chosenTrackId, musicDelayPrefix, parseRecipe, tuneSections } from "@/lib/output-recipe";
+import { bodyMates, chosenTrackId, musicDelayPrefix, parseRecipe, rebuildsEveryBodyMate, tuneSections } from "@/lib/output-recipe";
 
 const recipe = {
   look: "tiktok" as const,
@@ -42,5 +42,11 @@ describe("output recipe", () => {
 
   it("counts videos that share a body", () => {
     expect(bodyMates([JSON.stringify(recipe), JSON.stringify(recipe), ""], "body")).toBe(2);
+  });
+
+  it("rebuilds every mate from the body button even when this row has no word edits yet", () => {
+    expect(rebuildsEveryBodyMate("body", "body")).toBe(true);
+    expect(rebuildsEveryBodyMate("body", "")).toBe(false);
+    expect(rebuildsEveryBodyMate("one", "body")).toBe(false);
   });
 });

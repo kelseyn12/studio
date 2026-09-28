@@ -72,7 +72,15 @@ export function BatchOutputs({
   const defaultEditor = editors.find((person) => person.defaultEditor)?.id ?? editors[0]?.id ?? "";
   const outputIds = outputs.map((output) => output.id);
   const tunedNote =
-    tuned === "1" ? "Rebuilt. The new file is on this row." : tuned === "old" ? "That video needs a fresh Generate before it can be tuned." : "";
+    tuned === "1"
+      ? "Rebuilt. The new file is on this row."
+      : tuned === "body"
+        ? "Rebuilt every video that uses that body."
+        : tuned === "old"
+          ? "That video needs a fresh Generate before it can be tuned."
+          : tuned === "fail"
+            ? "Rebuild did not finish. Try this video first, then the rest."
+            : "";
   return (
     <div className="mt-8 space-y-4">
       {tunedNote ? <p className="text-sm text-sun">{tunedNote}</p> : null}

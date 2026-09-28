@@ -1,7 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { tuneOutput } from "@/app/repurposer/output-actions";
+import { useFormStatus } from "react-dom";
+import { tuneBodyVideos, tuneThisVideo } from "@/app/repurposer/output-actions";
 import type { TuneSection } from "@/lib/output-recipe";
 
 type Panel = "off" | "tune" | "cover";
@@ -85,7 +86,7 @@ export function OutputTune({
         </p>
       ) : null}
       {open === "tune" && ready ? (
-        <form action={tuneOutput} className="space-y-2 border-t border-line pt-3">
+        <form className="space-y-2 border-t border-line pt-3">
           <input type="hidden" name="outputId" value={outputId} />
           <video ref={videoRef} src={src} controls playsInline className="aspect-[9/16] w-36 rounded-lg bg-ink" />
           <label className="block text-xs text-mute">
@@ -114,16 +115,34 @@ export function OutputTune({
               <textarea name={`words:${section.clipId}`} defaultValue={section.text} className="field mt-1 min-h-16 text-sm" />
             </label>
           ))}
-          <button name="scope" value="one" className="w-full rounded-lg bg-sun px-3 py-2 text-sm font-semibold text-ink">
-            Rebuild this video
-          </button>
-          {mates > 1 ? (
-            <button name="scope" value="body" className="w-full rounded-lg border border-line px-3 py-2 text-sm">
-              Rebuild every video from this body ({mates})
-            </button>
-          ) : null}
+          <RebuildButtons mates={mates} />
         </form>
       ) : null}
     </div>
+  );
+}
+
+function RebuildButtons({ mates }: { mates: number }) {
+  const { pending } = useFormStatus();
+  return (
+    <>
+      <button
+        formAction={tuneThisVideo}
+        disabled={pending}
+        className="w-full rounded-lg bg-sun px-3 py-2 text-sm font-semibold text-ink disabled:opacity-60"
+      >
+        {pending ? "Rebuilding…" : "Rebuild this video"}
+      </button>
+      {mates > 1 ? (
+        <button
+          formAction={tuneBodyVideos}
+          disabled={pending}
+          className="w-full rounded-lg border border-line px-3 py-2 text-sm disabled:opacity-60"
+        >
+          {pending ? "Rebuilding every video from this body…" : `Rebuild every video from this body (${mates})`}
+        </button>
+      ) : null}
+      {pending ? <p className="text-xs text-sun">Stay on this page. A few videos can take a minute.</p> : null}
+    </>
   );
 }

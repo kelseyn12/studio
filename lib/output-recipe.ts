@@ -113,3 +113,8 @@ export function bodyMates(recipes: Array<string | null | undefined>, bodyClipId:
   if (!bodyClipId) return 1;
   return recipes.filter((raw) => parseRecipe(raw)?.bodyClipId === bodyClipId).length;
 }
+
+/** The second Rebuild button. Do not also require caption words — those live on the clip. */
+export function rebuildsEveryBodyMate(scope: string, bodyClipId: string): boolean {
+  return scope === "body" && Boolean(bodyClipId);
+}

@@ -4,9 +4,21 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { applyCaptionLines } from "@/lib/captions-math";
-import { parseCaptionMap, parseRecipe, wordsForClip } from "@/lib/output-recipe";
+import { parseCaptionMap, parseRecipe, rebuildsEveryBodyMate, wordsForClip } from "@/lib/output-recipe";
 import { prisma } from "@/lib/prisma";
 import { rebuildBody, rebuildOutput } from "@/lib/rebuild-output";
+
+export const maxDuration = 300;
+
+export async function tuneThisVideo(formData: FormData) {
+  formData.set("scope", "one");
+  await tuneOutput(formData);
+}
+
+export async function tuneBodyVideos(formData: FormData) {
+  formData.set("scope", "body");
+  await tuneOutput(formData);
+}
 
 export async function tuneOutput(formData: FormData) {
   const user = await requireUser();
@@ -37,24 +49,31 @@ export async function tuneOutput(formData: FormData) {
     },
   });
   const scope = String(formData.get("scope") || "one");
-  if (scope === "body" && recipe.bodyClipId && map[recipe.bodyClipId]) {
-    const words = JSON.stringify(map[recipe.bodyClipId]);
-    await prisma.repurposeClip.update({ where: { id: recipe.bodyClipId }, data: { captionsJson: words } });
-    const mates = await prisma.repurposeOut.findMany({ where: { batchId: output.batchId } });
-    for (const mate of mates) {
-      if (mate.id === outputId) continue;
-      if (parseRecipe(mate.recipeJson)?.bodyClipId !== recipe.bodyClipId) continue;
-      const mateMap = parseCaptionMap(mate.captionsJson);
-      mateMap[recipe.bodyClipId] = map[recipe.bodyClipId];
-      await prisma.repurposeOut.update({
-        where: { id: mate.id },
-        data: { captionsJson: JSON.stringify(mateMap) },
-      });
+  try {
+    if (rebuildsEveryBodyMate(scope, recipe.bodyClipId)) {
+      if (map[recipe.bodyClipId]?.length) {
+        const words = JSON.stringify(map[recipe.bodyClipId]);
+        await prisma.repurposeClip.update({ where: { id: recipe.bodyClipId }, data: { captionsJson: words } });
+        const mates = await prisma.repurposeOut.findMany({ where: { batchId: output.batchId } });
+        for (const mate of mates) {
+          if (mate.id === outputId) continue;
+          if (parseRecipe(mate.recipeJson)?.bodyClipId !== recipe.bodyClipId) continue;
+          const mateMap = parseCaptionMap(mate.captionsJson);
+          mateMap[recipe.bodyClipId] = map[recipe.bodyClipId];
+          await prisma.repurposeOut.update({
+            where: { id: mate.id },
+            data: { captionsJson: JSON.stringify(mateMap) },
+          });
+        }
+      }
+      await rebuildBody(outputId, recipe.bodyClipId);
+    } else {
+      await rebuildOutput(outputId);
     }
-    await rebuildBody(outputId, recipe.bodyClipId);
-  } else {
-    await rebuildOutput(outputId);
+  } catch {
+    revalidatePath(`/repurposer/${output.batchId}`);
+    redirect(`/repurposer/${output.batchId}?tuned=fail`);
   }
   revalidatePath(`/repurposer/${output.batchId}`);
-  redirect(`/repurposer/${output.batchId}?tuned=1`);
+  redirect(`/repurposer/${output.batchId}?tuned=${rebuildsEveryBodyMate(scope, recipe.bodyClipId) ? "body" : "1"}`);
 }
