@@ -1,4 +1,5 @@
 import { parkCard } from "@/app/calendar/actions";
+import { handle } from "@/lib/targets";
 
 export function DaySlot({
   isoDay,
@@ -20,11 +21,11 @@ export function DaySlot({
         ))}
       </select>
       <input name="scheduledAt" type="datetime-local" defaultValue={`${isoDay}T10:00`} className="field text-xs" required />
-      <select name="accountId" defaultValue={accounts[0]?.id ?? ""} className="field text-xs" required={accounts.length > 0}>
-        <option value="">Which account</option>
+      <select name="accountId" defaultValue="" className="field text-xs">
+        <option value="">Already on the video</option>
         {accounts.map((account) => (
           <option key={account.id} value={account.id}>
-            {account.nickname ? `${account.nickname} · ` : ""}@{account.username}
+            {account.nickname ? `${account.nickname} · ` : ""}{handle(account.username)}
           </option>
         ))}
       </select>

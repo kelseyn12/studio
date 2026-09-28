@@ -6,6 +6,7 @@ import { monthGrid, parseLocalDate, toInputDate } from "@/lib/dates";
 import { machineCounts } from "@/lib/queries";
 import { pickNextAction } from "@/lib/next-action";
 import { prisma } from "@/lib/prisma";
+import { handle } from "@/lib/targets";
 
 export default async function PlanPage({
   searchParams,
@@ -67,7 +68,7 @@ export default async function PlanPage({
           title: card.title,
           status: card.status,
           plannedDate: card.plannedDate ? toInputDate(card.plannedDate) : null,
-          handle: card.account ? `@${card.account.username}` : "No account",
+          handle: card.account ? handle(card.account.username) : "No account",
         }))}
       />
     </Shell>

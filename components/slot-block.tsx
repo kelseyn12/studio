@@ -66,10 +66,10 @@ export function SlotBlock({
       <DropZone
         action="/api/repurpose/clips"
         extra={{ batchId: id, slot, ...(hookText ? { hookText } : {}) }}
-        label={`Add ${title.toLowerCase()}`}
+        label={`Add ${title === "CTAs" ? title : title.toLowerCase()}`}
         accept="video/*"
         maxBytes={STUDIO_FILE_MAX_BYTES}
-        hint={`One take at a time. 4K is fine — it gets shrunk to 1080 on arrival. Under ${formatBytes(STUDIO_FILE_MAX_BYTES)}.`}
+        hint={`One take per file, under ${formatBytes(STUDIO_FILE_MAX_BYTES)}. 4K is fine.`}
       />
     </div>
   );

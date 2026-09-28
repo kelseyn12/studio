@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
+import { handle } from "@/lib/targets";
 
 export function BulkForm({
   waiting,
@@ -62,7 +63,7 @@ export function BulkForm({
           <option value="">Already on each video</option>
           {accounts.map((account) => (
             <option key={account.id} value={account.id}>
-              {account.nickname ? `${account.nickname} · ` : ""}@{account.username}
+              {account.nickname ? `${account.nickname} · ` : ""}{handle(account.username)}
             </option>
           ))}
         </select>

@@ -5,7 +5,7 @@ import { useEffect } from "react";
 
 export function LiveRefresh({
   seconds = 8,
-  message = "This page updates by itself. Send, with editor, and to approve stay in this app.",
+  message = "Updates on its own. No need to refresh.",
 }: {
   seconds?: number;
   message?: string;

@@ -249,3 +249,7 @@
 
 - [X] Deals fit a flat month + view bonuses (Polsia)
   Deal form: flat pay for the month (spreads over the videos owed, live "each video is worth"), or pay per video; CPM stays; view bonuses list ($ at N views, once per video); posts owed and most allowed a day. They owe you adds crossed bonuses. Schema: monthlyPayCents, postsPerDayMax, bonusesJson on both databases.
+
+- [X] ADHD pass over every creator page
+  Only the next setup step shows; done ones fold away. Live's day forms default to the accounts already on the video instead of the first account in the list. Usernames print one @. Add a deal is grouped like Edit this deal. Shorter lines on Today, Cuts, Numbers, Multiply rows, Text hooks, Mix settings, and the cut tool.
+- [ ] Live "Per day" default is 5 regardless of what the deals owe. Could default to the sum of active deals' posts a day, capped by their max.

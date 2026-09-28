@@ -72,7 +72,7 @@ export default async function TodayPage() {
       <div className="space-y-8">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">Today</h1>
-          <p className="mt-1 text-mute">Work, money, and both deal types. One next step on top.</p>
+          <p className="mt-1 text-mute">One next step on top. Everything else can wait.</p>
           <div className="mt-2">
             <LiveRefresh />
           </div>

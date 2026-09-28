@@ -5,6 +5,7 @@ import { DEAL_KIND_LABEL } from "@/lib/deal-kind";
 import { toInputDate } from "@/lib/dates";
 import { REFERENCE_MAX_BYTES } from "@/lib/files";
 import type { DealKind } from "@prisma/client";
+import { handle } from "@/lib/targets";
 
 export function CardBrief({
   card,
@@ -45,7 +46,7 @@ export function CardBrief({
           <option value="">Which account — skip for deal videos, they post to the deal&apos;s accounts</option>
           {accounts.map((account) => (
             <option key={account.id} value={account.id}>
-              {account.nickname ? `${account.nickname} · ` : ""}@{account.username}
+              {account.nickname ? `${account.nickname} · ` : ""}{handle(account.username)}
             </option>
           ))}
         </select>

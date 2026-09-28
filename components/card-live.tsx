@@ -4,7 +4,7 @@ import { CoverPick } from "@/components/cover-pick";
 import { QuickCut } from "@/components/quick-cut";
 import { toInputDateTime } from "@/lib/dates";
 import { formatMoney } from "@/lib/deals";
-import { dealAccounts, describeTargets } from "@/lib/targets";
+import { dealAccounts, describeTargets, handle } from "@/lib/targets";
 import { watchUrl } from "@/lib/urls";
 
 export function CardLive({
@@ -131,7 +131,7 @@ export function CardLive({
         <p className="text-sm text-mute">
           {dealTargets.length > 0
             ? `Schedule it. Posts to ${describeTargets(dealTargets)} at the time you set — one post, every account on this deal.`
-            : `Schedule it. ${card.account ? `@${card.account.username}` : "Pick an account"} gets this video at the time you set.`}
+            : `Schedule it. ${card.account ? handle(card.account.username) : "Pick an account"} gets this video at the time you set.`}
         </p>
         <textarea name="caption" defaultValue={card.caption} placeholder="Caption that ships with the video" className="field min-h-24" />
         <input
@@ -157,7 +157,7 @@ export function CardLive({
                   }
                 />
                 <span>
-                  {account.nickname ? `${account.nickname} · ` : ""}@{account.username}
+                  {account.nickname ? `${account.nickname} · ` : ""}{handle(account.username)}
                   <span className="text-mute"> · {account.network}</span>
                 </span>
               </label>

@@ -66,29 +66,28 @@ function Field({
   );
 }
 
+function Section({ title }: { title: string }) {
+  return <p className="label mt-2 md:col-span-2">{title}</p>;
+}
+
 export default function NewCampaignPage() {
   return (
     <Shell>
       <h1 className="mb-2 text-3xl font-semibold tracking-tight">Add a deal</h1>
       <p className="mb-6 text-mute">
-        Canvas / tech is volume. Traditional UGC is a fee and a video count. View bonuses go on the deal page after you save.
+        Fill what you know. Everything here can be changed on the deal page later, and view bonuses go there too.
       </p>
       <form action={createCampaign} className="grid max-w-3xl gap-4 md:grid-cols-2">
+        <Section title="The deal" />
         <label className="block md:col-span-2">
           <span className="mb-1 block text-xs font-semibold uppercase tracking-[0.14em] text-mute">Deal type</span>
           <select name="kind" className="w-full rounded-xl border border-line bg-lift px-3 py-2" defaultValue="UGC">
-            <option value="TECH">Canvas / tech</option>
-            <option value="UGC">Traditional UGC</option>
+            <option value="TECH">Canvas / tech — volume, posting every day</option>
+            <option value="UGC">Traditional UGC — a fee for a few videos</option>
           </select>
         </label>
-        <Field name="name" label="Campaign" />
+        <Field name="name" label="Deal name" />
         <Field name="brand" label="Brand" />
-        <Field name="videoCount" label="Videos owed" type="number" defaultValue={3} />
-        <Field name="deadlineAt" label="Deadline" type="date" />
-        <label className="md:col-span-2">
-          <span className="mb-1 block text-xs font-semibold uppercase tracking-[0.14em] text-mute">Deliverables</span>
-          <textarea name="deliverables" rows={2} placeholder="3 TikToks, 1 Reel…" className="w-full rounded-xl border border-line bg-lift px-3 py-2" />
-        </label>
         <label className="block">
           <span className="mb-1 block text-xs font-semibold uppercase tracking-[0.14em] text-mute">Status</span>
           <select name="status" className="w-full rounded-xl border border-line bg-lift px-3 py-2">
@@ -96,18 +95,30 @@ export default function NewCampaignPage() {
             <option value="ACTIVE">Active</option>
           </select>
         </label>
+        <Field name="deadlineAt" label="Deadline" type="date" />
+        <label className="md:col-span-2">
+          <span className="mb-1 block text-xs font-semibold uppercase tracking-[0.14em] text-mute">What they expect</span>
+          <textarea name="deliverables" rows={2} placeholder="3 TikToks, 1 Reel…" className="w-full rounded-xl border border-line bg-lift px-3 py-2" />
+        </label>
+
+        <Section title="How they pay" />
         <Field name="basePay" label="Pay per video $" type="number" defaultValue={40} />
         <Field name="monthlyPay" label="Or flat pay for the month $" type="number" defaultValue={0} />
-        <Field name="postsPerDay" label="Posts / day owed" type="number" defaultValue={5} />
-        <Field name="postsPerDayMax" label="Most allowed / day (0 = no cap)" type="number" defaultValue={0} />
+        <Field name="videoCount" label="Videos promised" type="number" defaultValue={3} />
+        <Field name="cpm" label="CPM $ per 1,000 views (0 if none)" type="number" defaultValue={0} />
+
+        <Section title="How much you post" />
+        <Field name="postsPerDay" label="Posts a day you owe" type="number" defaultValue={5} />
+        <Field name="postsPerDayMax" label="Most they allow a day (0 = no cap)" type="number" defaultValue={0} />
         <Field name="accountsAllowed" label="Accounts allowed" type="number" defaultValue={1} />
-        <Field name="minutesPerPost" label="Minutes / post" type="number" defaultValue={10} />
-        <Field name="monthlyHoursEstimate" label="Your hours / month" type="number" defaultValue={15} />
-        <Field name="minViews" label="View minimum" type="number" defaultValue={0} />
-        <Field name="approvalHours" label="Approval hours" type="number" defaultValue={12} />
-        <Field name="creativeFreedom" label="Creative freedom 1-5" type="number" defaultValue={4} />
-        <Field name="cpm" label="CPM $" type="number" defaultValue={0} />
+        <Field name="minutesPerPost" label="Minutes per post" type="number" defaultValue={10} />
+        <Field name="monthlyHoursEstimate" label="Your hours a month" type="number" defaultValue={15} />
+        <Field name="minViews" label="View minimum they require" type="number" defaultValue={0} />
+
+        <Section title="How they work · for the score" />
         <Field name="managerName" label="Manager" />
+        <Field name="approvalHours" label="Hours they take to approve" type="number" defaultValue={12} />
+        <Field name="creativeFreedom" label="Creative freedom 1–5" type="number" defaultValue={4} />
         <label className="block">
           <span className="mb-1 block text-xs font-semibold uppercase tracking-[0.14em] text-mute">Approval</span>
           <select name="approvalFriction" className="w-full rounded-xl border border-line bg-lift px-3 py-2">

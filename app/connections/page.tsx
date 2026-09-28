@@ -2,6 +2,7 @@ import { Shell } from "@/components/shell";
 import { hasOutstand, MANAGED_NETWORKS } from "@/lib/outstand";
 import { prisma } from "@/lib/prisma";
 import { saveAccount } from "./actions";
+import { handle } from "@/lib/targets";
 
 export default async function ConnectionsPage() {
   const [accounts, campaigns] = await Promise.all([
@@ -56,7 +57,7 @@ export default async function ConnectionsPage() {
           accounts.map((account) => (
             <div key={account.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-panel px-5 py-4">
               <div>
-                <p className="font-medium">@{account.username}</p>
+                <p className="font-medium">{handle(account.username)}</p>
                 <p className="text-sm capitalize text-mute">{account.network}</p>
               </div>
               <form action={saveAccount} className="flex flex-wrap gap-2">

@@ -123,8 +123,8 @@ export function BatchSettings({
       <section className="rounded-card border border-line bg-panel p-5">
         <p className="label">Text hooks · optional</p>
         <p className="mt-2 text-sm text-mute">
-          Same clips, new overlay — not a new take. Leave empty and each hook keeps the words typed on it above. Do
-          not use extra lines instead of filming another hook.
+          Leave this empty and each hook keeps the words you typed on it. Lines here put new words on the same clips.
+          That is not a new video, so do not use them instead of filming another hook.
         </p>
         <textarea
           name="hookLines"
@@ -177,9 +177,8 @@ export function BatchSettings({
       <section className="rounded-card border border-line bg-panel p-5">
         <p className="label">Mix settings</p>
         <p className="mt-2 text-sm text-mute">
-          Distinct is another hook take or another body take, not a sat/speed/crop copy of the same clips. Leave copies
-          at 1. Copies exist only if you will post that exact cut a second time and need the file not to match. Text
-          color per copy only runs if copies is 2 or more.
+          A new video means another hook take or another body take. Leave copies at 1. Copies are the same clips with
+          a small nudge, and campaign managers do not count those.
         </p>
         <div className="mt-5 space-y-4">
           <Row label="Use every mix">

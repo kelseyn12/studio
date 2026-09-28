@@ -83,7 +83,7 @@ export function CutTrack({
         />
       </div>
       <p className="text-[11px] text-mute">
-        Drag the yellow ends to chop the start or the end. Click the bar to move through the clip. A dark band is a middle you threw away.
+        Drag the yellow ends to trim the start or end. Click the bar to move. Dark bands are middles you cut.
       </p>
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { dealAccounts, describeTargets } from "@/lib/targets";
+import { dealAccounts, describeTargets, handle } from "@/lib/targets";
 
 export type BatchAccount = {
   id: string;
@@ -88,7 +88,7 @@ export function BatchTargets({
                     }
                   />
                   <span>
-                    {account.name || `@${account.username}`}
+                    {account.name || handle(account.username)}
                     <span className="text-mute"> · {account.network}</span>
                   </span>
                 </label>

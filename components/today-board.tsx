@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { DEAL_KIND_LABEL } from "@/lib/deal-kind";
-import { formatMoney } from "@/lib/deals";
+import { formatMoney, formatMoneyExact } from "@/lib/deals";
 import type { Campaign } from "@prisma/client";
 
 export function TodayBoard({
@@ -67,7 +67,8 @@ function DealLane({ title, href, deals }: { title: string; href: string; deals: 
               <Link href={`/campaigns/${deal.id}`} className="block rounded-xl bg-lift px-3 py-2">
                 <p className="font-medium">{deal.brand || deal.name}</p>
                 <p className="text-xs text-mute">
-                  {DEAL_KIND_LABEL[deal.kind]} · {formatMoney(deal.basePayCents)}
+                  {DEAL_KIND_LABEL[deal.kind]} ·{" "}
+                  {deal.monthlyPayCents > 0 ? `${formatMoney(deal.monthlyPayCents)} / mo` : `${formatMoneyExact(deal.basePayCents)} a video`}
                 </p>
               </Link>
             </li>

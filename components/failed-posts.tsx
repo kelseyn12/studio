@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { clearFailedPost, retryFailedPost } from "@/app/calendar/actions";
+import { handle } from "@/lib/targets";
 
 export function FailedPosts({
   jobs,
@@ -32,7 +33,7 @@ export function FailedPosts({
                 {job.card.title}
               </Link>
               <p className="truncate text-xs text-mute">
-                @{job.account.username}
+                {handle(job.account.username)}
                 {job.error ? ` · ${job.error}` : ""}
               </p>
             </div>

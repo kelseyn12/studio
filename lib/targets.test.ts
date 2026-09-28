@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dealAccounts, describeTargets, networkShort, parseAccountIds, targetAccounts } from "@/lib/targets";
+import { dealAccounts, describeTargets, handle, networkShort, parseAccountIds, targetAccounts } from "@/lib/targets";
 
 const accounts = [
   { id: "polsia-ig", network: "instagram", username: "polsia", isActive: true, campaignId: "polsia" },
@@ -8,6 +8,14 @@ const accounts = [
   { id: "morphi-yt-old", network: "youtube", username: "morphi", isActive: false, campaignId: "morphi" },
   { id: "me-ig", network: "instagram", username: "kelsey", isActive: true, campaignId: null },
 ];
+
+describe("handle", () => {
+  it("shows one @ even when YouTube synced the username with its own", () => {
+    expect(handle("polsia")).toBe("@polsia");
+    expect(handle("@kelseynocekugc")).toBe("@kelseynocekugc");
+    expect(describeTargets([{ network: "youtube", username: "@kelso" }])).toBe("YT @kelso");
+  });
+});
 
 describe("targetAccounts", () => {
   it("sends a deal video to every active account on that deal", () => {

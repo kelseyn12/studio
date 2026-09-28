@@ -7,6 +7,7 @@ import { formatCompact, formatMoney } from "@/lib/deals";
 import { scoreFormats, WIN_VIEWS } from "@/lib/formats";
 import { dashboardTotals, studioSnapshot, viewsByDay } from "@/lib/queries";
 import { prisma } from "@/lib/prisma";
+import { handle } from "@/lib/targets";
 
 export default async function AnalyticsPage() {
   const [totals, series, videos, accounts, snap, byAccount, formats] = await Promise.all([
@@ -62,7 +63,7 @@ export default async function AnalyticsPage() {
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">Numbers</h1>
-          <p className="mt-1 text-mute">Real posted videos only. Pull Outstand so campaigns cannot leak what you are owed.</p>
+          <p className="mt-1 text-mute">Real posted videos only. Pull from Outstand and the money you are owed stays right.</p>
         </div>
         <RefreshStats />
       </div>
@@ -146,7 +147,7 @@ export default async function AnalyticsPage() {
                 className="flex items-center justify-between gap-3 rounded-2xl border border-line bg-panel px-4 py-3"
               >
                 <div className="min-w-0">
-                  <p className="truncate font-medium">@{account.username}</p>
+                  <p className="truncate font-medium">{handle(account.username)}</p>
                   <p className="text-xs text-mute">
                     {account.network} · {account.posts} post{account.posts === 1 ? "" : "s"}
                   </p>

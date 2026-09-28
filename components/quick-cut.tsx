@@ -216,8 +216,7 @@ export function QuickCut({
             </button>
           </div>
           <p className="text-[11px] text-mute">
-            Yellow is what you keep. Play starts there, skips each dark band, and stops at the yellow end. Drag the
-            yellow ends to chop the start or the end. For a middle: Drop from here, play to the end of it, Drop to here.
+            Yellow is what you keep. To cut a middle: Drop from here, play past it, Drop to here.
           </p>
         </>
       )}

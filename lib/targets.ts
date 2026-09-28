@@ -57,9 +57,14 @@ export function targetsByLook<T extends { network: string }>(targets: T[]): Arra
   }));
 }
 
+/** "@polsia" — one @ even when the synced username already carries one (YouTube does). */
+export function handle(username: string): string {
+  return `@${username.replace(/^@+/, "")}`;
+}
+
 /** "IG @polsia · FB @polsia" — short enough for a card footer. */
 export function describeTargets(accounts: Array<{ network: string; username: string }>): string {
-  return accounts.map((account) => `${networkShort(account.network)} @${account.username}`).join(" · ");
+  return accounts.map((account) => `${networkShort(account.network)} ${handle(account.username)}`).join(" · ");
 }
 
 const NETWORK_SHORT: Record<string, string> = {

@@ -13,6 +13,7 @@ import { parseHookLayout } from "@/lib/hook-layout";
 import { LiveRefresh } from "@/components/live-refresh";
 import { prisma } from "@/lib/prisma";
 import { createBatch, renameBatch, resetBatch } from "../actions";
+import { handle } from "@/lib/targets";
 
 export default async function BatchPage({
   params,
@@ -107,7 +108,7 @@ export default async function BatchPage({
             slot="HOOK"
             title="Hooks"
             meta={`${hooks.length} options · first clip · one picked per video`}
-            hint="Openings. Mix 1–5 puts numbers here from the first frame. Body lines sit on those same rows. Spoken words skip this row."
+            hint="Your openings. Words go on the hook. Spoken captions skip this row."
             clips={hooks}
             showHook
             hookText={winningHook}
@@ -120,7 +121,7 @@ export default async function BatchPage({
             slot="DEMO"
             title="Bodies"
             meta={`${bodies.length} options · middle clip · usually one, can be more`}
-            hint="Type the points on Words. Spoken sentences are fixed on each finished video, under Words + music."
+            hint="Your middles. List points go on Words. Spoken captions land here."
             clips={bodies}
             look={look}
             listCount={batch.listCount}
@@ -131,7 +132,7 @@ export default async function BatchPage({
             slot="CTA"
             title="CTAs"
             meta={`${ctas.length} options · last clip · one picked per video`}
-            hint="Endings. Same Words/Box as the hook. Spoken words land here when you are talking."
+            hint="Your endings. Words and Box work like the hook. Spoken captions land here too."
             clips={ctas}
             look={look}
             listCount={batch.listCount}
@@ -200,8 +201,8 @@ export default async function BatchPage({
           isActive: account.isActive,
           campaignId: account.campaignId,
           name: account.nickname
-            ? `${account.nickname} · @${account.username}`
-            : `${account.network} · @${account.username}`,
+            ? `${account.nickname} · ${handle(account.username)}`
+            : `${account.network} · ${handle(account.username)}`,
         }))}
       />
 
