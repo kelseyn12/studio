@@ -1,7 +1,7 @@
+import { AccountDeal } from "@/components/account-deal";
 import { Shell } from "@/components/shell";
 import { hasOutstand, MANAGED_NETWORKS } from "@/lib/outstand";
 import { prisma } from "@/lib/prisma";
-import { saveAccount } from "./actions";
 import { handle } from "@/lib/targets";
 
 export default async function ConnectionsPage() {
@@ -15,8 +15,8 @@ export default async function ConnectionsPage() {
     <Shell>
       <h1 className="text-3xl font-semibold tracking-tight">Accounts</h1>
       <p className="mt-1 mb-6 max-w-2xl text-mute">
-        Link TikTok, Instagram, YouTube, and X in Outstand. Then Sync so Studio can post as those accounts. Put each
-        account on its deal — a deal video posts to every account on that deal at once.
+        Link TikTok, Instagram, YouTube, and X in Outstand. Then Sync so Studio can post as those accounts. Tap a deal
+        on an account and it saves right away — gold means that's the one.
       </p>
       <div className="mb-6 flex flex-wrap gap-2">
         <a
@@ -60,24 +60,12 @@ export default async function ConnectionsPage() {
                 <p className="font-medium">{handle(account.username)}</p>
                 <p className="text-sm capitalize text-mute">{account.network}</p>
               </div>
-              <form action={saveAccount} className="flex flex-wrap gap-2">
-                <input type="hidden" name="id" value={account.id} />
-                <input
-                  name="nickname"
-                  defaultValue={account.nickname}
-                  placeholder="Label — personal, OpenArt…"
-                  className="field w-52"
-                />
-                <select name="campaignId" defaultValue={account.campaignId ?? ""} className="field w-48">
-                  <option value="">Personal — no deal</option>
-                  {campaigns.map((campaign) => (
-                    <option key={campaign.id} value={campaign.id}>
-                      {campaign.name}
-                    </option>
-                  ))}
-                </select>
-                <button className="rounded-xl border border-line px-3 py-2 text-sm">Save</button>
-              </form>
+              <AccountDeal
+                id={account.id}
+                nickname={account.nickname}
+                campaignId={account.campaignId}
+                campaigns={campaigns}
+              />
             </div>
           ))
         )}

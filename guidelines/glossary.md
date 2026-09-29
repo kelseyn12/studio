@@ -67,7 +67,7 @@
 - `postIdsFor` — `lib/analytics.ts` — distinct Outstand post ids behind a video (card + publish jobs); analytics sync sums them.
 - `targetAccounts` / `dealAccounts` / `parseAccountIds` / `describeTargets` / `networkShort` / `accountsForLook` / `LOOK_APPS` — `lib/targets.ts` — checked Mix/Live ids win, else the deal list. `accountsForLook` keeps IG with FB and TT with YT. Mix cards use `LOOK_APPS` pills.
 - `watchUrl` / `isPublicMediaUrl` — `lib/urls.ts` / `lib/r2.ts` — in-app play/download always goes through `/api/files`. S3 API hosts (`*.r2.cloudflarestorage.com`) are not treated as public.
-- `saveAccount` — `app/connections/actions.ts` — saves an account's label and deal (was `renameAccount`).
+- `saveAccount` — `app/connections/actions.ts` — saves an account's label and deal. `AccountDeal` (`components/account-deal.tsx`) taps a deal and saves immediately.
 - `BatchTargets` — `components/batch-targets.tsx` — Deal · Format · Posts-to/Account rows on Mix settings; also exports `Row`.
 - `textStyleForNetworks` — `lib/text-style.ts` — one look for a set of networks (all TikTok → tiktok, all Meta → instagram, mixed → tiktok).
 - `handle(username)` — `lib/targets.ts` — "@name" with exactly one @, whatever the sync stored. Every place that prints an account username uses it (Live day forms, Accounts, Numbers, card pages, batch targets, post chips, failed posts, `describeTargets`).
