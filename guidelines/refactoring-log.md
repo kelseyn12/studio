@@ -1,5 +1,5 @@
 # Refactoring log
-- 2026-09-29 — Live now marks a video Posted when Outstand says an app went live. The calendar chip says Posted. Files are re-encoded without edit lists before they ship, and YouTube gets a 1280×720 thumb of the chosen frame.
+- 2026-09-29 — The cover you pick is the first frame of the file that ships, and that same picture is sent as the Instagram and TikTok cover. TikTok and YouTube Shorts were choosing their own frame, so the hook never showed.
 - 2026-09-29 — Retrying the apps that failed no longer takes the video off its day when TikTok already published. The original time stays on the calendar.
 - 2026-09-29 — A post could go live on TikTok while Instagram, Facebook, and YouTube failed, and Live still said queued. Opening Live now reads each app's result. Try again sends only the apps that failed, and the stored file name is plain letters so Facebook's downloader gets a simple link.
 - 2026-09-29 — Film day chips were squeezing titles down to one letter. They now show Mix N and the hook, and the month can scroll sideways so the columns stay wide enough to read.

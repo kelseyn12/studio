@@ -1,7 +1,7 @@
-import { mkdir, rename, rm } from "fs/promises";
+import { copyFile, mkdir, rename, rm } from "fs/promises";
 import path from "path";
 import { localRoot } from "@/lib/files";
-import { runFfmpeg } from "@/lib/ffmpeg";
+import { clipHasAudio, runFfmpeg } from "@/lib/ffmpeg";
 
 /** YouTube custom thumbs are 1280×720. A 9:16 cover is padded so the chosen frame stays intact. */
 export const YOUTUBE_THUMB_FILTER =
@@ -45,4 +45,64 @@ export async function withoutEditLists(fileAbs: string): Promise<void> {
   ]);
   await rm(fileAbs, { force: true });
   await rename(tempAbs, fileAbs);
+}
+
+/** How long the chosen cover sits at the front. Apps that ignore a cover image still open on this frame. */
+export const COVER_HOLD_SECONDS = 0.15;
+
+/**
+ * Puts the saved cover (the frame with the hook) at the start of the file, then re-encodes
+ * without an edit list. TikTok and YouTube Shorts pick a frame from the video; this makes that
+ * frame the one you chose.
+ */
+export async function prependCover(videoAbs: string, coverAbs: string): Promise<void> {
+  const tempAbs = `${videoAbs}.cover.mp4`;
+  const holdMs = Math.round(COVER_HOLD_SECONDS * 1000);
+  const hasAudio = await clipHasAudio(videoAbs);
+  const video = "[1:v]setsar=1,fps=30,format=yuv420p,setpts=PTS-STARTPTS[vid]";
+  const still =
+    "[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1,fps=30,format=yuv420p,setpts=PTS-STARTPTS[cover]";
+  const chain = hasAudio
+    ? `${still};${video};[cover][vid]concat=n=2:v=1:a=0[outv];[1:a]adelay=${holdMs}|${holdMs},asetpts=PTS-STARTPTS[outa]`
+    : `${still};${video};[cover][vid]concat=n=2:v=1:a=0[outv]`;
+  await runFfmpeg([
+    "-loop",
+    "1",
+    "-framerate",
+    "30",
+    "-t",
+    String(COVER_HOLD_SECONDS),
+    "-i",
+    coverAbs,
+    "-i",
+    videoAbs,
+    "-filter_complex",
+    chain,
+    "-map",
+    "[outv]",
+    ...(hasAudio ? ["-map", "[outa]", "-c:a", "aac", "-b:a", "192k"] : []),
+    "-c:v",
+    "libx264",
+    "-preset",
+    "veryfast",
+    "-crf",
+    "18",
+    "-pix_fmt",
+    "yuv420p",
+    "-movflags",
+    "+faststart",
+    "-use_editlist",
+    "0",
+    "-avoid_negative_ts",
+    "make_zero",
+    tempAbs,
+  ]);
+  await rm(videoAbs, { force: true });
+  await rename(tempAbs, videoAbs);
+}
+
+export async function shippingCopy(videoAbs: string): Promise<string> {
+  const copy = `${videoAbs}.ship.mp4`;
+  await copyFile(videoAbs, copy);
+  return copy;
 }

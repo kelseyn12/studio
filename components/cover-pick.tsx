@@ -73,7 +73,7 @@ export function CoverPick({
       <p className="text-xs text-mute">
         {savedAt != null
           ? "Saved. Wrong frame? Play to a new one and tap again."
-          : "This frame posts as the thumbnail on Instagram, TikTok, and YouTube."}
+          : "Play to the frame with the hook, then save. That picture is the cover on Instagram, TikTok, and YouTube."}
       </p>
       {error ? <p className="text-xs text-review">{error}</p> : null}
     </div>

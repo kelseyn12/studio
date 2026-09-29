@@ -17,6 +17,8 @@ export type TikTokOptions = {
   postMode: typeof TIKTOK_POST_MODE;
   privacyLevel: typeof TIKTOK_PRIVACY;
   videoCoverTimestampMs?: number;
+  /** The chosen cover JPEG. TikTok uses it when the app accepts an image; the file also starts on that frame. */
+  videoCoverImageUrl?: string;
 };
 
 export type NetworkOptions = {
@@ -29,7 +31,7 @@ export type NetworkOptions = {
 export function wantsCoverUrl(networks: string[]): boolean {
   return networks.some((network) => {
     const name = network.toLowerCase();
-    return name === "instagram" || name === "youtube";
+    return name === "instagram" || name === "youtube" || name === "tiktok";
   });
 }
 
@@ -48,8 +50,8 @@ export function coverCanChange(status: string): boolean {
 }
 
 /**
- * Per-network Outstand options for a cover. `coverUrl` is a public JPEG URL of the frame, or ""
- * when none could be made — Instagram then falls back to the frame offset.
+ * Per-network Outstand options for a cover. The shipped file starts on this frame, so a timestamp
+ * of 0 is that picture. `coverUrl` is the 9:16 JPEG. `youtubeUrl` is the same frame at 1280×720.
  */
 export function coverOptions(
   networks: string[],
@@ -61,10 +63,14 @@ export function coverOptions(
   const names = new Set(networks.map((network) => network.toLowerCase()));
   const options: NetworkOptions = {};
   if (names.has("instagram")) {
-    options.instagram = coverUrl ? { reelCoverUrl: coverUrl } : { reelThumbOffset: coverMs(cover.coverAt) };
+    options.instagram = coverUrl ? { reelCoverUrl: coverUrl } : { reelThumbOffset: 0 };
   }
   if (names.has("youtube") && youtubeUrl) options.youtube = { thumbnailUrl: youtubeUrl };
-  if (names.has("tiktok")) options.tiktok = tiktokBlock(coverMs(cover.coverAt));
+  if (names.has("tiktok")) {
+    options.tiktok = coverUrl
+      ? { ...tiktokBlock(0), videoCoverImageUrl: coverUrl }
+      : tiktokBlock(0);
+  }
   return options;
 }
 

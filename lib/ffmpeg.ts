@@ -116,8 +116,8 @@ export function escapeDrawText(text: string): string {
 export async function writeThumb(inputAbs: string, outputRel: string, at = 0): Promise<string> {
   const outputAbs = path.join(localRoot(), outputRel);
   await mkdir(path.dirname(outputAbs), { recursive: true });
-  const seek = at > 0.05 ? ["-ss", at.toFixed(2)] : [];
-  await runFfmpeg([...seek, "-i", inputAbs, "-vframes", "1", "-q:v", "3", outputAbs]);
+  const seek = at > 0.05 ? ["-ss", at.toFixed(3)] : [];
+  await runFfmpeg(["-i", inputAbs, ...seek, "-vframes", "1", "-q:v", "2", outputAbs]);
   return outputRel;
 }
 

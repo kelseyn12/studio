@@ -25,14 +25,12 @@ describe("coverOptions", () => {
     ).toEqual({
       instagram: { reelCoverUrl: url },
       youtube: { thumbnailUrl: "https://media.outstand.so/yt.jpg" },
-      tiktok: { ...tiktokLive, videoCoverTimestampMs: 2345 },
+      tiktok: { ...tiktokLive, videoCoverTimestampMs: 0, videoCoverImageUrl: url },
     });
   });
 
-  it("falls back to the frame offset on Instagram when no public image exists", () => {
-    expect(coverOptions(["Instagram", "youtube"], cover, "")).toEqual({
-      instagram: { reelThumbOffset: 2345 },
-    });
+  it("uses the cover picture itself when no public image was uploaded", () => {
+    expect(coverOptions(["Instagram", "youtube"], cover, "").instagram).toEqual({ reelThumbOffset: 0 });
   });
 
   it("leaves Facebook alone", () => {
@@ -42,7 +40,7 @@ describe("coverOptions", () => {
 
 describe("wantsCoverUrl", () => {
   it("only asks for an image when an app can take one", () => {
-    expect(wantsCoverUrl(["tiktok", "facebook"])).toBe(false);
+    expect(wantsCoverUrl(["tiktok", "facebook"])).toBe(true);
     expect(wantsCoverUrl(["tiktok", "YouTube"])).toBe(true);
   });
 });
