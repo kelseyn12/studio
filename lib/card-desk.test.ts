@@ -1,5 +1,21 @@
 import { describe, expect, it } from "vitest";
-import { deskStage, nextStatusFor, pickFinished, sendBackStatus } from "@/lib/card-desk";
+import { deskStage, filmChipLabel, nextStatusFor, pickFinished, sendBackStatus } from "@/lib/card-desk";
+import { pillLabel } from "@/lib/pipeline";
+
+describe("filmChipLabel", () => {
+  it("drops the batch prefix so a day cell can show the mix", () => {
+    expect(filmChipLabel("This week · mix 6 · BANGER 💥")).toBe("Mix 6 · BANGER 💥");
+    expect(filmChipLabel("Fridge filter")).toBe("Fridge filter");
+  });
+});
+
+describe("pillLabel", () => {
+  it("says Scheduled only after a day is set", () => {
+    expect(pillLabel("READY", new Date("2026-09-30T15:00:00.000Z"))).toBe("Scheduled");
+    expect(pillLabel("READY", null)).toBe("To schedule");
+    expect(pillLabel("POSTED", new Date())).toBe("Posted");
+  });
+});
 
 describe("card desk", () => {
   it("keeps publish off the card until a file exists", () => {

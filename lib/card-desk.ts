@@ -89,3 +89,12 @@ export function fileLooks(assets: Array<{ kind: string; textStyle: string }>): F
   const show = looks.length > 0 ? looks : (["plain"] as DrawnStyle[]);
   return show.map((look) => ({ look, tag: LOOK_TAG[look] || "All apps" }));
 }
+
+/** "Mix 6 · BANGER" — the month cell is too narrow for the full studio title. */
+export function filmChipLabel(title: string): string {
+  const parts = title.split("·").map((part) => part.trim()).filter(Boolean);
+  const mix = parts.find((part) => /^mix\s+\d+$/i.test(part));
+  if (!mix) return title;
+  const rest = parts.filter((part) => part !== mix && !/^this week$/i.test(part));
+  return [`Mix ${mix.replace(/^mix\s+/i, "")}`, ...rest].join(" · ");
+}

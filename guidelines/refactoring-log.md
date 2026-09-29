@@ -1,4 +1,6 @@
 # Refactoring log
+- 2026-09-29 — Film day chips were squeezing titles down to one letter. They now show Mix N and the hook, and the month can scroll sideways so the columns stay wide enough to read.
+- 2026-09-29 — A video with a day says Scheduled on the video page, Today, Deals, Pipeline, and the Schedule step. To schedule is only for a finished video with no day.
 - 2026-09-29 — Week chips name the video. The day column asks for a time only, and a second video can be set on that same day while the first is still uploading.
 - 2026-09-29 — Library's Ready pill said To schedule even after a day was set. It now says Scheduled, and the link says Open.
 - 2026-09-29 — Try again says Trying… while the upload runs. The click used to sit there for a minute with no change.

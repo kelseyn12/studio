@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { deleteVideo } from "@/app/cards/[id]/actions";
+import { filmChipLabel } from "@/lib/card-desk";
 
 export type PlanChip = {
   id: string;
@@ -40,7 +41,8 @@ export function PlanBoard({
 
   return (
     <div>
-      <div className="grid grid-cols-7 gap-2">
+      <div className="overflow-x-auto">
+      <div className="grid min-w-[64rem] grid-cols-7 gap-2">
       {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
         <p key={day} className="px-2 text-xs uppercase text-mute">
           {day}
@@ -68,6 +70,7 @@ export function PlanBoard({
           </div>
         );
       })}
+      </div>
       </div>
       {loose.length > 0 ? (
         <section className="mt-8">
@@ -104,11 +107,11 @@ function Chip({ card, onDelete }: { card: PlanChip; onDelete: () => void }) {
       className="rounded-lg bg-lift px-2 py-1"
     >
       <div className="flex items-start justify-between gap-1">
-        <a href={`/cards/${card.id}`} className="min-w-0 flex-1 cursor-grab">
-          <p className="truncate text-xs">{card.title}</p>
-          <p className="truncate text-[10px] text-mute">
-            {card.handle} · {card.status.toLowerCase()}
-          </p>
+        <a href={`/cards/${card.id}`} title={card.title} className="min-w-0 flex-1 cursor-grab">
+          <p className="line-clamp-2 text-xs leading-snug">{filmChipLabel(card.title)}</p>
+          {card.handle && card.handle !== "No account" ? (
+            <p className="truncate text-[10px] text-mute">{card.handle}</p>
+          ) : null}
         </a>
         <button type="button" onClick={onDelete} className="shrink-0 text-xs text-mute" aria-label="Delete video">
           ×

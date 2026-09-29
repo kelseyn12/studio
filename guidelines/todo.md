@@ -297,6 +297,10 @@
   Chips show what's already set. Tap a day to open that week and schedule there.
 - [X] Mix upload no longer dies on a 403
   The file is sent on the exact link Outstand signed. Try again on the banner uploads mix 3.
+- [X] Film day chips stay readable
+  A month cell shows Mix N and the hook, not one letter and "No account". The grid scrolls sideways instead of crushing the days.
+- [X] Scheduled replaces To schedule everywhere a video has a day
+  The pill and the Schedule step use the same day. Mixes with no day still say To schedule.
 - [X] Week day shows the video, and the time stays on that day
   The chip names the mix. A second video is another time on the same day, not the next day's date picker.
 - [X] Library says Scheduled after a day is set
