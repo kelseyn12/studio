@@ -6,6 +6,7 @@ import { requireUser } from "@/lib/auth";
 import { cancelPost } from "@/lib/outstand";
 import { prisma } from "@/lib/prisma";
 import { queueCard } from "@/lib/publish";
+import { retryAccountIds } from "@/lib/publish-sync";
 import { canUnschedule, cancelAlreadyGone, postsToCancel } from "@/lib/unschedule";
 
 const RETRY_DELAY_MS = 5 * 60 * 1000;
@@ -71,14 +72,21 @@ export async function unscheduleCard(formData: FormData) {
 export async function retryFailedPost(formData: FormData) {
   await requireUser();
   const jobId = String(formData.get("jobId") || "");
-  const job = await prisma.publishJob.findUnique({ where: { id: jobId } });
-  if (!job) return;
-  await prisma.publishJob.delete({ where: { id: jobId } });
+  const failed = await prisma.publishJob.findMany({
+    where: { status: "FAILED" },
+    include: { account: { select: { network: true } } },
+  });
+  const job = failed.find((row) => row.id === jobId);
+  const accountIds = retryAccountIds(failed, jobId);
+  if (!job || accountIds.length === 0) return;
+  await prisma.publishJob.deleteMany({
+    where: { cardId: job.cardId, status: "FAILED", accountId: { in: accountIds } },
+  });
   const when =
     job.scheduledAt && job.scheduledAt > new Date()
       ? job.scheduledAt
       : new Date(Date.now() + RETRY_DELAY_MS);
-  await queueCard(job.cardId, when, null);
+  await queueCard(job.cardId, when, accountIds);
   revalidatePath("/calendar");
   revalidatePath("/");
 }

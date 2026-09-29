@@ -21,7 +21,7 @@ export function FailedPosts({
         {jobs.length} did not post
       </h2>
       <p className="mt-1 text-sm text-mute">
-        Outstand did not take these. Fix the reason (account, file), then Try again.
+        These apps rejected the post. Try again sends only the ones that failed, so TikTok is not posted a second time.
       </p>
       <div className="mt-4 space-y-2">
         {jobs.map((job) => (

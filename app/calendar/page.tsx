@@ -18,6 +18,7 @@ import {
 } from "@/lib/dates";
 import { fileLooks } from "@/lib/card-desk";
 import { prisma } from "@/lib/prisma";
+import { syncQueuedPublishes } from "@/lib/publish-sync";
 import { targetAccounts, targetApps } from "@/lib/targets";
 import { WaitingVideos } from "@/components/waiting-videos";
 
@@ -34,6 +35,7 @@ export default async function CalendarPage({
   searchParams: Promise<{ view?: string; from?: string; ship?: string }>;
 }) {
   const params = await searchParams;
+  await syncQueuedPublishes();
   const view = asView(params.view);
   const anchor = params.from ? parseLocalDate(params.from) : new Date();
   const weekStart = startOfWeek(anchor);
@@ -190,7 +192,7 @@ export default async function CalendarPage({
               <div className="flex items-center gap-2">
                 {view === "scheduled" ? <CancelSchedule cardId={card.id} /> : null}
                 {view === "posted" ? <PaidButton card={card} /> : null}
-                <StatusPill status={card.status} label={view === "scheduled" && card.status === "READY" ? "Scheduled" : undefined} />
+                <StatusPill status={card.status} scheduledAt={card.scheduledAt} />
               </div>
             </div>
           ))}

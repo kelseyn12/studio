@@ -1,4 +1,4 @@
-import { postedAtFromPost, createPost, hasOutstand, uploadMedia, type OutstandPost } from "@/lib/outstand";
+import { postedAtFromPost, createPost, hasOutstand, safeUploadName, uploadMedia, type OutstandPost } from "@/lib/outstand";
 import { pickFinished, pickForLook } from "@/lib/card-desk";
 import { ensureLocal } from "@/lib/files";
 import { postOptions, wantsCoverUrl } from "@/lib/post-cover";
@@ -79,7 +79,9 @@ export async function queueCard(cardId: string, when: Date, accountId?: string |
     } else if (!finished) {
       error = "No video file to ship";
     } else {
-      await prisma.publishJob.deleteMany({ where: { cardId, status: "FAILED" } });
+      await prisma.publishJob.deleteMany({
+        where: { cardId, status: "FAILED", accountId: { in: targets.map((account) => account.id) } },
+      });
       for (const group of targetsByLook(targets)) {
         try {
           const asset = pickForLook(card.assets, group.look) ?? finished;
@@ -88,7 +90,7 @@ export async function queueCard(cardId: string, when: Date, accountId?: string |
             accounts: group.accounts.map((account: SocialAccount) => account.outstandAccountId),
             content: card.caption || card.title,
             scheduledAt: when.toISOString(),
-            media: [{ url: await shippableUrl(asset), filename: asset.filename || "video.mp4" }],
+            media: [{ url: await shippableUrl(asset), filename: safeUploadName(asset.filename || "video.mp4") }],
             options: postOptions(networks, asset, await shippableCoverUrl(asset, networks)),
           });
           posts.push(post);

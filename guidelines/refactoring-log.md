@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-09-29 — A post could go live on TikTok while Instagram, Facebook, and YouTube failed, and Live still said queued. Opening Live now reads each app's result. Try again sends only the apps that failed, and the stored file name is plain letters so Facebook's downloader gets a simple link.
 - 2026-09-29 — Film day chips were squeezing titles down to one letter. They now show Mix N and the hook, and the month can scroll sideways so the columns stay wide enough to read.
 - 2026-09-29 — A video with a day says Scheduled on the video page, Today, Deals, Pipeline, and the Schedule step. To schedule is only for a finished video with no day.
 - 2026-09-29 — Week chips name the video. The day column asks for a time only, and a second video can be set on that same day while the first is still uploading.
