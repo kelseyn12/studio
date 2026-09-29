@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { dealAccounts, describeTargets, handle, networkShort, parseAccountIds, targetAccounts } from "@/lib/targets";
+import {
+  accountsForLook,
+  dealAccounts,
+  describeTargets,
+  handle,
+  LOOK_APPS,
+  networkShort,
+  parseAccountIds,
+  targetAccounts,
+} from "@/lib/targets";
 
 const accounts = [
   { id: "polsia-ig", network: "instagram", username: "polsia", isActive: true, campaignId: "polsia" },
@@ -28,9 +37,18 @@ describe("targetAccounts", () => {
     expect(ids).toEqual(["morphi-tt"]);
   });
 
-  it("ignores a picked account when the deal owns accounts", () => {
-    const ids = targetAccounts(accounts, { campaignId: "polsia", accountId: null }, "me-ig").map((account) => account.id);
-    expect(ids).toEqual(["polsia-ig", "polsia-fb"]);
+  it("uses the checked accounts so you can add the other look pair on a deal", () => {
+    const ids = targetAccounts(accounts, { campaignId: "polsia", accountId: null }, ["polsia-ig", "me-ig"]).map(
+      (account) => account.id,
+    );
+    expect(ids).toEqual(["polsia-ig", "me-ig"]);
+  });
+
+  it("falls back to every deal account when nothing is checked", () => {
+    expect(targetAccounts(accounts, { campaignId: "polsia", accountId: null }).map((account) => account.id)).toEqual([
+      "polsia-ig",
+      "polsia-fb",
+    ]);
   });
 
   it("falls back to the picked or saved account for personal videos", () => {
@@ -51,10 +69,35 @@ describe("targetAccounts", () => {
     expect(parseAccountIds("a, b a")).toEqual(["a", "b"]);
   });
 
+  it("keeps saved Mix / Live checks even when the deal also has accounts", () => {
+    const ids = targetAccounts(accounts, { campaignId: "polsia", accountId: null, accountIds: "me-ig,polsia-ig" }).map(
+      (account) => account.id,
+    );
+    expect(ids).toEqual(["polsia-ig", "me-ig"]);
+  });
+
+  it("names the apps on each mix", () => {
+    expect(LOOK_APPS.instagram).toEqual(["IG", "FB"]);
+    expect(LOOK_APPS.tiktok).toEqual(["TT", "YT"]);
+  });
+
   it("describes targets short", () => {
     expect(describeTargets(dealAccounts(accounts, "polsia"))).toBe("IG @polsia · FB @polsia");
     expect(networkShort("TikTok")).toBe("TT");
     expect(networkShort("bluesky")).toBe("bluesky");
+  });
+});
+
+describe("accountsForLook", () => {
+  it("keeps IG with Facebook and TikTok with YouTube", () => {
+    const mix = [
+      { network: "instagram", isActive: true },
+      { network: "facebook", isActive: true },
+      { network: "tiktok", isActive: true },
+      { network: "youtube", isActive: true },
+    ];
+    expect(accountsForLook(mix, "instagram").map((account) => account.network)).toEqual(["instagram", "facebook"]);
+    expect(accountsForLook(mix, "tiktok").map((account) => account.network)).toEqual(["tiktok", "youtube"]);
   });
 });
 

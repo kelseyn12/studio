@@ -29,21 +29,38 @@ export function parseAccountIds(raw: string | string[] | null | undefined): stri
   return [...new Set(parts.map((part) => part.trim()).filter(Boolean))];
 }
 
-/** The accounts a video ships to: all of its deal's accounts, else every id checked on Mix / Live. */
+/** Active accounts that take this look — IG · FB or TT · YT. */
+export function accountsForLook<T extends { network: string; isActive?: boolean }>(accounts: T[], look: string): T[] {
+  return accounts.filter(
+    (account) => account.isActive !== false && textStyleForNetwork(account.network) === look,
+  );
+}
+
+/** Short app names on a mix card — IG + FB, or TT + YT. */
+export const LOOK_APPS: Record<string, string[]> = {
+  instagram: ["IG", "FB"],
+  tiktok: ["TT", "YT"],
+  plain: [],
+};
+
+/**
+ * The accounts a video ships to. Checked ids on Mix / Live win, so an IG · FB file can go to
+ * IG + FB and a TT · YT file can go to TT + YT even when the deal is missing one pair.
+ * No checks → every account on the deal, else the ids saved on the card.
+ */
 export function targetAccounts<T extends { id: string; isActive: boolean; campaignId: string | null }>(
   accounts: T[],
   card: { campaignId: string | null; accountId: string | null; accountIds?: string | null },
   pickedAccountId?: string | string[] | null,
 ): T[] {
-  const fromDeal = dealAccounts(accounts, card.campaignId);
-  if (fromDeal.length > 0) return fromDeal;
-  const ids = [
-    ...parseAccountIds(pickedAccountId),
-    ...parseAccountIds(card.accountIds),
-    ...(card.accountId ? [card.accountId] : []),
-  ];
-  const wanted = new Set(ids);
-  return accounts.filter((account) => account.isActive && wanted.has(account.id));
+  const picked = parseAccountIds(pickedAccountId);
+  const saved = parseAccountIds(card.accountIds);
+  const ids = picked.length > 0 ? picked : saved.length > 0 ? saved : card.accountId ? [card.accountId] : [];
+  if (ids.length > 0) {
+    const wanted = new Set(ids);
+    return accounts.filter((account) => account.isActive && wanted.has(account.id));
+  }
+  return dealAccounts(accounts, card.campaignId);
 }
 
 /**

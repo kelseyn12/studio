@@ -6,7 +6,7 @@ import { pickFinished, shipLooks } from "@/lib/card-desk";
 import { toInputDateTime } from "@/lib/dates";
 import { formatMoney } from "@/lib/deals";
 import { coverCanChange } from "@/lib/post-cover";
-import { dealAccounts, describeTargets, handle, targetAccounts } from "@/lib/targets";
+import { dealAccounts, describeTargets, handle, parseAccountIds, targetAccounts } from "@/lib/targets";
 import { watchUrl } from "@/lib/urls";
 
 type LiveAsset = {
@@ -58,6 +58,13 @@ export function CardLive({
   const targets = targetAccounts(accounts, card);
   const looks = shipLooks(assets, targets);
   const edited = pickFinished(assets);
+  const selectedIds = parseAccountIds(card.accountIds).length
+    ? parseAccountIds(card.accountIds)
+    : dealTargets.length
+      ? dealTargets.map((account) => account.id)
+      : card.accountId
+        ? [card.accountId]
+        : [];
   if (!edited) {
     return (
       <p className="rounded-card border border-dashed border-line bg-panel px-5 py-8 text-sm text-mute">
@@ -67,11 +74,6 @@ export function CardLive({
   }
   return (
     <div className="space-y-3">
-      <p className="text-sm text-mute">
-        Each look is its own file. IG · FB is the Instagram text. TT · YT is the TikTok text. Watch both, then edit the
-        caption in the box below.
-      </p>
-      <LiveLooks rows={looks} canCover={coverCanChange(card.status)} />
       {card.status === "REVIEW" || (card.status === "READY" && !card.scheduledAt) ? (
         <details className="rounded-card border border-line bg-panel px-5 py-4">
           <summary className="cursor-pointer text-sm font-semibold">Cut and speed — drop dragging parts, then post from here</summary>
@@ -135,20 +137,30 @@ export function CardLive({
           <button className="w-full rounded-xl border border-line px-4 py-3 font-semibold">Send to editor to polish</button>
         </form>
       ) : null}
-      <form action={scheduleCard} className="space-y-3 rounded-card border border-line bg-panel p-5">
+      <form action={scheduleCard} className="space-y-3">
         <input type="hidden" name="id" value={card.id} />
+        <p className="text-sm text-mute">
+          Each mix is labeled IG / FB or TT / YT. Check every account that mix should go to — you can pick more than one.
+        </p>
+        <LiveLooks
+          rows={looks}
+          canCover={coverCanChange(card.status)}
+          accounts={accounts}
+          selectedIds={selectedIds}
+        />
+        <div className="space-y-3 rounded-card border border-line bg-panel p-5">
         <p className="text-sm text-mute">
           {looks.length > 1
             ? looks
                 .map((row) =>
                   row.accounts.length
                     ? `${row.tag} → ${describeTargets(row.accounts)}`
-                    : `${row.tag} file`,
+                    : `${row.tag} — pick the accounts on that mix`,
                 )
                 .join(". ")
             : dealTargets.length > 0
               ? `Posts to ${describeTargets(dealTargets)} at the time you set.`
-              : `${card.account ? handle(card.account.username) : "Pick an account"} gets this video at the time you set.`}
+              : `${card.account ? handle(card.account.username) : "Pick accounts on each look"} at the time you set.`}
         </p>
         <label className="block text-sm">
           Caption on every app
@@ -176,30 +188,8 @@ export function CardLive({
             required
           />
         </label>
-        {dealTargets.length === 0 ? (
-          <div className="space-y-2">
-            <p className="text-xs text-mute">Check every account this video should post to.</p>
-            {accounts.map((account) => (
-              <label key={account.id} className="flex items-center gap-3 text-sm">
-                <input
-                  type="checkbox"
-                  name="accountIds"
-                  value={account.id}
-                  defaultChecked={
-                    card.accountIds
-                      ? card.accountIds.split(",").includes(account.id)
-                      : card.accountId === account.id
-                  }
-                />
-                <span>
-                  {account.nickname ? `${account.nickname} · ` : ""}{handle(account.username)}
-                  <span className="text-mute"> · {account.network}</span>
-                </span>
-              </label>
-            ))}
-          </div>
-        ) : null}
         <button className="w-full rounded-xl border border-line px-4 py-3 font-semibold">Schedule</button>
+        </div>
       </form>
     </div>
   );

@@ -278,7 +278,11 @@ export function BatchSettings({
             formats={formats}
             accounts={accounts}
             campaignId={campaignId}
-            onCampaignChange={setCampaignId}
+            onCampaignChange={(next) => {
+              setCampaignId(next);
+              const deal = dealAccounts(accounts, next);
+              if (deal.length) setAccountIds(deal.map((account) => account.id));
+            }}
             formatId={defaults.formatId}
             accountIds={accountIds}
             onAccountIdsChange={setAccountIds}

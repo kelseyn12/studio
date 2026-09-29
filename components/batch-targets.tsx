@@ -1,6 +1,8 @@
 "use client";
 
-import { dealAccounts, describeTargets, handle } from "@/lib/targets";
+import { LookAccountPicks } from "@/components/look-account-picks";
+import { dealAccounts } from "@/lib/targets";
+import { LOOK_TAG } from "@/lib/text-style";
 
 export type BatchAccount = {
   id: string;
@@ -62,41 +64,30 @@ export function BatchTargets({
           </select>
         </Row>
       ) : null}
-      {targets.length > 0 ? (
-        <Row label="Posts to">
-          <p className="max-w-xs text-right text-sm">{describeTargets(targets)}</p>
-        </Row>
-      ) : (
-        <div className="border-t border-line pt-4">
-          <p className="text-sm">Accounts this batch posts to</p>
-          <p className="mt-1 text-xs text-mute">
-            Check every app this should go to — IG and TikTok both, if that is the plan. Or put those accounts on this
-            deal in Accounts and we fill this in.
-          </p>
-          <div className="mt-3 space-y-2">
-            {accounts.map((account) => {
-              const on = accountIds.includes(account.id);
-              return (
-                <label key={account.id} className="flex items-center gap-3 text-sm">
-                  <input
-                    type="checkbox"
-                    name="accountIds"
-                    value={account.id}
-                    checked={on}
-                    onChange={() =>
-                      onAccountIdsChange(on ? accountIds.filter((id) => id !== account.id) : [...accountIds, account.id])
-                    }
-                  />
-                  <span>
-                    {account.name || handle(account.username)}
-                    <span className="text-mute"> · {account.network}</span>
-                  </span>
-                </label>
-              );
-            })}
+      <div className="space-y-4 border-t border-line pt-4">
+        <p className="text-sm">Accounts this batch posts to</p>
+        <p className="text-xs text-mute">
+          Each mix is labeled IG / FB or TT / YT. Check every account that mix should go to — you can pick more than one.
+        </p>
+        {(["instagram", "tiktok"] as const).map((look) => {
+          const selected = accountIds.length ? accountIds : targets.map((account) => account.id);
+          return (
+          <div key={look} className="space-y-2">
+            <p className="text-xs font-semibold">For {LOOK_TAG[look]}</p>
+            <LookAccountPicks
+              look={look}
+              tag={LOOK_TAG[look]}
+              accounts={accounts}
+              selectedIds={selected}
+              controlled
+              onToggle={(id, on) =>
+                onAccountIdsChange(on ? [...selected, id] : selected.filter((accountId) => accountId !== id))
+              }
+            />
           </div>
-        </div>
-      )}
+          );
+        })}
+      </div>
     </>
   );
 }

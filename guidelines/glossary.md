@@ -16,7 +16,8 @@
 - `transcribeFile` — `lib/whisper.ts` — Whisper a voice or video file. Used by Transcribe and card voice notes. Videos and files over 25 MB first become a 16 kHz mono mp3 (`audioForListen`) so OpenAI's upload cap is not hit.
 - `isNoCredits` / `isListenTooBig` / `openAiFailStatus` / `openAiUserError` / `OPENAI_BILLING_URL` — `lib/whisper.ts` — OpenAI billing failures and Whisper's 25 MB upload cap. Multiply stores `no-credits` or `listen-too-big` instead of clipping the API URL; Generate sends voice-only after a 413.
 - `pingStudio` — `lib/manychat.ts` — optional DM when a job is sent or parked. Recipes live on `/dms`.
-- `deskStage` / `shipLooks` / `lookLabels` — `lib/card-desk.ts` — pipeline stage; one Live row per look (`IG · FB` vs `TT · YT`); chip text. `LiveLooks` (`components/live-looks.tsx`) is the watch + cover block on Live.
+- `deskStage` / `shipLooks` / `lookLabels` — `lib/card-desk.ts` — pipeline stage; one Live row per look (`IG · FB` vs `TT · YT`); chip text. `LiveLooks` + `LookAccountPicks` let you check multiple @s per mix, each tagged IG / FB / TT / YT.
+- `accountsForLook` / `LOOK_APPS` / `targetAccounts` — `lib/targets.ts` — accounts that match a look; mix app pills; checked Mix/Live ids win, else the deal list.
 - `cardPatch` — `lib/card-patch.ts` — writes only fields present on the form so a Brief save cannot wipe editor notes.
 - `queueCard` — `lib/publish.ts` — parks a card on Live and ships through Outstand. Never overwrites `plannedDate`. Marks Posted only if Outstand already published.
 - `closeLoop` — `lib/analytics.ts` — Posted when live, Data when views exist. Used by `/api/analytics/sync`.
@@ -64,7 +65,7 @@
 - `targetsByLook` — `lib/targets.ts` — groups a video's target accounts by app look so each look's file posts to its own accounts. Used by `queueCard`.
 - `pickForLook` — `lib/card-desk.ts` — file to ship for one look: newest EDITED, else GENERATED built in that look, else `pickFinished`.
 - `postIdsFor` — `lib/analytics.ts` — distinct Outstand post ids behind a video (card + publish jobs); analytics sync sums them.
-- `targetAccounts` / `dealAccounts` / `parseAccountIds` / `describeTargets` / `networkShort` — `lib/targets.ts` — which accounts a video posts to: all active accounts on its deal, else every checked id (`accountIds`). Used by `queueCard`, `renderBatch`, Multiply generate guard, CardLive, BatchTargets. Tested in `lib/targets.test.ts`.
+- `targetAccounts` / `dealAccounts` / `parseAccountIds` / `describeTargets` / `networkShort` / `accountsForLook` / `LOOK_APPS` — `lib/targets.ts` — checked Mix/Live ids win, else the deal list. `accountsForLook` keeps IG with FB and TT with YT. Mix cards use `LOOK_APPS` pills.
 - `watchUrl` / `isPublicMediaUrl` — `lib/urls.ts` / `lib/r2.ts` — in-app play/download always goes through `/api/files`. S3 API hosts (`*.r2.cloudflarestorage.com`) are not treated as public.
 - `saveAccount` — `app/connections/actions.ts` — saves an account's label and deal (was `renameAccount`).
 - `BatchTargets` — `components/batch-targets.tsx` — Deal · Format · Posts-to/Account rows on Mix settings; also exports `Row`.

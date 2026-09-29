@@ -55,7 +55,14 @@ export function pickForLook<T extends { kind: string; createdAt: Date; textStyle
 
 export type ShipLook<A, T> = { look: DrawnStyle; tag: string; accounts: T[]; asset: A };
 
-/** One row per app look that will ship — IG · FB and TT · YT stay separate. */
+const LOOK_ORDER: DrawnStyle[] = ["instagram", "tiktok", "plain"];
+
+function looksOnFiles(assets: Array<{ kind: string; textStyle: string }>): DrawnStyle[] {
+  const have = new Set(assets.filter((asset) => asset.kind === "GENERATED").map((asset) => asset.textStyle));
+  return LOOK_ORDER.filter((look) => have.has(look));
+}
+
+/** One row per file look — both mixes show even before you pick accounts. */
 export function shipLooks<
   A extends { kind: string; createdAt: Date; textStyle: string },
   T extends { network: string },
@@ -63,17 +70,14 @@ export function shipLooks<
   const finished = pickFinished(assets);
   if (!finished) return [];
   const groups = targetsByLook(targets);
-  if (groups.length === 0) {
-    const look = (["instagram", "tiktok", "plain"].includes(finished.textStyle)
-      ? finished.textStyle
-      : "plain") as DrawnStyle;
-    return [{ look, tag: LOOK_TAG[look] || "All apps", accounts: [], asset: finished }];
-  }
-  return groups.map((group) => ({
-    look: group.look,
-    tag: LOOK_TAG[group.look] || group.look,
-    accounts: group.accounts,
-    asset: pickForLook(assets, group.look) ?? finished,
+  const byLook = new Map(groups.map((group) => [group.look, group.accounts]));
+  const looks = looksOnFiles(assets);
+  const show = looks.length > 0 ? looks : groups.length > 0 ? groups.map((group) => group.look) : (["plain"] as DrawnStyle[]);
+  return show.map((look) => ({
+    look,
+    tag: LOOK_TAG[look] || "All apps",
+    accounts: byLook.get(look) ?? [],
+    asset: pickForLook(assets, look) ?? finished,
   }));
 }
 

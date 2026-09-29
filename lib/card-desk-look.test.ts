@@ -47,9 +47,8 @@ describe("shipLooks", () => {
     ]);
   });
 
-  it("shows the newest file when no accounts are picked yet", () => {
-    const later = [...generated, { id: "newer", kind: "GENERATED", textStyle: "tiktok", createdAt: at(9) }];
-    expect(shipLooks(later, [])[0]?.asset.id).toBe("newer");
+  it("still lists both files when no accounts are picked yet", () => {
+    expect(shipLooks(generated, []).map((row) => row.tag)).toEqual(["IG · FB", "TT · YT"]);
   });
 });
 
