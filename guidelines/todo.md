@@ -287,6 +287,8 @@
   Scheduled list has Cancel. It drops the Outstand posts and puts the video back under finished, no day yet.
 - [X] Account picks on Live are dropdowns
   Each mix's IG · FB and TT · YT lists stay closed and show who is checked. Open one to change the checks.
+- [X] A mix picked on one day is greyed out on the others
+  Day slots start on different videos. Choosing one disables it everywhere else so it cannot be scheduled twice.
 
 
 
