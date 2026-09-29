@@ -277,6 +277,8 @@
   Waiting list now shows every mix with IG · FB and TT · YT pills and the exact @s each file posts to, plus a Check accounts + cover link.
 - [X] Dropped the leftover single-account dropdowns on Live
   Day slots and the batch scheduler always use the accounts checked on each video; missing checks get a loud warning instead of a silent skip.
+- [X] Pick accounts right on Live
+  Every waiting mix shows its IG · FB and TT · YT videos with account checkboxes; a tap saves instantly, then you schedule the mix on a day.
 
 
 

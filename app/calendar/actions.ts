@@ -7,6 +7,19 @@ import { queueCard } from "@/lib/publish";
 
 const RETRY_DELAY_MS = 5 * 60 * 1000;
 
+export async function saveCardAccounts(formData: FormData) {
+  await requireUser();
+  const id = String(formData.get("cardId") || "");
+  if (!id) return;
+  const accountIds = formData.getAll("accountIds").map(String).filter(Boolean);
+  await prisma.card.update({
+    where: { id },
+    data: { accountIds: accountIds.join(","), accountId: accountIds[0] || null },
+  });
+  revalidatePath("/calendar");
+  revalidatePath(`/cards/${id}`);
+}
+
 export async function parkCard(formData: FormData) {
   await requireUser();
   const id = String(formData.get("cardId") || "");

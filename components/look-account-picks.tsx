@@ -17,6 +17,7 @@ export function LookAccountPicks({
   accounts,
   selectedIds,
   controlled = false,
+  compact = false,
   onToggle,
 }: {
   look: string;
@@ -24,6 +25,7 @@ export function LookAccountPicks({
   accounts: PickAccount[];
   selectedIds: string[];
   controlled?: boolean;
+  compact?: boolean;
   onToggle?: (id: string, on: boolean) => void;
 }) {
   const choices = accountsForLook(accounts, look);
@@ -33,9 +35,11 @@ export function LookAccountPicks({
   }
   return (
     <div className="space-y-2">
-      <p className="text-xs text-mute">
-        This mix is for {apps.join(" and ") || tag}. Check every account it should go to — as many as you want.
-      </p>
+      {compact ? null : (
+        <p className="text-xs text-mute">
+          This mix is for {apps.join(" and ") || tag}. Check every account it should go to — as many as you want.
+        </p>
+      )}
       {choices.map((account) => {
         const on = selectedIds.includes(account.id);
         const label = account.nickname || account.name || handle(account.username);

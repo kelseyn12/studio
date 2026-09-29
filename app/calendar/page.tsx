@@ -15,7 +15,7 @@ import {
   toInputDate,
   weekGrid,
 } from "@/lib/dates";
-import { waitingLooks } from "@/lib/card-desk";
+import { fileLooks } from "@/lib/card-desk";
 import { prisma } from "@/lib/prisma";
 import { targetAccounts, targetApps } from "@/lib/targets";
 import { WaitingVideos } from "@/components/waiting-videos";
@@ -54,7 +54,11 @@ export default async function CalendarPage({
   const withLooks = cards.map((card) => ({ ...card, looks: targetApps(targetAccounts(accounts, card)) }));
   const waiting = withLooks
     .filter((card) => card.status === "READY" && !card.scheduledAt)
-    .map((card) => ({ ...card, lines: waitingLooks(card.assets, targetAccounts(accounts, card)) }));
+    .map((card) => ({
+      ...card,
+      lookRows: fileLooks(card.assets),
+      selectedIds: targetAccounts(accounts, card).map((account) => account.id),
+    }));
   const parked = withLooks.filter((card) => card.scheduledAt && card.status !== "POSTED" && card.status !== "DATA");
   const posted = withLooks.filter((card) => card.status === "POSTED" || card.status === "DATA");
   const thisWeek = cards.filter(
@@ -167,10 +171,10 @@ export default async function CalendarPage({
         <section className="mt-8">
           <h2 className="mb-3 text-lg font-semibold">{waiting.length} finished, no day yet</h2>
           <p className="mb-3 text-sm text-mute">
-            Each mix is two videos — an IG · FB one and a TT · YT one. Schedule the mix on a day above and each video
-            posts to its own accounts, shown here.
+            Each mix is two videos — an IG · FB one and a TT · YT one. Check the accounts each video should go to (a
+            tap saves right away), then schedule the mix on a day above.
           </p>
-          <WaitingVideos cards={waiting} />
+          <WaitingVideos cards={waiting} accounts={accounts} />
         </section>
       ) : null}
     </Shell>

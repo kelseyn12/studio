@@ -1,37 +1,56 @@
-import Link from "next/link";
-import type { WaitingLook } from "@/lib/card-desk";
+"use client";
 
-/** Finished mixes with no day yet — same look pills as Multiply, plus exactly where each file posts. */
+import Link from "next/link";
+import { saveCardAccounts } from "@/app/calendar/actions";
+import { LookAccountPicks } from "@/components/look-account-picks";
+import type { FileLook } from "@/lib/card-desk";
+
+type Account = { id: string; network: string; username: string; nickname: string; isActive: boolean };
+
+/**
+ * Finished mixes with no day yet. Each mix shows its IG · FB and TT · YT videos with account
+ * checkboxes — a tap saves right away, so scheduling on a day always uses what you see here.
+ */
 export function WaitingVideos({
   cards,
+  accounts,
 }: {
-  cards: Array<{ id: string; title: string; lines: WaitingLook[] }>;
+  cards: Array<{ id: string; title: string; lookRows: FileLook[]; selectedIds: string[] }>;
+  accounts: Account[];
 }) {
   return (
     <div className="space-y-2">
       {cards.map((card) => (
-        <div key={card.id} className="rounded-card border border-line bg-panel px-4 py-3">
+        <form
+          key={card.id}
+          action={saveCardAccounts}
+          onChange={(event) => event.currentTarget.requestSubmit()}
+          className="rounded-card border border-line bg-panel px-4 py-3"
+        >
+          <input type="hidden" name="cardId" value={card.id} />
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="min-w-0 flex-1 basis-56 break-words text-sm font-medium">{card.title}</p>
             <Link href={`/cards/${card.id}?step=live`} className="shrink-0 text-sm text-sun">
-              Check accounts + cover
+              Cover + caption
             </Link>
           </div>
-          <div className="mt-2 space-y-1.5">
-            {card.lines.map((line) => (
-              <p key={line.tag} className="flex flex-wrap items-center gap-2 text-xs text-mute">
-                <span className="shrink-0 rounded-full bg-sun px-2.5 py-0.5 font-semibold text-ink">{line.tag}</span>
-                {line.who ? (
-                  <span>{line.who}</span>
-                ) : (
-                  <span className="font-semibold text-sun">
-                    Nothing checked for these apps — this video will not post. Tap Check accounts + cover.
-                  </span>
-                )}
-              </p>
+          <div className="mt-3 grid gap-4 md:grid-cols-2">
+            {card.lookRows.map((row) => (
+              <div key={row.look} className="space-y-2">
+                <span className="inline-block rounded-full bg-sun px-2.5 py-0.5 text-xs font-semibold text-ink">
+                  {row.tag}
+                </span>
+                <LookAccountPicks
+                  look={row.look}
+                  tag={row.tag}
+                  accounts={accounts}
+                  selectedIds={card.selectedIds}
+                  compact
+                />
+              </div>
             ))}
           </div>
-        </div>
+        </form>
       ))}
     </div>
   );
