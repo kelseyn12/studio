@@ -74,6 +74,20 @@ export function targetsByLook<T extends { network: string }>(targets: T[]): Arra
   }));
 }
 
+/** "IG · FB · YT" — just the apps this video posts to, one tag per app. */
+export function targetApps(accounts: Array<{ network: string }>): string {
+  const seen = new Set<string>();
+  const apps: string[] = [];
+  for (const account of accounts) {
+    const short = networkShort(account.network);
+    if (!seen.has(short)) {
+      seen.add(short);
+      apps.push(short);
+    }
+  }
+  return apps.join(" · ");
+}
+
 /** "@polsia" — one @ even when the synced username already carries one (YouTube does). */
 export function handle(username: string): string {
   return `@${username.replace(/^@+/, "")}`;

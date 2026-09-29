@@ -271,6 +271,8 @@
   Each look is its own card: watch, cover, and which @ it posts to. Caption is labeled as the text under the video. Calendar chips name both looks.
 - [X] Pick multiple accounts per mix, labeled IG / FB / TT / YT
   Each mix card lists only the matching apps. Check as many @s as you want. Deal no longer locks you to one set.
+- [X] Calendar names the real apps, not the file looks
+  Chips and the day dropdown now say IG · FB · YT — whatever accounts are checked on that video — instead of IG · FB + TT · YT on everything.
 
 
 

@@ -8,6 +8,7 @@ import {
   networkShort,
   parseAccountIds,
   targetAccounts,
+  targetApps,
 } from "@/lib/targets";
 
 const accounts = [
@@ -79,6 +80,18 @@ describe("targetAccounts", () => {
   it("names the apps on each mix", () => {
     expect(LOOK_APPS.instagram).toEqual(["IG", "FB"]);
     expect(LOOK_APPS.tiktok).toEqual(["TT", "YT"]);
+  });
+
+  it("lists just the apps a video posts to, once each", () => {
+    expect(
+      targetApps([
+        { network: "instagram" },
+        { network: "facebook" },
+        { network: "instagram" },
+        { network: "youtube" },
+      ]),
+    ).toBe("IG · FB · YT");
+    expect(targetApps([])).toBe("");
   });
 
   it("describes targets short", () => {

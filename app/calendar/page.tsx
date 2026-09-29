@@ -15,8 +15,8 @@ import {
   toInputDate,
   weekGrid,
 } from "@/lib/dates";
-import { lookLabels } from "@/lib/card-desk";
 import { prisma } from "@/lib/prisma";
+import { targetAccounts, targetApps } from "@/lib/targets";
 
 const VIEWS = ["week", "month", "scheduled", "posted"] as const;
 type View = (typeof VIEWS)[number];
@@ -39,7 +39,7 @@ export default async function CalendarPage({
   const [cards, accounts, failedJobs] = await Promise.all([
     prisma.card.findMany({
       where: { OR: [{ scheduledAt: { not: null } }, { status: "READY" }] },
-      include: { account: true, assets: { select: { kind: true, textStyle: true } } },
+      include: { account: true },
       orderBy: { scheduledAt: "asc" },
     }),
     prisma.socialAccount.findMany({ where: { isActive: true } }),
@@ -49,7 +49,7 @@ export default async function CalendarPage({
       orderBy: { createdAt: "desc" },
     }),
   ]);
-  const withLooks = cards.map((card) => ({ ...card, looks: lookLabels(card.assets) }));
+  const withLooks = cards.map((card) => ({ ...card, looks: targetApps(targetAccounts(accounts, card)) }));
   const waiting = withLooks.filter((card) => card.status === "READY" && !card.scheduledAt);
   const parked = withLooks.filter((card) => card.scheduledAt && card.status !== "POSTED" && card.status !== "DATA");
   const posted = withLooks.filter((card) => card.status === "POSTED" || card.status === "DATA");

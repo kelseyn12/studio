@@ -80,18 +80,3 @@ export function shipLooks<
     asset: pickForLook(assets, look) ?? finished,
   }));
 }
-
-/** "IG · FB + TT · YT" for chips when a video has both files. */
-export function lookLabels(assets: Array<{ kind: string; textStyle: string }>): string {
-  const order: DrawnStyle[] = ["instagram", "tiktok", "plain"];
-  const have = new Set(
-    assets
-      .filter((asset) => asset.kind === "GENERATED" || asset.kind === "EDITED")
-      .map((asset) => asset.textStyle),
-  );
-  return order
-    .filter((look) => have.has(look))
-    .map((look) => LOOK_TAG[look])
-    .filter(Boolean)
-    .join(" + ");
-}

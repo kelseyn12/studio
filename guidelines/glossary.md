@@ -16,8 +16,8 @@
 - `transcribeFile` — `lib/whisper.ts` — Whisper a voice or video file. Used by Transcribe and card voice notes. Videos and files over 25 MB first become a 16 kHz mono mp3 (`audioForListen`) so OpenAI's upload cap is not hit.
 - `isNoCredits` / `isListenTooBig` / `openAiFailStatus` / `openAiUserError` / `OPENAI_BILLING_URL` — `lib/whisper.ts` — OpenAI billing failures and Whisper's 25 MB upload cap. Multiply stores `no-credits` or `listen-too-big` instead of clipping the API URL; Generate sends voice-only after a 413.
 - `pingStudio` — `lib/manychat.ts` — optional DM when a job is sent or parked. Recipes live on `/dms`.
-- `deskStage` / `shipLooks` / `lookLabels` — `lib/card-desk.ts` — pipeline stage; one Live row per look (`IG · FB` vs `TT · YT`); chip text. `LiveLooks` + `LookAccountPicks` let you check multiple @s per mix, each tagged IG / FB / TT / YT.
-- `accountsForLook` / `LOOK_APPS` / `targetAccounts` — `lib/targets.ts` — accounts that match a look; mix app pills; checked Mix/Live ids win, else the deal list.
+- `deskStage` / `shipLooks` — `lib/card-desk.ts` — pipeline stage; one Live row per look (`IG · FB` vs `TT · YT`). `LiveLooks` + `LookAccountPicks` let you check multiple @s per mix, each tagged IG / FB / TT / YT.
+- `accountsForLook` / `LOOK_APPS` / `targetApps` / `targetAccounts` — `lib/targets.ts` — accounts that match a look; mix app pills; `targetApps` = the apps a video actually posts to (calendar chips + day-slot dropdown); checked Mix/Live ids win, else the deal list.
 - `cardPatch` — `lib/card-patch.ts` — writes only fields present on the form so a Brief save cannot wipe editor notes.
 - `queueCard` — `lib/publish.ts` — parks a card on Live and ships through Outstand. Never overwrites `plannedDate`. Marks Posted only if Outstand already published.
 - `closeLoop` — `lib/analytics.ts` — Posted when live, Data when views exist. Used by `/api/analytics/sync`.

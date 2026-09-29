@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { lookLabels, pickForLook, shipLooks } from "@/lib/card-desk";
+import { pickForLook, shipLooks } from "@/lib/card-desk";
 import { hookLooks } from "@/lib/text-style";
 
 const at = (minutes: number) => new Date(2026, 8, 26, 12, minutes);
@@ -49,17 +49,6 @@ describe("shipLooks", () => {
 
   it("still lists both files when no accounts are picked yet", () => {
     expect(shipLooks(generated, []).map((row) => row.tag)).toEqual(["IG · FB", "TT · YT"]);
-  });
-});
-
-describe("lookLabels", () => {
-  it("names both files for a chip", () => {
-    expect(
-      lookLabels([
-        { kind: "GENERATED", textStyle: "instagram" },
-        { kind: "GENERATED", textStyle: "tiktok" },
-      ]),
-    ).toBe("IG · FB + TT · YT");
   });
 });
 
