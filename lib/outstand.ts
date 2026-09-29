@@ -138,6 +138,45 @@ export function parseConfirm(body: Record<string, unknown>): { url: string } {
   return { url };
 }
 
+/** Host and path exactly as Outstand signed them. `fetch` sends the file in chunks and R2 answers 403. */
+export function signedPutTarget(uploadUrl: string): { hostname: string; path: string } {
+  const scheme = uploadUrl.indexOf("://");
+  const pathStart = scheme < 0 ? -1 : uploadUrl.indexOf("/", scheme + 3);
+  if (pathStart < 0) throw new Error("Outstand upload URL is not a signed link");
+  return { hostname: uploadUrl.slice(scheme + 3, pathStart), path: uploadUrl.slice(pathStart) };
+}
+
+export function storagePutError(status: number, body: string): string {
+  const code = body.match(/<Code>([^<]+)<\/Code>/)?.[1];
+  return code ? `Outstand storage PUT failed (${status} ${code})` : `Outstand storage PUT failed (${status})`;
+}
+
+function putSigned(uploadUrl: string, bytes: Buffer, contentType: string): Promise<{ ok: boolean; status: number; body: string }> {
+  const { hostname, path } = signedPutTarget(uploadUrl);
+  return new Promise((resolve, reject) => {
+    void import("node:https").then(({ request }) => {
+      const req = request(
+        {
+          hostname,
+          path,
+          method: "PUT",
+          headers: { "Content-Type": contentType, "Content-Length": bytes.length },
+        },
+        (res) => {
+          const chunks: Buffer[] = [];
+          res.on("data", (chunk: Buffer) => chunks.push(chunk));
+          res.on("end", () => {
+            const status = res.statusCode ?? 0;
+            resolve({ ok: status >= 200 && status < 300, status, body: Buffer.concat(chunks).toString("utf8") });
+          });
+        },
+      );
+      req.on("error", reject);
+      req.end(bytes);
+    }, reject);
+  });
+}
+
 export async function uploadMedia(
   fileAbs: string,
   filename: string,
@@ -151,12 +190,8 @@ export async function uploadMedia(
   });
   const ticket = parseUploadTicket(ticketBody);
   const bytes = await readFile(fileAbs);
-  const put = await fetch(ticket.uploadUrl, {
-    method: "PUT",
-    headers: { "Content-Type": contentType },
-    body: bytes,
-  });
-  if (!put.ok) throw new Error(`Outstand storage PUT failed (${put.status})`);
+  const put = await putSigned(ticket.uploadUrl, bytes, contentType);
+  if (!put.ok) throw new Error(storagePutError(put.status, put.body));
   const confirmed = await outstand<Record<string, unknown>>(`/media/${ticket.id}/confirm`, {
     method: "POST",
     body: JSON.stringify({ size }),

@@ -4,7 +4,7 @@
 - `dropSuperseded` / `sweepStale` — `lib/sweep.ts` — deletes those files from R2 and the rows. Editor cut calls `dropSuperseded`; Library Free space runs `sweepStale`.
 - `pickNextAction` — `lib/next-action.ts` — chooses the single Today action. Used on `app/page.tsx`.
 - `machineCounts` — `lib/queries.ts` — pipeline and slot totals for Today.
-- `uploadMedia` — `lib/outstand.ts` — PUT the mp4 (or cover JPEG) into Outstand storage, returns the public URL.
+- `uploadMedia` — `lib/outstand.ts` — PUT the mp4 (or cover JPEG) into Outstand storage, returns the public URL. Sends the whole file with its length (`signedPutTarget`) so storage does not answer 403.
 - `postBody` / `createPost` — `lib/outstand.ts` — builds the `POST /posts/` body; `options` carries per-network blocks (`instagram`, `youtube`, `tiktok`) and can never override `containers`/`accounts`/`scheduledAt`.
 - `coverOptions`, `postOptions`, `wantsCoverUrl`, `coverMs`, `nextCoverPath`, `coverCanChange` — `lib/post-cover.ts` — turn an asset's `coverPath`/`coverAt` into Outstand cover fields per network. `postOptions` also sets TikTok `DIRECT_POST` + `PUBLIC_TO_EVERYONE` so the cover timestamp is honored. Used by `queueCard` via `shippableCoverUrl` (R2 public URL, else Outstand upload, else "" → IG offset fallback).
 - `scoreDeal` — `lib/deals.ts` — TECH scores volume; UGC scores fee per video. A deal with `monthlyPayCents` set scores that flat fee as the month instead of pay × slots × 30. Used on Deals and deal detail. `formatMoneyExact` keeps cents for per-video amounts.

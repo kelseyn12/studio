@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseConfirm, parsePost, parseUploadTicket, postBody, postedAtFromPost } from "@/lib/outstand";
+import { parseConfirm, parsePost, parseUploadTicket, postBody, postedAtFromPost, signedPutTarget, storagePutError } from "@/lib/outstand";
 
 describe("postBody", () => {
   it("puts network blocks beside containers without letting them override the core fields", () => {
@@ -23,6 +23,21 @@ describe("Outstand media parsers", () => {
         data: { id: "med_1", upload_url: "https://storage.example/put" },
       }),
     ).toEqual({ id: "med_1", uploadUrl: "https://storage.example/put" });
+  });
+
+  it("keeps the signed upload query byte for byte", () => {
+    const raw =
+      "https://bucket.r2.cloudflarestorage.com/file.mp4?X-Amz-Signature=abc+def%2Bxyz&X-Amz-SignedHeaders=host";
+    expect(signedPutTarget(raw)).toEqual({
+      hostname: "bucket.r2.cloudflarestorage.com",
+      path: "/file.mp4?X-Amz-Signature=abc+def%2Bxyz&X-Amz-SignedHeaders=host",
+    });
+  });
+
+  it("names the storage error code when R2 sends one", () => {
+    expect(storagePutError(403, "<Error><Code>SignatureDoesNotMatch</Code></Error>")).toBe(
+      "Outstand storage PUT failed (403 SignatureDoesNotMatch)",
+    );
   });
 
   it("reads a nested confirm URL", () => {

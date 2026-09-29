@@ -295,6 +295,8 @@
   Each day on the month grid has the same Pick a video control as the week. Days outside the month are dimmed.
 - [X] Month is an overview again
   Chips show what's already set. Tap a day to open that week and schedule there.
+- [X] Mix upload no longer dies on a 403
+  The file is sent on the exact link Outstand signed. Try again on the banner uploads mix 3.
 
 
 
