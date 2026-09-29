@@ -19,10 +19,12 @@ describe("coverOptions", () => {
     expect(coverOptions(["instagram", "tiktok"], { coverPath: "", coverAt: 3 }, url)).toEqual({});
   });
 
-  it("gives Instagram and YouTube the image and TikTok the frame time", () => {
-    expect(coverOptions(["instagram", "youtube", "tiktok", "facebook"], cover, url)).toEqual({
+  it("gives Instagram the 9:16 image and YouTube the 16:9 thumb", () => {
+    expect(
+      coverOptions(["instagram", "youtube", "tiktok", "facebook"], cover, url, "https://media.outstand.so/yt.jpg"),
+    ).toEqual({
       instagram: { reelCoverUrl: url },
-      youtube: { thumbnailUrl: url },
+      youtube: { thumbnailUrl: "https://media.outstand.so/yt.jpg" },
       tiktok: { ...tiktokLive, videoCoverTimestampMs: 2345 },
     });
   });

@@ -26,9 +26,7 @@ export function CalendarBoard({
   allowSlots: boolean;
   month?: Date;
 }) {
-  const scheduled = cards
-    .filter((card) => card.scheduledAt && card.status === "READY")
-    .map((card) => ({ id: card.id, title: card.title }));
+  const scheduled = cards.filter((card) => card.scheduledAt).map((card) => ({ id: card.id, title: card.title }));
   return (
     <DayPicks waitingIds={waiting.map((card) => card.id)}>
       <div className="grid gap-3 md:grid-cols-7">

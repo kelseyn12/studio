@@ -3,7 +3,7 @@ import { pickFinished, pickForLook } from "@/lib/card-desk";
 import { ensureLocal } from "@/lib/files";
 import { postOptions, wantsCoverUrl } from "@/lib/post-cover";
 import { prisma } from "@/lib/prisma";
-import { isPublicMediaUrl, r2PublicUrl } from "@/lib/r2";
+import { withoutEditLists, writeYoutubeThumb } from "@/lib/ship-media";
 import { targetAccounts, targetsByLook } from "@/lib/targets";
 import { LOOK_TAG, type DrawnStyle } from "@/lib/text-style";
 import type { Asset, CardStatus, SocialAccount } from "@prisma/client";
@@ -42,26 +42,35 @@ export function parkWrite(input: {
 
 /** Makes sure Outstand can fetch this file; caches the URL on the asset. */
 async function shippableUrl(asset: Asset): Promise<string> {
-  if (isPublicMediaUrl(asset.publicUrl)) return asset.publicUrl;
-  const uploaded = await uploadMedia(await ensureLocal(asset.path), asset.filename || "video.mp4", asset.mime || "video/mp4");
+  const local = await ensureLocal(asset.path);
+  await withoutEditLists(local);
+  const uploaded = await uploadMedia(local, asset.filename || "video.mp4", asset.mime || "video/mp4");
   await prisma.asset.update({ where: { id: asset.id }, data: { publicUrl: uploaded.url } });
   return uploaded.url;
 }
 
 /**
- * A public JPEG URL of the saved cover frame for apps that take one (IG, YT). "" when the video
- * has no cover, no app in the group wants an image, or the file cannot be reached — the post
- * still ships, Instagram just falls back to the frame offset.
+ * Public JPEGs of the saved cover. Instagram keeps 9:16. YouTube gets 1280×720. "" when the video
+ * has no cover — the post still ships, Instagram then uses the frame offset.
  */
-async function shippableCoverUrl(asset: Asset, networks: string[]): Promise<string> {
-  if (!asset.coverPath || !wantsCoverUrl(networks)) return "";
-  const fromR2 = r2PublicUrl(asset.coverPath);
-  if (isPublicMediaUrl(fromR2)) return fromR2;
+async function shippableCoverUrls(
+  asset: Asset,
+  networks: string[],
+): Promise<{ coverUrl: string; youtubeUrl: string }> {
+  if (!asset.coverPath || !wantsCoverUrl(networks)) return { coverUrl: "", youtubeUrl: "" };
   try {
-    const uploaded = await uploadMedia(await ensureLocal(asset.coverPath), `cover-${asset.id}.jpg`, "image/jpeg");
-    return uploaded.url;
+    const coverLocal = await ensureLocal(asset.coverPath);
+    const uploaded = await uploadMedia(coverLocal, `cover-${asset.id}.jpg`, "image/jpeg");
+    if (!networks.some((network) => network.toLowerCase() === "youtube")) {
+      return { coverUrl: uploaded.url, youtubeUrl: "" };
+    }
+    const ytRel = `thumbs/covers/${asset.id}-yt.jpg`;
+    await writeYoutubeThumb(coverLocal, ytRel);
+    const ytLocal = await ensureLocal(ytRel);
+    const ytUploaded = await uploadMedia(ytLocal, `cover-${asset.id}-yt.jpg`, "image/jpeg");
+    return { coverUrl: uploaded.url, youtubeUrl: ytUploaded.url };
   } catch {
-    return "";
+    return { coverUrl: "", youtubeUrl: "" };
   }
 }
 
@@ -94,12 +103,13 @@ export async function queueCard(cardId: string, when: Date, accountId?: string |
         try {
           const asset = pickForLook(card.assets, group.look) ?? finished;
           const networks = group.accounts.map((account) => account.network);
+          const covers = await shippableCoverUrls(asset, networks);
           const post = await createPost({
             accounts: group.accounts.map((account: SocialAccount) => account.outstandAccountId),
             content: card.caption || card.title,
             scheduledAt: when.toISOString(),
             media: [{ url: await shippableUrl(asset), filename: safeUploadName(asset.filename || "video.mp4") }],
-            options: postOptions(networks, asset, await shippableCoverUrl(asset, networks)),
+            options: postOptions(networks, asset, covers.coverUrl, covers.youtubeUrl),
           });
           posts.push(post);
           const publishedAt = postedAtFromPost(post);

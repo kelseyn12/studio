@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { publishOutcome, retryAccountIds, shortPlatformError } from "@/lib/publish-sync";
+import { publishOutcome, retryAccountIds, shortPlatformError, postedAtWhenLive } from "@/lib/publish-sync";
 
 describe("publishOutcome", () => {
   it("keeps a pending app queued", () => {
@@ -50,5 +50,27 @@ describe("retryAccountIds", () => {
   it("retries the failed look only, and leaves TikTok alone", () => {
     expect(retryAccountIds(jobs, "ig")).toEqual(["ig-acc", "fb-acc"]);
     expect(retryAccountIds(jobs, "yt")).toEqual(["yt-acc"]);
+  });
+});
+
+describe("postedAtWhenLive", () => {
+  const at = new Date("2026-09-29T15:01:00.000Z");
+
+  it("waits while any app is still queued", () => {
+    expect(
+      postedAtWhenLive([
+        { status: "PUBLISHED", publishedAt: at },
+        { status: "QUEUED", publishedAt: null },
+      ]),
+    ).toBeNull();
+  });
+
+  it("marks Posted once an app is live and nothing is waiting", () => {
+    expect(
+      postedAtWhenLive([
+        { status: "PUBLISHED", publishedAt: at },
+        { status: "FAILED", publishedAt: null },
+      ]),
+    ).toEqual(at);
   });
 });

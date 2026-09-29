@@ -69,6 +69,20 @@ export function retryAccountIds(jobs: RetryJob[], jobId: string): string[] {
     .map((row) => row.accountId);
 }
 
+/**
+ * The earliest live stamp once nothing is still waiting. Failed apps do not block Posted.
+ */
+export function postedAtWhenLive(
+  jobs: Array<{ status: string; publishedAt: Date | null }>,
+): Date | null {
+  if (jobs.some((job) => job.status === "QUEUED")) return null;
+  const times = jobs
+    .filter((job) => job.status === "PUBLISHED" && job.publishedAt)
+    .map((job) => job.publishedAt as Date)
+    .sort((a, b) => a.getTime() - b.getTime());
+  return times[0] ?? null;
+}
+
 /** Reads queued posts from Outstand and marks each app published or failed. */
 export async function syncQueuedPublishes(): Promise<void> {
   if (!hasOutstand()) return;
@@ -105,5 +119,17 @@ export async function syncQueuedPublishes(): Promise<void> {
     } catch {
       /* leave the job queued when Outstand cannot be read */
     }
+  }
+  const parked = await prisma.card.findMany({
+    where: { status: "READY", scheduledAt: { not: null } },
+    select: { id: true, publishes: { select: { status: true, publishedAt: true } } },
+  });
+  for (const card of parked) {
+    const postedAt = postedAtWhenLive(card.publishes);
+    if (!postedAt) continue;
+    await prisma.card.update({
+      where: { id: card.id },
+      data: { status: "POSTED", postedAt },
+    });
   }
 }

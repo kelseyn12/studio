@@ -93,6 +93,9 @@
 - [X] Show which app rejected a post that already went out
   Live reads each queued Outstand post and marks Instagram, Facebook, or YouTube failed. Try again sends only those apps, so TikTok is not posted twice.
 
+- [X] Calendar says Posted once an app is live
+  Opening Live marks the card Posted. The day chip says Posted. Files are remuxed without edit lists, and YouTube gets a 1280×720 thumb of the chosen frame.
+
 - [X] Multiply batch caption + dead-air trim
   Caption box ships with every video in the batch (no more file-name captions). Cut dead air toggle trims silent clip ends with ffmpeg silencedetect, never below half a second.
 

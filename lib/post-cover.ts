@@ -1,8 +1,8 @@
 /**
  * Turns the cover frame saved on a finished video into what each app accepts through Outstand.
  * Instagram Reels take a JPEG URL (or a frame offset when no URL is reachable), YouTube takes a
- * JPEG URL (best-effort; Shorts often ignore it), TikTok takes only a frame timestamp and only
- * on DIRECT_POST. Facebook and Threads have no cover field, so they get nothing.
+ * 1280×720 JPEG, TikTok takes only a frame timestamp and only on DIRECT_POST. Facebook and Threads
+ * have no cover field, so they get nothing.
  */
 
 export const MS_PER_SECOND = 1000;
@@ -51,14 +51,19 @@ export function coverCanChange(status: string): boolean {
  * Per-network Outstand options for a cover. `coverUrl` is a public JPEG URL of the frame, or ""
  * when none could be made — Instagram then falls back to the frame offset.
  */
-export function coverOptions(networks: string[], cover: CoverSource, coverUrl: string): NetworkOptions {
+export function coverOptions(
+  networks: string[],
+  cover: CoverSource,
+  coverUrl: string,
+  youtubeUrl = coverUrl,
+): NetworkOptions {
   if (!cover.coverPath) return {};
   const names = new Set(networks.map((network) => network.toLowerCase()));
   const options: NetworkOptions = {};
   if (names.has("instagram")) {
     options.instagram = coverUrl ? { reelCoverUrl: coverUrl } : { reelThumbOffset: coverMs(cover.coverAt) };
   }
-  if (names.has("youtube") && coverUrl) options.youtube = { thumbnailUrl: coverUrl };
+  if (names.has("youtube") && youtubeUrl) options.youtube = { thumbnailUrl: youtubeUrl };
   if (names.has("tiktok")) options.tiktok = tiktokBlock(coverMs(cover.coverAt));
   return options;
 }
@@ -72,8 +77,13 @@ function tiktokBlock(coverAtMs?: number): TikTokOptions {
 }
 
 /** Cover fields plus TikTok auto-publish. TikTok still gets DIRECT_POST when no cover is saved. */
-export function postOptions(networks: string[], cover: CoverSource, coverUrl: string): NetworkOptions {
-  const options = coverOptions(networks, cover, coverUrl);
+export function postOptions(
+  networks: string[],
+  cover: CoverSource,
+  coverUrl: string,
+  youtubeUrl = coverUrl,
+): NetworkOptions {
+  const options = coverOptions(networks, cover, coverUrl, youtubeUrl);
   if (networks.some((network) => network.toLowerCase() === "tiktok") && !options.tiktok) {
     options.tiktok = tiktokBlock();
   }

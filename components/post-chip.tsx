@@ -11,13 +11,16 @@ export function PostChip({
     id: string;
     title: string;
     scheduledAt: Date | null;
+    status?: string;
     account: { username: string } | null;
     looks?: string;
   };
   showDate?: boolean;
   showTitle?: boolean;
 }) {
+  const live = card.status === "POSTED" || card.status === "DATA";
   const when = card.scheduledAt ? (showDate ? labelWhen(card.scheduledAt) : labelTime(card.scheduledAt)) : "—";
+  const stamp = live ? `Posted · ${when}` : when;
   return (
     <Link href={`/cards/${card.id}?step=live`} className="block rounded-xl bg-lift p-2">
       {showTitle ? (
@@ -25,7 +28,7 @@ export function PostChip({
           {card.title}
         </p>
       ) : null}
-      <p className={showTitle ? "text-xs text-mute" : "text-sm font-medium"}>{when}</p>
+      <p className={showTitle ? "text-xs text-mute" : "text-sm font-medium"}>{stamp}</p>
       <p className="truncate text-xs text-mute">{card.account ? handle(card.account.username) : card.title}</p>
       {card.looks ? <p className="truncate text-xs text-mute">{card.looks}</p> : null}
     </Link>
