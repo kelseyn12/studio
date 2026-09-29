@@ -10,6 +10,14 @@ import type { Asset, CardStatus, SocialAccount } from "@prisma/client";
 
 export type QueueResult = { ok: true; shipped: boolean } | { ok: false; error: string; scheduled: boolean };
 
+/**
+ * A failed retry must not take the video off its day when another app already published
+ * or is still waiting. Only a first attempt that shipped nothing clears the day.
+ */
+export function shouldClearDay(shipped: boolean, stillLive: boolean): boolean {
+  return !shipped && !stillLive;
+}
+
 /** Names the video that failed, so IG · FB is not confused with TT · YT. */
 export function lookFailure(look: DrawnStyle, message: string): string {
   const tag = LOOK_TAG[look];
@@ -131,17 +139,23 @@ export async function queueCard(cardId: string, when: Date, accountId?: string |
 
   const shipped = posts.length > 0;
   if (!shipped && error) {
-    await prisma.card.update({ where: { id: cardId }, data: { scheduledAt: null } });
-    return { ok: false, error, scheduled: false };
+    const stillLive = await prisma.publishJob.count({
+      where: { cardId, status: { in: ["QUEUED", "PUBLISHED"] } },
+    });
+    if (shouldClearDay(false, stillLive > 0)) {
+      await prisma.card.update({ where: { id: cardId }, data: { scheduledAt: null } });
+      return { ok: false, error, scheduled: false };
+    }
+    return { ok: false, error, scheduled: true };
   }
 
   const first = posts[0];
   await prisma.card.update({
     where: { id: cardId },
     data: parkWrite({
-      when,
+      when: card.scheduledAt ?? when,
       accountId: primary?.id ?? card.accountId,
-      outstandPostId: first?.id ?? card.outstandPostId,
+      outstandPostId: card.outstandPostId ?? first?.id ?? null,
       publishedAt: first ? postedAtFromPost(first) : null,
     }),
   });

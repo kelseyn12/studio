@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { lookFailure, parkWrite } from "@/lib/publish";
+import { lookFailure, parkWrite, shouldClearDay } from "@/lib/publish";
 
 describe("lookFailure", () => {
   it("names the video that Outstand refused", () => {
@@ -9,6 +9,14 @@ describe("lookFailure", () => {
     expect(lookFailure("tiktok", "Outstand storage PUT failed (403)")).toBe(
       "TT · YT video · Outstand storage PUT failed (403)",
     );
+  });
+});
+
+describe("shouldClearDay", () => {
+  it("keeps the day when another app already published", () => {
+    expect(shouldClearDay(false, true)).toBe(false);
+    expect(shouldClearDay(false, false)).toBe(true);
+    expect(shouldClearDay(true, false)).toBe(false);
   });
 });
 
