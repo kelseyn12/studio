@@ -1,5 +1,5 @@
 import type { PipelineStatus } from "@/lib/pipeline";
-import { targetsByLook } from "@/lib/targets";
+import { accountsForLook, describeTargets, targetsByLook } from "@/lib/targets";
 import { LOOK_TAG, type DrawnStyle } from "@/lib/text-style";
 
 export const DESK_STAGES = ["brief", "footage", "editor", "live"] as const;
@@ -78,5 +78,20 @@ export function shipLooks<
     tag: LOOK_TAG[look] || "All apps",
     accounts: byLook.get(look) ?? [],
     asset: pickForLook(assets, look) ?? finished,
+  }));
+}
+
+export type WaitingLook = { tag: string; who: string };
+
+/** One line per file on a waiting mix — the "IG · FB" video and where it posts, then the "TT · YT" one. */
+export function waitingLooks(
+  assets: Array<{ kind: string; textStyle: string }>,
+  targets: Array<{ network: string; username: string; isActive?: boolean }>,
+): WaitingLook[] {
+  const looks = looksOnFiles(assets);
+  const show = looks.length > 0 ? looks : (["plain"] as DrawnStyle[]);
+  return show.map((look) => ({
+    tag: LOOK_TAG[look] || "All apps",
+    who: describeTargets(look === "plain" ? targets : accountsForLook(targets, look)),
   }));
 }

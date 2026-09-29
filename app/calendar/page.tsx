@@ -15,8 +15,10 @@ import {
   toInputDate,
   weekGrid,
 } from "@/lib/dates";
+import { waitingLooks } from "@/lib/card-desk";
 import { prisma } from "@/lib/prisma";
 import { targetAccounts, targetApps } from "@/lib/targets";
+import { WaitingVideos } from "@/components/waiting-videos";
 
 const VIEWS = ["week", "month", "scheduled", "posted"] as const;
 type View = (typeof VIEWS)[number];
@@ -39,7 +41,7 @@ export default async function CalendarPage({
   const [cards, accounts, failedJobs] = await Promise.all([
     prisma.card.findMany({
       where: { OR: [{ scheduledAt: { not: null } }, { status: "READY" }] },
-      include: { account: true },
+      include: { account: true, assets: { select: { kind: true, textStyle: true } } },
       orderBy: { scheduledAt: "asc" },
     }),
     prisma.socialAccount.findMany({ where: { isActive: true } }),
@@ -50,7 +52,9 @@ export default async function CalendarPage({
     }),
   ]);
   const withLooks = cards.map((card) => ({ ...card, looks: targetApps(targetAccounts(accounts, card)) }));
-  const waiting = withLooks.filter((card) => card.status === "READY" && !card.scheduledAt);
+  const waiting = withLooks
+    .filter((card) => card.status === "READY" && !card.scheduledAt)
+    .map((card) => ({ ...card, lines: waitingLooks(card.assets, targetAccounts(accounts, card)) }));
   const parked = withLooks.filter((card) => card.scheduledAt && card.status !== "POSTED" && card.status !== "DATA");
   const posted = withLooks.filter((card) => card.status === "POSTED" || card.status === "DATA");
   const thisWeek = cards.filter(
@@ -168,7 +172,11 @@ export default async function CalendarPage({
       {waiting.length > 0 && view === "week" ? (
         <section className="mt-8">
           <h2 className="mb-3 text-lg font-semibold">{waiting.length} finished, no day yet</h2>
-          <p className="mb-3 text-sm text-mute">Pick a video on a day, or schedule the whole batch above.</p>
+          <p className="mb-3 text-sm text-mute">
+            Each mix is two videos — an IG · FB one and a TT · YT one. Schedule the mix on a day above and each video
+            posts to its own accounts, shown here.
+          </p>
+          <WaitingVideos cards={waiting} />
         </section>
       ) : null}
     </Shell>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { pickForLook, shipLooks } from "@/lib/card-desk";
+import { pickForLook, shipLooks, waitingLooks } from "@/lib/card-desk";
 import { hookLooks } from "@/lib/text-style";
 
 const at = (minutes: number) => new Date(2026, 8, 26, 12, minutes);
@@ -49,6 +49,35 @@ describe("shipLooks", () => {
 
   it("still lists both files when no accounts are picked yet", () => {
     expect(shipLooks(generated, []).map((row) => row.tag)).toEqual(["IG · FB", "TT · YT"]);
+  });
+});
+
+describe("waitingLooks", () => {
+  const generated = [
+    { kind: "GENERATED", textStyle: "instagram" },
+    { kind: "GENERATED", textStyle: "tiktok" },
+  ];
+
+  it("says where each file posts, per look", () => {
+    const lines = waitingLooks(generated, [
+      { network: "instagram", username: "polsia" },
+      { network: "facebook", username: "polsia.fb" },
+      { network: "youtube", username: "@kelso" },
+    ]);
+    expect(lines).toEqual([
+      { tag: "IG · FB", who: "IG @polsia · FB @polsia.fb" },
+      { tag: "TT · YT", who: "YT @kelso" },
+    ]);
+  });
+
+  it("leaves who empty when no checked account takes that look", () => {
+    const lines = waitingLooks(generated, [{ network: "instagram", username: "polsia" }]);
+    expect(lines[1]).toEqual({ tag: "TT · YT", who: "" });
+  });
+
+  it("shows every account on an editor-only or plain video", () => {
+    const lines = waitingLooks([{ kind: "EDITED", textStyle: "" }], [{ network: "instagram", username: "polsia" }]);
+    expect(lines).toEqual([{ tag: "All apps", who: "IG @polsia" }]);
   });
 });
 

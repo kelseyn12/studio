@@ -19,7 +19,7 @@ export function CalendarBoard({
 }: {
   days: Date[];
   cards: CardRow[];
-  waiting: Array<{ id: string; title: string; looks?: string }>;
+  waiting: Array<{ id: string; title: string }>;
   accounts: Array<{ id: string; username: string; nickname: string }>;
   allowSlots: boolean;
 }) {
