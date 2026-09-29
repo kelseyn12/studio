@@ -43,6 +43,12 @@ export function labelTime(date: Date): string {
   return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
 }
 
+/** "Mon, Sep 28 · 10:00 AM" — the scheduled list has no day column, so the date has to be on the row. */
+export function labelWhen(date: Date): string {
+  const day = date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  return `${day} · ${labelTime(date)}`;
+}
+
 export function toInputDate(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");

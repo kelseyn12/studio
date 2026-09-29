@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { labelWeekRange, parseLocalDate, startOfWeek, toInputDate } from "@/lib/dates";
+import { labelWeekRange, labelWhen, parseLocalDate, startOfWeek, toInputDate } from "@/lib/dates";
 
 describe("local calendar dates", () => {
   it("parses a YYYY-MM-DD as a local day, not UTC midnight", () => {
@@ -8,6 +8,10 @@ describe("local calendar dates", () => {
     expect(day.getMonth()).toBe(8);
     expect(day.getDate()).toBe(3);
     expect(day.getHours()).toBe(0);
+  });
+
+  it("puts the weekday on a scheduled row", () => {
+    expect(labelWhen(new Date(2026, 8, 28, 10, 0))).toBe("Mon, Sep 28 · 10:00 AM");
   });
 
   it("labels a week the way the posting calendar does", () => {

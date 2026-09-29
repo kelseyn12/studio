@@ -48,7 +48,7 @@ export default async function CalendarPage({
     prisma.socialAccount.findMany({ where: { isActive: true } }),
     prisma.publishJob.findMany({
       where: { status: "FAILED" },
-      include: { card: { select: { id: true, title: true } }, account: { select: { username: true } } },
+      include: { card: { select: { id: true, title: true } }, account: { select: { username: true, network: true } } },
       orderBy: { createdAt: "desc" },
     }),
   ]);
@@ -133,7 +133,7 @@ export default async function CalendarPage({
       ) : null}
       {params.ship === "fail" ? (
         <p className="mb-4 rounded-card border border-line bg-panel px-4 py-3 text-sm">
-          Time is saved. Outstand did not take the file — check Accounts and that a finished video exists.
+          Outstand did not take the file, so it is not on a day. The notice above names the app. Try again there.
         </p>
       ) : null}
       {params.ship === "taken" ? (
@@ -185,12 +185,12 @@ export default async function CalendarPage({
             <div key={card.id} className="flex items-center justify-between gap-3 rounded-card border border-line bg-panel px-4 py-3">
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium">{card.title}</p>
-                <PostChip card={card} />
+                <PostChip card={card} showDate />
               </div>
               <div className="flex items-center gap-2">
                 {view === "scheduled" ? <CancelSchedule cardId={card.id} /> : null}
                 {view === "posted" ? <PaidButton card={card} /> : null}
-                <StatusPill status={card.status} />
+                <StatusPill status={card.status} label={view === "scheduled" && card.status === "READY" ? "Scheduled" : undefined} />
               </div>
             </div>
           ))}

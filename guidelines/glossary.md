@@ -4,7 +4,7 @@
 - `dropSuperseded` / `sweepStale` — `lib/sweep.ts` — deletes those files from R2 and the rows. Editor cut calls `dropSuperseded`; Library Free space runs `sweepStale`.
 - `pickNextAction` — `lib/next-action.ts` — chooses the single Today action. Used on `app/page.tsx`.
 - `machineCounts` — `lib/queries.ts` — pipeline and slot totals for Today.
-- `uploadMedia` — `lib/outstand.ts` — PUT the mp4 (or cover JPEG) into Outstand storage, returns the public URL. Sends the whole file with its length (`signedPutTarget`) so storage does not answer 403.
+- `uploadMedia` — `lib/outstand.ts` — PUT the mp4 (or cover JPEG) into Outstand storage, returns the public URL. `safeUploadName` strips `?` from the title so the signed link stays intact, and `signedPutTarget` sends the whole file with its length.
 - `postBody` / `createPost` — `lib/outstand.ts` — builds the `POST /posts/` body; `options` carries per-network blocks (`instagram`, `youtube`, `tiktok`) and can never override `containers`/`accounts`/`scheduledAt`.
 - `coverOptions`, `postOptions`, `wantsCoverUrl`, `coverMs`, `nextCoverPath`, `coverCanChange` — `lib/post-cover.ts` — turn an asset's `coverPath`/`coverAt` into Outstand cover fields per network. `postOptions` also sets TikTok `DIRECT_POST` + `PUBLIC_TO_EVERYONE` so the cover timestamp is honored. Used by `queueCard` via `shippableCoverUrl` (R2 public URL, else Outstand upload, else "" → IG offset fallback).
 - `scoreDeal` — `lib/deals.ts` — TECH scores volume; UGC scores fee per video. A deal with `monthlyPayCents` set scores that flat fee as the month instead of pay × slots × 30. Used on Deals and deal detail. `formatMoneyExact` keeps cents for per-video amounts.
@@ -51,7 +51,9 @@
 - `rejectStudioFile` — `lib/storage.ts` — blocks camera-day files. Phone clips/1080s cap at 250MB. Voice/reference 40MB.
 - `groupByDeal` — `lib/library-groups.ts` — piles finished Library videos under the deal name.
 - `togglePaid` — `app/cards/[id]/actions.ts` — flips `approved` so Collected on Today counts real money. Used by PaidButton on Live posted list and the video page.
-- `retryFailedPost` / `clearFailedPost` — `app/calendar/actions.ts` — re-ship or dismiss a failed Outstand post. Used by FailedPosts on Live.
+- `retryFailedPost` / `clearFailedPost` — `app/calendar/actions.ts` — re-ship or dismiss a failed Outstand post. Used by FailedPosts on Live. Retry uses the accounts already checked on the video. The notice shows the app (`IG @handle`), and the error names the video (`IG · FB video`).
+- `lookFailure` — `lib/publish.ts` — prefixes an Outstand error with the video it belongs to. A failed upload also clears the day, so the video does not stay in Scheduled.
+- `labelWhen` — `lib/dates.ts` — weekday, date, and time for the Scheduled and Posted lists.
 - `updateDeal` — `app/campaigns/[id]/actions.ts` — edits a deal after creation. Used by DealEdit on the deal page.
 - `studioBytes` — `lib/queries.ts` — every stored byte: card files + Multiply clips + music. Used by the storage meter on Today and Library.
 - `quietEnds` / `trimFromSilence` — `lib/trim.ts` — finds dead air at clip ends via silencedetect; safe parse tested in `lib/trim.test.ts`. Used by Multiply generate when Cut dead air is on.

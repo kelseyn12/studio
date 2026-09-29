@@ -11,11 +11,11 @@ const TONE: Record<string, string> = {
   data: "bg-data/15 text-data",
 };
 
-export function StatusPill({ status }: { status: PipelineStatus }) {
+export function StatusPill({ status, label }: { status: PipelineStatus; label?: string }) {
   const meta = PIPELINE_META[status];
   return (
     <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide ${TONE[meta.color]}`}>
-      {meta.label}
+      {label ?? meta.label}
     </span>
   );
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseConfirm, parsePost, parseUploadTicket, postBody, postedAtFromPost, signedPutTarget, storagePutError } from "@/lib/outstand";
+import { parseConfirm, parsePost, parseUploadTicket, postBody, postedAtFromPost, safeUploadName, signedPutTarget, storagePutError } from "@/lib/outstand";
 
 describe("postBody", () => {
   it("puts network blocks beside containers without letting them override the core fields", () => {
@@ -23,6 +23,12 @@ describe("Outstand media parsers", () => {
         data: { id: "med_1", upload_url: "https://storage.example/put" },
       }),
     ).toEqual({ id: "med_1", uploadUrl: "https://storage.example/put" });
+  });
+
+  it("keeps question marks out of the storage name", () => {
+    expect(safeUploadName("This week · mix 3 · AI can build the company now too?? · IG · FB.mp4")).toBe(
+      "This-week-mix-3-AI-can-build-the-company-now-too-IG-FB.mp4",
+    );
   });
 
   it("keeps the signed upload query byte for byte", () => {

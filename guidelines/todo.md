@@ -297,6 +297,8 @@
   Chips show what's already set. Tap a day to open that week and schedule there.
 - [X] Mix upload no longer dies on a 403
   The file is sent on the exact link Outstand signed. Try again on the banner uploads mix 3.
+- [X] A failed upload is not listed as scheduled
+  The day is cleared when Outstand refuses the file. Scheduled rows show the date and say Scheduled. The failure names IG, FB, TT, or YT and which video.
 
 
 

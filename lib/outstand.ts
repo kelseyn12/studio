@@ -138,6 +138,22 @@ export function parseConfirm(body: Record<string, unknown>): { url: string } {
   return { url };
 }
 
+/**
+ * A storage name Outstand can put in the upload link. A `?` in the title (the mix caption)
+ * was being read as the start of the signed query, so R2 answered 403.
+ */
+export function safeUploadName(filename: string, fallback = "video.mp4"): string {
+  const base = filename.trim() || fallback;
+  const dot = base.lastIndexOf(".");
+  const rawExt = dot > 0 ? base.slice(dot).toLowerCase() : "";
+  const ext = /^\.[a-z0-9]{1,5}$/.test(rawExt) ? rawExt : ".mp4";
+  const stem = (dot > 0 ? base.slice(0, dot) : base)
+    .replace(/[^a-zA-Z0-9._-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+  return `${stem || "video"}${ext}`.slice(0, 180);
+}
+
 /** Host and path exactly as Outstand signed them. `fetch` sends the file in chunks and R2 answers 403. */
 export function signedPutTarget(uploadUrl: string): { hostname: string; path: string } {
   const scheme = uploadUrl.indexOf("://");
@@ -186,7 +202,7 @@ export async function uploadMedia(
   const size = (await stat(fileAbs)).size;
   const ticketBody = await outstand<Record<string, unknown>>("/media/upload", {
     method: "POST",
-    body: JSON.stringify({ filename, content_type: contentType }),
+    body: JSON.stringify({ filename: safeUploadName(filename), content_type: contentType }),
   });
   const ticket = parseUploadTicket(ticketBody);
   const bytes = await readFile(fileAbs);

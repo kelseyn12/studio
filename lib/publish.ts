@@ -5,9 +5,16 @@ import { postOptions, wantsCoverUrl } from "@/lib/post-cover";
 import { prisma } from "@/lib/prisma";
 import { isPublicMediaUrl, r2PublicUrl } from "@/lib/r2";
 import { targetAccounts, targetsByLook } from "@/lib/targets";
+import { LOOK_TAG, type DrawnStyle } from "@/lib/text-style";
 import type { Asset, CardStatus, SocialAccount } from "@prisma/client";
 
 export type QueueResult = { ok: true; shipped: boolean } | { ok: false; error: string; scheduled: boolean };
+
+/** Names the video that failed, so IG · FB is not confused with TT · YT. */
+export function lookFailure(look: DrawnStyle, message: string): string {
+  const tag = LOOK_TAG[look];
+  return tag ? `${tag} video · ${message}` : message;
+}
 
 export function parkWrite(input: {
   when: Date;
@@ -62,6 +69,7 @@ export async function queueCard(cardId: string, when: Date, accountId?: string |
   const finished = pickFinished(card.assets);
 
   const posts: OutstandPost[] = [];
+  const failures: Array<{ accountId: string; error: string }> = [];
   let error = "";
   try {
     if (!hasOutstand()) {
@@ -71,41 +79,58 @@ export async function queueCard(cardId: string, when: Date, accountId?: string |
     } else if (!finished) {
       error = "No video file to ship";
     } else {
+      await prisma.publishJob.deleteMany({ where: { cardId, status: "FAILED" } });
       for (const group of targetsByLook(targets)) {
-        const asset = pickForLook(card.assets, group.look) ?? finished;
-        const networks = group.accounts.map((account) => account.network);
-        const post = await createPost({
-          accounts: group.accounts.map((account: SocialAccount) => account.outstandAccountId),
-          content: card.caption || card.title,
-          scheduledAt: when.toISOString(),
-          media: [{ url: await shippableUrl(asset), filename: asset.filename || "video.mp4" }],
-          options: postOptions(networks, asset, await shippableCoverUrl(asset, networks)),
-        });
-        posts.push(post);
-        const publishedAt = postedAtFromPost(post);
-        await prisma.publishJob.createMany({
-          data: group.accounts.map((account) => ({
-            cardId,
-            accountId: account.id,
-            outstandPostId: post.id,
-            status: publishedAt ? "PUBLISHED" : "QUEUED",
-            scheduledAt: when,
-            publishedAt,
-          })),
-        });
+        try {
+          const asset = pickForLook(card.assets, group.look) ?? finished;
+          const networks = group.accounts.map((account) => account.network);
+          const post = await createPost({
+            accounts: group.accounts.map((account: SocialAccount) => account.outstandAccountId),
+            content: card.caption || card.title,
+            scheduledAt: when.toISOString(),
+            media: [{ url: await shippableUrl(asset), filename: asset.filename || "video.mp4" }],
+            options: postOptions(networks, asset, await shippableCoverUrl(asset, networks)),
+          });
+          posts.push(post);
+          const publishedAt = postedAtFromPost(post);
+          await prisma.publishJob.createMany({
+            data: group.accounts.map((account) => ({
+              cardId,
+              accountId: account.id,
+              outstandPostId: post.id,
+              status: publishedAt ? "PUBLISHED" : "QUEUED",
+              scheduledAt: when,
+              publishedAt,
+            })),
+          });
+        } catch (caught) {
+          const message = lookFailure(group.look, caught instanceof Error ? caught.message : "Outstand failed");
+          error = message;
+          for (const account of group.accounts) failures.push({ accountId: account.id, error: message });
+        }
       }
     }
   } catch (caught) {
     error = caught instanceof Error ? caught.message : "Outstand failed";
   }
 
-  const shipped = posts.length > 0;
-  if (shipped) {
-    await prisma.publishJob.deleteMany({ where: { cardId, status: "FAILED" } });
-  } else if (error && primary) {
-    await prisma.publishJob.create({
-      data: { cardId, accountId: primary.id, status: "FAILED", error, scheduledAt: when },
+  if (failures.length === 0 && error && primary) failures.push({ accountId: primary.id, error });
+  if (failures.length) {
+    await prisma.publishJob.createMany({
+      data: failures.map((row) => ({
+        cardId,
+        accountId: row.accountId,
+        status: "FAILED" as const,
+        error: row.error,
+        scheduledAt: when,
+      })),
     });
+  }
+
+  const shipped = posts.length > 0;
+  if (!shipped && error) {
+    await prisma.card.update({ where: { id: cardId }, data: { scheduledAt: null } });
+    return { ok: false, error, scheduled: false };
   }
 
   const first = posts[0];

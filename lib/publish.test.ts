@@ -1,5 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { parkWrite } from "@/lib/publish";
+import { lookFailure, parkWrite } from "@/lib/publish";
+
+describe("lookFailure", () => {
+  it("names the video that Outstand refused", () => {
+    expect(lookFailure("instagram", "Outstand storage PUT failed (403)")).toBe(
+      "IG · FB video · Outstand storage PUT failed (403)",
+    );
+    expect(lookFailure("tiktok", "Outstand storage PUT failed (403)")).toBe(
+      "TT · YT video · Outstand storage PUT failed (403)",
+    );
+  });
+});
 
 describe("parkWrite", () => {
   const when = new Date("2026-09-20T15:00:00.000Z");

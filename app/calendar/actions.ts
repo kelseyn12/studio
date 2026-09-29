@@ -78,7 +78,7 @@ export async function retryFailedPost(formData: FormData) {
     job.scheduledAt && job.scheduledAt > new Date()
       ? job.scheduledAt
       : new Date(Date.now() + RETRY_DELAY_MS);
-  await queueCard(job.cardId, when, job.accountId);
+  await queueCard(job.cardId, when, null);
   revalidatePath("/calendar");
   revalidatePath("/");
 }
