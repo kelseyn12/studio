@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BulkForm } from "@/components/bulk-form";
+import { CancelSchedule } from "@/components/cancel-schedule";
 import { FailedPosts } from "@/components/failed-posts";
 import { PaidButton } from "@/components/paid-button";
 import { CalendarBoard } from "@/components/calendar-board";
@@ -140,6 +141,16 @@ export default async function CalendarPage({
           That video is already on a day. It was not sent again.
         </p>
       ) : null}
+      {params.ship === "cleared" ? (
+        <p className="mb-4 rounded-card border border-line bg-panel px-4 py-3 text-sm">
+          Taken off the calendar. It will not post.
+        </p>
+      ) : null}
+      {params.ship === "cancel-fail" ? (
+        <p className="mb-4 rounded-card border border-line bg-panel px-4 py-3 text-sm">
+          Outstand still has this post, so it stayed on the calendar. Try Cancel again.
+        </p>
+      ) : null}
 
       <FailedPosts jobs={failedJobs} />
 
@@ -159,8 +170,12 @@ export default async function CalendarPage({
         <section className="mt-8 space-y-2">
           {(view === "scheduled" ? parked : posted).map((card) => (
             <div key={card.id} className="flex items-center justify-between gap-3 rounded-card border border-line bg-panel px-4 py-3">
-              <PostChip card={card} />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium">{card.title}</p>
+                <PostChip card={card} />
+              </div>
               <div className="flex items-center gap-2">
+                {view === "scheduled" ? <CancelSchedule cardId={card.id} /> : null}
                 {view === "posted" ? <PaidButton card={card} /> : null}
                 <StatusPill status={card.status} />
               </div>

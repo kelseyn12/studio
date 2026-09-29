@@ -283,6 +283,8 @@
   Accounts page uses deal pills instead of a dropdown. Tap Polsia and it saves; the gold pill is the current deal.
 - [X] Schedule shows that it is working
   The button says Scheduling… and a second click cannot send the same video twice. The day is claimed before the slow upload.
+- [X] Cancel a scheduled video
+  Scheduled list has Cancel. It drops the Outstand posts and puts the video back under finished, no day yet.
 
 
 
