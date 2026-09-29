@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-09-29 — A posted video says Posted on the day chip and on the video's last step. If an app rejects the post after you leave, that app is sent once more and the ones that already published are left alone. YouTube's daily upload cap waits until the next day.
 - 2026-09-29 — The cover you pick is the first frame of the file that ships, and that same picture is sent as the Instagram and TikTok cover. TikTok and YouTube Shorts were choosing their own frame, so the hook never showed.
 - 2026-09-29 — Retrying the apps that failed no longer takes the video off its day when TikTok already published. The original time stays on the calendar.
 - 2026-09-29 — A post could go live on TikTok while Instagram, Facebook, and YouTube failed, and Live still said queued. Opening Live now reads each app's result. Try again sends only the apps that failed, and the stored file name is plain letters so Facebook's downloader gets a simple link.

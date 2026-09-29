@@ -19,6 +19,7 @@ import {
 import { fileLooks } from "@/lib/card-desk";
 import { prisma } from "@/lib/prisma";
 import { syncQueuedPublishes } from "@/lib/publish-sync";
+import { sweepFailedPublishes } from "@/lib/publish-sweep";
 import { targetAccounts, targetApps } from "@/lib/targets";
 import { WaitingVideos } from "@/components/waiting-videos";
 
@@ -36,6 +37,7 @@ export default async function CalendarPage({
 }) {
   const params = await searchParams;
   await syncQueuedPublishes();
+  void sweepFailedPublishes();
   const view = asView(params.view);
   const anchor = params.from ? parseLocalDate(params.from) : new Date();
   const weekStart = startOfWeek(anchor);

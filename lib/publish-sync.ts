@@ -83,6 +83,53 @@ export function postedAtWhenLive(
   return times[0] ?? null;
 }
 
+type Attempt = {
+  cardId: string;
+  accountId: string;
+  status: string;
+  error: string | null;
+  createdAt: Date;
+};
+
+function sameLocalDay(left: Date, right: Date): boolean {
+  return (
+    left.getFullYear() === right.getFullYear() &&
+    left.getMonth() === right.getMonth() &&
+    left.getDate() === right.getDate()
+  );
+}
+
+function isUploadQuota(error: string | null): boolean {
+  return /daily upload limit/i.test(error || "");
+}
+
+/**
+ * Apps to send again after a failure. A published app is left alone. YouTube's daily cap waits
+ * until the next day. Anything else gets one automatic retry.
+ */
+export function accountsReadyToRetry(jobs: Attempt[], now = new Date()): Array<{ cardId: string; accountIds: string[] }> {
+  const grouped = new Map<string, Attempt[]>();
+  for (const job of jobs) {
+    const key = `${job.cardId}:${job.accountId}`;
+    const list = grouped.get(key) ?? [];
+    list.push(job);
+    grouped.set(key, list);
+  }
+  const chosen = new Map<string, string[]>();
+  for (const list of grouped.values()) {
+    const latest = [...list].sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime())[0];
+    if (latest.status !== "FAILED") continue;
+    const quota = isUploadQuota(latest.error);
+    if (quota && sameLocalDay(latest.createdAt, now)) continue;
+    const failures = list.filter((job) => job.status === "FAILED").length;
+    if (!quota && failures > 1) continue;
+    const ids = chosen.get(latest.cardId) ?? [];
+    ids.push(latest.accountId);
+    chosen.set(latest.cardId, ids);
+  }
+  return [...chosen.entries()].map(([cardId, accountIds]) => ({ cardId, accountIds }));
+}
+
 /** Reads queued posts from Outstand and marks each app published or failed. */
 export async function syncQueuedPublishes(): Promise<void> {
   if (!hasOutstand()) return;

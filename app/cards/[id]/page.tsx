@@ -50,7 +50,7 @@ export default async function CardPage({
           <h1 className="text-3xl font-semibold tracking-tight">{card.title}</h1>
         </div>
         <div className="flex items-start gap-3">
-          <StatusPill status={card.status} />
+          <StatusPill status={card.status} scheduledAt={card.scheduledAt} />
         </div>
       </div>
       {desk ? null : (
@@ -60,7 +60,13 @@ export default async function CardPage({
       )}
       {desk ? null : (
         <div className="mb-6 max-w-xl">
-          <Stepper cardId={card.id} stage={stage} cutBy={card.cutBy} />
+          <Stepper
+            cardId={card.id}
+            stage={stage}
+            cutBy={card.cutBy}
+            scheduled={Boolean(card.scheduledAt)}
+            posted={card.status === "POSTED" || card.status === "DATA"}
+          />
         </div>
       )}
       <div className="max-w-2xl">

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { publishOutcome, retryAccountIds, shortPlatformError, postedAtWhenLive } from "@/lib/publish-sync";
+import { publishOutcome, retryAccountIds, shortPlatformError, postedAtWhenLive, accountsReadyToRetry } from "@/lib/publish-sync";
 
 describe("publishOutcome", () => {
   it("keeps a pending app queued", () => {
@@ -72,5 +72,51 @@ describe("postedAtWhenLive", () => {
         { status: "FAILED", publishedAt: null },
       ]),
     ).toEqual(at);
+  });
+});
+
+describe("accountsReadyToRetry", () => {
+  const now = new Date("2026-09-29T18:00:00.000Z");
+  const earlier = new Date("2026-09-29T15:00:00.000Z");
+
+  it("retries a failed app once and leaves a published one alone", () => {
+    expect(
+      accountsReadyToRetry(
+        [
+          { cardId: "mix", accountId: "ig", status: "FAILED", error: "Instagram could not process the video.", createdAt: earlier },
+          { cardId: "mix", accountId: "tt", status: "PUBLISHED", error: null, createdAt: earlier },
+        ],
+        now,
+      ),
+    ).toEqual([{ cardId: "mix", accountIds: ["ig"] }]);
+  });
+
+  it("does not retry YouTube's daily cap until the next day", () => {
+    expect(
+      accountsReadyToRetry(
+        [
+          {
+            cardId: "mix",
+            accountId: "yt",
+            status: "FAILED",
+            error: "YouTube daily upload limit is used up. It resets overnight.",
+            createdAt: earlier,
+          },
+        ],
+        now,
+      ),
+    ).toEqual([]);
+  });
+
+  it("stops after one automatic retry", () => {
+    expect(
+      accountsReadyToRetry(
+        [
+          { cardId: "mix", accountId: "ig", status: "FAILED", error: "Instagram could not process the video.", createdAt: earlier },
+          { cardId: "mix", accountId: "ig", status: "FAILED", error: "Instagram could not process the video.", createdAt: now },
+        ],
+        now,
+      ),
+    ).toEqual([]);
   });
 });

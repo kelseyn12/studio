@@ -179,17 +179,23 @@ export function CardLive({
         {card.caption.trim() ? null : (
           <p className="text-xs text-mute">Empty caption ships the title: {card.title}</p>
         )}
-        <label className="block text-sm">
-          When it posts
-          <input
-            name="scheduledAt"
-            type="datetime-local"
-            defaultValue={card.scheduledAt ? toInputDateTime(card.scheduledAt) : ""}
-            className="field mt-2"
-            required
-          />
-        </label>
-        <ScheduleButton label="Schedule" className="w-full rounded-xl border border-line px-4 py-3 font-semibold" />
+        {card.status === "POSTED" || card.status === "DATA" ? (
+          <p className="text-sm text-mute">This already posted. It will not be sent again from here.</p>
+        ) : (
+          <>
+            <label className="block text-sm">
+              When it posts
+              <input
+                name="scheduledAt"
+                type="datetime-local"
+                defaultValue={card.scheduledAt ? toInputDateTime(card.scheduledAt) : ""}
+                className="field mt-2"
+                required
+              />
+            </label>
+            <ScheduleButton label="Schedule" className="w-full rounded-xl border border-line px-4 py-3 font-semibold" />
+          </>
+        )}
         </div>
       </form>
     </div>
