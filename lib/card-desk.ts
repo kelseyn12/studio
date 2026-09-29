@@ -1,4 +1,6 @@
 import type { PipelineStatus } from "@/lib/pipeline";
+import { targetsByLook } from "@/lib/targets";
+import { LOOK_TAG, type DrawnStyle } from "@/lib/text-style";
 
 export const DESK_STAGES = ["brief", "footage", "editor", "live"] as const;
 export type DeskStage = (typeof DESK_STAGES)[number];
@@ -49,4 +51,43 @@ export function pickForLook<T extends { kind: string; createdAt: Date; textStyle
     newestFirst.find((asset) => asset.kind === "GENERATED" && asset.textStyle === look) ??
     pickFinished(assets)
   );
+}
+
+export type ShipLook<A, T> = { look: DrawnStyle; tag: string; accounts: T[]; asset: A };
+
+/** One row per app look that will ship — IG · FB and TT · YT stay separate. */
+export function shipLooks<
+  A extends { kind: string; createdAt: Date; textStyle: string },
+  T extends { network: string },
+>(assets: A[], targets: T[]): Array<ShipLook<A, T>> {
+  const finished = pickFinished(assets);
+  if (!finished) return [];
+  const groups = targetsByLook(targets);
+  if (groups.length === 0) {
+    const look = (["instagram", "tiktok", "plain"].includes(finished.textStyle)
+      ? finished.textStyle
+      : "plain") as DrawnStyle;
+    return [{ look, tag: LOOK_TAG[look] || "All apps", accounts: [], asset: finished }];
+  }
+  return groups.map((group) => ({
+    look: group.look,
+    tag: LOOK_TAG[group.look] || group.look,
+    accounts: group.accounts,
+    asset: pickForLook(assets, group.look) ?? finished,
+  }));
+}
+
+/** "IG · FB + TT · YT" for chips when a video has both files. */
+export function lookLabels(assets: Array<{ kind: string; textStyle: string }>): string {
+  const order: DrawnStyle[] = ["instagram", "tiktok", "plain"];
+  const have = new Set(
+    assets
+      .filter((asset) => asset.kind === "GENERATED" || asset.kind === "EDITED")
+      .map((asset) => asset.textStyle),
+  );
+  return order
+    .filter((look) => have.has(look))
+    .map((look) => LOOK_TAG[look])
+    .filter(Boolean)
+    .join(" + ");
 }

@@ -267,6 +267,9 @@
   TikTok now auto-publishes (`DIRECT_POST` + public) so the saved cover frame is the thumbnail. Inbox drafts are gone. If a post fails with `reached_active_user_cap`, wait and ship that one again the next day.
 - [X] Reselect cover after a bad pick
   Cover stays after you save and after you set a time. Play to a new frame and tap Use this frame instead. Each save writes a new still so the old one is not stuck.
+- [X] Live schedule shows which file is IG · FB vs TT · YT
+  Each look is its own card: watch, cover, and which @ it posts to. Caption is labeled as the text under the video. Calendar chips name both looks.
+
 
 
 

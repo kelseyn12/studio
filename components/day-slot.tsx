@@ -7,7 +7,7 @@ export function DaySlot({
   accounts,
 }: {
   isoDay: string;
-  waiting: Array<{ id: string; title: string }>;
+  waiting: Array<{ id: string; title: string; looks?: string }>;
   accounts: Array<{ id: string; username: string; nickname: string }>;
 }) {
   if (waiting.length === 0) return null;
@@ -16,7 +16,7 @@ export function DaySlot({
       <select name="cardId" className="field text-xs" required>
         {waiting.map((card) => (
           <option key={card.id} value={card.id}>
-            {card.title}
+            {card.looks ? `${card.title} · ${card.looks}` : card.title}
           </option>
         ))}
       </select>

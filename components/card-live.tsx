@@ -1,22 +1,36 @@
 import { approveCut, requestChanges, scheduleCard, sendForTouchUp } from "@/app/cards/[id]/actions";
+import { LiveLooks } from "@/components/live-looks";
 import { PaidButton } from "@/components/paid-button";
-import { CoverPick } from "@/components/cover-pick";
 import { QuickCut } from "@/components/quick-cut";
+import { pickFinished, shipLooks } from "@/lib/card-desk";
 import { toInputDateTime } from "@/lib/dates";
 import { formatMoney } from "@/lib/deals";
 import { coverCanChange } from "@/lib/post-cover";
-import { dealAccounts, describeTargets, handle } from "@/lib/targets";
+import { dealAccounts, describeTargets, handle, targetAccounts } from "@/lib/targets";
 import { watchUrl } from "@/lib/urls";
+
+type LiveAsset = {
+  id: string;
+  path: string;
+  filename: string;
+  kind: string;
+  createdAt: Date;
+  textStyle: string;
+  publicUrl: string | null;
+  coverPath?: string;
+  coverAt?: number;
+};
 
 export function CardLive({
   card,
   accounts,
-  edited,
+  assets,
   canUndo,
   cutSrc,
 }: {
   card: {
     id: string;
+    title: string;
     status: string;
     caption: string;
     editorNote: string;
@@ -36,11 +50,14 @@ export function CardLive({
     isActive: boolean;
     campaignId: string | null;
   }>;
-  edited?: { id: string; path: string; filename: string; publicUrl: string | null; coverPath?: string; coverAt?: number };
+  assets: LiveAsset[];
   canUndo?: boolean;
   cutSrc?: string;
 }) {
   const dealTargets = dealAccounts(accounts, card.campaignId);
+  const targets = targetAccounts(accounts, card);
+  const looks = shipLooks(assets, targets);
+  const edited = pickFinished(assets);
   if (!edited) {
     return (
       <p className="rounded-card border border-dashed border-line bg-panel px-5 py-8 text-sm text-mute">
@@ -50,12 +67,11 @@ export function CardLive({
   }
   return (
     <div className="space-y-3">
-      <a
-        href={watchUrl(edited.path)}
-        className="block rounded-xl border border-line px-4 py-3 text-center"
-      >
-        Watch {edited.filename}
-      </a>
+      <p className="text-sm text-mute">
+        Each look is its own file. IG · FB is the Instagram text. TT · YT is the TikTok text. Watch both, then edit the
+        caption in the box below.
+      </p>
+      <LiveLooks rows={looks} canCover={coverCanChange(card.status)} />
       {card.status === "REVIEW" || (card.status === "READY" && !card.scheduledAt) ? (
         <details className="rounded-card border border-line bg-panel px-5 py-4">
           <summary className="cursor-pointer text-sm font-semibold">Cut and speed — drop dragging parts, then post from here</summary>
@@ -67,14 +83,6 @@ export function CardLive({
               canUndo={canUndo}
               note="Makes a new cut of this video. The newest cut is the one that ships."
             />
-          </div>
-        </details>
-      ) : null}
-      {coverCanChange(card.status) ? (
-        <details className="rounded-card border border-line bg-panel px-5 py-4">
-          <summary className="cursor-pointer text-sm font-semibold">Cover frame — pick a still. Change it anytime before it posts.</summary>
-          <div className="mt-3">
-            <CoverPick id={edited.id} src={watchUrl(edited.path)} coverAt={edited.coverAt} />
           </div>
         </details>
       ) : null}
@@ -130,18 +138,44 @@ export function CardLive({
       <form action={scheduleCard} className="space-y-3 rounded-card border border-line bg-panel p-5">
         <input type="hidden" name="id" value={card.id} />
         <p className="text-sm text-mute">
-          {dealTargets.length > 0
-            ? `Schedule it. Posts to ${describeTargets(dealTargets)} at the time you set — one post, every account on this deal.`
-            : `Schedule it. ${card.account ? handle(card.account.username) : "Pick an account"} gets this video at the time you set.`}
+          {looks.length > 1
+            ? looks
+                .map((row) =>
+                  row.accounts.length
+                    ? `${row.tag} → ${describeTargets(row.accounts)}`
+                    : `${row.tag} file`,
+                )
+                .join(". ")
+            : dealTargets.length > 0
+              ? `Posts to ${describeTargets(dealTargets)} at the time you set.`
+              : `${card.account ? handle(card.account.username) : "Pick an account"} gets this video at the time you set.`}
         </p>
-        <textarea name="caption" defaultValue={card.caption} placeholder="Caption that ships with the video" className="field min-h-24" />
-        <input
-          name="scheduledAt"
-          type="datetime-local"
-          defaultValue={card.scheduledAt ? toInputDateTime(card.scheduledAt) : ""}
-          className="field"
-          required
-        />
+        <label className="block text-sm">
+          Caption on every app
+          <span className="mt-1 block text-xs font-normal text-mute">
+            The text under the video — same on IG, TikTok, YouTube, and Facebook. Words already on the video stay in the
+            file; change those on Multiply → Words + music.
+          </span>
+          <textarea
+            name="caption"
+            defaultValue={card.caption}
+            placeholder={card.title}
+            className="field mt-2 min-h-24"
+          />
+        </label>
+        {card.caption.trim() ? null : (
+          <p className="text-xs text-mute">Empty caption ships the title: {card.title}</p>
+        )}
+        <label className="block text-sm">
+          When it posts
+          <input
+            name="scheduledAt"
+            type="datetime-local"
+            defaultValue={card.scheduledAt ? toInputDateTime(card.scheduledAt) : ""}
+            className="field mt-2"
+            required
+          />
+        </label>
         {dealTargets.length === 0 ? (
           <div className="space-y-2">
             <p className="text-xs text-mute">Check every account this video should post to.</p>

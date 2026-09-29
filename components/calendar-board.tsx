@@ -7,6 +7,7 @@ type CardRow = {
   title: string;
   scheduledAt: Date | null;
   account: { username: string; nickname: string } | null;
+  looks?: string;
 };
 
 export function CalendarBoard({
@@ -18,7 +19,7 @@ export function CalendarBoard({
 }: {
   days: Date[];
   cards: CardRow[];
-  waiting: Array<{ id: string; title: string }>;
+  waiting: Array<{ id: string; title: string; looks?: string }>;
   accounts: Array<{ id: string; username: string; nickname: string }>;
   allowSlots: boolean;
 }) {

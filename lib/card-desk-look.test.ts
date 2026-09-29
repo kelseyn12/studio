@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { pickForLook } from "@/lib/card-desk";
+import { lookLabels, pickForLook, shipLooks } from "@/lib/card-desk";
 import { hookLooks } from "@/lib/text-style";
 
 const at = (minutes: number) => new Date(2026, 8, 26, 12, minutes);
@@ -25,6 +25,42 @@ describe("pickForLook", () => {
     const single = [{ id: "one", kind: "GENERATED", textStyle: "plain", createdAt: at(1) }];
     expect(pickForLook(single, "tiktok")?.id).toBe("one");
     expect(pickForLook([], "tiktok")).toBeUndefined();
+  });
+});
+
+describe("shipLooks", () => {
+  const generated = [
+    { id: "ig", kind: "GENERATED", textStyle: "instagram", createdAt: at(1) },
+    { id: "tt", kind: "GENERATED", textStyle: "tiktok", createdAt: at(1) },
+  ];
+
+  it("splits IG · FB and TT · YT onto their own files", () => {
+    const rows = shipLooks(generated, [
+      { network: "instagram" },
+      { network: "facebook" },
+      { network: "tiktok" },
+      { network: "youtube" },
+    ]);
+    expect(rows.map((row) => [row.tag, row.asset.id, row.accounts.map((account) => account.network)])).toEqual([
+      ["IG · FB", "ig", ["instagram", "facebook"]],
+      ["TT · YT", "tt", ["tiktok", "youtube"]],
+    ]);
+  });
+
+  it("shows the newest file when no accounts are picked yet", () => {
+    const later = [...generated, { id: "newer", kind: "GENERATED", textStyle: "tiktok", createdAt: at(9) }];
+    expect(shipLooks(later, [])[0]?.asset.id).toBe("newer");
+  });
+});
+
+describe("lookLabels", () => {
+  it("names both files for a chip", () => {
+    expect(
+      lookLabels([
+        { kind: "GENERATED", textStyle: "instagram" },
+        { kind: "GENERATED", textStyle: "tiktok" },
+      ]),
+    ).toBe("IG · FB + TT · YT");
   });
 });
 

@@ -80,7 +80,7 @@ export default async function CardPage({
           <CardLive
             card={card}
             accounts={accounts}
-            edited={edited}
+            assets={card.assets}
             cutSrc={cutSource?.path}
             canUndo={card.assets.some((asset) => asset.kind === "EDITED" && asset.filename.startsWith("cut-"))}
           />
