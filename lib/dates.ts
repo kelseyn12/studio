@@ -39,6 +39,14 @@ export function labelDay(date: Date): string {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
+const SLOT_TIMES = ["10:00", "15:00", "18:00"];
+
+/** Next open clock time on a day that already has `already` videos. */
+export function nextSlotTime(already: number): string {
+  const index = Math.min(Math.max(already, 0), SLOT_TIMES.length - 1);
+  return SLOT_TIMES[index];
+}
+
 export function labelTime(date: Date): string {
   return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
 }

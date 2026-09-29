@@ -55,6 +55,7 @@
 - `retryFailedPost` / `clearFailedPost` — `app/calendar/actions.ts` — re-ship or dismiss a failed Outstand post. Used by FailedPosts on Live. Retry uses the accounts already checked on the video. The notice shows the app (`IG @handle`), and the error names the video (`IG · FB video`).
 - `lookFailure` — `lib/publish.ts` — prefixes an Outstand error with the video it belongs to. A failed upload also clears the day, so the video does not stay in Scheduled.
 - `labelWhen` — `lib/dates.ts` — weekday, date, and time for the Scheduled and Posted lists.
+- `nextSlotTime` — `lib/dates.ts` — 10:00, then 15:00, then 18:00, so a second video on the same day does not reuse the first clock time. The week column only asks for a time; the day is the column.
 - `updateDeal` — `app/campaigns/[id]/actions.ts` — edits a deal after creation. Used by DealEdit on the deal page.
 - `studioBytes` — `lib/queries.ts` — every stored byte: card files + Multiply clips + music. Used by the storage meter on Today and Library.
 - `quietEnds` / `trimFromSilence` — `lib/trim.ts` — finds dead air at clip ends via silencedetect; safe parse tested in `lib/trim.test.ts`. Used by Multiply generate when Cut dead air is on.

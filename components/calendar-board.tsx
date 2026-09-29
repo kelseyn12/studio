@@ -53,10 +53,12 @@ export function CalendarBoard({
               </p>
               <div className="mt-3 space-y-2">
                 {dayCards.map((card) => (
-                  <PostChip key={card.id} card={card} />
+                  <PostChip key={card.id} card={card} showTitle />
                 ))}
               </div>
-              {allowSlots ? <DaySlot isoDay={toInputDate(day)} waiting={waiting} scheduled={scheduled} /> : null}
+              {allowSlots ? (
+                <DaySlot isoDay={toInputDate(day)} waiting={waiting} scheduled={scheduled} taken={dayCards.length} />
+              ) : null}
             </section>
           );
         })}

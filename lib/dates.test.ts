@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { labelWeekRange, labelWhen, parseLocalDate, startOfWeek, toInputDate } from "@/lib/dates";
+import { labelWeekRange, labelWhen, nextSlotTime, parseLocalDate, startOfWeek, toInputDate } from "@/lib/dates";
 
 describe("local calendar dates", () => {
   it("parses a YYYY-MM-DD as a local day, not UTC midnight", () => {
@@ -8,6 +8,12 @@ describe("local calendar dates", () => {
     expect(day.getMonth()).toBe(8);
     expect(day.getDate()).toBe(3);
     expect(day.getHours()).toBe(0);
+  });
+
+  it("offers a later time when the day already has a video", () => {
+    expect(nextSlotTime(0)).toBe("10:00");
+    expect(nextSlotTime(1)).toBe("15:00");
+    expect(nextSlotTime(4)).toBe("18:00");
   });
 
   it("puts the weekday on a scheduled row", () => {

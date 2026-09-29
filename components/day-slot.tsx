@@ -1,23 +1,68 @@
 "use client";
 
+import { useState } from "react";
 import { parkCard } from "@/app/calendar/actions";
 import { ScheduleButton } from "@/components/schedule-button";
 import { useDayPicks } from "@/components/day-picks";
+import { nextSlotTime } from "@/lib/dates";
 
 export function DaySlot({
   isoDay,
   waiting,
   scheduled,
+  taken = 0,
 }: {
   isoDay: string;
   waiting: Array<{ id: string; title: string }>;
   scheduled: Array<{ id: string; title: string }>;
+  taken?: number;
+}) {
+  const [round, setRound] = useState(0);
+  if (waiting.length === 0 && scheduled.length === 0) return null;
+  return (
+    <>
+      {Array.from({ length: round + 1 }, (_, index) => (
+        <SlotForm
+          key={index}
+          isoDay={isoDay}
+          waiting={waiting}
+          scheduled={scheduled}
+          defaultTime={nextSlotTime(taken + index)}
+          hidden={index < round}
+          onStart={() => setRound((current) => (current === index ? index + 1 : current))}
+        />
+      ))}
+    </>
+  );
+}
+
+function SlotForm({
+  isoDay,
+  waiting,
+  scheduled,
+  defaultTime,
+  hidden,
+  onStart,
+}: {
+  isoDay: string;
+  waiting: Array<{ id: string; title: string }>;
+  scheduled: Array<{ id: string; title: string }>;
+  defaultTime: string;
+  hidden: boolean;
+  onStart: () => void;
 }) {
   const picks = useDayPicks();
-  if (waiting.length === 0 && scheduled.length === 0) return null;
+  const [time, setTime] = useState(defaultTime);
   const value = picks?.value(isoDay) || "";
   return (
-    <form action={parkCard} className="mt-3 space-y-2">
+    <form
+      action={parkCard}
+      className={hidden ? "hidden" : "mt-3 space-y-2"}
+      onSubmit={() => {
+        picks?.choose(isoDay, "");
+        onStart();
+      }}
+    >
       <select
         name="cardId"
         className="field text-xs"
@@ -37,12 +82,21 @@ export function DaySlot({
           </option>
         ))}
       </select>
-      <input name="scheduledAt" type="datetime-local" defaultValue={`${isoDay}T10:00`} className="field text-xs" required />
+      <input type="hidden" name="scheduledAt" value={`${isoDay}T${time}`} />
+      <input
+        type="time"
+        value={time}
+        onChange={(event) => setTime(event.target.value)}
+        className="field text-xs"
+        required
+      />
       <ScheduleButton
         label="Schedule here"
         className="w-full rounded-lg bg-sun px-2 py-1.5 text-xs font-semibold text-ink"
       />
-      <p className="text-[11px] text-mute">Any mix that is not on the calendar yet. Grey ones are already scheduled.</p>
+      {hidden ? null : (
+        <p className="text-[11px] text-mute">This day. Change the time for a second video. Grey ones are already scheduled.</p>
+      )}
     </form>
   );
 }

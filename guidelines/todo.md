@@ -297,6 +297,8 @@
   Chips show what's already set. Tap a day to open that week and schedule there.
 - [X] Mix upload no longer dies on a 403
   The file is sent on the exact link Outstand signed. Try again on the banner uploads mix 3.
+- [X] Week day shows the video, and the time stays on that day
+  The chip names the mix. A second video is another time on the same day, not the next day's date picker.
 - [X] Library says Scheduled after a day is set
   Finished files keep the Ready pill until then. Once scheduledAt is set, the pill says Scheduled and the link says Open.
 - [X] Try again shows that it is working

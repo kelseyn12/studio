@@ -5,6 +5,7 @@ import { handle } from "@/lib/targets";
 export function PostChip({
   card,
   showDate = false,
+  showTitle = false,
 }: {
   card: {
     id: string;
@@ -14,11 +15,17 @@ export function PostChip({
     looks?: string;
   };
   showDate?: boolean;
+  showTitle?: boolean;
 }) {
   const when = card.scheduledAt ? (showDate ? labelWhen(card.scheduledAt) : labelTime(card.scheduledAt)) : "—";
   return (
     <Link href={`/cards/${card.id}?step=live`} className="block rounded-xl bg-lift p-2">
-      <p className="text-sm font-medium">{when}</p>
+      {showTitle ? (
+        <p className="truncate text-sm font-medium" title={card.title}>
+          {card.title}
+        </p>
+      ) : null}
+      <p className={showTitle ? "text-xs text-mute" : "text-sm font-medium"}>{when}</p>
       <p className="truncate text-xs text-mute">{card.account ? handle(card.account.username) : card.title}</p>
       {card.looks ? <p className="truncate text-xs text-mute">{card.looks}</p> : null}
     </Link>
