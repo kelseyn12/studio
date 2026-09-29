@@ -1,8 +1,6 @@
 import { queueCard } from "@/lib/publish";
-import { accountsReadyToRetry, syncQueuedPublishes } from "@/lib/publish-sync";
+import { accountsReadyToRetry, retryAt, syncQueuedPublishes } from "@/lib/publish-sync";
 import { prisma } from "@/lib/prisma";
-
-const RETRY_DELAY_MS = 2 * 60 * 1000;
 
 let running = false;
 
@@ -18,11 +16,7 @@ export async function sweepFailedPublishes(): Promise<void> {
     });
     const now = new Date();
     for (const group of accountsReadyToRetry(jobs, now)) {
-      const future = jobs
-        .filter((job) => job.cardId === group.cardId && group.accountIds.includes(job.accountId) && job.scheduledAt && job.scheduledAt > now)
-        .map((job) => job.scheduledAt as Date)
-        .sort((left, right) => left.getTime() - right.getTime())[0];
-      await queueCard(group.cardId, future ?? new Date(now.getTime() + RETRY_DELAY_MS), group.accountIds);
+      await queueCard(group.cardId, retryAt(jobs, group.cardId, group.accountIds, now), group.accountIds);
     }
   } catch {
     /* the next pass will try again */

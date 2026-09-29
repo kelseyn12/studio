@@ -1,6 +1,14 @@
+import { labelTime } from "@/lib/dates";
 import { getPost, hasOutstand } from "@/lib/outstand";
 import { prisma } from "@/lib/prisma";
 import { textStyleForNetwork } from "@/lib/text-style";
+
+const NETWORK_LABEL: Record<string, string> = {
+  youtube: "YouTube",
+  instagram: "Instagram",
+  facebook: "Facebook",
+  tiktok: "TikTok",
+};
 
 type AccountResult = {
   status?: string;
@@ -91,21 +99,83 @@ type Attempt = {
   createdAt: Date;
 };
 
-function sameLocalDay(left: Date, right: Date): boolean {
-  return (
-    left.getFullYear() === right.getFullYear() &&
-    left.getMonth() === right.getMonth() &&
-    left.getDate() === right.getDate()
-  );
-}
-
 function isUploadQuota(error: string | null): boolean {
   return /daily upload limit/i.test(error || "");
 }
 
+const QUOTA_RESET_ZONE = "America/Los_Angeles";
+const QUOTA_GRACE_MINUTES = 15;
+
+function zoneOffsetMinutes(timeZone: string, instant: Date): number {
+  const name =
+    new Intl.DateTimeFormat("en-US", { timeZone, timeZoneName: "shortOffset" })
+      .formatToParts(instant)
+      .find((part) => part.type === "timeZoneName")?.value ?? "GMT-7";
+  const match = /GMT([+-])(\d+)(?::(\d+))?/.exec(name);
+  if (!match) return 7 * 60;
+  const sign = match[1] === "-" ? 1 : -1;
+  return sign * (Number(match[2]) * 60 + Number(match[3] ?? 0));
+}
+
+/** 12:15 AM Pacific on the calendar day after `now`. That is when YouTube's upload cap resets. */
+export function nextUploadWindow(now = new Date()): Date {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: QUOTA_RESET_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(now);
+  const year = Number(parts.find((part) => part.type === "year")?.value);
+  const month = Number(parts.find((part) => part.type === "month")?.value);
+  const day = Number(parts.find((part) => part.type === "day")?.value);
+  const localQuarterUtc = Date.UTC(year, month - 1, day + 1, 0, QUOTA_GRACE_MINUTES, 0);
+  return new Date(localQuarterUtc + zoneOffsetMinutes(QUOTA_RESET_ZONE, new Date(localQuarterUtc)) * 60 * 1000);
+}
+
 /**
- * Apps to send again after a failure. A published app is left alone. YouTube's daily cap waits
- * until the next day. Anything else gets one automatic retry.
+ * An app that is still queued after the others already posted. The clock is when that app will go out.
+ */
+export function heldNote(
+  jobs: Array<{ status: string; scheduledAt: Date | null; network: string }>,
+  liveAt: Date | null,
+): string {
+  if (!liveAt) return "";
+  const waiting = jobs.filter(
+    (job) => job.status === "QUEUED" && job.scheduledAt && job.scheduledAt.getTime() > liveAt.getTime() + 60_000,
+  );
+  if (waiting.length === 0) return "";
+  const names = [...new Set(waiting.map((job) => NETWORK_LABEL[job.network] ?? job.network))];
+  const when = [...waiting].sort((left, right) => (left.scheduledAt as Date).getTime() - (right.scheduledAt as Date).getTime())[0];
+  return `${names.join(" · ")} sends at ${labelTime(when.scheduledAt as Date)}`;
+}
+
+/**
+ * When to send a failed app again. YouTube's cap is scheduled for 12:15 AM Pacific.
+ * If that reset already passed, it sends in two minutes. Anything else keeps a future time, or sends in two minutes.
+ */
+export function retryAt(
+  jobs: Array<Attempt & { scheduledAt?: Date | null }>,
+  cardId: string,
+  accountIds: string[],
+  now = new Date(),
+): Date {
+  const related = jobs.filter((job) => job.cardId === cardId && accountIds.includes(job.accountId));
+  const latest = [...related].sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime())[0];
+  if (latest && isUploadQuota(latest.error)) {
+    const window = nextUploadWindow(latest.createdAt);
+    if (window.getTime() > now.getTime() + 60_000) return window;
+    return new Date(now.getTime() + 2 * 60 * 1000);
+  }
+  const future = related
+    .map((job) => job.scheduledAt)
+    .filter((when): when is Date => Boolean(when && when > now))
+    .sort((left, right) => left.getTime() - right.getTime())[0];
+  return future ?? new Date(now.getTime() + 2 * 60 * 1000);
+}
+
+/**
+ * Apps to send again after a failure. A published app is left alone.
+ * YouTube's daily cap is included so it can be set for the reset. Anything else gets one automatic retry.
  */
 export function accountsReadyToRetry(jobs: Attempt[], now = new Date()): Array<{ cardId: string; accountIds: string[] }> {
   const grouped = new Map<string, Attempt[]>();
@@ -120,7 +190,6 @@ export function accountsReadyToRetry(jobs: Attempt[], now = new Date()): Array<{
     const latest = [...list].sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime())[0];
     if (latest.status !== "FAILED") continue;
     const quota = isUploadQuota(latest.error);
-    if (quota && sameLocalDay(latest.createdAt, now)) continue;
     const failures = list.filter((job) => job.status === "FAILED").length;
     if (!quota && failures > 1) continue;
     const ids = chosen.get(latest.cardId) ?? [];

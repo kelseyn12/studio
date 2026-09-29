@@ -18,7 +18,7 @@ import {
 } from "@/lib/dates";
 import { fileLooks } from "@/lib/card-desk";
 import { prisma } from "@/lib/prisma";
-import { syncQueuedPublishes } from "@/lib/publish-sync";
+import { heldNote, syncQueuedPublishes } from "@/lib/publish-sync";
 import { sweepFailedPublishes } from "@/lib/publish-sweep";
 import { targetAccounts, targetApps } from "@/lib/targets";
 import { WaitingVideos } from "@/components/waiting-videos";
@@ -46,7 +46,11 @@ export default async function CalendarPage({
   const [cards, accounts, failedJobs] = await Promise.all([
     prisma.card.findMany({
       where: { OR: [{ scheduledAt: { not: null } }, { status: "READY" }] },
-      include: { account: true, assets: { select: { kind: true, textStyle: true } } },
+      include: {
+        account: true,
+        assets: { select: { kind: true, textStyle: true } },
+        publishes: { select: { status: true, scheduledAt: true, account: { select: { network: true } } } },
+      },
       orderBy: { scheduledAt: "asc" },
     }),
     prisma.socialAccount.findMany({ where: { isActive: true } }),
@@ -56,7 +60,14 @@ export default async function CalendarPage({
       orderBy: { createdAt: "desc" },
     }),
   ]);
-  const withLooks = cards.map((card) => ({ ...card, looks: targetApps(targetAccounts(accounts, card)) }));
+  const withLooks = cards.map((card) => ({
+    ...card,
+    looks: targetApps(targetAccounts(accounts, card)),
+    held: heldNote(
+      card.publishes.map((job) => ({ status: job.status, scheduledAt: job.scheduledAt, network: job.account.network })),
+      card.postedAt,
+    ),
+  }));
   const waiting = withLooks
     .filter((card) => card.status === "READY" && !card.scheduledAt)
     .map((card) => ({

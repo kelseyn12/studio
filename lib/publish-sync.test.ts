@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { publishOutcome, retryAccountIds, shortPlatformError, postedAtWhenLive, accountsReadyToRetry } from "@/lib/publish-sync";
+import { publishOutcome, retryAccountIds, shortPlatformError, postedAtWhenLive, accountsReadyToRetry, heldNote, nextUploadWindow, retryAt } from "@/lib/publish-sync";
 
 describe("publishOutcome", () => {
   it("keeps a pending app queued", () => {
@@ -91,7 +91,20 @@ describe("accountsReadyToRetry", () => {
     ).toEqual([{ cardId: "mix", accountIds: ["ig"] }]);
   });
 
-  it("does not retry YouTube's daily cap until the next day", () => {
+  it("names an app that is still waiting after the others posted", () => {
+    const live = new Date("2026-09-29T20:01:00.000Z");
+    expect(
+      heldNote(
+        [
+          { status: "PUBLISHED", scheduledAt: live, network: "tiktok" },
+          { status: "QUEUED", scheduledAt: new Date("2026-09-30T07:15:00.000Z"), network: "youtube" },
+        ],
+        live,
+      ),
+    ).toMatch(/^YouTube sends at /);
+  });
+
+  it("sends YouTube on its own after the daily cap", () => {
     expect(
       accountsReadyToRetry(
         [
@@ -105,7 +118,28 @@ describe("accountsReadyToRetry", () => {
         ],
         now,
       ),
-    ).toEqual([]);
+    ).toEqual([{ cardId: "mix", accountIds: ["yt"] }]);
+  });
+
+  it("sets that YouTube send for 12:15 AM Pacific", () => {
+    expect(
+      retryAt(
+        [
+          {
+            cardId: "mix",
+            accountId: "yt",
+            status: "FAILED",
+            error: "YouTube daily upload limit is used up. It resets overnight.",
+            createdAt: earlier,
+            scheduledAt: earlier,
+          },
+        ],
+        "mix",
+        ["yt"],
+        now,
+      ).toISOString(),
+    ).toBe(nextUploadWindow(earlier).toISOString());
+    expect(nextUploadWindow(earlier).toISOString()).toBe("2026-09-30T07:15:00.000Z");
   });
 
   it("stops after one automatic retry", () => {

@@ -11,6 +11,7 @@ type CardRow = {
   account: { username: string; nickname: string } | null;
   looks?: string;
   status?: string;
+  held?: string;
 };
 
 export function CalendarBoard({

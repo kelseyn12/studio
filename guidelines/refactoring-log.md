@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-09-29 — YouTube's shared daily cap blocked the 3:00 PM video. That app is set for 12:15 AM Pacific on its own, and the day chip says YouTube sends then. The other apps stay posted.
 - 2026-09-29 — A posted video says Posted on the day chip and on the video's last step. If an app rejects the post after you leave, that app is sent once more and the ones that already published are left alone. YouTube's daily upload cap waits until the next day.
 - 2026-09-29 — The cover you pick is the first frame of the file that ships, and that same picture is sent as the Instagram and TikTok cover. TikTok and YouTube Shorts were choosing their own frame, so the hook never showed.
 - 2026-09-29 — Retrying the apps that failed no longer takes the video off its day when TikTok already published. The original time stays on the calendar.
