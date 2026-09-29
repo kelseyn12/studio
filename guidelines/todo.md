@@ -265,6 +265,9 @@
   Schedule now sends the cover frame to Outstand: Instagram gets the JPEG, YouTube gets it best-effort, TikTok gets the frame time. Facebook has no cover field.
 - [X] Decide TikTok post mode
   TikTok now auto-publishes (`DIRECT_POST` + public) so the saved cover frame is the thumbnail. Inbox drafts are gone. If a post fails with `reached_active_user_cap`, wait and ship that one again the next day.
+- [X] Reselect cover after a bad pick
+  Cover stays after you save and after you set a time. Play to a new frame and tap Use this frame instead. Each save writes a new still so the old one is not stuck.
+
 
 
 

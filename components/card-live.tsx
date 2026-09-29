@@ -4,6 +4,7 @@ import { CoverPick } from "@/components/cover-pick";
 import { QuickCut } from "@/components/quick-cut";
 import { toInputDateTime } from "@/lib/dates";
 import { formatMoney } from "@/lib/deals";
+import { coverCanChange } from "@/lib/post-cover";
 import { dealAccounts, describeTargets, handle } from "@/lib/targets";
 import { watchUrl } from "@/lib/urls";
 
@@ -35,7 +36,7 @@ export function CardLive({
     isActive: boolean;
     campaignId: string | null;
   }>;
-  edited?: { id: string; path: string; filename: string; publicUrl: string | null; coverPath?: string };
+  edited?: { id: string; path: string; filename: string; publicUrl: string | null; coverPath?: string; coverAt?: number };
   canUndo?: boolean;
   cutSrc?: string;
 }) {
@@ -69,11 +70,11 @@ export function CardLive({
           </div>
         </details>
       ) : null}
-      {card.status === "REVIEW" || (card.status === "READY" && !card.scheduledAt) ? (
+      {coverCanChange(card.status) ? (
         <details className="rounded-card border border-line bg-panel px-5 py-4">
-          <summary className="cursor-pointer text-sm font-semibold">Cover frame — pick a different still for twins</summary>
+          <summary className="cursor-pointer text-sm font-semibold">Cover frame — pick a still. Change it anytime before it posts.</summary>
           <div className="mt-3">
-            <CoverPick id={edited.id} src={watchUrl(edited.path)} />
+            <CoverPick id={edited.id} src={watchUrl(edited.path)} coverAt={edited.coverAt} />
           </div>
         </details>
       ) : null}

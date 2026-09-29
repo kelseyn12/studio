@@ -18,7 +18,12 @@ type Output = {
 };
 type Clip = { id: string; slot: string; captionsJson: string };
 type Track = { id: string; filename: string };
-type CardState = { id: string; status: string; scheduledAt: Date | null; assets: Array<{ id: string; path: string }> };
+type CardState = {
+  id: string;
+  status: string;
+  scheduledAt: Date | null;
+  assets: Array<{ id: string; path: string; coverAt: number }>;
+};
 type Editor = { id: string; name: string; defaultEditor: boolean };
 
 const STATE_LABEL: Record<string, string> = {
@@ -117,7 +122,9 @@ export function BatchOutputs({
           {outputs.map((output) => {
             const card = output.cardId ? cardById.get(output.cardId) : undefined;
             const state = stateLabel(card);
-            const assetId = card?.assets.find((asset) => asset.path === output.path)?.id ?? "";
+            const asset = card?.assets.find((row) => row.path === output.path);
+            const assetId = asset?.id ?? "";
+            const coverAt = asset?.coverAt;
             const recipe = parseRecipe(output.recipeJson);
             const selectedMusic = output.musicTrackId === "none" ? "none" : output.musicTrackId || recipe?.trackId || "none";
             const title = rowTitle(output.label);
@@ -150,6 +157,7 @@ export function BatchOutputs({
                   mates={bodyMates(outputs.map((row) => row.recipeJson), recipe?.bodyClipId || "")}
                   ready={Boolean(recipe)}
                   assetId={assetId}
+                  coverAt={coverAt}
                 />
               </div>
             );

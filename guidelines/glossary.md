@@ -6,7 +6,7 @@
 - `machineCounts` — `lib/queries.ts` — pipeline and slot totals for Today.
 - `uploadMedia` — `lib/outstand.ts` — PUT the mp4 (or cover JPEG) into Outstand storage, returns the public URL.
 - `postBody` / `createPost` — `lib/outstand.ts` — builds the `POST /posts/` body; `options` carries per-network blocks (`instagram`, `youtube`, `tiktok`) and can never override `containers`/`accounts`/`scheduledAt`.
-- `coverOptions`, `postOptions`, `wantsCoverUrl`, `coverMs` — `lib/post-cover.ts` — turn an asset's `coverPath`/`coverAt` into Outstand cover fields per network. `postOptions` also sets TikTok `DIRECT_POST` + `PUBLIC_TO_EVERYONE` so the cover timestamp is honored. Used by `queueCard` via `shippableCoverUrl` (R2 public URL, else Outstand upload, else "" → IG offset fallback).
+- `coverOptions`, `postOptions`, `wantsCoverUrl`, `coverMs`, `nextCoverPath`, `coverCanChange` — `lib/post-cover.ts` — turn an asset's `coverPath`/`coverAt` into Outstand cover fields per network. `postOptions` also sets TikTok `DIRECT_POST` + `PUBLIC_TO_EVERYONE` so the cover timestamp is honored. Used by `queueCard` via `shippableCoverUrl` (R2 public URL, else Outstand upload, else "" → IG offset fallback).
 - `scoreDeal` — `lib/deals.ts` — TECH scores volume; UGC scores fee per video. A deal with `monthlyPayCents` set scores that flat fee as the month instead of pay × slots × 30. Used on Deals and deal detail. `formatMoneyExact` keeps cents for per-video amounts.
 - `videoMoneyCents(card, deal)` — `lib/deal-bonuses.ts` — the one place a posted video is priced: stamped `payoutCents` + `cpmEarnedCents` on views + `bonusEarnedCents` for every view bonus the video has crossed. Used by `dashboardTotals`, `viewsByDay`, `studioSnapshot` (`lib/queries.ts`) and the deal page.
 - `parseBonuses` / `serializeBonuses` / `cleanBonuses` / `bonusesFromForm` — `lib/deal-bonuses.ts` — `Campaign.bonusesJson` ⇄ `ViewBonus[]` (`{views, payoutCents}`, sorted, ≤ `MAX_BONUSES`). The form posts repeated `bonusPay` ($) / `bonusViews` fields from `components/deal-bonuses.tsx`.
@@ -110,7 +110,7 @@
 - `boxFor` / `setLookBox` / `nextBox` / `boxLabel` — `lib/hook-layout.ts` — TikTok cycles off / black / white. Instagram always returns no box.
 - `posFor` / `setLookPos` — `lib/hook-layout.ts` — each look keeps its own headline spot once you have dragged it. A look you never dragged reads the shared x/y and follows the drag, so arranging in one view does not strand the other look. Tested in `lib/cut.test.ts`.
 - `applyCaptionLines` / `captionLines` — `lib/captions-math.ts` — rewrite spoken phrases and keep their clocks.
-- `CoverPick` — `components/cover-pick.tsx` — pick a still on Live. Each finished video also has Cover (`OutputTune` → `/api/cover`). Generate still staggers cover times. `nextPanel` keeps Words + music and Cover as switches so saving a cover cannot hide the other.
+- `CoverPick` — `components/cover-pick.tsx` — pick a still on Live or Multiply Cover. Save keeps the picker open; tap Use this frame instead to overwrite. `coverCanChange` keeps it on READY/REVIEW (including scheduled). `/api/cover` writes `nextCoverPath` and drops the old jpg.
 - `nextPanel` — `components/output-tune.tsx` — tap the open panel to close it, tap the other to switch. Words + music stays on the row after Cover saved.
 
 - `addLink` / `deleteLink` — `app/dms/actions.ts` — tracked short links for auto-DMs. Public redirect at `/l/[slug]` counts every click.

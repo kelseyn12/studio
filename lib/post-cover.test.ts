@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { coverMs, coverOptions, postOptions, TIKTOK_POST_MODE, TIKTOK_PRIVACY, wantsCoverUrl } from "@/lib/post-cover";
+import {
+  coverCanChange,
+  coverMs,
+  coverOptions,
+  nextCoverPath,
+  postOptions,
+  TIKTOK_POST_MODE,
+  TIKTOK_PRIVACY,
+  wantsCoverUrl,
+} from "@/lib/post-cover";
 
 const cover = { coverPath: "thumbs/covers/a.jpg", coverAt: 2.345 };
 const url = "https://media.outstand.so/cover.jpg";
@@ -45,6 +54,21 @@ describe("postOptions", () => {
 
   it("leaves Instagram-only groups without a TikTok block", () => {
     expect(postOptions(["instagram", "facebook"], cover, url).tiktok).toBeUndefined();
+  });
+});
+
+describe("nextCoverPath", () => {
+  it("writes a new file per save so a redo is not the same URL", () => {
+    expect(nextCoverPath("a", 1000)).toBe("thumbs/covers/a-1000.jpg");
+    expect(nextCoverPath("a", 2000)).not.toBe(nextCoverPath("a", 1000));
+  });
+});
+
+describe("coverCanChange", () => {
+  it("stays open after schedule and closes after it posts", () => {
+    expect(coverCanChange("READY")).toBe(true);
+    expect(coverCanChange("REVIEW")).toBe(true);
+    expect(coverCanChange("POSTED")).toBe(false);
   });
 });
 

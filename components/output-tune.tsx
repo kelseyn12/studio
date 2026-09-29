@@ -3,25 +3,13 @@
 import { useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { tuneBodyVideos, tuneThisVideo } from "@/app/repurposer/output-actions";
+import { CoverPick } from "@/components/cover-pick";
 import type { TuneSection } from "@/lib/output-recipe";
 
 type Panel = "off" | "tune" | "cover";
 
 export function nextPanel(open: Panel, clicked: Exclude<Panel, "off">): Panel {
   return open === clicked ? "off" : clicked;
-}
-
-async function saveCover(assetId: string, at: number, setNote: (note: string) => void) {
-  if (!assetId) {
-    setNote("Generate again, then pick the cover.");
-    return;
-  }
-  const response = await fetch("/api/cover", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ id: assetId, at }),
-  });
-  setNote(response.ok ? "Cover saved. It posts as the thumbnail on Instagram, TikTok, and YouTube." : "Could not set that frame.");
 }
 
 export function OutputTune({
@@ -34,6 +22,7 @@ export function OutputTune({
   mates,
   ready,
   assetId,
+  coverAt,
 }: {
   outputId: string;
   src: string;
@@ -44,11 +33,11 @@ export function OutputTune({
   mates: number;
   ready: boolean;
   assetId: string;
+  coverAt?: number;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [open, setOpen] = useState<Panel>("off");
   const [start, setStart] = useState(musicStart > 0 ? musicStart.toFixed(1) : "0");
-  const [coverNote, setCoverNote] = useState("");
   return (
     <div className="mt-2 space-y-2">
       <div className="flex gap-3">
@@ -68,16 +57,8 @@ export function OutputTune({
         </button>
       </div>
       {open === "cover" ? (
-        <div className="space-y-2 border-t border-line pt-3">
-          <video ref={videoRef} src={src} controls playsInline className="aspect-[9/16] w-36 rounded-lg bg-ink" />
-          <button
-            type="button"
-            className="rounded-lg border border-line px-2 py-1 text-xs"
-            onClick={() => void saveCover(assetId, videoRef.current?.currentTime ?? 0, setCoverNote)}
-          >
-            Use this frame as the cover
-          </button>
-          {coverNote ? <p className="text-xs text-mute">{coverNote}</p> : null}
+        <div className="border-t border-line pt-3">
+          <CoverPick id={assetId} src={src} coverAt={coverAt} compact />
         </div>
       ) : null}
       {open === "tune" && !ready ? (

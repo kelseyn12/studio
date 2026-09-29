@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { writeThumb } from "@/lib/ffmpeg";
-import { ensureLocal, localRoot, uploadLocalToR2 } from "@/lib/files";
+import { deleteUpload, ensureLocal, uploadLocalToR2 } from "@/lib/files";
+import { nextCoverPath } from "@/lib/post-cover";
 import { hasR2 } from "@/lib/r2";
 import { prisma } from "@/lib/prisma";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
@@ -18,8 +19,16 @@ export async function POST(request: Request) {
   const asset = await prisma.asset.findUnique({ where: { id } });
   if (!asset) return NextResponse.json({ error: "Missing video" }, { status: 404 });
   const local = await ensureLocal(asset.path);
-  const coverPath = await writeThumb(local, `thumbs/covers/${asset.id}.jpg`, at);
+  const previous = asset.coverPath;
+  const coverPath = await writeThumb(local, nextCoverPath(asset.id), at);
   if (hasR2()) await uploadLocalToR2(coverPath, "image/jpeg");
   await prisma.asset.update({ where: { id }, data: { coverPath, coverAt: at } });
-  return NextResponse.json({ ok: true, coverPath });
+  if (previous && previous !== coverPath) {
+    try {
+      await deleteUpload(previous);
+    } catch {
+      /* old still is gone or never stored */
+    }
+  }
+  return NextResponse.json({ ok: true, coverPath, coverAt: at });
 }

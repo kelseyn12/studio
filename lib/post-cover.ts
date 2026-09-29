@@ -37,6 +37,16 @@ export function coverMs(coverAt: number): number {
   return Math.max(0, Math.round(coverAt * MS_PER_SECOND));
 }
 
+/** New jpg each save so a second pick is not stuck behind the old cached file. */
+export function nextCoverPath(assetId: string, now = Date.now()): string {
+  return `thumbs/covers/${assetId}-${now}.jpg`;
+}
+
+/** Cover can change until the video has actually posted. */
+export function coverCanChange(status: string): boolean {
+  return status === "REVIEW" || status === "READY";
+}
+
 /**
  * Per-network Outstand options for a cover. `coverUrl` is a public JPEG URL of the frame, or ""
  * when none could be made — Instagram then falls back to the frame offset.
