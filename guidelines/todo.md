@@ -291,6 +291,8 @@
   Day slots start on different videos. Choosing one disables it everywhere else so it cannot be scheduled twice.
 - [X] Switching a day's mix stays open
   Days start on Pick a video. Only a mix already on the calendar is greyed out. Any other mix can be chosen.
+- [X] Month view can schedule
+  Each day on the month grid has the same Pick a video control as the week. Days outside the month are dimmed.
 
 
 

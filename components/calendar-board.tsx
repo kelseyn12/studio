@@ -17,11 +17,13 @@ export function CalendarBoard({
   cards,
   waiting,
   allowSlots,
+  month,
 }: {
   days: Date[];
   cards: CardRow[];
   waiting: Array<{ id: string; title: string }>;
   allowSlots: boolean;
+  month?: Date;
 }) {
   const scheduled = cards
     .filter((card) => card.scheduledAt && card.status === "READY")
@@ -31,8 +33,12 @@ export function CalendarBoard({
       <div className="grid gap-3 md:grid-cols-7">
         {days.map((day) => {
           const dayCards = cards.filter((card) => card.scheduledAt && sameDay(card.scheduledAt, day));
+          const outside = month ? day.getMonth() !== month.getMonth() : false;
           return (
-            <section key={toInputDate(day)} className="rounded-card border border-line bg-panel p-3">
+            <section
+              key={toInputDate(day)}
+              className={`rounded-card border border-line bg-panel p-3 ${outside ? "opacity-40" : ""}`}
+            >
               <p className="text-xs uppercase text-mute">
                 {day.toLocaleDateString("en-US", { weekday: "short" })} {day.getDate()}
               </p>

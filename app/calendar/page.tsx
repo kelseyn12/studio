@@ -160,11 +160,20 @@ export default async function CalendarPage({
         </p>
       ) : null}
 
-      <BulkForm waiting={waiting.length} startDate={toInputDate(weekStart)} />
+      <BulkForm
+        waiting={waiting.length}
+        startDate={toInputDate(view === "month" ? new Date(anchor.getFullYear(), anchor.getMonth(), 1) : weekStart)}
+      />
 
       {view === "week" || view === "month" ? (
         <div className="mt-8">
-          <CalendarBoard days={days} cards={withLooks} waiting={waiting} allowSlots={view === "week"} />
+          <CalendarBoard
+            days={days}
+            cards={withLooks}
+            waiting={waiting}
+            allowSlots
+            month={view === "month" ? anchor : undefined}
+          />
         </div>
       ) : (
         <section className="mt-8 space-y-2">
