@@ -289,6 +289,8 @@
   Each mix's IG · FB and TT · YT lists stay closed and show who is checked. Open one to change the checks.
 - [X] A mix picked on one day is greyed out on the others
   Day slots start on different videos. Choosing one disables it everywhere else so it cannot be scheduled twice.
+- [X] Switching a day's mix stays open
+  Days start on Pick a video. Only a mix already on the calendar is greyed out. Any other mix can be chosen.
 
 
 

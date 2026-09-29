@@ -9,6 +9,7 @@ type CardRow = {
   scheduledAt: Date | null;
   account: { username: string; nickname: string } | null;
   looks?: string;
+  status?: string;
 };
 
 export function CalendarBoard({
@@ -22,9 +23,11 @@ export function CalendarBoard({
   waiting: Array<{ id: string; title: string }>;
   allowSlots: boolean;
 }) {
-  const isoDays = days.map((day) => toInputDate(day));
+  const scheduled = cards
+    .filter((card) => card.scheduledAt && card.status === "READY")
+    .map((card) => ({ id: card.id, title: card.title }));
   return (
-    <DayPicks isoDays={isoDays} waitingIds={waiting.map((card) => card.id)}>
+    <DayPicks waitingIds={waiting.map((card) => card.id)}>
       <div className="grid gap-3 md:grid-cols-7">
         {days.map((day) => {
           const dayCards = cards.filter((card) => card.scheduledAt && sameDay(card.scheduledAt, day));
@@ -38,7 +41,7 @@ export function CalendarBoard({
                   <PostChip key={card.id} card={card} />
                 ))}
               </div>
-              {allowSlots ? <DaySlot isoDay={toInputDate(day)} waiting={waiting} /> : null}
+              {allowSlots ? <DaySlot isoDay={toInputDate(day)} waiting={waiting} scheduled={scheduled} /> : null}
             </section>
           );
         })}
