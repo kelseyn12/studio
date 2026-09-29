@@ -20,6 +20,7 @@
 - `accountsForLook` / `LOOK_APPS` / `targetApps` / `targetAccounts` — `lib/targets.ts` — accounts that match a look; mix app pills; `targetApps` = the apps a video actually posts to (calendar chips + day-slot dropdown); checked Mix/Live ids win, else the deal list.
 - `cardPatch` — `lib/card-patch.ts` — writes only fields present on the form so a Brief save cannot wipe editor notes.
 - `queueCard` — `lib/publish.ts` — parks a card on Live and ships through Outstand. Never overwrites `plannedDate`. Marks Posted only if Outstand already published.
+- `parkCard` — `app/calendar/actions.ts` — day-slot schedule. Claims `scheduledAt` before the upload so a second click cannot send the video twice. `ScheduleButton` shows Scheduling… while it runs.
 - `closeLoop` — `lib/analytics.ts` — Posted when live, Data when views exist. Used by `/api/analytics/sync`.
 - `nextLanes` — `lib/formats.ts` — 70/20/10 winner promotion after stats land.
 - `canVisit` — `lib/access.ts` — rooms a role may open. Used by middleware and nav.

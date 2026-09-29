@@ -2,6 +2,7 @@ import { approveCut, requestChanges, scheduleCard, sendForTouchUp } from "@/app/
 import { LiveLooks } from "@/components/live-looks";
 import { PaidButton } from "@/components/paid-button";
 import { QuickCut } from "@/components/quick-cut";
+import { ScheduleButton } from "@/components/schedule-button";
 import { pickFinished, shipLooks } from "@/lib/card-desk";
 import { toInputDateTime } from "@/lib/dates";
 import { formatMoney } from "@/lib/deals";
@@ -188,7 +189,7 @@ export function CardLive({
             required
           />
         </label>
-        <button className="w-full rounded-xl border border-line px-4 py-3 font-semibold">Schedule</button>
+        <ScheduleButton label="Schedule" className="w-full rounded-xl border border-line px-4 py-3 font-semibold" />
         </div>
       </form>
     </div>

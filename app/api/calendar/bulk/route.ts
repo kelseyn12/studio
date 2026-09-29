@@ -26,6 +26,11 @@ export async function POST(request: Request) {
     const when = addDays(start, dayOffset);
     when.setHours(startHour, 0, 0, 0);
     when.setMinutes(slot * intervalMin);
+    const claimed = await prisma.card.updateMany({
+      where: { id: card.id, scheduledAt: null },
+      data: { scheduledAt: when },
+    });
+    if (claimed.count === 0) continue;
     try {
       const result = await queueCard(card.id, when, null);
       if (result.ok && result.shipped) shipped += 1;

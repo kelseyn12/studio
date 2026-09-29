@@ -281,6 +281,8 @@
   Every waiting mix shows its IG · FB and TT · YT videos with account checkboxes; a tap saves instantly, then you schedule the mix on a day.
 - [X] Deal on an account saves when you tap it
   Accounts page uses deal pills instead of a dropdown. Tap Polsia and it saves; the gold pill is the current deal.
+- [X] Schedule shows that it is working
+  The button says Scheduling… and a second click cannot send the same video twice. The day is claimed before the slow upload.
 
 
 

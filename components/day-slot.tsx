@@ -1,4 +1,5 @@
 import { parkCard } from "@/app/calendar/actions";
+import { ScheduleButton } from "@/components/schedule-button";
 
 export function DaySlot({
   isoDay,
@@ -18,8 +19,11 @@ export function DaySlot({
         ))}
       </select>
       <input name="scheduledAt" type="datetime-local" defaultValue={`${isoDay}T10:00`} className="field text-xs" required />
-      <button className="w-full rounded-lg bg-sun px-2 py-1.5 text-xs font-semibold text-ink">Schedule here</button>
-      <p className="text-[11px] text-mute">Posts to the accounts checked on the video — see the list below.</p>
+      <ScheduleButton
+        label="Schedule here"
+        className="w-full rounded-lg bg-sun px-2 py-1.5 text-xs font-semibold text-ink"
+      />
+      <p className="text-[11px] text-mute">Takes about a minute. It posts to the accounts checked below.</p>
     </form>
   );
 }

@@ -135,6 +135,11 @@ export default async function CalendarPage({
           Time is saved. Outstand did not take the file — check Accounts and that a finished video exists.
         </p>
       ) : null}
+      {params.ship === "taken" ? (
+        <p className="mb-4 rounded-card border border-line bg-panel px-4 py-3 text-sm">
+          That video is already on a day. It was not sent again.
+        </p>
+      ) : null}
 
       <FailedPosts jobs={failedJobs} />
 
