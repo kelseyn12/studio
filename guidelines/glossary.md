@@ -50,6 +50,7 @@
 - `deleteUpload` — `lib/files.ts` — removes a Studio file from R2 and local disk. Used by Library cleanup.
 - `rejectStudioFile` — `lib/storage.ts` — blocks camera-day files. Phone clips/1080s cap at 250MB. Voice/reference 40MB.
 - `groupByDeal` — `lib/library-groups.ts` — piles finished Library videos under the deal name.
+- `libraryMark` / `libraryAction` — `lib/library-groups.ts` — a Ready video with a day shows Scheduled and Open, not To schedule. Used by LibraryFile.
 - `togglePaid` — `app/cards/[id]/actions.ts` — flips `approved` so Collected on Today counts real money. Used by PaidButton on Live posted list and the video page.
 - `retryFailedPost` / `clearFailedPost` — `app/calendar/actions.ts` — re-ship or dismiss a failed Outstand post. Used by FailedPosts on Live. Retry uses the accounts already checked on the video. The notice shows the app (`IG @handle`), and the error names the video (`IG · FB video`).
 - `lookFailure` — `lib/publish.ts` — prefixes an Outstand error with the video it belongs to. A failed upload also clears the day, so the video does not stay in Scheduled.

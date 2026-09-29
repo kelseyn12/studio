@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { deleteAsset } from "@/app/library/actions";
 import { StatusPill } from "@/components/status-pill";
+import { libraryMark } from "@/lib/library-groups";
 import { formatBytes } from "@/lib/storage";
 import type { PipelineStatus } from "@/lib/pipeline";
 import { watchUrl } from "@/lib/urls";
@@ -20,7 +21,13 @@ export function LibraryFile({
     size: number;
     publicUrl: string | null;
     coverPath?: string;
-    card: { id: string; title: string; status: PipelineStatus; campaign: { name: string } | null };
+    card: {
+      id: string;
+      title: string;
+      status: PipelineStatus;
+      scheduledAt: Date | null;
+      campaign: { name: string } | null;
+    };
   };
   liveLabel?: string;
   pick?: ReactNode;
@@ -47,7 +54,7 @@ export function LibraryFile({
             {asset.card.campaign?.name ?? "No deal"} · {asset.filename} · {formatBytes(asset.size)}
           </p>
         </div>
-        <StatusPill status={asset.card.status} />
+        <StatusPill status={asset.card.status} label={libraryMark(asset.card.status, asset.card.scheduledAt)} />
       </div>
       <div className="mt-3 flex flex-wrap items-center gap-3">
         <Link href={`/cards/${asset.card.id}${liveLabel ? "?step=live" : ""}`} className="text-sm text-sun">

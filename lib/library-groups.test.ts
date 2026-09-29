@@ -1,5 +1,19 @@
 import { describe, expect, it } from "vitest";
-import { groupByDeal } from "@/lib/library-groups";
+import { groupByDeal, libraryAction, libraryMark } from "@/lib/library-groups";
+
+describe("library marks", () => {
+  const day = new Date("2026-09-29T20:00:00.000Z");
+
+  it("says Scheduled once a finished video has a day", () => {
+    expect(libraryMark("READY", day)).toBe("Scheduled");
+    expect(libraryAction("READY", day)).toBe("Open");
+  });
+
+  it("keeps To schedule until a day is set", () => {
+    expect(libraryMark("READY", null)).toBeUndefined();
+    expect(libraryAction("READY", null)).toBe("Schedule");
+  });
+});
 
 describe("groupByDeal", () => {
   it("piles finished videos under the deal name", () => {

@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-09-29 — Library's Ready pill said To schedule even after a day was set. It now says Scheduled, and the link says Open.
 - 2026-09-29 — Try again says Trying… while the upload runs. The click used to sit there for a minute with no change.
 - 2026-09-29 — A failed upload no longer stays on Scheduled. The list shows the date, the pill says Scheduled, and the failure names the app and which video (IG · FB or TT · YT). Titles with `?` are stored under a plain file name so the upload link is not cut in half.
 - 2026-09-28 — Live hid account checks when a deal had any accounts. Each mix is now its own card with IG/FB or TT/YT pills. Check any number of @s on that mix; each row is tagged IG, FB, TT, or YT. Checked ids win over the deal list (`targetAccounts`).

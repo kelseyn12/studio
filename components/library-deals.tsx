@@ -1,6 +1,6 @@
 import { LibraryFile } from "@/components/library-file";
 import { PickBox, SelectDeleteBar, VideoPick } from "@/components/select-videos";
-import { groupByDeal } from "@/lib/library-groups";
+import { groupByDeal, libraryAction } from "@/lib/library-groups";
 import type { PipelineStatus } from "@/lib/pipeline";
 
 type FinishedAsset = {
@@ -12,7 +12,13 @@ type FinishedAsset = {
   size: number;
   publicUrl: string | null;
   coverPath?: string;
-  card: { id: string; title: string; status: PipelineStatus; campaign: { name: string } | null };
+  card: {
+    id: string;
+    title: string;
+    status: PipelineStatus;
+    scheduledAt: Date | null;
+    campaign: { name: string } | null;
+  };
 };
 
 export function LibraryDeals({ assets }: { assets: FinishedAsset[] }) {
@@ -39,13 +45,7 @@ export function LibraryDeals({ assets }: { assets: FinishedAsset[] }) {
                   key={asset.id}
                   asset={asset}
                   pick={<PickBox id={asset.card.id} />}
-                  liveLabel={
-                    asset.card.status === "REVIEW"
-                      ? "Approve / schedule"
-                      : asset.card.status === "READY"
-                        ? "Schedule"
-                        : "Open"
-                  }
+                  liveLabel={libraryAction(asset.card.status, asset.card.scheduledAt)}
                 />
               ))}
             </div>
