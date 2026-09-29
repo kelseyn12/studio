@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { clearFailedPost, retryFailedPost } from "@/app/calendar/actions";
+import { ScheduleButton } from "@/components/schedule-button";
 import { describeTargets } from "@/lib/targets";
 
 export function FailedPosts({
@@ -40,7 +41,11 @@ export function FailedPosts({
             <div className="flex gap-2">
               <form action={retryFailedPost}>
                 <input type="hidden" name="jobId" value={job.id} />
-                <button className="rounded-xl bg-sun px-3 py-1.5 text-sm font-semibold text-ink">Try again</button>
+                <ScheduleButton
+                  label="Try again"
+                  pendingLabel="Trying…"
+                  className="rounded-xl bg-sun px-3 py-1.5 text-sm font-semibold text-ink"
+                />
               </form>
               <form action={clearFailedPost}>
                 <input type="hidden" name="jobId" value={job.id} />
