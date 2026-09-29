@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { DayPicks } from "@/components/day-picks";
 import { DaySlot } from "@/components/day-slot";
 import { PostChip } from "@/components/post-chip";
@@ -40,7 +41,15 @@ export function CalendarBoard({
               className={`rounded-card border border-line bg-panel p-3 ${outside ? "opacity-40" : ""}`}
             >
               <p className="text-xs uppercase text-mute">
-                {day.toLocaleDateString("en-US", { weekday: "short" })} {day.getDate()}
+                {month && !allowSlots ? (
+                  <Link href={`/calendar?view=week&from=${toInputDate(day)}`} className="hover:text-sun">
+                    {day.toLocaleDateString("en-US", { weekday: "short" })} {day.getDate()}
+                  </Link>
+                ) : (
+                  <>
+                    {day.toLocaleDateString("en-US", { weekday: "short" })} {day.getDate()}
+                  </>
+                )}
               </p>
               <div className="mt-3 space-y-2">
                 {dayCards.map((card) => (

@@ -160,18 +160,22 @@ export default async function CalendarPage({
         </p>
       ) : null}
 
-      <BulkForm
-        waiting={waiting.length}
-        startDate={toInputDate(view === "month" ? new Date(anchor.getFullYear(), anchor.getMonth(), 1) : weekStart)}
-      />
+      {view === "week" ? (
+        <BulkForm waiting={waiting.length} startDate={toInputDate(weekStart)} />
+      ) : null}
 
       {view === "week" || view === "month" ? (
         <div className="mt-8">
+          {view === "month" ? (
+            <p className="mb-3 text-sm text-mute">
+              What's already set this month. Tap a day to open that week and schedule.
+            </p>
+          ) : null}
           <CalendarBoard
             days={days}
             cards={withLooks}
             waiting={waiting}
-            allowSlots
+            allowSlots={view === "week"}
             month={view === "month" ? anchor : undefined}
           />
         </div>
