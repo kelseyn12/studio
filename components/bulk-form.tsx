@@ -2,15 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import { handle } from "@/lib/targets";
 
 export function BulkForm({
   waiting,
-  accounts,
   startDate,
 }: {
   waiting: number;
-  accounts: Array<{ id: string; username: string; network: string; nickname?: string }>;
   startDate: string;
 }) {
   const router = useRouter();
@@ -27,7 +24,6 @@ export function BulkForm({
         intervalMin: Number(form.get("intervalMin")),
         startHour: Number(form.get("startHour")),
         startDate: form.get("startDate"),
-        accountId: form.get("accountId"),
       }),
     });
     const body = await response.json();
@@ -40,7 +36,7 @@ export function BulkForm({
   }
 
   return (
-    <form onSubmit={onSubmit} className="grid gap-3 rounded-card border border-line bg-panel p-5 md:grid-cols-5">
+    <form onSubmit={onSubmit} className="grid gap-3 rounded-card border border-line bg-panel p-5 md:grid-cols-4">
       <label>
         <span className="label">Start</span>
         <input name="startDate" type="date" defaultValue={startDate} className="field" required />
@@ -57,20 +53,12 @@ export function BulkForm({
         <span className="label">Minutes apart</span>
         <input name="intervalMin" type="number" defaultValue={90} className="field" />
       </label>
-      <label>
-        <span className="label">Account</span>
-        <select name="accountId" className="field">
-          <option value="">Already on each video</option>
-          {accounts.map((account) => (
-            <option key={account.id} value={account.id}>
-              {account.nickname ? `${account.nickname} · ` : ""}{handle(account.username)}
-            </option>
-          ))}
-        </select>
-      </label>
-      <button className="rounded-xl bg-sun px-4 py-3 font-semibold text-ink md:col-span-5">
+      <button className="rounded-xl bg-sun px-4 py-3 font-semibold text-ink md:col-span-4">
         Schedule {waiting} video{waiting === 1 ? "" : "s"} on these days
       </button>
+      <p className="text-xs text-mute md:col-span-4">
+        Each video posts to the accounts checked on it — the list below shows exactly where every mix goes.
+      </p>
       {note ? <p className="text-sm text-sun md:col-span-5">{note}</p> : null}
     </form>
   );

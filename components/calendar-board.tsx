@@ -14,13 +14,11 @@ export function CalendarBoard({
   days,
   cards,
   waiting,
-  accounts,
   allowSlots,
 }: {
   days: Date[];
   cards: CardRow[];
   waiting: Array<{ id: string; title: string }>;
-  accounts: Array<{ id: string; username: string; nickname: string }>;
   allowSlots: boolean;
 }) {
   return (
@@ -37,7 +35,7 @@ export function CalendarBoard({
                 <PostChip key={card.id} card={card} />
               ))}
             </div>
-            {allowSlots ? <DaySlot isoDay={toInputDate(day)} waiting={waiting} accounts={accounts} /> : null}
+            {allowSlots ? <DaySlot isoDay={toInputDate(day)} waiting={waiting} /> : null}
           </section>
         );
       })}

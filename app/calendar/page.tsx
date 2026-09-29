@@ -140,17 +140,11 @@ export default async function CalendarPage({
         </p>
       ) : null}
 
-      <BulkForm waiting={waiting.length} accounts={accounts} startDate={toInputDate(weekStart)} />
+      <BulkForm waiting={waiting.length} startDate={toInputDate(weekStart)} />
 
       {view === "week" || view === "month" ? (
         <div className="mt-8">
-          <CalendarBoard
-            days={days}
-            cards={withLooks}
-            waiting={waiting}
-            accounts={accounts}
-            allowSlots={view === "week"}
-          />
+          <CalendarBoard days={days} cards={withLooks} waiting={waiting} allowSlots={view === "week"} />
         </div>
       ) : (
         <section className="mt-8 space-y-2">

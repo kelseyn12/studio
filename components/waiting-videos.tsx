@@ -21,7 +21,13 @@ export function WaitingVideos({
             {card.lines.map((line) => (
               <p key={line.tag} className="flex flex-wrap items-center gap-2 text-xs text-mute">
                 <span className="shrink-0 rounded-full bg-sun px-2.5 py-0.5 font-semibold text-ink">{line.tag}</span>
-                <span>{line.who || "No account checked yet — open the video and pick one."}</span>
+                {line.who ? (
+                  <span>{line.who}</span>
+                ) : (
+                  <span className="font-semibold text-sun">
+                    Nothing checked for these apps — this video will not post. Tap Check accounts + cover.
+                  </span>
+                )}
               </p>
             ))}
           </div>

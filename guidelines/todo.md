@@ -275,6 +275,8 @@
   Chips and the day dropdown now say IG · FB · YT — whatever accounts are checked on that video — instead of IG · FB + TT · YT on everything.
 - [X] Live shows what each mix's videos are for, like Multiply
   Waiting list now shows every mix with IG · FB and TT · YT pills and the exact @s each file posts to, plus a Check accounts + cover link.
+- [X] Dropped the leftover single-account dropdowns on Live
+  Day slots and the batch scheduler always use the accounts checked on each video; missing checks get a loud warning instead of a silent skip.
 
 
 

@@ -11,9 +11,8 @@ export async function parkCard(formData: FormData) {
   await requireUser();
   const id = String(formData.get("cardId") || "");
   const when = new Date(String(formData.get("scheduledAt") || ""));
-  const accountId = String(formData.get("accountId") || "") || null;
   if (!id || Number.isNaN(when.getTime())) return;
-  await queueCard(id, when, accountId);
+  await queueCard(id, when, null);
   revalidatePath("/calendar");
   revalidatePath(`/cards/${id}`);
 }

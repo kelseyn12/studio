@@ -14,7 +14,6 @@ export async function POST(request: Request) {
   const intervalMin = Math.max(15, Number(body.intervalMin || 90));
   const startHour = Number(body.startHour ?? 10);
   const start = body.startDate ? startOfDay(parseLocalDate(String(body.startDate))) : startOfDay(new Date());
-  const accountId = body.accountId ? String(body.accountId) : null;
   const cards = await prisma.card.findMany({
     where: { status: "READY", scheduledAt: null },
     orderBy: { createdAt: "asc" },
@@ -28,7 +27,7 @@ export async function POST(request: Request) {
     when.setHours(startHour, 0, 0, 0);
     when.setMinutes(slot * intervalMin);
     try {
-      const result = await queueCard(card.id, when, accountId);
+      const result = await queueCard(card.id, when, null);
       if (result.ok && result.shipped) shipped += 1;
       if (!result.ok) errors.push(`${card.title}: ${result.error}`);
     } catch (error) {
