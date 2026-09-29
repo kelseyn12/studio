@@ -191,8 +191,8 @@ export default async function CalendarPage({
         <section className="mt-8">
           <h2 className="mb-3 text-lg font-semibold">{waiting.length} finished, no day yet</h2>
           <p className="mb-3 text-sm text-mute">
-            Each mix is two videos — an IG · FB one and a TT · YT one. Check the accounts each video should go to (a
-            tap saves right away), then schedule the mix on a day above.
+            Each mix is two videos. Open IG · FB or TT · YT to check the accounts (a tap saves), then schedule the mix
+            on a day above.
           </p>
           <WaitingVideos cards={waiting} accounts={accounts} />
         </section>

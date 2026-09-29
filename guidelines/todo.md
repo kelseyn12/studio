@@ -285,6 +285,8 @@
   The button says Scheduling… and a second click cannot send the same video twice. The day is claimed before the slow upload.
 - [X] Cancel a scheduled video
   Scheduled list has Cancel. It drops the Outstand posts and puts the video back under finished, no day yet.
+- [X] Account picks on Live are dropdowns
+  Each mix's IG · FB and TT · YT lists stay closed and show who is checked. Open one to change the checks.
 
 
 

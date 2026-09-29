@@ -4,12 +4,21 @@ import Link from "next/link";
 import { saveCardAccounts } from "@/app/calendar/actions";
 import { LookAccountPicks } from "@/components/look-account-picks";
 import type { FileLook } from "@/lib/card-desk";
+import { accountsForLook, handle, networkShort } from "@/lib/targets";
 
 type Account = { id: string; network: string; username: string; nickname: string; isActive: boolean };
 
+function pickedSummary(accounts: Account[], look: string, selectedIds: string[]): string {
+  const chosen = accountsForLook(accounts, look).filter((account) => selectedIds.includes(account.id));
+  if (chosen.length === 0) return "None checked";
+  return chosen
+    .map((account) => `${networkShort(account.network)} ${account.nickname || handle(account.username)}`)
+    .join(" · ");
+}
+
 /**
- * Finished mixes with no day yet. Each mix shows its IG · FB and TT · YT videos with account
- * checkboxes — a tap saves right away, so scheduling on a day always uses what you see here.
+ * Finished mixes with no day yet. Each look is a dropdown of accounts — closed it shows who is
+ * checked, open it is the checkboxes. A tap saves right away.
  */
 export function WaitingVideos({
   cards,
@@ -34,20 +43,30 @@ export function WaitingVideos({
               Cover + caption
             </Link>
           </div>
-          <div className="mt-3 grid gap-4 md:grid-cols-2">
+          <div className="mt-3 grid gap-2 md:grid-cols-2">
             {card.lookRows.map((row) => (
-              <div key={row.look} className="space-y-2">
-                <span className="inline-block rounded-full bg-sun px-2.5 py-0.5 text-xs font-semibold text-ink">
-                  {row.tag}
-                </span>
-                <LookAccountPicks
-                  look={row.look}
-                  tag={row.tag}
-                  accounts={accounts}
-                  selectedIds={card.selectedIds}
-                  compact
-                />
-              </div>
+              <details key={row.look} className="rounded-xl border border-line">
+                <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2 text-sm [&::-webkit-details-marker]:hidden">
+                  <span className="shrink-0 rounded-full bg-sun px-2.5 py-0.5 text-xs font-semibold text-ink">
+                    {row.tag}
+                  </span>
+                  <span className="min-w-0 flex-1 truncate text-mute">
+                    {pickedSummary(accounts, row.look, card.selectedIds)}
+                  </span>
+                  <span className="text-mute" aria-hidden>
+                    ▾
+                  </span>
+                </summary>
+                <div className="border-t border-line px-3 py-2">
+                  <LookAccountPicks
+                    look={row.look}
+                    tag={row.tag}
+                    accounts={accounts}
+                    selectedIds={card.selectedIds}
+                    compact
+                  />
+                </div>
+              </details>
             ))}
           </div>
         </form>
