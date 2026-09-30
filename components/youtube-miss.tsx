@@ -1,4 +1,5 @@
 import { retryFailedAt } from "@/app/calendar/actions";
+import { DownloadPosted } from "@/components/download-posted";
 import { ScheduleButton } from "@/components/schedule-button";
 import { labelTime, toInputDateTime } from "@/lib/dates";
 import { nextUploadWindow } from "@/lib/publish-sync";
@@ -34,15 +35,7 @@ export function YouTubeMiss({
           ? `Outstand's shared YouTube cap is full until about 2:00 AM. The first time that can work is ${labelTime(window)}. A time before that fails again.`
           : "The YouTube cap has reset. Pick a time and only YouTube is sent."}
       </p>
-      {download ? (
-        <a
-          href={download.href}
-          download={download.filename}
-          className="inline-block rounded-xl border border-line px-3 py-1.5 text-sm font-semibold"
-        >
-          Download YouTube file
-        </a>
-      ) : null}
+      {download ? <DownloadPosted jobId={jobId} href={download.href} filename={download.filename} /> : null}
       <form action={retryFailedAt} className="flex flex-wrap items-end gap-2">
         <input type="hidden" name="jobId" value={jobId} />
         <label className="text-sm">

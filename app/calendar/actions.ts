@@ -127,3 +127,22 @@ export async function clearFailedPost(formData: FormData) {
   await prisma.publishJob.delete({ where: { id: jobId } }).catch(() => {});
   revalidatePath("/calendar");
 }
+
+/** Downloading the YouTube file means that app was posted by hand. Nothing else is sent. */
+export async function markYouTubeDownloaded(jobId: string) {
+  await requireUser();
+  if (!jobId) return;
+  const job = await prisma.publishJob.findUnique({
+    where: { id: jobId },
+    include: { account: { select: { network: true } } },
+  });
+  if (!job || job.status !== "FAILED" || job.account.network !== "youtube") return;
+  await prisma.publishJob.update({
+    where: { id: jobId },
+    data: { status: "PUBLISHED", error: null, publishedAt: new Date() },
+  });
+  await prisma.card.update({ where: { id: job.cardId }, data: { status: "POSTED" } });
+  revalidatePath("/calendar");
+  revalidatePath("/");
+  revalidatePath(`/cards/${job.cardId}`);
+}
