@@ -1,4 +1,5 @@
 import { attachEditedUrl, finishStage, updateCard } from "@/app/cards/[id]/actions";
+import { CapcutLink } from "@/components/capcut-link";
 import { DropZone } from "@/components/drop-zone";
 import { EditorNeed } from "@/components/editor-need";
 import { PacketFiles } from "@/components/packet-files";
@@ -18,6 +19,7 @@ export function CardEditorStage({
     id: string;
     editorId: string | null;
     editorNote: string;
+    capcutUrl: string;
     cutBy: "SELF" | "EDITOR";
     rawsUrl: string;
   };
@@ -42,6 +44,7 @@ export function CardEditorStage({
         {desk && card.editorNote ? (
           <p className="mb-3 rounded-xl bg-lift px-4 py-3 text-sm">{card.editorNote}</p>
         ) : null}
+        {desk ? <CapcutLink url={card.capcutUrl} editable={false} /> : null}
         <EditorNeed items={packet} />
       </section>
       <PacketFiles rawsUrl={card.rawsUrl} files={files} />
@@ -68,6 +71,7 @@ export function CardEditorStage({
             placeholder="Must keep / CTA / words to avoid"
             className="field min-h-24"
           />
+          <CapcutLink url={card.capcutUrl} editable />
           <div className="flex gap-2">
             <button formAction={updateCard} className="flex-1 rounded-xl border border-line py-3">
               Save
@@ -85,6 +89,7 @@ export function CardEditorStage({
             placeholder="Notes for yourself"
             className="field min-h-16"
           />
+          <CapcutLink url={card.capcutUrl} editable />
           <button className="rounded-xl border border-line px-4 py-2 text-sm">Save notes</button>
         </form>
       ) : null}

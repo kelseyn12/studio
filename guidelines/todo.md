@@ -315,6 +315,10 @@
   The button says Trying… while the file uploads. A quiet minute used to look like the click did nothing.
 - [X] A failed upload is not listed as scheduled
   The day is cleared when Outstand refuses the file. Scheduled rows show the date and say Scheduled. The failure names IG, FB, TT, or YT and which video.
+- [X] Numbers pull the real Outstand totals
+  The pull was looking for a views field Outstand does not send. It now reads the totals, and a saved YouTube link adds a Studio upload.
+- [X] CapCut link on the editor job
+  Paste a CapCut Teams link with the editor note. Open in CapCut jumps there. The finished file still drops back here.
 
 
 

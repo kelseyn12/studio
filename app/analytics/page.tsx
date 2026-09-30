@@ -63,7 +63,9 @@ export default async function AnalyticsPage() {
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">Numbers</h1>
-          <p className="mt-1 text-mute">Real posted videos only. Pull from Outstand and the money you are owed stays right.</p>
+          <p className="mt-1 text-mute">
+            Real posted videos. Pull reads Outstand, and any YouTube link you saved after posting it yourself.
+          </p>
         </div>
         <RefreshStats />
       </div>

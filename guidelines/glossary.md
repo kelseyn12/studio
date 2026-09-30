@@ -22,7 +22,9 @@
 - `queueCard` — `lib/publish.ts` — parks a card on Live and ships through Outstand. Never overwrites `plannedDate`. Marks Posted only if Outstand already published. A retry deletes failed jobs only for the accounts it is sending again, and `shouldClearDay` keeps the day when another app already published. The file name Outstand stores is `safeUploadName`, so the public link stays plain letters.
 - `parkCard` — `app/calendar/actions.ts` — day-slot schedule. Claims `scheduledAt` before the upload so a second click cannot send the video twice. `ScheduleButton` shows Scheduling… while it runs. Days start on "Pick a video". `chooseDay` in `lib/day-picks.ts` moves a mix off any other day when you pick it here. Only mixes already on the calendar are greyed out.
 - `unscheduleCard` — `app/calendar/actions.ts` — Cancel on the scheduled list. `postsToCancel` / `canUnschedule` in `lib/unschedule.ts` pick the Outstand posts still waiting; `cancelPost` drops them, then the day is cleared.
-- `closeLoop` — `lib/analytics.ts` — Posted when live, Data when views exist. Used by `/api/analytics/sync`.
+- `closeLoop` / `parseAnalytics` / `withHandYouTube` — `lib/analytics.ts` — Posted when live, Data when views exist. `parseAnalytics` reads Outstand `aggregated_metrics`. `withHandYouTube` adds a Studio upload only when Outstand has no YouTube views. Used by `/api/analytics/sync`.
+- `youtubeVideoId` / `youtubePublicViews` — `lib/youtube-public.ts` — a pasted YouTube link, and its public view count. Used when YouTube was posted outside Outstand.
+- `capcutHref` — `lib/capcut.ts` — keeps an https CapCut link for the editor job. `CapcutLink` opens it.
 - `nextLanes` — `lib/formats.ts` — 70/20/10 winner promotion after stats land.
 - `canVisit` — `lib/access.ts` — rooms a role may open. Used by middleware and nav.
 - `withoutEditLists` / `prependCover` / `writeYoutubeThumb` — `lib/ship-media.ts` — the file Outstand ships starts on the saved cover so TikTok and YouTube Shorts open on the hook frame. The same JPEG goes to Instagram. YouTube also gets that frame at 1280×720. Re-encode drops the MP4 edit list.

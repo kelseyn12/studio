@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-09-30 — Numbers read the wrong part of Outstand's reply, so every video stayed at 0. The pull now uses the totals, and a YouTube link saved after a Studio upload is added when Outstand has no YouTube views. A CapCut link on the editor job opens that project.
 - 2026-09-30 — Downloading the YouTube file counts that app as posted. The day then lists YouTube with the apps that already went out.
 - 2026-09-30 — A miss now says which apps posted. YouTube can be downloaded or sent after the cap refills, and a time before that is refused.
 - 2026-09-30 — A YouTube miss at the scheduled time now says "YouTube did not post" on Today and on the day. The overnight resend was hiding that miss, so it is no longer scheduled.

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
+import { youtubeVideoId } from "@/lib/youtube-public";
 import { cancelPost } from "@/lib/outstand";
 import { prisma } from "@/lib/prisma";
 import { queueCard } from "@/lib/publish";
@@ -129,6 +130,28 @@ export async function clearFailedPost(formData: FormData) {
 }
 
 /** Downloading the YouTube file means that app was posted by hand. Nothing else is sent. */
+export async function saveYouTubeLink(formData: FormData) {
+  await requireUser();
+  const jobId = String(formData.get("jobId") || "");
+  const raw = String(formData.get("youtubeUrl") || "").trim();
+  if (!jobId) return;
+  const job = await prisma.publishJob.findUnique({
+    where: { id: jobId },
+    include: { account: { select: { network: true } } },
+  });
+  if (!job || job.account.network !== "youtube") return;
+  const videoId = youtubeVideoId(raw);
+  if (raw && !videoId) return;
+  await prisma.card.update({
+    where: { id: job.cardId },
+    data: { youtubeUrl: videoId ? `https://www.youtube.com/watch?v=${videoId}` : "" },
+  });
+  revalidatePath("/calendar");
+  revalidatePath("/");
+  revalidatePath("/analytics");
+  revalidatePath(`/cards/${job.cardId}`);
+}
+
 export async function markYouTubeDownloaded(jobId: string) {
   await requireUser();
   if (!jobId) return;

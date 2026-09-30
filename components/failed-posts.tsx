@@ -13,6 +13,7 @@ type FailedJob = {
   card: {
     id: string;
     title: string;
+    youtubeUrl: string;
     assets: Array<{ kind: string; textStyle: string; path: string; filename: string; createdAt: Date }>;
     publishes: Array<{ status: string; account: { network: string } }>;
   };
@@ -42,7 +43,12 @@ export function FailedPosts({ jobs }: { jobs: FailedJob[] }) {
               </p>
               {job.error ? <p className="text-xs text-mute">{job.error}</p> : null}
               {quota ? (
-                <YouTubeMiss jobId={job.id} failedAt={job.createdAt} download={youtubeDownload(job.card.assets)} />
+                <YouTubeMiss
+                  jobId={job.id}
+                  failedAt={job.createdAt}
+                  download={youtubeDownload(job.card.assets)}
+                  youtubeUrl={job.card.youtubeUrl}
+                />
               ) : (
                 <form action={retryFailedPost} className="mt-3">
                   <input type="hidden" name="jobId" value={job.id} />

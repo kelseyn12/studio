@@ -1,4 +1,4 @@
-import { retryFailedAt } from "@/app/calendar/actions";
+import { retryFailedAt, saveYouTubeLink } from "@/app/calendar/actions";
 import { DownloadPosted } from "@/components/download-posted";
 import { ScheduleButton } from "@/components/schedule-button";
 import { labelTime, toInputDateTime } from "@/lib/dates";
@@ -21,10 +21,12 @@ export function YouTubeMiss({
   jobId,
   failedAt,
   download,
+  youtubeUrl = "",
 }: {
   jobId: string;
   failedAt: Date;
   download: { href: string; filename: string } | null;
+  youtubeUrl?: string;
 }) {
   const window = nextUploadWindow(failedAt);
   const open = window.getTime() > Date.now() ? window : new Date(Date.now() + 2 * 60 * 1000);
@@ -36,6 +38,20 @@ export function YouTubeMiss({
           : "The YouTube cap has reset. Pick a time and only YouTube is sent."}
       </p>
       {download ? <DownloadPosted jobId={jobId} href={download.href} filename={download.filename} /> : null}
+      <form action={saveYouTubeLink} className="flex flex-wrap items-end gap-2">
+        <input type="hidden" name="jobId" value={jobId} />
+        <label className="text-sm">
+          YouTube link after you post it
+          <input
+            name="youtubeUrl"
+            defaultValue={youtubeUrl}
+            placeholder="https://youtube.com/watch?v=…"
+            className="field mt-1"
+          />
+        </label>
+        <button className="rounded-xl border border-line px-3 py-2 text-sm">Save link</button>
+      </form>
+      <p className="text-xs text-mute">Saving the link does not post again. Numbers adds those views on the next pull.</p>
       <form action={retryFailedAt} className="flex flex-wrap items-end gap-2">
         <input type="hidden" name="jobId" value={jobId} />
         <label className="text-sm">

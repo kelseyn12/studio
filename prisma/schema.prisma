@@ -160,6 +160,8 @@ model Card {
   referenceUrl     String          @default("")
   rawsUrl          String          @default("")
   editorNote       String          @default("")
+  capcutUrl        String          @default("")
+  youtubeUrl       String          @default("")
   captionStyle     String          @default("")
   plannedDate      DateTime?
   scheduledAt      DateTime?

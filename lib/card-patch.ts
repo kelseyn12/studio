@@ -48,6 +48,8 @@ export function cardPatch(form: FormData): Prisma.CardUncheckedUpdateInput {
   if (rawsUrl !== undefined) data.rawsUrl = rawsUrl;
   const editorNote = text(form, "editorNote");
   if (editorNote !== undefined) data.editorNote = editorNote;
+  const capcutUrl = text(form, "capcutUrl");
+  if (capcutUrl !== undefined) data.capcutUrl = capcutUrl.trim();
   if (form.has("plannedDate")) {
     const raw = String(form.get("plannedDate") || "");
     data.plannedDate = raw ? parseLocalDate(raw) : null;

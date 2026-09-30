@@ -1,13 +1,46 @@
-export function parseAnalytics(body: Record<string, unknown>): { views: number; likes: number; comments: number } {
-  const nested = (body.data as Record<string, unknown> | undefined) || (body.analytics as Record<string, unknown> | undefined) || body;
-  const views = Number(nested.views ?? nested.impressions ?? nested.view_count ?? nested.playCount ?? 0);
-  const likes = Number(nested.likes ?? nested.like_count ?? nested.likeCount ?? 0);
-  const comments = Number(nested.comments ?? nested.comment_count ?? nested.commentCount ?? 0);
+export type PullStats = { views: number; likes: number; comments: number; youtubeViews: number };
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : null;
+}
+
+function num(value: unknown): number {
+  const parsed = Number(value ?? 0);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+/** Outstand returns `aggregated_metrics`, not a top-level `views` field. */
+export function parseAnalytics(body: Record<string, unknown>): PullStats {
+  const rows = Array.isArray(body.metrics_by_account) ? body.metrics_by_account : [];
+  let youtubeViews = 0;
+  for (const row of rows) {
+    const record = asRecord(row);
+    const account = asRecord(record?.social_account);
+    if (account?.network !== "youtube") continue;
+    youtubeViews += num(asRecord(record?.metrics)?.views);
+  }
+  const aggregated = asRecord(body.aggregated_metrics);
+  if (aggregated) {
+    return {
+      views: num(aggregated.total_views ?? aggregated.total_impressions),
+      likes: num(aggregated.total_likes),
+      comments: num(aggregated.total_comments),
+      youtubeViews,
+    };
+  }
+  const nested = asRecord(body.data) || asRecord(body.analytics) || body;
   return {
-    views: Number.isFinite(views) ? views : 0,
-    likes: Number.isFinite(likes) ? likes : 0,
-    comments: Number.isFinite(comments) ? comments : 0,
+    views: num(nested.views ?? nested.impressions ?? nested.view_count ?? nested.playCount),
+    likes: num(nested.likes ?? nested.like_count ?? nested.likeCount),
+    comments: num(nested.comments ?? nested.comment_count ?? nested.commentCount),
+    youtubeViews,
   };
+}
+
+/** Add a YouTube Studio upload only when Outstand has no YouTube views for this video. */
+export function withHandYouTube(stats: PullStats, handViews: number | null): PullStats {
+  if (stats.youtubeViews > 0 || handViews == null) return stats;
+  return { ...stats, views: stats.views + handViews };
 }
 
 export function closeLoop(input: {

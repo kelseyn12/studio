@@ -61,6 +61,7 @@ export default async function CalendarPage({
           select: {
             id: true,
             title: true,
+            youtubeUrl: true,
             assets: { select: { kind: true, textStyle: true, path: true, filename: true, createdAt: true } },
             publishes: { select: { status: true, account: { select: { network: true } } } },
           },

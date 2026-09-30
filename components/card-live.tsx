@@ -38,6 +38,7 @@ export function CardLive({
     status: string;
     caption: string;
     editorNote: string;
+    youtubeUrl?: string;
     scheduledAt: Date | null;
     accountId: string | null;
     accountIds?: string;
@@ -192,12 +193,7 @@ export function CardLive({
           <p className="text-xs text-mute">Empty caption ships the title: {card.title}</p>
         )}
         {card.status === "POSTED" || card.status === "DATA" ? (
-          <div className="space-y-2">
-            <p className="text-sm font-semibold text-live">Posted{posted ? ` · ${posted}` : ""}</p>
-            {youtubeMiss.map((job) => (
-              <YouTubeMiss key={job.id} jobId={job.id} failedAt={job.createdAt} download={youtubeDownload(assets)} />
-            ))}
-          </div>
+          <p className="text-sm font-semibold text-live">Posted{posted ? ` · ${posted}` : ""}</p>
         ) : (
           <>
             <label className="block text-sm">
@@ -215,6 +211,17 @@ export function CardLive({
         )}
         </div>
       </form>
+      {card.status === "POSTED" || card.status === "DATA"
+        ? youtubeMiss.map((job) => (
+            <YouTubeMiss
+              key={job.id}
+              jobId={job.id}
+              failedAt={job.createdAt}
+              download={youtubeDownload(assets)}
+              youtubeUrl={card.youtubeUrl}
+            />
+          ))
+        : null}
     </div>
   );
 }

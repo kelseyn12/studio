@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { closeLoop, parseAnalytics, postIdsFor } from "@/lib/analytics";
+import { closeLoop, parseAnalytics, postIdsFor, withHandYouTube, type PullStats } from "@/lib/analytics";
 import { nextLanes } from "@/lib/formats";
 import { getPost, getPostAnalytics, hasOutstand, postedAtFromPost } from "@/lib/outstand";
 import { prisma } from "@/lib/prisma";
+import { youtubePublicViews } from "@/lib/youtube-public";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
 import { readSession } from "@/lib/session";
 
@@ -16,10 +17,11 @@ export async function POST(request: Request) {
   if (!user) return NextResponse.json({ error: "Auth required" }, { status: 401 });
   if (!hasOutstand()) return NextResponse.json({ error: "Outstand key missing" }, { status: 400 });
   const cards = await prisma.card.findMany({
-    where: { outstandPostId: { not: null } },
+    where: { OR: [{ outstandPostId: { not: null } }, { youtubeUrl: { not: "" } }] },
     select: {
       id: true,
       outstandPostId: true,
+      youtubeUrl: true,
       formatId: true,
       campaignId: true,
       publishes: { select: { outstandPostId: true } },
@@ -31,22 +33,31 @@ export async function POST(request: Request) {
   for (const card of cards) {
     // A cross-posted video is several Outstand posts (one per app look); its numbers are the sum.
     const postIds = postIdsFor(card);
-    if (postIds.length === 0) continue;
+    if (postIds.length === 0 && !card.youtubeUrl) continue;
     try {
-      const stats = { views: 0, likes: 0, comments: 0 };
+      const stats: PullStats = { views: 0, likes: 0, comments: 0, youtubeViews: 0 };
       let publishedAt: Date | null = null;
+      let gotStats = false;
       for (const postId of postIds) {
-        const post = await getPost(postId);
-        publishedAt = publishedAt ?? postedAtFromPost(post);
         try {
+          const post = await getPost(postId);
+          publishedAt = publishedAt ?? postedAtFromPost(post);
           const one = parseAnalytics(await getPostAnalytics(postId));
           stats.views += one.views;
           stats.likes += one.likes;
           stats.comments += one.comments;
+          stats.youtubeViews += one.youtubeViews;
+          gotStats = true;
         } catch {
-          /* views can wait; publish state cannot */
+          // An old or still-waiting post id must not throw away the apps that did publish.
         }
       }
+      if (card.youtubeUrl && stats.youtubeViews === 0) {
+        const hand = withHandYouTube(stats, await youtubePublicViews(card.youtubeUrl));
+        if (hand.views !== stats.views) gotStats = true;
+        stats.views = hand.views;
+      }
+      if (!gotStats) continue;
       const life = closeLoop({ publishedAt, views: stats.views });
       await prisma.card.update({
         where: { id: card.id },
