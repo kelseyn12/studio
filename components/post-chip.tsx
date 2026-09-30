@@ -15,6 +15,7 @@ export function PostChip({
     account: { username: string } | null;
     looks?: string;
     held?: string;
+    missed?: string;
   };
   showDate?: boolean;
   showTitle?: boolean;
@@ -29,6 +30,7 @@ export function PostChip({
         </p>
       ) : null}
       {live ? <p className="text-xs font-semibold uppercase tracking-wide text-live">Posted</p> : null}
+      {card.missed ? <p className="text-xs font-semibold text-sun">{card.missed}</p> : null}
       {card.held ? <p className="text-xs text-sun">{card.held}</p> : null}
       <p className={showTitle || live ? "text-xs text-mute" : "text-sm font-medium"}>{when}</p>
       <p className="truncate text-xs text-mute">{card.account ? handle(card.account.username) : card.title}</p>

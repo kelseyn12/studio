@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { publishOutcome, retryAccountIds, shortPlatformError, postedAtWhenLive, accountsReadyToRetry, heldNote, nextUploadWindow, retryAt } from "@/lib/publish-sync";
+import { publishOutcome, retryAccountIds, shortPlatformError, postedAtWhenLive, accountsReadyToRetry, heldNote, missedNote, nextUploadWindow, retryAt } from "@/lib/publish-sync";
 
 describe("publishOutcome", () => {
   it("keeps a pending app queued", () => {
@@ -104,7 +104,13 @@ describe("accountsReadyToRetry", () => {
     ).toMatch(/^YouTube sends at /);
   });
 
-  it("sends YouTube on its own after the daily cap", () => {
+  it("names the app that did not post", () => {
+    expect(missedNote([{ status: "FAILED", network: "youtube" }, { status: "PUBLISHED", network: "tiktok" }])).toBe(
+      "YouTube did not post",
+    );
+  });
+
+  it("leaves YouTube's daily cap for you to see, and does not send it again", () => {
     expect(
       accountsReadyToRetry(
         [
@@ -118,7 +124,7 @@ describe("accountsReadyToRetry", () => {
         ],
         now,
       ),
-    ).toEqual([{ cardId: "mix", accountIds: ["yt"] }]);
+    ).toEqual([]);
   });
 
   it("sets that YouTube send for 12:15 AM Pacific", () => {

@@ -149,6 +149,15 @@ export function heldNote(
   return `${names.join(" · ")} sends at ${labelTime(when.scheduledAt as Date)}`;
 }
 
+/** Apps that rejected the post. Shown on the day so a miss is not a blank time slot. */
+export function missedNote(jobs: Array<{ status: string; network: string }>): string {
+  const names = [
+    ...new Set(jobs.filter((job) => job.status === "FAILED").map((job) => NETWORK_LABEL[job.network] ?? job.network)),
+  ];
+  if (names.length === 0) return "";
+  return `${names.join(" · ")} did not post`;
+}
+
 /**
  * When to send a failed app again. YouTube's cap is scheduled for 12:15 AM Pacific.
  * If that reset already passed, it sends in two minutes. Anything else keeps a future time, or sends in two minutes.
@@ -175,7 +184,7 @@ export function retryAt(
 
 /**
  * Apps to send again after a failure. A published app is left alone.
- * YouTube's daily cap is included so it can be set for the reset. Anything else gets one automatic retry.
+ * YouTube's daily cap is not sent again on its own. Anything else gets one automatic retry.
  */
 export function accountsReadyToRetry(jobs: Attempt[], now = new Date()): Array<{ cardId: string; accountIds: string[] }> {
   const grouped = new Map<string, Attempt[]>();
@@ -189,9 +198,9 @@ export function accountsReadyToRetry(jobs: Attempt[], now = new Date()): Array<{
   for (const list of grouped.values()) {
     const latest = [...list].sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime())[0];
     if (latest.status !== "FAILED") continue;
-    const quota = isUploadQuota(latest.error);
+    if (isUploadQuota(latest.error)) continue;
     const failures = list.filter((job) => job.status === "FAILED").length;
-    if (!quota && failures > 1) continue;
+    if (failures > 1) continue;
     const ids = chosen.get(latest.cardId) ?? [];
     ids.push(latest.accountId);
     chosen.set(latest.cardId, ids);

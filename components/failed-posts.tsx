@@ -22,6 +22,7 @@ export function FailedPosts({
       </h2>
       <p className="mt-1 text-sm text-mute">
         These apps rejected the post. Try again sends only the ones that failed, so TikTok is not posted a second time.
+        YouTube's daily cap has to be posted from YouTube Studio.
       </p>
       <div className="mt-4 space-y-2">
         {jobs.map((job) => (
@@ -39,14 +40,16 @@ export function FailedPosts({
               </p>
             </div>
             <div className="flex gap-2">
-              <form action={retryFailedPost}>
-                <input type="hidden" name="jobId" value={job.id} />
-                <ScheduleButton
-                  label="Try again"
-                  pendingLabel="Trying…"
-                  className="rounded-xl bg-sun px-3 py-1.5 text-sm font-semibold text-ink"
-                />
-              </form>
+              {/daily upload limit/i.test(job.error || "") ? null : (
+                <form action={retryFailedPost}>
+                  <input type="hidden" name="jobId" value={job.id} />
+                  <ScheduleButton
+                    label="Try again"
+                    pendingLabel="Trying…"
+                    className="rounded-xl bg-sun px-3 py-1.5 text-sm font-semibold text-ink"
+                  />
+                </form>
+              )}
               <form action={clearFailedPost}>
                 <input type="hidden" name="jobId" value={job.id} />
                 <button className="rounded-xl border border-line px-3 py-1.5 text-sm text-mute">Clear</button>

@@ -18,7 +18,7 @@ import {
 } from "@/lib/dates";
 import { fileLooks } from "@/lib/card-desk";
 import { prisma } from "@/lib/prisma";
-import { heldNote, syncQueuedPublishes } from "@/lib/publish-sync";
+import { heldNote, missedNote, syncQueuedPublishes } from "@/lib/publish-sync";
 import { sweepFailedPublishes } from "@/lib/publish-sweep";
 import { targetAccounts, targetApps } from "@/lib/targets";
 import { WaitingVideos } from "@/components/waiting-videos";
@@ -67,6 +67,7 @@ export default async function CalendarPage({
       card.publishes.map((job) => ({ status: job.status, scheduledAt: job.scheduledAt, network: job.account.network })),
       card.postedAt,
     ),
+    missed: missedNote(card.publishes.map((job) => ({ status: job.status, network: job.account.network }))),
   }));
   const waiting = withLooks
     .filter((card) => card.status === "READY" && !card.scheduledAt)

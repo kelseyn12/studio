@@ -94,7 +94,7 @@
   Live reads each queued Outstand post and marks Instagram, Facebook, or YouTube failed. Try again sends only those apps, so TikTok is not posted twice.
 
 - [X] Calendar says Posted once an app is live
-  The day chip and the video's last step say Posted. A failed app is retried once on its own. YouTube's daily cap is set for 12:15 AM Pacific, and the chip says so.
+  The day chip and the video's last step say Posted. A failed app other than YouTube is retried once on its own. A YouTube cap miss says "YouTube did not post" on Today and on the day.
 
 - [X] Multiply batch caption + dead-air trim
   Caption box ships with every video in the batch (no more file-name captions). Cut dead air toggle trims silent clip ends with ffmpeg silencedetect, never below half a second.

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ActionCard } from "@/components/action-card";
 import { LiveRefresh } from "@/components/live-refresh";
+import { FailedPosts } from "@/components/failed-posts";
 import { Shell } from "@/components/shell";
 import { StudioMap } from "@/components/studio-map";
 import { StatusPill } from "@/components/status-pill";
@@ -12,13 +13,15 @@ import { setupSteps } from "@/lib/setup";
 import { machineCounts, studioBytes, studioSnapshot } from "@/lib/queries";
 import { hasR2 } from "@/lib/r2";
 import { studioUsage } from "@/lib/storage";
+import { syncQueuedPublishes } from "@/lib/publish-sync";
 import { prisma } from "@/lib/prisma";
 import { addDays, startOfDay } from "@/lib/dates";
 
 export default async function TodayPage() {
   const today = startOfDay(new Date());
   const soon = addDays(today, 2);
-  const [counts, snap, todayCards, chase, cutting, fileBytes] = await Promise.all([
+  await syncQueuedPublishes();
+  const [counts, snap, todayCards, chase, cutting, fileBytes, failedJobs] = await Promise.all([
     machineCounts(),
     studioSnapshot(),
     prisma.card.findMany({
@@ -47,6 +50,11 @@ export default async function TodayPage() {
       orderBy: { updatedAt: "desc" },
     }),
     studioBytes(),
+    prisma.publishJob.findMany({
+      where: { status: "FAILED" },
+      include: { card: { select: { id: true, title: true } }, account: { select: { username: true, network: true } } },
+      orderBy: { createdAt: "desc" },
+    }),
   ]);
   const files = studioUsage(fileBytes);
   const [accountCount, dealCount, formatCount, clipCount, videoCount, editorCount] = await Promise.all([
@@ -78,6 +86,7 @@ export default async function TodayPage() {
           </div>
         </div>
         <ActionCard action={pickNextAction(counts)} />
+        <FailedPosts jobs={failedJobs} />
         <SetupChecklist steps={steps} />
         {files.hot ? (
           <div className="max-w-xl">

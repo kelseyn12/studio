@@ -12,6 +12,7 @@ type CardRow = {
   looks?: string;
   status?: string;
   held?: string;
+  missed?: string;
 };
 
 export function CalendarBoard({
