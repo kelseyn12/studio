@@ -18,7 +18,7 @@ import {
 } from "@/lib/dates";
 import { fileLooks } from "@/lib/card-desk";
 import { prisma } from "@/lib/prisma";
-import { heldNote, missedNote, syncQueuedPublishes } from "@/lib/publish-sync";
+import { heldNote, missedNote, postedAppLine, syncQueuedPublishes } from "@/lib/publish-sync";
 import { sweepFailedPublishes } from "@/lib/publish-sweep";
 import { targetAccounts, targetApps } from "@/lib/targets";
 import { WaitingVideos } from "@/components/waiting-videos";
@@ -56,7 +56,17 @@ export default async function CalendarPage({
     prisma.socialAccount.findMany({ where: { isActive: true } }),
     prisma.publishJob.findMany({
       where: { status: "FAILED" },
-      include: { card: { select: { id: true, title: true } }, account: { select: { username: true, network: true } } },
+      include: {
+        card: {
+          select: {
+            id: true,
+            title: true,
+            assets: { select: { kind: true, textStyle: true, path: true, filename: true, createdAt: true } },
+            publishes: { select: { status: true, account: { select: { network: true } } } },
+          },
+        },
+        account: { select: { username: true, network: true } },
+      },
       orderBy: { createdAt: "desc" },
     }),
   ]);
@@ -68,6 +78,7 @@ export default async function CalendarPage({
       card.postedAt,
     ),
     missed: missedNote(card.publishes.map((job) => ({ status: job.status, network: job.account.network }))),
+    postedApps: postedAppLine(card.publishes.map((job) => ({ status: job.status, network: job.account.network }))),
   }));
   const waiting = withLooks
     .filter((card) => card.status === "READY" && !card.scheduledAt)
@@ -136,6 +147,16 @@ export default async function CalendarPage({
         </p>
       </div>
 
+      {params.ship === "yt-early" ? (
+        <p className="mb-4 rounded-card border border-line bg-panel px-4 py-3 text-sm">
+          That time is still inside YouTube's full cap. Pick 2:15 AM or later, or download the file and use YouTube Studio.
+        </p>
+      ) : null}
+      {params.ship === "yt-later" ? (
+        <p className="mb-4 rounded-card border border-line bg-panel px-4 py-3 text-sm">
+          YouTube is set for that time. Instagram, Facebook, and TikTok stay posted.
+        </p>
+      ) : null}
       {params.ship === "ok" ? (
         <p className="mb-4 rounded-card border border-line bg-panel px-4 py-3 text-sm">
           Scheduled. After it posts, Pull from Outstand on Numbers so it shows as Posted.

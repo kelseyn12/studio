@@ -13,6 +13,7 @@ type CardRow = {
   status?: string;
   held?: string;
   missed?: string;
+  postedApps?: string;
 };
 
 export function CalendarBoard({

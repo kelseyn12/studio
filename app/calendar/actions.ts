@@ -6,7 +6,7 @@ import { requireUser } from "@/lib/auth";
 import { cancelPost } from "@/lib/outstand";
 import { prisma } from "@/lib/prisma";
 import { queueCard } from "@/lib/publish";
-import { retryAccountIds } from "@/lib/publish-sync";
+import { retryAccountIds, youtubeRetryAllowed } from "@/lib/publish-sync";
 import { canUnschedule, cancelAlreadyGone, postsToCancel } from "@/lib/unschedule";
 
 const RETRY_DELAY_MS = 5 * 60 * 1000;
@@ -89,6 +89,35 @@ export async function retryFailedPost(formData: FormData) {
   await queueCard(job.cardId, when, accountIds);
   revalidatePath("/calendar");
   revalidatePath("/");
+}
+
+export async function retryFailedAt(formData: FormData) {
+  await requireUser();
+  const jobId = String(formData.get("jobId") || "");
+  const when = new Date(String(formData.get("scheduledAt") || ""));
+  const failed = await prisma.publishJob.findMany({
+    where: { status: "FAILED" },
+    include: { account: { select: { network: true } } },
+  });
+  const job = failed.find((row) => row.id === jobId);
+  const accountIds = retryAccountIds(failed, jobId);
+  if (!job || accountIds.length === 0 || Number.isNaN(when.getTime())) redirect("/calendar?ship=yt-early");
+  if (!youtubeRetryAllowed(job.error, when, job.createdAt)) redirect("/calendar?ship=yt-early");
+  await prisma.publishJob.deleteMany({
+    where: { cardId: job.cardId, status: "FAILED", accountId: { in: accountIds } },
+  });
+  const result = await queueCard(job.cardId, when, accountIds);
+  const stillPosted = await prisma.publishJob.count({
+    where: { cardId: job.cardId, status: "PUBLISHED" },
+  });
+  if (stillPosted > 0) {
+    await prisma.card.update({ where: { id: job.cardId }, data: { status: "POSTED" } });
+  }
+  revalidatePath("/calendar");
+  revalidatePath("/");
+  revalidatePath(`/cards/${job.cardId}`);
+  if (!result.ok) redirect("/calendar?ship=fail");
+  redirect("/calendar?ship=yt-later");
 }
 
 export async function clearFailedPost(formData: FormData) {

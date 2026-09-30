@@ -1,47 +1,50 @@
 import Link from "next/link";
 import { clearFailedPost, retryFailedPost } from "@/app/calendar/actions";
 import { ScheduleButton } from "@/components/schedule-button";
+import { youtubeDownload, YouTubeMiss } from "@/components/youtube-miss";
+import { postedAppLine } from "@/lib/publish-sync";
 import { describeTargets } from "@/lib/targets";
 
-export function FailedPosts({
-  jobs,
-}: {
-  jobs: Array<{
+type FailedJob = {
+  id: string;
+  error: string | null;
+  createdAt: Date;
+  scheduledAt: Date | null;
+  card: {
     id: string;
-    error: string | null;
-    scheduledAt: Date | null;
-    card: { id: string; title: string };
-    account: { username: string; network: string };
-  }>;
-}) {
+    title: string;
+    assets: Array<{ kind: string; textStyle: string; path: string; filename: string; createdAt: Date }>;
+    publishes: Array<{ status: string; account: { network: string } }>;
+  };
+  account: { username: string; network: string };
+};
+
+export function FailedPosts({ jobs }: { jobs: FailedJob[] }) {
   if (jobs.length === 0) return null;
   return (
     <section className="mb-6 rounded-card border border-line bg-panel p-5">
-      <h2 className="text-lg font-semibold">
-        {jobs.length} did not post
-      </h2>
+      <h2 className="text-lg font-semibold">Posted, with a miss</h2>
       <p className="mt-1 text-sm text-mute">
-        These apps rejected the post. Try again sends only the ones that failed, so TikTok is not posted a second time.
-        YouTube's daily cap has to be posted from YouTube Studio.
+        The apps below went out. The one named after them did not. Try again sends only that app.
       </p>
-      <div className="mt-4 space-y-2">
-        {jobs.map((job) => (
-          <div
-            key={job.id}
-            className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line px-4 py-3"
-          >
-            <div className="min-w-0">
+      <div className="mt-4 space-y-3">
+        {jobs.map((job) => {
+          const posted = postedAppLine(job.card.publishes.map((row) => ({ status: row.status, network: row.account.network })));
+          const quota = /daily upload limit/i.test(job.error || "");
+          return (
+            <div key={job.id} className="rounded-xl border border-line px-4 py-3">
               <Link href={`/cards/${job.card.id}?step=live`} className="font-medium">
                 {job.card.title}
               </Link>
-              <p className="truncate text-xs text-mute">
-                {describeTargets([job.account])}
-                {job.error ? ` · ${job.error}` : ""}
+              {posted ? <p className="text-sm font-semibold text-live">Posted · {posted}</p> : null}
+              <p className="text-sm font-semibold text-sun">
+                {describeTargets([job.account])} did not post
               </p>
-            </div>
-            <div className="flex gap-2">
-              {/daily upload limit/i.test(job.error || "") ? null : (
-                <form action={retryFailedPost}>
+              {job.error ? <p className="text-xs text-mute">{job.error}</p> : null}
+              {quota ? (
+                <YouTubeMiss jobId={job.id} failedAt={job.createdAt} download={youtubeDownload(job.card.assets)} />
+              ) : (
+                <form action={retryFailedPost} className="mt-3">
                   <input type="hidden" name="jobId" value={job.id} />
                   <ScheduleButton
                     label="Try again"
@@ -50,13 +53,13 @@ export function FailedPosts({
                   />
                 </form>
               )}
-              <form action={clearFailedPost}>
+              <form action={clearFailedPost} className="mt-2">
                 <input type="hidden" name="jobId" value={job.id} />
-                <button className="rounded-xl border border-line px-3 py-1.5 text-sm text-mute">Clear</button>
+                <button className="text-sm text-mute">Clear</button>
               </form>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </section>
   );

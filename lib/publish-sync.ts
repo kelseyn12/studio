@@ -1,6 +1,7 @@
 import { labelTime } from "@/lib/dates";
 import { getPost, hasOutstand } from "@/lib/outstand";
 import { prisma } from "@/lib/prisma";
+import { networkShort } from "@/lib/targets";
 import { textStyleForNetwork } from "@/lib/text-style";
 
 const NETWORK_LABEL: Record<string, string> = {
@@ -156,6 +157,18 @@ export function missedNote(jobs: Array<{ status: string; network: string }>): st
   ];
   if (names.length === 0) return "";
   return `${names.join(" · ")} did not post`;
+}
+
+/** Short app names that already published, for the Posted line. */
+export function postedAppLine(jobs: Array<{ status: string; network: string }>): string {
+  return [...new Set(jobs.filter((job) => job.status === "PUBLISHED").map((job) => networkShort(job.network)))].join(" · ");
+}
+
+/** A YouTube cap miss can only be sent again after the cap refills. Any other miss can go at the chosen time. */
+export function youtubeRetryAllowed(error: string | null, when: Date, failedAt: Date, now = new Date()): boolean {
+  if (when.getTime() <= now.getTime()) return false;
+  if (!isUploadQuota(error)) return true;
+  return when.getTime() + 60_000 >= nextUploadWindow(failedAt).getTime();
 }
 
 /**

@@ -26,7 +26,7 @@ export default async function CardPage({
   const [card, campaigns, accounts, editors] = await Promise.all([
     prisma.card.findUnique({
       where: { id },
-      include: { campaign: true, account: true, assets: true, editor: true },
+      include: { campaign: true, account: true, assets: true, editor: true, publishes: { include: { account: { select: { network: true, username: true } } } } },
     }),
     prisma.campaign.findMany({ include: { formats: true } }),
     prisma.socialAccount.findMany({ where: { isActive: true } }),
@@ -89,6 +89,7 @@ export default async function CardPage({
             assets={card.assets}
             cutSrc={cutSource?.path}
             canUndo={card.assets.some((asset) => asset.kind === "EDITED" && asset.filename.startsWith("cut-"))}
+            publishes={card.publishes}
           />
         ) : null}
         <div className="mt-6 space-y-2">

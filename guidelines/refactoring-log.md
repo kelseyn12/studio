@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-09-30 — A miss now says which apps posted. YouTube can be downloaded or sent after the cap refills, and a time before that is refused.
 - 2026-09-30 — A YouTube miss at the scheduled time now says "YouTube did not post" on Today and on the day. The overnight resend was hiding that miss, so it is no longer scheduled.
 - 2026-09-29 — YouTube's shared daily cap blocked the 3:00 PM video. That app is set for 12:15 AM Pacific on its own, and the day chip says YouTube sends then. The other apps stay posted.
 - 2026-09-29 — A posted video says Posted on the day chip and on the video's last step. If an app rejects the post after you leave, that app is sent once more and the ones that already published are left alone. YouTube's daily upload cap waits until the next day.

@@ -16,6 +16,7 @@ export function PostChip({
     looks?: string;
     held?: string;
     missed?: string;
+    postedApps?: string;
   };
   showDate?: boolean;
   showTitle?: boolean;
@@ -29,7 +30,11 @@ export function PostChip({
           {card.title}
         </p>
       ) : null}
-      {live ? <p className="text-xs font-semibold uppercase tracking-wide text-live">Posted</p> : null}
+      {live ? (
+        <p className="text-xs font-semibold uppercase tracking-wide text-live">
+          Posted{card.postedApps ? ` · ${card.postedApps}` : ""}
+        </p>
+      ) : null}
       {card.missed ? <p className="text-xs font-semibold text-sun">{card.missed}</p> : null}
       {card.held ? <p className="text-xs text-sun">{card.held}</p> : null}
       <p className={showTitle || live ? "text-xs text-mute" : "text-sm font-medium"}>{when}</p>

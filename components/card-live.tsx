@@ -8,6 +8,8 @@ import { toInputDateTime } from "@/lib/dates";
 import { formatMoney } from "@/lib/deals";
 import { coverCanChange } from "@/lib/post-cover";
 import { dealAccounts, describeTargets, handle, parseAccountIds, targetAccounts } from "@/lib/targets";
+import { YouTubeMiss, youtubeDownload } from "@/components/youtube-miss";
+import { postedAppLine } from "@/lib/publish-sync";
 import { watchUrl } from "@/lib/urls";
 
 type LiveAsset = {
@@ -28,6 +30,7 @@ export function CardLive({
   assets,
   canUndo,
   cutSrc,
+  publishes = [],
 }: {
   card: {
     id: string;
@@ -54,6 +57,13 @@ export function CardLive({
   assets: LiveAsset[];
   canUndo?: boolean;
   cutSrc?: string;
+  publishes?: Array<{
+    id: string;
+    status: string;
+    error: string | null;
+    createdAt: Date;
+    account: { network: string };
+  }>;
 }) {
   const dealTargets = dealAccounts(accounts, card.campaignId);
   const targets = targetAccounts(accounts, card);
@@ -66,6 +76,8 @@ export function CardLive({
       : card.accountId
         ? [card.accountId]
         : [];
+  const posted = postedAppLine(publishes.map((job) => ({ status: job.status, network: job.account.network })));
+  const youtubeMiss = publishes.filter((job) => job.status === "FAILED" && job.account.network === "youtube");
   if (!edited) {
     return (
       <p className="rounded-card border border-dashed border-line bg-panel px-5 py-8 text-sm text-mute">
@@ -180,7 +192,12 @@ export function CardLive({
           <p className="text-xs text-mute">Empty caption ships the title: {card.title}</p>
         )}
         {card.status === "POSTED" || card.status === "DATA" ? (
-          <p className="text-sm text-mute">This already posted. It will not be sent again from here.</p>
+          <div className="space-y-2">
+            <p className="text-sm font-semibold text-live">Posted{posted ? ` · ${posted}` : ""}</p>
+            {youtubeMiss.map((job) => (
+              <YouTubeMiss key={job.id} jobId={job.id} failedAt={job.createdAt} download={youtubeDownload(assets)} />
+            ))}
+          </div>
         ) : (
           <>
             <label className="block text-sm">

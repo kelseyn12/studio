@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { publishOutcome, retryAccountIds, shortPlatformError, postedAtWhenLive, accountsReadyToRetry, heldNote, missedNote, nextUploadWindow, retryAt } from "@/lib/publish-sync";
+import { publishOutcome, retryAccountIds, shortPlatformError, postedAtWhenLive, accountsReadyToRetry, heldNote, missedNote, postedAppLine, youtubeRetryAllowed, nextUploadWindow, retryAt } from "@/lib/publish-sync";
 
 describe("publishOutcome", () => {
   it("keeps a pending app queued", () => {
@@ -108,6 +108,20 @@ describe("accountsReadyToRetry", () => {
     expect(missedNote([{ status: "FAILED", network: "youtube" }, { status: "PUBLISHED", network: "tiktok" }])).toBe(
       "YouTube did not post",
     );
+  });
+
+  it("names the apps that posted, and refuses a YouTube retry before the cap refills", () => {
+    const failedAt = new Date("2026-09-30T15:01:00.000Z");
+    expect(
+      postedAppLine([
+        { status: "PUBLISHED", network: "instagram" },
+        { status: "PUBLISHED", network: "facebook" },
+        { status: "PUBLISHED", network: "tiktok" },
+        { status: "FAILED", network: "youtube" },
+      ]),
+    ).toBe("IG · FB · TT");
+    expect(youtubeRetryAllowed("YouTube daily upload limit is used up. It resets overnight.", new Date("2026-09-30T20:00:00.000Z"), failedAt)).toBe(false);
+    expect(youtubeRetryAllowed("YouTube daily upload limit is used up. It resets overnight.", nextUploadWindow(failedAt), failedAt)).toBe(true);
   });
 
   it("leaves YouTube's daily cap for you to see, and does not send it again", () => {

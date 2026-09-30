@@ -52,7 +52,17 @@ export default async function TodayPage() {
     studioBytes(),
     prisma.publishJob.findMany({
       where: { status: "FAILED" },
-      include: { card: { select: { id: true, title: true } }, account: { select: { username: true, network: true } } },
+      include: {
+        card: {
+          select: {
+            id: true,
+            title: true,
+            assets: { select: { kind: true, textStyle: true, path: true, filename: true, createdAt: true } },
+            publishes: { select: { status: true, account: { select: { network: true } } } },
+          },
+        },
+        account: { select: { username: true, network: true } },
+      },
       orderBy: { createdAt: "desc" },
     }),
   ]);
