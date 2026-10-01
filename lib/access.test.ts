@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canVisit, homeFor } from "@/lib/access";
+import { canVisit, homeFor, isPublicPath } from "@/lib/access";
 
 describe("access", () => {
   it("sends editors to Cuts", () => {
@@ -11,6 +11,11 @@ describe("access", () => {
     expect(canVisit("EDITOR", "/calendar")).toBe(false);
     expect(canVisit("EDITOR", "/api/assets")).toBe(true);
     expect(canVisit("EDITOR", "/api/files/cards/a.mp4")).toBe(true);
+  });
+
+  it("lets a signed-out visitor open the privacy page", () => {
+    expect(isPublicPath("/privacy")).toBe(true);
+    expect(isPublicPath("/analytics")).toBe(false);
   });
 
   it("lets creators into every room", () => {

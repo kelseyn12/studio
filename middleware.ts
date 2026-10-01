@@ -1,18 +1,12 @@
 import { clerkMiddleware, clerkClient, type ClerkMiddlewareAuth } from "@clerk/nextjs/server";
 import { NextResponse, type NextFetchEvent, type NextRequest } from "next/server";
 import { jwtVerify } from "jose";
-import { canVisit, homeFor } from "@/lib/access";
+import { canVisit, homeFor, isPublicPath } from "@/lib/access";
 import { hasClerk, parseStudioRole } from "@/lib/clerk-mode";
 import type { Role } from "@prisma/client";
 
-const OPEN = ["/login", "/sign-in", "/sign-up", "/api/auth", "/l"];
-
-function isOpen(pathname: string): boolean {
-  return OPEN.some((path) => pathname === path || pathname.startsWith(`${path}/`));
-}
-
 async function clerkHandler(auth: ClerkMiddlewareAuth, request: NextRequest) {
-  if (isOpen(request.nextUrl.pathname)) return NextResponse.next();
+  if (isPublicPath(request.nextUrl.pathname)) return NextResponse.next();
   const { userId, sessionClaims } = await auth();
   if (!userId) {
     const signIn = request.nextUrl.clone();
@@ -47,7 +41,7 @@ export default function middleware(request: NextRequest, event: NextFetchEvent) 
 
 async function pinGate(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  if (isOpen(pathname) || pathname.startsWith("/_next") || pathname === "/favicon.ico") {
+  if (isPublicPath(pathname) || pathname.startsWith("/_next") || pathname === "/favicon.ico") {
     return NextResponse.next();
   }
   const token = request.cookies.get("studio_session")?.value;

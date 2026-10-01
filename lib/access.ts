@@ -1,5 +1,12 @@
 import type { Role } from "@prisma/client";
 
+const PUBLIC_PREFIXES = ["/login", "/sign-in", "/sign-up", "/api/auth", "/l", "/privacy"];
+
+/** Pages a signed-out visitor can open. The privacy page has to load with no login. */
+export function isPublicPath(pathname: string): boolean {
+  return PUBLIC_PREFIXES.some((path) => pathname === path || pathname.startsWith(`${path}/`));
+}
+
 export function homeFor(role: Role): string {
   if (role === "EDITOR") return "/edits";
   if (role === "OPERATOR") return "/calendar";

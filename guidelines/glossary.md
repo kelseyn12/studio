@@ -26,7 +26,7 @@
 - `youtubeVideoId` / `youtubePublicViews` — `lib/youtube-public.ts` — a pasted YouTube link, and its public view count. Used when YouTube was posted outside Outstand.
 - `capcutHref` — `lib/capcut.ts` — keeps an https CapCut link for the editor job. `CapcutLink` opens it.
 - `nextLanes` — `lib/formats.ts` — 70/20/10 winner promotion after stats land.
-- `canVisit` — `lib/access.ts` — rooms a role may open. Used by middleware and nav.
+- `canVisit` / `isPublicPath` — `lib/access.ts` — rooms a role may open, and pages a signed-out visitor can open (`/privacy`). Used by middleware and nav.
 - `withoutEditLists` / `prependCover` / `writeYoutubeThumb` — `lib/ship-media.ts` — the file Outstand ships starts on the saved cover so TikTok and YouTube Shorts open on the hook frame. The same JPEG goes to Instagram. YouTube also gets that frame at 1280×720. Re-encode drops the MP4 edit list.
 - `assembleVideo` — `lib/ffmpeg.ts` — concatenates hook × body × CTA, keeps audio, optional music, applies a per-copy Variation, optional hook text + spoken caption filters. New files are written without an MP4 edit list.
 - `ffmpegBin` / `canBurnText` — `lib/ffmpeg.ts` — prefers Homebrew ffmpeg-full so drawtext exists; Generate refuses text if it does not.
