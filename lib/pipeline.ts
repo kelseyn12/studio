@@ -30,3 +30,9 @@ export const CREATOR_STATUSES: PipelineStatus[] = ["IDEA", "SCRIPTED", "FILMED",
 export function isPipelineStatus(value: string): value is PipelineStatus {
   return (PIPELINE_STATUSES as readonly string[]).includes(value);
 }
+
+/** Ready with a day is Scheduled. Ready with no day stays To schedule. */
+export function pillLabel(status: PipelineStatus, scheduledAt?: Date | null): string {
+  if (status === "READY" && scheduledAt) return "Scheduled";
+  return PIPELINE_META[status].label;
+}

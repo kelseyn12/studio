@@ -1,4 +1,4 @@
-import { PIPELINE_META, type PipelineStatus } from "@/lib/pipeline";
+import { pillLabel, PIPELINE_META, type PipelineStatus } from "@/lib/pipeline";
 
 const TONE: Record<string, string> = {
   idea: "bg-idea/20 text-zinc-200",
@@ -11,11 +11,19 @@ const TONE: Record<string, string> = {
   data: "bg-data/15 text-data",
 };
 
-export function StatusPill({ status, label }: { status: PipelineStatus; label?: string }) {
+export function StatusPill({
+  status,
+  scheduledAt,
+  label,
+}: {
+  status: PipelineStatus;
+  scheduledAt?: Date | null;
+  label?: string;
+}) {
   const meta = PIPELINE_META[status];
   return (
     <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide ${TONE[meta.color]}`}>
-      {label ?? meta.label}
+      {label ?? pillLabel(status, scheduledAt)}
     </span>
   );
 }
