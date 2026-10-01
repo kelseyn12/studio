@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-09-30 — Sign-in shows YouTube and links to Privacy and Terms, and `/terms` is public, so the YouTube app check has screenshots it can open.
 - 2026-09-30 — A public privacy page at `/privacy` so the YouTube app check has a link Google can open without signing in.
 - 2026-09-30 — Numbers read the wrong part of Outstand's reply, so every video stayed at 0. The pull now uses the totals, and a YouTube link saved after a Studio upload is added when Outstand has no YouTube views. A CapCut link on the editor job opens that project.
 - 2026-09-30 — Downloading the YouTube file counts that app as posted. The day then lists YouTube with the apps that already went out.

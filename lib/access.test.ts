@@ -15,6 +15,7 @@ describe("access", () => {
 
   it("lets a signed-out visitor open the privacy page", () => {
     expect(isPublicPath("/privacy")).toBe(true);
+    expect(isPublicPath("/terms")).toBe(true);
     expect(isPublicPath("/analytics")).toBe(false);
   });
 
