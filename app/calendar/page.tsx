@@ -150,7 +150,7 @@ export default async function CalendarPage({
 
       {params.ship === "yt-early" ? (
         <p className="mb-4 rounded-card border border-line bg-panel px-4 py-3 text-sm">
-          That time is still inside YouTube's full cap. Pick 2:15 AM or later, or download the file and use YouTube Studio.
+          That time is still inside YouTube&apos;s full cap. Pick 2:15 AM or later, or download the file and use YouTube Studio.
         </p>
       ) : null}
       {params.ship === "yt-later" ? (
@@ -206,7 +206,7 @@ export default async function CalendarPage({
         <div className="mt-8">
           {view === "month" ? (
             <p className="mb-3 text-sm text-mute">
-              What's already set this month. Tap a day to open that week and schedule.
+              What&apos;s already set this month. Tap a day to open that week and schedule.
             </p>
           ) : null}
           <CalendarBoard

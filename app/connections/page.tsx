@@ -16,7 +16,7 @@ export default async function ConnectionsPage() {
       <h1 className="text-3xl font-semibold tracking-tight">Accounts</h1>
       <p className="mt-1 mb-6 max-w-2xl text-mute">
         Link TikTok, Instagram, YouTube, and X in Outstand. Then Sync so Studio can post as those accounts. Tap a deal
-        on an account and it saves right away — gold means that's the one.
+        on an account and it saves right away — gold means that&apos;s the one.
       </p>
       <div className="mb-6 flex flex-wrap gap-2">
         <a
