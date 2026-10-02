@@ -157,6 +157,7 @@ export function CardLive({
           Each mix is labeled IG / FB or TT / YT. Check every account that mix should go to — you can pick more than one.
         </p>
         <LiveLooks
+          cardId={card.id}
           rows={looks}
           canCover={coverCanChange(card.status)}
           accounts={accounts}

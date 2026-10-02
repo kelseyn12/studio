@@ -37,9 +37,15 @@ export function pickFinished<T extends { kind: string; createdAt: Date }>(assets
   );
 }
 
+/** A file with no look, or plain, is the same video for every app. A tagged file stays on its look. */
+function coversLook(textStyle: string, look: string): boolean {
+  if (textStyle === look) return true;
+  return !textStyle || textStyle === "plain";
+}
+
 /**
- * The file that ships to accounts wanting one text look. An editor's cut always wins (it is the
- * same for every app); otherwise the Multiply file built in that look; otherwise whatever is newest.
+ * The file that ships to one look. An IG/FB upload does not fill TT/YT. A file marked both
+ * (or an older cut with no look) still ships to every app.
  */
 export function pickForLook<T extends { kind: string; createdAt: Date; textStyle: string }>(
   assets: T[],
@@ -47,18 +53,22 @@ export function pickForLook<T extends { kind: string; createdAt: Date; textStyle
 ): T | undefined {
   const newestFirst = [...assets].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   return (
-    newestFirst.find((asset) => asset.kind === "EDITED") ??
-    newestFirst.find((asset) => asset.kind === "GENERATED" && asset.textStyle === look) ??
-    pickFinished(assets)
+    newestFirst.find((asset) => asset.kind === "EDITED" && asset.textStyle === look) ??
+    newestFirst.find((asset) => asset.kind === "EDITED" && coversLook(asset.textStyle, look) && asset.textStyle !== "instagram" && asset.textStyle !== "tiktok") ??
+    newestFirst.find((asset) => asset.kind === "GENERATED" && coversLook(asset.textStyle, look))
   );
 }
 
-export type ShipLook<A, T> = { look: DrawnStyle; tag: string; accounts: T[]; asset: A };
+export type ShipLook<A, T> = { look: DrawnStyle; tag: string; accounts: T[]; asset: A | undefined };
 
 const LOOK_ORDER: DrawnStyle[] = ["instagram", "tiktok", "plain"];
 
 function looksOnFiles(assets: Array<{ kind: string; textStyle: string }>): DrawnStyle[] {
-  const have = new Set(assets.filter((asset) => asset.kind === "GENERATED").map((asset) => asset.textStyle));
+  const have = new Set<string>();
+  for (const asset of assets) {
+    if (asset.kind !== "GENERATED" && asset.kind !== "EDITED") continue;
+    if (asset.textStyle === "instagram" || asset.textStyle === "tiktok") have.add(asset.textStyle);
+  }
   return LOOK_ORDER.filter((look) => have.has(look));
 }
 
@@ -71,13 +81,13 @@ export function shipLooks<
   if (!finished) return [];
   const groups = targetsByLook(targets);
   const byLook = new Map(groups.map((group) => [group.look, group.accounts]));
-  const looks = looksOnFiles(assets);
-  const show = looks.length > 0 ? looks : groups.length > 0 ? groups.map((group) => group.look) : (["plain"] as DrawnStyle[]);
-  return show.map((look) => ({
+  const wanted = new Set<DrawnStyle>([...looksOnFiles(assets), ...groups.map((group) => group.look)]);
+  const show = LOOK_ORDER.filter((look) => wanted.has(look));
+  return (show.length > 0 ? show : (["plain"] as DrawnStyle[])).map((look) => ({
     look,
     tag: LOOK_TAG[look] || "All apps",
     accounts: byLook.get(look) ?? [],
-    asset: pickForLook(assets, look) ?? finished,
+    asset: pickForLook(assets, look),
   }));
 }
 

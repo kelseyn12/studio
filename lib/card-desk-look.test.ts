@@ -15,10 +15,16 @@ describe("pickForLook", () => {
     expect(pickForLook(generated, "tiktok")?.id).toBe("tt");
   });
 
-  it("lets the editor's cut win for every look", () => {
+  it("lets an untagged editor cut win for every look", () => {
     const withEdit = [...generated, { id: "edit", kind: "EDITED", textStyle: "", createdAt: at(5) }];
     expect(pickForLook(withEdit, "instagram")?.id).toBe("edit");
     expect(pickForLook(withEdit, "tiktok")?.id).toBe("edit");
+  });
+
+  it("keeps an IG/FB upload off TT/YT", () => {
+    const uploaded = [{ id: "ig", kind: "EDITED", textStyle: "instagram", createdAt: at(2) }];
+    expect(pickForLook(uploaded, "instagram")?.id).toBe("ig");
+    expect(pickForLook(uploaded, "tiktok")).toBeUndefined();
   });
 
   it("falls back to the newest finished file when no look matches", () => {
@@ -49,6 +55,17 @@ describe("shipLooks", () => {
 
   it("still lists both files when no accounts are picked yet", () => {
     expect(shipLooks(generated, []).map((row) => row.tag)).toEqual(["IG · FB", "TT · YT"]);
+  });
+
+  it("asks for the TT/YT file when only IG/FB was uploaded", () => {
+    const rows = shipLooks([{ id: "ig", kind: "EDITED", textStyle: "instagram", createdAt: at(1) }], [
+      { network: "instagram" },
+      { network: "tiktok" },
+    ]);
+    expect(rows.map((row) => [row.tag, row.asset?.id])).toEqual([
+      ["IG · FB", "ig"],
+      ["TT · YT", undefined],
+    ]);
   });
 });
 

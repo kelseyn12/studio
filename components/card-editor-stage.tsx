@@ -1,11 +1,11 @@
 import { attachEditedUrl, finishStage, updateCard } from "@/app/cards/[id]/actions";
 import { CapcutLink } from "@/components/capcut-link";
-import { DropZone } from "@/components/drop-zone";
+import { FinishedDrop } from "@/components/finished-drop";
 import { EditorNeed } from "@/components/editor-need";
 import { PacketFiles } from "@/components/packet-files";
 import type { PacketItem } from "@/lib/editor-packet";
-import { watchUrl } from "@/lib/urls";
 import { formatBytes, STUDIO_FILE_MAX_BYTES } from "@/lib/storage";
+import { watchUrl } from "@/lib/urls";
 
 export function CardEditorStage({
   card,
@@ -25,11 +25,18 @@ export function CardEditorStage({
   };
   editors: Array<{ id: string; name: string; defaultEditor?: boolean }>;
   packet: PacketItem[];
-  files: Array<{ id: string; kind: string; filename: string; path: string; publicUrl: string }>;
+  files: Array<{ id: string; kind: string; filename: string; path: string; publicUrl: string; textStyle?: string }>;
   edited?: { path: string; publicUrl: string | null };
   desk: boolean;
 }) {
   const self = card.cutBy === "SELF" && !desk;
+  const editedLooks = files.filter((file) => file.kind === "EDITED").map((file) => file.textStyle);
+  const defaultLook =
+    editedLooks.includes("instagram") && !editedLooks.includes("tiktok")
+      ? "tiktok"
+      : editedLooks.includes("tiktok") && !editedLooks.includes("instagram")
+        ? "instagram"
+        : "instagram";
   const hasSources =
     Boolean(card.rawsUrl.trim()) ||
     files.some((file) => file.kind === "RAW" || file.kind === "VOICE" || file.kind === "REFERENCE");
@@ -101,17 +108,20 @@ export function CardEditorStage({
           <button className="rounded-xl border border-line px-4 py-2 text-sm">Save notes</button>
         </form>
       ) : null}
-      <DropZone
-        action="/api/assets"
-        extra={{ id: card.id, kind: "EDITED" }}
-        label="Drop the finished video"
-        hint={`The export that posts. Under ${formatBytes(STUDIO_FILE_MAX_BYTES)}.`}
-        accept="video/*"
+      <FinishedDrop
+        cardId={card.id}
+        defaultLook={defaultLook}
         maxBytes={STUDIO_FILE_MAX_BYTES}
+        sizeLabel={formatBytes(STUDIO_FILE_MAX_BYTES)}
       />
       <form action={attachEditedUrl} className="space-y-2 rounded-card border border-line bg-panel p-5">
         <input type="hidden" name="id" value={card.id} />
         <p className="text-sm text-mute">Or paste a direct video link. Not a Drive folder.</p>
+        <select name="textStyle" defaultValue={defaultLook} className="field">
+          <option value="instagram">IG · FB</option>
+          <option value="tiktok">TT · YT</option>
+          <option value="plain">Both — same video</option>
+        </select>
         <input name="editedUrl" placeholder="https://…/export.mp4" className="field" />
         <button className="rounded-xl border border-line px-4 py-2 text-sm">Attach URL</button>
       </form>

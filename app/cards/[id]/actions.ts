@@ -195,8 +195,10 @@ export async function attachEditedUrl(formData: FormData) {
   const name = url.split("?")[0].split("/").pop() || "export.mp4";
   const type = response.headers.get("content-type") || mimeFromName(name);
   const saved = await saveUpload(new File([new Uint8Array(bytes)], name, { type }), `cards/${id}`);
+  const style = String(formData.get("textStyle") || "");
+  const textStyle = style === "instagram" || style === "tiktok" || style === "plain" ? style : "plain";
   await prisma.asset.create({
-    data: { cardId: id, kind: "EDITED", ...saved, publicUrl: saved.publicUrl || url },
+    data: { cardId: id, kind: "EDITED", ...saved, publicUrl: saved.publicUrl || url, textStyle },
   });
   await markCutReady(id);
   revalidatePath(`/cards/${id}`);

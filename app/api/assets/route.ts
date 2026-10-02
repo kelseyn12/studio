@@ -25,7 +25,11 @@ export async function POST(request: Request) {
   const blocked = rejectStudioFile(file.size, kind);
   if (blocked) return NextResponse.json({ error: blocked }, { status: 400 });
   const saved = await saveUpload(file, `cards/${id}`);
-  await prisma.asset.create({ data: { cardId: id, kind, ...saved } });
+  const style = String(form.get("textStyle") || "");
+  const textStyle = style === "instagram" || style === "tiktok" || style === "plain" ? style : "";
+  await prisma.asset.create({
+    data: { cardId: id, kind, ...saved, ...(kind === "EDITED" ? { textStyle } : {}) },
+  });
   let transcript = "";
   if (kind === "EDITED") {
     await markCutReady(id);

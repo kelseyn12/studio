@@ -105,7 +105,8 @@ export async function queueCard(cardId: string, when: Date, accountId?: string |
       });
       for (const group of targetsByLook(targets)) {
         try {
-          const asset = pickForLook(card.assets, group.look) ?? finished;
+          const asset = pickForLook(card.assets, group.look);
+          if (!asset) throw new Error("Drop that file first");
           const networks = group.accounts.map((account) => account.network);
           const covers = await shippableCoverUrls(asset, networks);
           const post = await createPost({

@@ -323,6 +323,8 @@
   How many opens that many name boxes. Each card keeps the name you typed. The film day is still shared, and the post time is set later on each video.
 - [X] Finished videos skip the film calendar
   New videos open on Cuts to drop the file. The eight Sitescout videos from Oct 2 were taken off Film days and put there too.
+- [X] A finished drop says which apps it is for
+  Cuts asks IG · FB, TT · YT, or Both before the file lands. Schedule shows that file on its row only, and the other row gets its own drop.
 
 
 

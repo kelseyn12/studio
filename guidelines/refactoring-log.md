@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-10-02 — Dropping a finished video asks IG · FB, TT · YT, or Both. An IG/FB file no longer shows or ships on the TT/YT row. The missing look gets its own drop on Schedule.
 - 2026-10-02 — Approve stays on the video so the cover, caption, accounts, and time can be set. It no longer drops you in the Library first.
 - 2026-10-02 — Finished videos skip Film days. Add videos opens Cuts so each file can be dropped, then the cover, accounts, caption, and time are set on that video.
 - 2026-10-02 — Add videos asks how many, then shows one title box per video. A batch no longer shares one name with a number stuck on the end.

@@ -1,5 +1,7 @@
 import { CoverPick } from "@/components/cover-pick";
+import { FinishedDrop } from "@/components/finished-drop";
 import { LookAccountPicks } from "@/components/look-account-picks";
+import { formatBytes, STUDIO_FILE_MAX_BYTES } from "@/lib/storage";
 import { describeTargets, LOOK_APPS } from "@/lib/targets";
 import { watchUrl } from "@/lib/urls";
 
@@ -21,12 +23,14 @@ type PickAccount = {
 };
 
 export function LiveLooks({
+  cardId,
   rows,
   canCover,
   accounts,
   selectedIds,
 }: {
-  rows: Array<{ look: string; tag: string; accounts: LookAccount[]; asset: LookAsset }>;
+  cardId: string;
+  rows: Array<{ look: string; tag: string; accounts: LookAccount[]; asset?: LookAsset }>;
   canCover: boolean;
   accounts?: PickAccount[];
   selectedIds?: string[];
@@ -45,12 +49,23 @@ export function LiveLooks({
               {row.accounts.length > 0 ? describeTargets(row.accounts) : "Pick the accounts below."}
             </p>
           </div>
-          <a href={watchUrl(row.asset.path)} className="block rounded-xl border border-line px-4 py-3 text-center">
-            Watch {row.asset.filename}
-          </a>
-          {canCover ? (
-            <CoverPick id={row.asset.id} src={watchUrl(row.asset.path)} coverAt={row.asset.coverAt} compact />
-          ) : null}
+          {row.asset ? (
+            <>
+              <a href={watchUrl(row.asset.path)} className="block rounded-xl border border-line px-4 py-3 text-center">
+                Watch {row.asset.filename}
+              </a>
+              {canCover ? (
+                <CoverPick id={row.asset.id} src={watchUrl(row.asset.path)} coverAt={row.asset.coverAt} compact />
+              ) : null}
+            </>
+          ) : (
+            <FinishedDrop
+              cardId={cardId}
+              look={row.look === "tiktok" ? "tiktok" : "instagram"}
+              maxBytes={STUDIO_FILE_MAX_BYTES}
+              sizeLabel={formatBytes(STUDIO_FILE_MAX_BYTES)}
+            />
+          )}
           {accounts ? (
             <LookAccountPicks look={row.look} tag={row.tag} accounts={accounts} selectedIds={selectedIds ?? []} />
           ) : null}
