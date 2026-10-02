@@ -6,6 +6,7 @@
 - `pickNextAction` — `lib/next-action.ts` — chooses the single Today action. Used on `app/page.tsx`.
 - `machineCounts` — `lib/queries.ts` — pipeline and slot totals for Today.
 - `connectUrl` / `authConnectUrl` — `lib/outstand.ts` — the Outstand connect link. Both set `force_account_selection` so Facebook shows every Page, including ones left unchecked last time. Used by `app/api/outstand/connect/route.ts`.
+- `fieldsFromSync` — `lib/account-sync.ts` — what Sync writes on an account. A new account takes Outstand's name. One already in Studio keeps the label you typed. Used by `app/api/outstand/sync/route.ts`.
 - `uploadMedia` — `lib/outstand.ts` — PUT the mp4 (or cover JPEG) into Outstand storage, returns the public URL. `safeUploadName` strips `?` from the title so the signed link stays intact, and `signedPutTarget` sends the whole file with its length.
 - `postBody` / `createPost` — `lib/outstand.ts` — builds the `POST /posts/` body; `options` carries per-network blocks (`instagram`, `youtube`, `tiktok`) and can never override `containers`/`accounts`/`scheduledAt`.
 - `coverOptions`, `postOptions`, `wantsCoverUrl`, `coverMs`, `nextCoverPath`, `coverCanChange` — `lib/post-cover.ts` — turn an asset's `coverPath`/`coverAt` into Outstand cover fields per network. Instagram gets the 9:16 JPEG; YouTube gets a 1280×720 pad of that same frame (`writeYoutubeThumb`). TikTok gets `videoCoverTimestampMs` on DIRECT_POST. Covers always upload through Outstand, not R2.
