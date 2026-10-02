@@ -125,7 +125,7 @@
 - `boxFor` / `setLookBox` / `nextBox` / `boxLabel` — `lib/hook-layout.ts` — TikTok cycles off / black / white. Instagram always returns no box.
 - `posFor` / `setLookPos` — `lib/hook-layout.ts` — each look keeps its own headline spot once you have dragged it. A look you never dragged reads the shared x/y and follows the drag, so arranging in one view does not strand the other look. Tested in `lib/cut.test.ts`.
 - `applyCaptionLines` / `captionLines` — `lib/captions-math.ts` — rewrite spoken phrases and keep their clocks.
-- `CoverPick` — `components/cover-pick.tsx` — pick a still on Live or Multiply Cover. Save keeps the picker open; tap Use this frame instead to overwrite. `coverCanChange` keeps it on READY/REVIEW (including scheduled). `/api/cover` writes `nextCoverPath` and drops the old jpg.
+- `CoverPick` — `components/cover-pick.tsx` — the Thumbnail block on Cut and Schedule, and the compact picker on Multiply. Play to a frame and save. `coverCanChange` keeps it on READY/REVIEW (including scheduled). `/api/cover` writes `nextCoverPath` and drops the old jpg.
 - `nextPanel` — `components/output-tune.tsx` — tap the open panel to close it, tap the other to switch. Words + music stays on the row after Cover saved.
 
 - `addLink` / `deleteLink` — `app/dms/actions.ts` — tracked short links for auto-DMs. Public redirect at `/l/[slug]` counts every click.

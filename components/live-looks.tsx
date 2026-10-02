@@ -55,7 +55,7 @@ export function LiveLooks({
                 Watch {row.asset.filename}
               </a>
               {canCover ? (
-                <CoverPick id={row.asset.id} src={watchUrl(row.asset.path)} coverAt={row.asset.coverAt} compact />
+                <CoverPick id={row.asset.id} src={watchUrl(row.asset.path)} coverAt={row.asset.coverAt} />
               ) : null}
             </>
           ) : (

@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-10-02 — Thumbnail is a labeled player on Cut and on Schedule. It was a tiny “cover” button under the Watch link, so it read as missing.
 - 2026-10-02 — Each named video stays one file. Schedule no longer asks for the other version on the same name. Cuts can delete an empty slot. A TT name starts on the TT · YT drop.
 - 2026-10-02 — Sync no longer replaces the label typed on Accounts. A new account still starts with Outstand's name.
 - 2026-10-02 — Connect facebook asks Meta for every Page again. A Page skipped on the first connect was staying off the available list.

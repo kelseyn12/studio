@@ -1,5 +1,6 @@
 import { attachEditedUrl, finishStage, updateCard } from "@/app/cards/[id]/actions";
 import { CapcutLink } from "@/components/capcut-link";
+import { CoverPick } from "@/components/cover-pick";
 import { FinishedDrop } from "@/components/finished-drop";
 import { EditorNeed } from "@/components/editor-need";
 import { PacketFiles } from "@/components/packet-files";
@@ -27,7 +28,15 @@ export function CardEditorStage({
   };
   editors: Array<{ id: string; name: string; defaultEditor?: boolean }>;
   packet: PacketItem[];
-  files: Array<{ id: string; kind: string; filename: string; path: string; publicUrl: string; textStyle?: string }>;
+  files: Array<{
+    id: string;
+    kind: string;
+    filename: string;
+    path: string;
+    publicUrl: string;
+    textStyle?: string;
+    coverAt?: number;
+  }>;
   edited?: { path: string; publicUrl: string | null };
   desk: boolean;
 }) {
@@ -126,6 +135,18 @@ export function CardEditorStage({
         <input name="editedUrl" placeholder="https://…/export.mp4" className="field" />
         <button className="rounded-xl border border-line px-4 py-2 text-sm">Attach URL</button>
       </form>
+      {files
+        .filter((file) => file.kind === "EDITED")
+        .map((file) => (
+          <section key={file.id} className="rounded-card border border-line bg-panel p-5">
+            <CoverPick
+              id={file.id}
+              src={watchUrl(file.path)}
+              coverAt={file.coverAt}
+              detail={file.textStyle === "tiktok" ? "TT · YT" : file.textStyle === "instagram" ? "IG · FB" : "Every app"}
+            />
+          </section>
+        ))}
       {edited ? (
         <a
           href={watchUrl(edited.path)}

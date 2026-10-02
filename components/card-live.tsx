@@ -118,7 +118,7 @@ export function CardLive({
         <>
           <form action={approveCut} className="rounded-card border border-line bg-panel p-5">
             <input type="hidden" name="id" value={card.id} />
-            <p className="text-sm text-mute">Approve stays on this video. Then set the cover, caption, accounts, and time below.</p>
+            <p className="text-sm text-mute">Approve stays on this video. Then set the thumbnail, caption, accounts, and time below.</p>
             <button className="mt-3 w-full rounded-xl bg-sun px-4 py-3 font-semibold text-ink">Approve</button>
           </form>
           <form action={requestChanges} className="space-y-3 rounded-card border border-line bg-panel p-5">

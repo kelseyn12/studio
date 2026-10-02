@@ -7,11 +7,13 @@ export function CoverPick({
   src,
   coverAt = 0,
   compact = false,
+  detail,
 }: {
   id: string;
   src: string;
   coverAt?: number;
   compact?: boolean;
+  detail?: string;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [busy, setBusy] = useState(false);
@@ -51,12 +53,18 @@ export function CoverPick({
 
   return (
     <div className="space-y-2">
+      {compact ? null : (
+        <div className="flex items-baseline justify-between gap-2">
+          <h3 className="font-semibold">Thumbnail</h3>
+          {detail ? <p className="text-xs text-mute">{detail}</p> : null}
+        </div>
+      )}
       <video
         ref={videoRef}
         src={src}
         controls
         playsInline
-        className={compact ? "aspect-[9/16] w-36 rounded-lg bg-ink" : "w-full rounded-xl bg-ink"}
+        className={compact ? "aspect-[9/16] w-36 rounded-lg bg-ink" : "aspect-[9/16] w-full max-w-xs rounded-xl bg-ink"}
       />
       <button
         type="button"
@@ -65,15 +73,15 @@ export function CoverPick({
         className={
           compact
             ? "rounded-lg border border-line px-2 py-1 text-xs disabled:opacity-60"
-            : "w-full rounded-xl border border-line px-3 py-2 text-sm disabled:opacity-60"
+            : "rounded-xl border border-line px-3 py-2 text-sm disabled:opacity-60"
         }
       >
-        {busy ? "Saving…" : savedAt != null ? "Use this frame instead" : "Use this frame as the cover"}
+        {busy ? "Saving…" : savedAt != null ? "Use this frame instead" : "Save this frame as the thumbnail"}
       </button>
       <p className="text-xs text-mute">
         {savedAt != null
-          ? "Saved. Wrong frame? Play to a new one and tap again."
-          : "Play to the frame with the hook, then save. That picture is the cover on Instagram, TikTok, and YouTube."}
+          ? "Saved. Wrong picture? Play to a new frame and tap again."
+          : "Play to the picture you want people to see, then save. That thumbnail shows on Instagram, TikTok, and YouTube."}
       </p>
       {error ? <p className="text-xs text-review">{error}</p> : null}
     </div>

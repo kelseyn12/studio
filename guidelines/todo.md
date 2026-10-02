@@ -327,6 +327,8 @@
   Cuts asks IG · FB, TT · YT, or Both before the file lands. Schedule shows that file on its row only, and the other row gets its own drop.
 - [X] Facebook connect asks for every Page again
   A Page left unchecked the first time stayed off the available list. Connect facebook now makes Meta show that list again.
+- [X] Thumbnail is visible on Cut and Schedule
+  The frame picker was a tiny player labeled cover, under Watch, and only on Schedule. Cut and Schedule now show a Thumbnail heading and Save this frame as the thumbnail.
 - [X] One name is one video
   Schedule no longer offers a second drop on the same name. Cuts has Delete. A TT title starts on the TT · YT drop. Library rows say IG · FB or TT · YT.
 - [X] Account labels survive Sync

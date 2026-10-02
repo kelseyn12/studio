@@ -29,7 +29,7 @@ export default async function NewCardPage() {
   return (
     <Shell>
       <h1 className="mb-2 text-3xl font-semibold tracking-tight">Add videos</h1>
-      <p className="mb-6 text-mute">Name each one. Next you drop the finished file, then set the cover, accounts, caption, and time.</p>
+      <p className="mb-6 text-mute">Name each one. Next you drop the finished file, then set the thumbnail, accounts, caption, and time.</p>
       <NewVideosForm
         action={createCard}
         deals={campaigns.map((campaign) => ({

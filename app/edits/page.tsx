@@ -28,7 +28,7 @@ export default async function EditsPage() {
       <p className="mt-2 mb-2 max-w-2xl text-mute">
         {user.role === "EDITOR"
           ? "Jobs show up here when she sends them. Watch here. Drop the finished video here when you are done — it goes to To approve for her."
-          : "Each name is its own video. Drop one file and pick IG · FB or TT · YT. Then set the cover, accounts, caption, and time. The other version is the other name."}
+          : "Each name is its own video. Drop one file and pick IG · FB or TT · YT. Then pick the thumbnail, accounts, caption, and time. The other version is the other name."}
       </p>
       <div className="mb-6">
         <LiveRefresh />
@@ -105,7 +105,7 @@ function Bucket({
                     {dropFile
                       ? "Drop one file. Pick IG · FB or TT · YT."
                       : schedule
-                        ? "Set the cover, accounts, caption, and time."
+                        ? "Set the thumbnail, accounts, caption, and time."}
                         : packetReady(packet)
                           ? "Files are ready. Cut it."
                           : "Still missing files."}
