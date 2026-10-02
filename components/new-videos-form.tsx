@@ -28,6 +28,7 @@ export function NewVideosForm({
       </select>
       <label>
         <span className="label">Film day</span>
+        <span className="mb-1 block text-xs font-normal text-mute">Leave blank. This is only for videos you still have to film.</span>
         <input name="plannedDate" type="date" className="field" />
       </label>
       <label>

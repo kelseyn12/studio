@@ -30,24 +30,32 @@ export function CardEditorStage({
   desk: boolean;
 }) {
   const self = card.cutBy === "SELF" && !desk;
+  const hasSources =
+    Boolean(card.rawsUrl.trim()) ||
+    files.some((file) => file.kind === "RAW" || file.kind === "VOICE" || file.kind === "REFERENCE");
+  const dropOnly = self && !hasSources;
   return (
     <div className="space-y-4">
       <section className="rounded-card border border-line bg-panel p-5">
-        <h2 className="mb-1 font-semibold">{self ? "You cut this" : desk ? "Your job" : "Files for the editor"}</h2>
+        <h2 className="mb-1 font-semibold">
+          {dropOnly ? "Drop the finished video" : self ? "You cut this" : desk ? "Your job" : "Files for the editor"}
+        </h2>
         <p className="mb-3 text-sm text-mute">
-          {self
-            ? "Download if you need the clips. Cut the finished video. Drop it below."
-            : desk
-              ? "Download the files, cut the finished video, drop it here or paste a direct mp4 link."
-              : "Send only if someone else cuts this. I’ll cut this is on Clips."}
+          {dropOnly
+            ? "This one is already edited. Drop the file below."
+            : self
+              ? "Download if you need the clips. Cut the finished video. Drop it below."
+              : desk
+                ? "Download the files, cut the finished video, drop it here or paste a direct mp4 link."
+                : "Send only if someone else cuts this. I’ll cut this is on Clips."}
         </p>
         {desk && card.editorNote ? (
           <p className="mb-3 rounded-xl bg-lift px-4 py-3 text-sm">{card.editorNote}</p>
         ) : null}
         {desk ? <CapcutLink url={card.capcutUrl} editable={false} /> : null}
-        <EditorNeed items={packet} />
+        {dropOnly ? null : <EditorNeed items={packet} />}
       </section>
-      <PacketFiles rawsUrl={card.rawsUrl} files={files} />
+      {dropOnly ? null : <PacketFiles rawsUrl={card.rawsUrl} files={files} />}
       {self || desk ? null : (
         <form action={finishStage.bind(null, "editor")} className="space-y-3">
           <input type="hidden" name="id" value={card.id} />

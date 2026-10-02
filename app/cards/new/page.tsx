@@ -17,11 +17,11 @@ async function createCard(formData: FormData) {
   const created = await Promise.all(
     titles.map((title) =>
       prisma.card.create({
-        data: { title, campaignId, plannedDate: planned, createdById: user.id },
+        data: { title, campaignId, plannedDate: planned, createdById: user.id, status: "FILMED", cutBy: "SELF" },
       }),
     ),
   );
-  redirect(created.length === 1 ? `/cards/${created[0].id}?step=brief` : "/plan");
+  redirect(created.length === 1 ? `/cards/${created[0].id}?step=editor` : "/edits");
 }
 
 export default async function NewCardPage() {
@@ -29,7 +29,7 @@ export default async function NewCardPage() {
   return (
     <Shell>
       <h1 className="mb-2 text-3xl font-semibold tracking-tight">Add videos</h1>
-      <p className="mb-6 text-mute">Pick how many. Name each one. The date is when you film, not when they post.</p>
+      <p className="mb-6 text-mute">Name each one. Next you drop the finished file, then set the cover, accounts, caption, and time.</p>
       <NewVideosForm
         action={createCard}
         deals={campaigns.map((campaign) => ({
