@@ -1,5 +1,6 @@
 # Glossary
 
+- `titlesForCount` / `videoTitles` — `lib/new-videos.ts` — How many on Add videos opens that many title boxes and keeps names already typed. `videoTitles` is what gets saved, blanks dropped, 40 max. Used by `components/new-videos-form.tsx` and `app/cards/new/page.tsx`.
 - `isStalePosted` / `supersededGeneratedIds` / `staleFinishedIds` / `batchClipsAreStale` — `lib/keep.ts` — what files a volume studio can drop. Tested in `lib/keep.test.ts`.
 - `dropSuperseded` / `sweepStale` — `lib/sweep.ts` — deletes those files from R2 and the rows. Editor cut calls `dropSuperseded`; Library Free space runs `sweepStale`.
 - `pickNextAction` — `lib/next-action.ts` — chooses the single Today action. Used on `app/page.tsx`.

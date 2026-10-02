@@ -319,6 +319,8 @@
   The pull was looking for a views field Outstand does not send. It now reads the totals, and a saved YouTube link adds a Studio upload.
 - [X] CapCut link on the editor job
   Paste a CapCut Teams link with the editor note. Open in CapCut jumps there. The finished file still drops back here.
+- [X] Add videos asks for a title per video
+  How many opens that many name boxes. Each card keeps the name you typed. The film day is still shared, and the post time is set later on each video.
 
 
 

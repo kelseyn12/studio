@@ -1,25 +1,23 @@
 import { redirect } from "next/navigation";
+import { NewVideosForm } from "@/components/new-videos-form";
 import { Shell } from "@/components/shell";
 import { requireUser } from "@/lib/auth";
 import { parseLocalDate } from "@/lib/dates";
+import { DEAL_KIND_LABEL } from "@/lib/deal-kind";
+import { videoTitles } from "@/lib/new-videos";
 import { prisma } from "@/lib/prisma";
 
 async function createCard(formData: FormData) {
   "use server";
   const user = await requireUser();
-  const count = Number(formData.get("count") || 1);
+  const titles = videoTitles(formData.getAll("title").map(String));
+  if (!titles.length) redirect("/cards/new");
   const campaignId = String(formData.get("campaignId") || "") || null;
-  const title = String(formData.get("title") || "Untitled");
   const planned = formData.get("plannedDate") ? parseLocalDate(String(formData.get("plannedDate"))) : null;
   const created = await Promise.all(
-    Array.from({ length: Math.min(count, 40) }, (_, index) =>
+    titles.map((title) =>
       prisma.card.create({
-        data: {
-          title: count > 1 ? `${title} ${index + 1}` : title,
-          campaignId,
-          plannedDate: planned,
-          createdById: user.id,
-        },
+        data: { title, campaignId, plannedDate: planned, createdById: user.id },
       }),
     ),
   );
@@ -28,28 +26,17 @@ async function createCard(formData: FormData) {
 
 export default async function NewCardPage() {
   const campaigns = await prisma.campaign.findMany({ orderBy: { name: "asc" } });
-  const { DEAL_KIND_LABEL } = await import("@/lib/deal-kind");
   return (
     <Shell>
-      <h1 className="mb-2 text-3xl font-semibold tracking-tight">Add a video</h1>
-      <p className="mb-6 text-mute">Name it. Pick the deal. Write the script next.</p>
-      <form action={createCard} className="grid max-w-xl gap-4">
-        <input name="title" required placeholder="Title" className="field" />
-        <input name="plannedDate" type="date" className="field" />
-        <select name="campaignId" className="field">
-          <option value="">Personal — no deal</option>
-          {campaigns.map((campaign) => (
-            <option key={campaign.id} value={campaign.id}>
-              {DEAL_KIND_LABEL[campaign.kind]} · {campaign.brand || campaign.name}
-            </option>
-          ))}
-        </select>
-        <label>
-          <span className="label">How many</span>
-          <input name="count" type="number" defaultValue={1} min={1} max={40} className="field" />
-        </label>
-        <button className="rounded-xl bg-sun px-4 py-3 font-semibold text-ink">Create video</button>
-      </form>
+      <h1 className="mb-2 text-3xl font-semibold tracking-tight">Add videos</h1>
+      <p className="mb-6 text-mute">Pick how many. Name each one. The date is when you film, not when they post.</p>
+      <NewVideosForm
+        action={createCard}
+        deals={campaigns.map((campaign) => ({
+          id: campaign.id,
+          label: `${DEAL_KIND_LABEL[campaign.kind]} · ${campaign.brand || campaign.name}`,
+        }))}
+      />
     </Shell>
   );
 }
