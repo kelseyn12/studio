@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-10-02 — Approve stays on the video so the cover, caption, accounts, and time can be set. It no longer drops you in the Library first.
 - 2026-10-02 — Finished videos skip Film days. Add videos opens Cuts so each file can be dropped, then the cover, accounts, caption, and time are set on that video.
 - 2026-10-02 — Add videos asks how many, then shows one title box per video. A batch no longer shares one name with a number stuck on the end.
 - 2026-09-30 — Sign-in shows YouTube and links to Privacy and Terms, and `/terms` is public, so the YouTube app check has screenshots it can open.

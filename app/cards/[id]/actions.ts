@@ -105,7 +105,7 @@ export async function approveCut(formData: FormData) {
   revalidatePath("/edits");
   revalidatePath("/library");
   revalidatePath("/");
-  redirect("/library");
+  redirect(`/cards/${id}?step=live`);
 }
 
 export async function sendForTouchUp(formData: FormData) {
