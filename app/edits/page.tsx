@@ -105,7 +105,7 @@ function Bucket({
                     {dropFile
                       ? "Drop one file. Pick IG · FB or TT · YT."
                       : schedule
-                        ? "Set the thumbnail, accounts, caption, and time."}
+                        ? "Set the thumbnail, accounts, caption, and time."
                         : packetReady(packet)
                           ? "Files are ready. Cut it."
                           : "Still missing files."}
