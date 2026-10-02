@@ -2,7 +2,7 @@
 
 import { deleteVideo } from "@/app/cards/[id]/actions";
 
-export function DeleteVideoButton({ id }: { id: string }) {
+export function DeleteVideoButton({ id, back, label = "Delete this video" }: { id: string; back?: string; label?: string }) {
   return (
     <form
       action={deleteVideo}
@@ -11,7 +11,8 @@ export function DeleteVideoButton({ id }: { id: string }) {
       }}
     >
       <input type="hidden" name="id" value={id} />
-      <button className="text-sm text-mute">Delete this video</button>
+      {back ? <input type="hidden" name="next" value={back} /> : null}
+      <button className="text-sm text-mute">{label}</button>
     </form>
   );
 }

@@ -72,7 +72,15 @@ function looksOnFiles(assets: Array<{ kind: string; textStyle: string }>): Drawn
   return LOOK_ORDER.filter((look) => have.has(look));
 }
 
-/** One row per file look — both mixes show even before you pick accounts. */
+/** TT reaction and Tier list TT start on the TT · YT drop. Everything else starts on IG · FB. */
+export function lookForNewDrop(title: string): "instagram" | "tiktok" {
+  return /\btt\b/i.test(title) && !/\big\b/i.test(title) ? "tiktok" : "instagram";
+}
+
+/**
+ * One row per file already on this video. An IG-only upload does not grow a TT drop —
+ * that other version is its own video. A file marked both still fills every account look.
+ */
 export function shipLooks<
   A extends { kind: string; createdAt: Date; textStyle: string },
   T extends { network: string },
@@ -81,9 +89,9 @@ export function shipLooks<
   if (!finished) return [];
   const groups = targetsByLook(targets);
   const byLook = new Map(groups.map((group) => [group.look, group.accounts]));
-  const wanted = new Set<DrawnStyle>([...looksOnFiles(assets), ...groups.map((group) => group.look)]);
-  const show = LOOK_ORDER.filter((look) => wanted.has(look));
-  return (show.length > 0 ? show : (["plain"] as DrawnStyle[])).map((look) => ({
+  const onFiles = looksOnFiles(assets);
+  const show = onFiles.length > 0 ? onFiles : groups.length > 0 ? groups.map((group) => group.look) : (["plain"] as DrawnStyle[]);
+  return show.map((look) => ({
     look,
     tag: LOOK_TAG[look] || "All apps",
     accounts: byLook.get(look) ?? [],

@@ -19,6 +19,7 @@ export function LibraryFile({
     path: string;
     mime: string;
     size: number;
+    textStyle?: string;
     publicUrl: string | null;
     coverPath?: string;
     card: {
@@ -32,6 +33,7 @@ export function LibraryFile({
   liveLabel?: string;
   pick?: ReactNode;
 }) {
+  const look = asset.textStyle === "instagram" ? "IG · FB" : asset.textStyle === "tiktok" ? "TT · YT" : "";
   const href = watchUrl(asset.path);
   const audio = asset.mime.startsWith("audio");
   const video = asset.mime.startsWith("video");
@@ -51,7 +53,8 @@ export function LibraryFile({
         <div>
           <p className="font-medium">{asset.card.title}</p>
           <p className="text-sm text-mute">
-            {asset.card.campaign?.name ?? "No deal"} · {asset.filename} · {formatBytes(asset.size)}
+            {asset.card.campaign?.name ?? "No deal"}
+            {look ? ` · ${look}` : ""} · {asset.filename} · {formatBytes(asset.size)}
           </p>
         </div>
         <StatusPill status={asset.card.status} label={libraryMark(asset.card.status, asset.card.scheduledAt)} />

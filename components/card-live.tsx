@@ -154,7 +154,7 @@ export function CardLive({
       <form action={scheduleCard} className="space-y-3">
         <input type="hidden" name="id" value={card.id} />
         <p className="text-sm text-mute">
-          Each mix is labeled IG / FB or TT / YT. Check every account that mix should go to — you can pick more than one.
+          This video only posts the file you dropped. Check the accounts for that version. The other version is the other name.
         </p>
         <LiveLooks
           cardId={card.id}

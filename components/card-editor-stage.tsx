@@ -3,6 +3,7 @@ import { CapcutLink } from "@/components/capcut-link";
 import { FinishedDrop } from "@/components/finished-drop";
 import { EditorNeed } from "@/components/editor-need";
 import { PacketFiles } from "@/components/packet-files";
+import { lookForNewDrop } from "@/lib/card-desk";
 import type { PacketItem } from "@/lib/editor-packet";
 import { formatBytes, STUDIO_FILE_MAX_BYTES } from "@/lib/storage";
 import { watchUrl } from "@/lib/urls";
@@ -17,6 +18,7 @@ export function CardEditorStage({
 }: {
   card: {
     id: string;
+    title: string;
     editorId: string | null;
     editorNote: string;
     capcutUrl: string;
@@ -31,12 +33,11 @@ export function CardEditorStage({
 }) {
   const self = card.cutBy === "SELF" && !desk;
   const editedLooks = files.filter((file) => file.kind === "EDITED").map((file) => file.textStyle);
-  const defaultLook =
-    editedLooks.includes("instagram") && !editedLooks.includes("tiktok")
-      ? "tiktok"
-      : editedLooks.includes("tiktok") && !editedLooks.includes("instagram")
-        ? "instagram"
-        : "instagram";
+  const defaultLook = editedLooks.includes("tiktok") && !editedLooks.includes("instagram")
+    ? "tiktok"
+    : editedLooks.includes("instagram")
+      ? "instagram"
+      : lookForNewDrop(card.title);
   const hasSources =
     Boolean(card.rawsUrl.trim()) ||
     files.some((file) => file.kind === "RAW" || file.kind === "VOICE" || file.kind === "REFERENCE");

@@ -217,5 +217,6 @@ export async function deleteVideo(formData: FormData) {
   revalidatePath("/edits");
   revalidatePath("/library");
   revalidatePath("/");
-  redirect("/plan");
+  const next = String(formData.get("next") || "");
+  redirect(next === "/edits" || next === "/library" ? next : "/plan");
 }

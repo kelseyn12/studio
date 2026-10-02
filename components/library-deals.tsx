@@ -10,6 +10,7 @@ type FinishedAsset = {
   path: string;
   mime: string;
   size: number;
+  textStyle?: string;
   publicUrl: string | null;
   coverPath?: string;
   card: {

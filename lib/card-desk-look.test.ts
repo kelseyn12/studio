@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fileLooks, pickForLook, shipLooks } from "@/lib/card-desk";
+import { fileLooks, lookForNewDrop, pickForLook, shipLooks } from "@/lib/card-desk";
 import { hookLooks } from "@/lib/text-style";
 
 const at = (minutes: number) => new Date(2026, 8, 26, 12, minutes);
@@ -57,15 +57,21 @@ describe("shipLooks", () => {
     expect(shipLooks(generated, []).map((row) => row.tag)).toEqual(["IG · FB", "TT · YT"]);
   });
 
-  it("asks for the TT/YT file when only IG/FB was uploaded", () => {
+  it("keeps an IG-only upload on the IG row", () => {
     const rows = shipLooks([{ id: "ig", kind: "EDITED", textStyle: "instagram", createdAt: at(1) }], [
       { network: "instagram" },
       { network: "tiktok" },
     ]);
-    expect(rows.map((row) => [row.tag, row.asset?.id])).toEqual([
-      ["IG · FB", "ig"],
-      ["TT · YT", undefined],
-    ]);
+    expect(rows.map((row) => [row.tag, row.asset?.id])).toEqual([["IG · FB", "ig"]]);
+  });
+});
+
+describe("lookForNewDrop", () => {
+  it("starts a TT name on TT · YT and an IG name on IG · FB", () => {
+    expect(lookForNewDrop("TT reaction 2 10/2")).toBe("tiktok");
+    expect(lookForNewDrop("Tier list TT 10/2")).toBe("tiktok");
+    expect(lookForNewDrop("IG reaction 2 10/2")).toBe("instagram");
+    expect(lookForNewDrop("Tier list IG 10/2")).toBe("instagram");
   });
 });
 

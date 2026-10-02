@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-10-02 — Each named video stays one file. Schedule no longer asks for the other version on the same name. Cuts can delete an empty slot. A TT name starts on the TT · YT drop.
 - 2026-10-02 — Sync no longer replaces the label typed on Accounts. A new account still starts with Outstand's name.
 - 2026-10-02 — Connect facebook asks Meta for every Page again. A Page skipped on the first connect was staying off the available list.
 - 2026-10-02 — Dropping a finished video asks IG · FB, TT · YT, or Both. An IG/FB file no longer shows or ships on the TT/YT row. The missing look gets its own drop on Schedule.

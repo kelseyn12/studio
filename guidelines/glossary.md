@@ -77,7 +77,7 @@
 - `SelectDeleteBar` / `usePicked` / `PickBox` — `components/select-videos.tsx` — checkbox selection + confirm-before-delete toolbar.
 - `hookLooks` / `looksForNetworks` — `lib/text-style.ts` — which looks to render for one Multiply output (`both` always Instagram + TikTok; `auto` does the same when the deal spans those looks) / distinct looks a set of accounts needs. Tested in `lib/card-desk-look.test.ts` and `lib/text-style.test.ts`.
 - `targetsByLook` — `lib/targets.ts` — groups a video's target accounts by app look so each look's file posts to its own accounts. Used by `queueCard`.
-- `pickForLook` — `lib/card-desk.ts` — file for one look. Newest EDITED tagged for that look, else an EDITED file marked both (or with no look), else a GENERATED file for that look. An IG/FB upload does not fill TT/YT.
+- `pickForLook` / `lookForNewDrop` / `shipLooks` — `lib/card-desk.ts` — `pickForLook` is the file for one look. An IG/FB upload does not fill TT/YT. `lookForNewDrop` starts a TT title on TT · YT. `shipLooks` lists only looks that already have a file, so the other version stays its own video.
 - `postIdsFor` — `lib/analytics.ts` — distinct Outstand post ids behind a video (card + publish jobs); analytics sync sums them.
 - `targetAccounts` / `dealAccounts` / `parseAccountIds` / `describeTargets` / `networkShort` / `accountsForLook` / `LOOK_APPS` — `lib/targets.ts` — checked Mix/Live ids win, else the deal list. `accountsForLook` keeps IG with FB and TT with YT. Mix cards use `LOOK_APPS` pills.
 - `watchUrl` / `isPublicMediaUrl` — `lib/urls.ts` / `lib/r2.ts` — in-app play/download always goes through `/api/files`. S3 API hosts (`*.r2.cloudflarestorage.com`) are not treated as public.
