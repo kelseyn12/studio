@@ -68,7 +68,22 @@ export function connectUrl(network: string, redirectUri: string): string {
   if (!orgId) throw new Error("Add OUTSTAND_ORG_ID to .env");
   const url = new URL(`https://www.outstand.so/app/api/socials/${network}/${orgId}`);
   url.searchParams.set("redirect_uri", redirectUri);
+  url.searchParams.set("force_account_selection", "true");
   return url.toString();
+}
+
+/** Connect link that makes Facebook show every Page again, including ones skipped last time. */
+export async function authConnectUrl(network: string, redirectUri: string): Promise<string> {
+  const payload = await outstand<{ data?: { auth_url?: string } }>(
+    `/social-networks/${encodeURIComponent(network)}/auth-url`,
+    {
+      method: "POST",
+      body: JSON.stringify({ redirect_uri: redirectUri, force_account_selection: true }),
+    },
+  );
+  const url = payload.data?.auth_url;
+  if (!url) throw new Error("Outstand did not return a connect link");
+  return url;
 }
 
 export async function listAccounts(): Promise<OutstandAccount[]> {

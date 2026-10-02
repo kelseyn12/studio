@@ -15,8 +15,9 @@ export default async function ConnectionsPage() {
     <Shell>
       <h1 className="text-3xl font-semibold tracking-tight">Accounts</h1>
       <p className="mt-1 mb-6 max-w-2xl text-mute">
-        Link TikTok, Instagram, YouTube, and X in Outstand. Then Sync so Studio can post as those accounts. Tap a deal
-        on an account and it saves right away — gold means that&apos;s the one.
+        Link TikTok, Instagram, YouTube, and Facebook in Outstand. Then Sync so Studio can post as those accounts. Tap a
+        deal on an account and it saves right away — gold means that&apos;s the one. Facebook only offers Pages you
+        already allowed. Connect facebook again and check the missing Pages on that screen, then Sync.
       </p>
       <div className="mb-6 flex flex-wrap gap-2">
         <a

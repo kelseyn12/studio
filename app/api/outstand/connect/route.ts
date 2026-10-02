@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { connectUrl, hasOutstand } from "@/lib/outstand";
+import { authConnectUrl, connectUrl, hasOutstand } from "@/lib/outstand";
 import { readSession } from "@/lib/session";
 
 export async function GET(request: Request) {
@@ -10,5 +10,9 @@ export async function GET(request: Request) {
   }
   const network = new URL(request.url).searchParams.get("network") || "instagram";
   const redirectUri = process.env.OUTSTAND_REDIRECT_URI || `${new URL(request.url).origin}/connections/callback`;
-  return NextResponse.redirect(connectUrl(network, redirectUri));
+  try {
+    return NextResponse.redirect(await authConnectUrl(network, redirectUri));
+  } catch {
+    return NextResponse.redirect(connectUrl(network, redirectUri));
+  }
 }
