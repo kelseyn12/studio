@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { addDays, parseLocalDate, startOfDay, timeAlreadyPassed } from "@/lib/dates";
 import { prisma } from "@/lib/prisma";
-import { queueCard } from "@/lib/publish";
+import { ALREADY_SCHEDULED, queueCard } from "@/lib/publish";
 import { readSession } from "@/lib/session";
 
 export const maxDuration = 300;
@@ -28,14 +28,10 @@ export async function POST(request: Request) {
     when.setHours(startHour, 0, 0, 0);
     when.setMinutes(slot * intervalMin);
     if (timeAlreadyPassed(when)) continue;
-    scheduled += 1;
-    const claimed = await prisma.card.updateMany({
-      where: { id: card.id, scheduledAt: null },
-      data: { scheduledAt: when },
-    });
-    if (claimed.count === 0) continue;
     try {
       const result = await queueCard(card.id, when, null);
+      if (!result.ok && result.error === ALREADY_SCHEDULED) continue;
+      scheduled += 1;
       if (result.ok && result.shipped) shipped += 1;
       if (!result.ok) errors.push(`${card.title}: ${result.error}`);
     } catch (error) {

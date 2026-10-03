@@ -1,5 +1,9 @@
 # To-do
 
+- [X] A scheduled video cannot be sent twice
+  Every schedule path claims the day inside `queueCard`. A second press creates no Outstand post.
+  A failed app can still be sent again. The extra Monday queue for the afternoon double was cancelled.
+
 - [X] Scaffold studio app, schema, ADHD shell
   First cut of System Studio is in the repo: pipeline cards, deals, calendars, editor handoff, Outstand hooks.
   Today picks one next action so the creator is not staring at a dashboard.

@@ -14,7 +14,7 @@ import { prisma } from "@/lib/prisma";
 import { markCutReady } from "@/lib/cut-ready";
 import { pingStudio } from "@/lib/manychat";
 import { timeAlreadyPassed } from "@/lib/dates";
-import { queueCard } from "@/lib/publish";
+import { ALREADY_SCHEDULED, queueCard } from "@/lib/publish";
 
 async function saveCard(formData: FormData) {
   await requireUser();
@@ -169,6 +169,10 @@ export async function scheduleCard(formData: FormData) {
     });
   }
   const result = await queueCard(id, when, accountIds.length ? accountIds : accountId);
+  if (!result.ok && result.error === ALREADY_SCHEDULED) {
+    revalidatePath(`/cards/${id}`);
+    redirect("/calendar?ship=taken");
+  }
   try {
     await pingStudio("creator", `Scheduled: ${id}`);
   } catch {

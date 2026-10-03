@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { lookFailure, parkWrite, shouldClearDay } from "@/lib/publish";
+import { accountsToSend, lookFailure, parkWrite, shouldClearDay } from "@/lib/publish";
 
 describe("lookFailure", () => {
   it("names the video that Outstand refused", () => {
@@ -45,5 +45,62 @@ describe("parkWrite", () => {
     });
     expect(patch.status).toBe("POSTED");
     expect(patch.postedAt).toEqual(publishedAt);
+  });
+});
+
+describe("accountsToSend", () => {
+  const earlier = new Date("2026-10-03T17:07:00.000Z");
+  const later = new Date("2026-10-03T17:11:00.000Z");
+
+  it("sends every app the first time, even if an older try was cancelled", () => {
+    expect(
+      accountsToSend(
+        [{ accountId: "ig", status: "CANCELLED", createdAt: earlier }],
+        ["ig", "tt"],
+        true,
+      ),
+    ).toEqual(["ig", "tt"]);
+  });
+
+  it("does not send an app that is already queued or published", () => {
+    expect(
+      accountsToSend(
+        [
+          { accountId: "ig", status: "QUEUED", createdAt: earlier },
+          { accountId: "tt", status: "PUBLISHED", createdAt: earlier },
+        ],
+        ["ig", "tt"],
+        true,
+      ),
+    ).toEqual([]);
+  });
+
+  it("sends nothing when the day is already taken and nothing failed", () => {
+    expect(
+      accountsToSend(
+        [
+          { accountId: "ig", status: "QUEUED", createdAt: earlier },
+          { accountId: "ig", status: "QUEUED", createdAt: later },
+        ],
+        ["ig", "tt"],
+        false,
+      ),
+    ).toEqual([]);
+    expect(accountsToSend([], ["ig", "tt"], false)).toEqual([]);
+  });
+
+  it("sends only the app whose latest try failed", () => {
+    expect(
+      accountsToSend(
+        [
+          { accountId: "ig", status: "FAILED", createdAt: earlier },
+          { accountId: "ig", status: "QUEUED", createdAt: later },
+          { accountId: "tt", status: "PUBLISHED", createdAt: earlier },
+          { accountId: "tt", status: "FAILED", createdAt: later },
+        ],
+        ["ig", "tt", "yt"],
+        false,
+      ),
+    ).toEqual(["tt"]);
   });
 });

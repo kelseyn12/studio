@@ -10,6 +10,30 @@ import type { Asset, CardStatus, SocialAccount } from "@prisma/client";
 
 export type QueueResult = { ok: true; shipped: boolean } | { ok: false; error: string; scheduled: boolean };
 
+export const ALREADY_SCHEDULED = "Already on the calendar";
+
+type ScheduleJob = { accountId: string; status: string; createdAt: Date };
+
+/**
+ * Who may still be sent. A brand-new claim can send apps that are not already queued or published.
+ * Once the day is taken, only an app whose latest try failed can be sent again. A second Schedule
+ * press finds nothing to send.
+ */
+export function accountsToSend(jobs: ScheduleJob[], accountIds: string[], freshClaim: boolean): string[] {
+  const latest = new Map<string, ScheduleJob>();
+  for (const job of jobs) {
+    const prev = latest.get(job.accountId);
+    if (!prev || job.createdAt.getTime() >= prev.createdAt.getTime()) latest.set(job.accountId, job);
+  }
+  if (freshClaim) {
+    return accountIds.filter((id) => {
+      const status = latest.get(id)?.status;
+      return status !== "QUEUED" && status !== "PUBLISHED";
+    });
+  }
+  return accountIds.filter((id) => latest.get(id)?.status === "FAILED");
+}
+
 /**
  * A failed retry must not take the video off its day when another app already published
  * or is still waiting. Only a first attempt that shipped nothing clears the day.
@@ -83,11 +107,28 @@ async function shippableCoverUrls(
  * (IG + TT), each look's file ships to its own accounts as its own Outstand post.
  */
 export async function queueCard(cardId: string, when: Date, accountId?: string | string[] | null): Promise<QueueResult> {
-  const card = await prisma.card.findUnique({ where: { id: cardId }, include: { assets: true } });
+  const card = await prisma.card.findUnique({
+    where: { id: cardId },
+    include: { assets: true, publishes: { select: { accountId: true, status: true, createdAt: true } } },
+  });
   if (!card) return { ok: false, error: "Missing card", scheduled: false };
-  const targets = targetAccounts(await prisma.socialAccount.findMany(), card, accountId);
-  const primary = targets[0] ?? null;
+  const wanted = targetAccounts(await prisma.socialAccount.findMany(), card, accountId);
   const finished = pickFinished(card.assets);
+  if (wanted.length === 0) return { ok: false, error: "Pick an account, or put accounts on this deal", scheduled: false };
+  if (hasOutstand() && !finished) return { ok: false, error: "No video file to ship", scheduled: false };
+  let freshClaim = false;
+  if (!card.scheduledAt) {
+    const claimed = await prisma.card.updateMany({
+      where: { id: cardId, scheduledAt: null },
+      data: { scheduledAt: when },
+    });
+    if (claimed.count === 0) return { ok: false, error: ALREADY_SCHEDULED, scheduled: true };
+    freshClaim = true;
+  }
+  const open = new Set(accountsToSend(card.publishes, wanted.map((account) => account.id), freshClaim));
+  const targets = wanted.filter((account) => open.has(account.id));
+  if (targets.length === 0) return { ok: false, error: ALREADY_SCHEDULED, scheduled: true };
+  const primary = targets[0] ?? null;
 
   const posts: OutstandPost[] = [];
   const failures: Array<{ accountId: string; error: string }> = [];

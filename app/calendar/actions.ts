@@ -6,7 +6,7 @@ import { requireUser } from "@/lib/auth";
 import { youtubeVideoId } from "@/lib/youtube-public";
 import { cancelPost } from "@/lib/outstand";
 import { prisma } from "@/lib/prisma";
-import { queueCard } from "@/lib/publish";
+import { ALREADY_SCHEDULED, queueCard } from "@/lib/publish";
 import { retryAccountIds, youtubeRetryAllowed } from "@/lib/publish-sync";
 import { timeAlreadyPassed } from "@/lib/dates";
 import { canUnschedule, cancelAlreadyGone, postsToCancel } from "@/lib/unschedule";
@@ -31,15 +31,10 @@ export async function parkCard(formData: FormData) {
   const id = String(formData.get("cardId") || "");
   const when = new Date(String(formData.get("scheduledAt") || ""));
   if (!id || timeAlreadyPassed(when)) redirect("/calendar?ship=past");
-  // Claim the video before the slow upload, so a second click cannot send it twice.
-  const claimed = await prisma.card.updateMany({
-    where: { id, scheduledAt: null },
-    data: { scheduledAt: when },
-  });
-  if (claimed.count === 0) redirect("/calendar?ship=taken");
   const result = await queueCard(id, when, null);
   revalidatePath("/calendar");
   revalidatePath(`/cards/${id}`);
+  if (!result.ok && result.error === ALREADY_SCHEDULED) redirect("/calendar?ship=taken");
   if (!result.ok) redirect("/calendar?ship=fail");
 }
 
@@ -81,9 +76,6 @@ export async function retryFailedPost(formData: FormData) {
   const job = failed.find((row) => row.id === jobId);
   const accountIds = retryAccountIds(failed, jobId);
   if (!job || accountIds.length === 0) return;
-  await prisma.publishJob.deleteMany({
-    where: { cardId: job.cardId, status: "FAILED", accountId: { in: accountIds } },
-  });
   const when =
     job.scheduledAt && job.scheduledAt > new Date()
       ? job.scheduledAt
@@ -105,9 +97,6 @@ export async function retryFailedAt(formData: FormData) {
   const accountIds = retryAccountIds(failed, jobId);
   if (!job || accountIds.length === 0 || Number.isNaN(when.getTime())) redirect("/calendar?ship=yt-early");
   if (!youtubeRetryAllowed(job.error, when, job.createdAt)) redirect("/calendar?ship=yt-early");
-  await prisma.publishJob.deleteMany({
-    where: { cardId: job.cardId, status: "FAILED", accountId: { in: accountIds } },
-  });
   const result = await queueCard(job.cardId, when, accountIds);
   const stillPosted = await prisma.publishJob.count({
     where: { cardId: job.cardId, status: "PUBLISHED" },

@@ -4,7 +4,7 @@ import { PaidButton } from "@/components/paid-button";
 import { QuickCut } from "@/components/quick-cut";
 import { ScheduleButton } from "@/components/schedule-button";
 import { pickFinished, shipLooks } from "@/lib/card-desk";
-import { toInputDateTime } from "@/lib/dates";
+import { labelWhen } from "@/lib/dates";
 import { formatMoney } from "@/lib/deals";
 import { coverCanChange } from "@/lib/post-cover";
 import { dealAccounts, describeTargets, handle, parseAccountIds, targetAccounts } from "@/lib/targets";
@@ -195,17 +195,15 @@ export function CardLive({
         )}
         {card.status === "POSTED" || card.status === "DATA" ? (
           <p className="text-sm font-semibold text-live">Posted{posted ? ` · ${posted}` : ""}</p>
+        ) : card.scheduledAt ? (
+          <p className="text-sm">
+            Already set for {labelWhen(card.scheduledAt)}. It will not send again. Cancel it on Live to pick a new time.
+          </p>
         ) : (
           <>
             <label className="block text-sm">
               When it posts
-              <input
-                name="scheduledAt"
-                type="datetime-local"
-                defaultValue={card.scheduledAt ? toInputDateTime(card.scheduledAt) : ""}
-                className="field mt-2"
-                required
-              />
+              <input name="scheduledAt" type="datetime-local" className="field mt-2" required />
             </label>
             <ScheduleButton label="Schedule" className="w-full rounded-xl border border-line px-4 py-3 font-semibold" />
           </>

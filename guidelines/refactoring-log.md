@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-10-03 — A video can only be scheduled once. `queueCard` claims the day, and a second press sends nothing unless that app's latest try failed. The video page hides Schedule once a time is set.
 - 2026-10-03 — Today no longer reloads itself every few seconds. Clicks were waiting behind that reload. Clerk is remembered between clicks, and Today's counts load together.
 - 2026-10-03 — Pages open without waiting on Outstand. Schedule uploads a clean file instead of re-encoding it. New builds use the veryfast encoder.
 - 2026-10-03 — Spoken captions use the native Words stroke (IG 4, TT 5) instead of the thicker CapCut outline. A day or clock that already passed cannot be scheduled, so an old Sunday cannot publish a pile at once.
