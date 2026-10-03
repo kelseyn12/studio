@@ -13,6 +13,7 @@ import type { PipelineStatus } from "@/lib/pipeline";
 import { prisma } from "@/lib/prisma";
 import { markCutReady } from "@/lib/cut-ready";
 import { pingStudio } from "@/lib/manychat";
+import { timeAlreadyPassed } from "@/lib/dates";
 import { queueCard } from "@/lib/publish";
 
 async function saveCard(formData: FormData) {
@@ -155,6 +156,7 @@ export async function scheduleCard(formData: FormData) {
   await requireUser();
   const id = String(formData.get("id"));
   const when = formData.get("scheduledAt") ? new Date(String(formData.get("scheduledAt"))) : new Date();
+  if (timeAlreadyPassed(when)) redirect("/calendar?ship=past");
   const accountIds = formData.getAll("accountIds").map(String).filter(Boolean);
   const accountId = accountIds[0] || String(formData.get("accountId") || "") || null;
   if (formData.has("caption")) {

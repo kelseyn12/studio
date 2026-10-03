@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-10-03 — Spoken captions use the native Words stroke (IG 4, TT 5) instead of the thicker CapCut outline. A day or clock that already passed cannot be scheduled, so an old Sunday cannot publish a pile at once.
 - 2026-10-03 — The song slider moves in small steps instead of four snaps. The batch count says stories, then two files when IG and TikTok both get a copy.
 - 2026-10-03 — Multiply has a song-volume slider. Every step keeps the voice full and the song under it.
 - 2026-10-03 — Multiply was burying the voice under the song and stitching a CTA into the middle. The song now stays under the voice, and Generate stops when Bodies and a CTA are the same recording.

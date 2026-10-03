@@ -8,11 +8,11 @@ import { hookFontFamily, hookFontsDir } from "@/lib/hook-font-files";
 import { FRAME_H, FRAME_W } from "@/lib/list-layout";
 import type { DrawnStyle } from "@/lib/text-style";
 
-/** CapCut auto-captions: white + black outline, lower third. IG is tighter stroke; TT is fatter. */
+/** Native auto-captions: white + black outline, lower third. Same stroke as unboxed Words. */
 export const CAPTION_METRICS: Record<DrawnStyle, { fontsize: number; y: number; outline: number }> = {
-  tiktok: { fontsize: 64, y: 0.7, outline: 9 },
-  instagram: { fontsize: 58, y: 0.72, outline: 7 },
-  plain: { fontsize: 62, y: 0.7, outline: 8 },
+  tiktok: { fontsize: 64, y: 0.7, outline: 5 },
+  instagram: { fontsize: 58, y: 0.72, outline: 4 },
+  plain: { fontsize: 62, y: 0.7, outline: 5 },
 };
 
 function shifted(phrase: CaptionPhrase, trimStart: number): { start: number; end: number } | null {

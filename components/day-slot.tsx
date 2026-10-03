@@ -4,7 +4,7 @@ import { useState } from "react";
 import { parkCard } from "@/app/calendar/actions";
 import { ScheduleButton } from "@/components/schedule-button";
 import { useDayPicks } from "@/components/day-picks";
-import { nextSlotTime } from "@/lib/dates";
+import { openSlotTime, parseLocalDate } from "@/lib/dates";
 
 export function DaySlot({
   isoDay,
@@ -19,19 +19,29 @@ export function DaySlot({
 }) {
   const [round, setRound] = useState(0);
   if (waiting.length === 0 && scheduled.length === 0) return null;
+  const day = parseLocalDate(isoDay);
+  const first = openSlotTime(day, taken);
+  if (!first) {
+    if (waiting.length === 0) return null;
+    return <p className="mt-3 text-[11px] text-mute">This day already happened.</p>;
+  }
   return (
     <>
-      {Array.from({ length: round + 1 }, (_, index) => (
-        <SlotForm
-          key={index}
-          isoDay={isoDay}
-          waiting={waiting}
-          scheduled={scheduled}
-          defaultTime={nextSlotTime(taken + index)}
-          hidden={index < round}
-          onStart={() => setRound((current) => (current === index ? index + 1 : current))}
-        />
-      ))}
+      {Array.from({ length: round + 1 }, (_, index) => {
+        const time = openSlotTime(day, taken + index);
+        if (!time) return null;
+        return (
+          <SlotForm
+            key={time}
+            isoDay={isoDay}
+            waiting={waiting}
+            scheduled={scheduled}
+            defaultTime={time}
+            hidden={index < round}
+            onStart={() => setRound((current) => (current === index ? index + 1 : current))}
+          />
+        );
+      })}
     </>
   );
 }

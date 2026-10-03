@@ -8,6 +8,7 @@ import { cancelPost } from "@/lib/outstand";
 import { prisma } from "@/lib/prisma";
 import { queueCard } from "@/lib/publish";
 import { retryAccountIds, youtubeRetryAllowed } from "@/lib/publish-sync";
+import { timeAlreadyPassed } from "@/lib/dates";
 import { canUnschedule, cancelAlreadyGone, postsToCancel } from "@/lib/unschedule";
 
 const RETRY_DELAY_MS = 5 * 60 * 1000;
@@ -29,7 +30,7 @@ export async function parkCard(formData: FormData) {
   await requireUser();
   const id = String(formData.get("cardId") || "");
   const when = new Date(String(formData.get("scheduledAt") || ""));
-  if (!id || Number.isNaN(when.getTime())) return;
+  if (!id || timeAlreadyPassed(when)) redirect("/calendar?ship=past");
   // Claim the video before the slow upload, so a second click cannot send it twice.
   const claimed = await prisma.card.updateMany({
     where: { id, scheduledAt: null },

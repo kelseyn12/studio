@@ -39,12 +39,51 @@ export function labelDay(date: Date): string {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
-const SLOT_TIMES = ["10:00", "15:00", "18:00"];
+const SLOT_MINUTES = [10 * 60, 15 * 60, 18 * 60];
 
-/** Next open clock time on a day that already has `already` videos. */
+function clockLabel(minutes: number): string {
+  const hour = Math.floor(minutes / 60);
+  const minute = minutes % 60;
+  return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+}
+
+/** Minutes from midnight. The first three stay 10:00, 3:00, and 6:00. Later videos step forward an hour. */
+export function slotMinutes(already: number): number {
+  const index = Math.max(0, already);
+  if (index < SLOT_MINUTES.length) return SLOT_MINUTES[index];
+  const extra = index - (SLOT_MINUTES.length - 1);
+  return Math.min(23 * 60 + 45, SLOT_MINUTES[SLOT_MINUTES.length - 1] + extra * 60);
+}
+
+/** Next open clock time on a day that already has `already` videos. Never repeats the last time. */
 export function nextSlotTime(already: number): string {
-  const index = Math.min(Math.max(already, 0), SLOT_TIMES.length - 1);
-  return SLOT_TIMES[index];
+  return clockLabel(slotMinutes(already));
+}
+
+export function clockOnDay(day: Date, clock: string): Date {
+  const [hour, minute] = clock.split(":").map(Number);
+  const when = startOfDay(day);
+  when.setHours(hour || 0, minute || 0, 0, 0);
+  return when;
+}
+
+/**
+ * A clock still ahead of now. A day that already ended has none.
+ * Today skips 10:00 once that hour has passed, and a later video never shares the previous clock.
+ */
+export function openSlotTime(day: Date, already: number, now = new Date()): string | null {
+  if (startOfDay(day).getTime() < startOfDay(now).getTime()) return null;
+  const futureDay = startOfDay(day).getTime() > startOfDay(now).getTime();
+  for (let index = Math.max(0, already); index < 16; index += 1) {
+    const clock = nextSlotTime(index);
+    if (futureDay || clockOnDay(day, clock).getTime() > now.getTime() + 60_000) return clock;
+  }
+  return null;
+}
+
+/** Outstand posts a past time immediately. Refuse it. */
+export function timeAlreadyPassed(when: Date, now = new Date()): boolean {
+  return Number.isNaN(when.getTime()) || when.getTime() <= now.getTime() + 60_000;
 }
 
 export function labelTime(date: Date): string {

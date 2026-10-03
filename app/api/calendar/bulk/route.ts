@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { addDays, parseLocalDate, startOfDay } from "@/lib/dates";
+import { addDays, parseLocalDate, startOfDay, timeAlreadyPassed } from "@/lib/dates";
 import { prisma } from "@/lib/prisma";
 import { queueCard } from "@/lib/publish";
 import { readSession } from "@/lib/session";
@@ -19,6 +19,7 @@ export async function POST(request: Request) {
     orderBy: { createdAt: "asc" },
   });
   let shipped = 0;
+  let scheduled = 0;
   const errors: string[] = [];
   for (const [index, card] of cards.entries()) {
     const dayOffset = Math.floor(index / perDay);
@@ -26,6 +27,8 @@ export async function POST(request: Request) {
     const when = addDays(start, dayOffset);
     when.setHours(startHour, 0, 0, 0);
     when.setMinutes(slot * intervalMin);
+    if (timeAlreadyPassed(when)) continue;
+    scheduled += 1;
     const claimed = await prisma.card.updateMany({
       where: { id: card.id, scheduledAt: null },
       data: { scheduledAt: when },
@@ -41,7 +44,7 @@ export async function POST(request: Request) {
   }
   return NextResponse.json({
     ok: errors.length === 0,
-    scheduled: cards.length,
+    scheduled,
     shipped,
     error: errors[0],
   });

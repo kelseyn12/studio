@@ -335,6 +335,8 @@
   The frame picker was a tiny player labeled cover, under Watch, and only on Schedule. Cut and Schedule now show a Thumbnail heading and Save this frame as the thumbnail.
 - [X] One name is one video
   Schedule no longer offers a second drop on the same name. Cuts has Delete. A TT title starts on the TT · YT drop. Library rows say IG · FB or TT · YT.
+- [X] Native caption stroke, past days cannot post
+  Spoken captions use the same thin stroke as unboxed Words. Live hides a day that already happened, and a past clock is refused so Outstand cannot publish it on the spot.
 - [X] Song slider moves smoothly
   The slider was four stops, so it snapped. It now moves from barely there to the loudest level that still stays under the voice. The batch line says 15 stories, then two files each.
 - [X] Song volume slider

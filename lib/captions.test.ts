@@ -63,14 +63,14 @@ describe("buildCaptionAss", () => {
     expect(track).not.toContain("gone");
   });
 
-  it("paints both looks as white stroke, IG thinner and TT fatter", () => {
+  it("paints both looks as the native white stroke, IG thinner than TT", () => {
     const phrase = { text: "hello there", start: 0, end: 1 };
     const instagram = buildCaptionAss([phrase], 0, "instagram");
     const tiktok = buildCaptionAss([phrase], 0, "tiktok");
-    expect(instagram).toContain(",1,7,0,5,");
+    expect(instagram).toContain(",1,4,0,5,");
     expect(instagram).toContain("Inter Tight");
     expect(instagram).not.toContain(",3,");
-    expect(tiktok).toContain(",1,9,0,5,");
+    expect(tiktok).toContain(",1,5,0,5,");
     expect(tiktok).toContain("TikTok Sans");
     expect(tiktok).not.toContain("&H00FFFF&");
   });

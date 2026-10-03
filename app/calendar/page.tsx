@@ -174,6 +174,12 @@ export default async function CalendarPage({
           Outstand did not take the file, so it is not on a day. The notice above names the app. Try again there.
         </p>
       ) : null}
+      {params.ship === "past" ? (
+        <p className="mb-4 rounded-card border border-line bg-panel px-4 py-3 text-sm">
+          That time already passed, so nothing was posted. Pick a later time. A day that already happened cannot take a
+          video.
+        </p>
+      ) : null}
       {params.ship === "taken" ? (
         <p className="mb-4 rounded-card border border-line bg-panel px-4 py-3 text-sm">
           That video is already on a day. It was not sent again.
