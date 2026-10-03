@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-10-03 — Pages open without waiting on Outstand. Schedule uploads a clean file instead of re-encoding it. New builds use the veryfast encoder.
 - 2026-10-03 — Spoken captions use the native Words stroke (IG 4, TT 5) instead of the thicker CapCut outline. A day or clock that already passed cannot be scheduled, so an old Sunday cannot publish a pile at once.
 - 2026-10-03 — The song slider moves in small steps instead of four snaps. The batch count says stories, then two files when IG and TikTok both get a copy.
 - 2026-10-03 — Multiply has a song-volume slider. Every step keeps the voice full and the song under it.

@@ -1,4 +1,4 @@
-import { copyFile, mkdir, rename, rm } from "fs/promises";
+import { copyFile, mkdir, open, rename, rm } from "fs/promises";
 import path from "path";
 import { localRoot } from "@/lib/files";
 import { clipHasAudio, runFfmpeg } from "@/lib/ffmpeg";
@@ -12,6 +12,26 @@ export async function writeYoutubeThumb(coverAbs: string, outputRel: string): Pr
   await mkdir(path.dirname(outputAbs), { recursive: true });
   await runFfmpeg(["-i", coverAbs, "-vf", YOUTUBE_THUMB_FILTER, "-q:v", "3", outputAbs]);
   return outputRel;
+}
+
+const EDIT_LIST = Buffer.from("elst");
+
+/** True when the MP4 still has an edit list. A clean Multiply file does not, so Schedule can upload it. */
+export async function fileHasEditList(fileAbs: string): Promise<boolean> {
+  const handle = await open(fileAbs, "r");
+  try {
+    const { size } = await handle.stat();
+    const window = Math.min(size, 1024 * 1024);
+    const head = Buffer.alloc(window);
+    await handle.read(head, 0, window, 0);
+    if (head.includes(EDIT_LIST)) return true;
+    if (size <= window) return false;
+    const tail = Buffer.alloc(window);
+    await handle.read(tail, 0, window, size - window);
+    return tail.includes(EDIT_LIST);
+  } finally {
+    await handle.close();
+  }
 }
 
 /**

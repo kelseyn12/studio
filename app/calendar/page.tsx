@@ -18,7 +18,7 @@ import {
 } from "@/lib/dates";
 import { fileLooks } from "@/lib/card-desk";
 import { prisma } from "@/lib/prisma";
-import { heldNote, missedNote, postedAppLine, syncQueuedPublishes } from "@/lib/publish-sync";
+import { heldNote, missedNote, postedAppLine } from "@/lib/publish-sync";
 import { sweepFailedPublishes } from "@/lib/publish-sweep";
 import { targetAccounts, targetApps } from "@/lib/targets";
 import { WaitingVideos } from "@/components/waiting-videos";
@@ -36,7 +36,6 @@ export default async function CalendarPage({
   searchParams: Promise<{ view?: string; from?: string; ship?: string }>;
 }) {
   const params = await searchParams;
-  await syncQueuedPublishes();
   void sweepFailedPublishes();
   const view = asView(params.view);
   const anchor = params.from ? parseLocalDate(params.from) : new Date();

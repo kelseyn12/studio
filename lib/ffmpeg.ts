@@ -303,7 +303,7 @@ export async function assembleVideo(input: {
     "-c:v",
     "libx264",
     "-preset",
-    "medium",
+    "veryfast",
     "-crf",
     "18",
     "-pix_fmt",

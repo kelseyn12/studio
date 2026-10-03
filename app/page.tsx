@@ -20,7 +20,7 @@ import { addDays, startOfDay } from "@/lib/dates";
 export default async function TodayPage() {
   const today = startOfDay(new Date());
   const soon = addDays(today, 2);
-  await syncQueuedPublishes();
+  void syncQueuedPublishes();
   const [counts, snap, todayCards, chase, cutting, fileBytes, failedJobs] = await Promise.all([
     machineCounts(),
     studioSnapshot(),
@@ -128,7 +128,7 @@ export default async function TodayPage() {
                     <p className="font-medium">{card.title}</p>
                     <p className="text-sm text-mute">{card.editor?.name ?? "No editor"}</p>
                   </div>
-                  <StatusPill status={card.status} />
+                  <StatusPill status={card.status} scheduledAt={card.scheduledAt} />
                 </Link>
               ))}
             </div>
@@ -148,7 +148,7 @@ export default async function TodayPage() {
                     <p className="font-medium">{card.title}</p>
                     <p className="text-sm text-mute">{card.editor?.name ?? "No editor"}</p>
                   </div>
-                  <StatusPill status={card.status} />
+                  <StatusPill status={card.status} scheduledAt={card.scheduledAt} />
                 </Link>
               ))}
             </div>
@@ -175,7 +175,7 @@ export default async function TodayPage() {
                       {card.editor ? ` · ${card.editor.name}` : ""}
                     </p>
                   </div>
-                  <StatusPill status={card.status} />
+                  <StatusPill status={card.status} scheduledAt={card.scheduledAt} />
                 </Link>
               ))
             )}

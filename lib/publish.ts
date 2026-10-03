@@ -3,7 +3,7 @@ import { pickFinished, pickForLook } from "@/lib/card-desk";
 import { ensureLocal } from "@/lib/files";
 import { postOptions, wantsCoverUrl } from "@/lib/post-cover";
 import { prisma } from "@/lib/prisma";
-import { withoutEditLists, prependCover, shippingCopy, writeYoutubeThumb } from "@/lib/ship-media";
+import { fileHasEditList, withoutEditLists, prependCover, shippingCopy, writeYoutubeThumb } from "@/lib/ship-media";
 import { targetAccounts, targetsByLook } from "@/lib/targets";
 import { LOOK_TAG, type DrawnStyle } from "@/lib/text-style";
 import type { Asset, CardStatus, SocialAccount } from "@prisma/client";
@@ -45,7 +45,7 @@ async function shippableUrl(asset: Asset): Promise<string> {
   const local = await ensureLocal(asset.path);
   const shipping = await shippingCopy(local);
   if (asset.coverPath) await prependCover(shipping, await ensureLocal(asset.coverPath));
-  else await withoutEditLists(shipping);
+  else if (await fileHasEditList(shipping)) await withoutEditLists(shipping);
   const uploaded = await uploadMedia(shipping, asset.filename || "video.mp4", asset.mime || "video/mp4");
   await prisma.asset.update({ where: { id: asset.id }, data: { publicUrl: uploaded.url } });
   const { rm } = await import("fs/promises");

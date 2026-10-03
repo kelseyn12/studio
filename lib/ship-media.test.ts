@@ -4,12 +4,26 @@ import path from "path";
 import { describe, expect, it } from "vitest";
 import { runCommand, runFfmpeg, ffprobeBin } from "@/lib/ffmpeg";
 import { localRoot } from "@/lib/files";
-import { YOUTUBE_THUMB_FILTER, prependCover, withoutEditLists, writeYoutubeThumb } from "@/lib/ship-media";
+import { writeFile } from "fs/promises";
+import { YOUTUBE_THUMB_FILTER, fileHasEditList, prependCover, withoutEditLists, writeYoutubeThumb } from "@/lib/ship-media";
 
 describe("YOUTUBE_THUMB_FILTER", () => {
   it("fits the 9:16 cover on a 1280×720 canvas", () => {
     expect(YOUTUBE_THUMB_FILTER).toContain("1280:720");
     expect(YOUTUBE_THUMB_FILTER).toContain("pad=1280:720");
+  });
+});
+
+describe("fileHasEditList", () => {
+  it("sees an edit list and ignores a clean file", async () => {
+    const dir = await mkdtemp(path.join(os.tmpdir(), "studio-elst-"));
+    const clean = path.join(dir, "clean.mp4");
+    const listed = path.join(dir, "listed.mp4");
+    await writeFile(clean, Buffer.from("mdat-only"));
+    await writeFile(listed, Buffer.concat([Buffer.from("moov"), Buffer.from("elst"), Buffer.from("end")]));
+    expect(await fileHasEditList(clean)).toBe(false);
+    expect(await fileHasEditList(listed)).toBe(true);
+    await rm(dir, { recursive: true, force: true });
   });
 });
 
