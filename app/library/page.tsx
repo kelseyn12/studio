@@ -9,10 +9,14 @@ import { prisma } from "@/lib/prisma";
 import { studioBytes } from "@/lib/queries";
 
 export default async function LibraryPage() {
-  const [assets, drive, totals] = await Promise.all([
+  const [assets, batches, drive, totals] = await Promise.all([
     prisma.asset.findMany({
       include: { card: { include: { campaign: true } } },
       orderBy: { createdAt: "desc" },
+    }),
+    prisma.repurposeOut.findMany({
+      where: { cardId: { not: null } },
+      select: { cardId: true, batch: { select: { name: true } } },
     }),
     prisma.card.findMany({
       where: { rawsUrl: { not: "" } },
@@ -21,7 +25,10 @@ export default async function LibraryPage() {
     }),
     studioBytes(),
   ]);
-  const finished = assets.filter((asset) => asset.kind === "EDITED" || asset.kind === "GENERATED");
+  const batchByCard = new Map(batches.flatMap((row) => (row.cardId ? [[row.cardId, row.batch.name] as const] : [])));
+  const finished = assets
+    .filter((asset) => asset.kind === "EDITED" || asset.kind === "GENERATED")
+    .map((asset) => ({ ...asset, batch: batchByCard.get(asset.card.id) ?? "" }));
   const raws = assets.filter((asset) => asset.kind === "RAW");
   const voice = assets.filter((asset) => asset.kind === "VOICE" || asset.kind === "REFERENCE");
   const postedRaws = raws.filter((asset) => asset.card.status === "POSTED" || asset.card.status === "DATA");
@@ -30,8 +37,8 @@ export default async function LibraryPage() {
     <Shell>
       <h1 className="text-3xl font-semibold tracking-tight">Library</h1>
       <p className="mt-2 mb-6 max-w-2xl text-mute">
-        Finished videos are grouped by deal. Posted files drop after {KEEP_FILE_DAYS} days — the video and its numbers
-        stay. 4K days stay in Drive.
+        Each Multiply batch is its own folder. Still to do sits above Posted. Anything you dropped by hand stays under
+        the deal. Posted files drop after {KEEP_FILE_DAYS} days — the video and its numbers stay. 4K days stay in Drive.
       </p>
       <div className="mb-8 max-w-xl space-y-3">
         <StorageMeter bytes={totals} r2={hasR2()} />

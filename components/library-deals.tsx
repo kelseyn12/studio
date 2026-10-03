@@ -1,6 +1,6 @@
 import { LibraryFile } from "@/components/library-file";
 import { PickBox, SelectDeleteBar, VideoPick } from "@/components/select-videos";
-import { groupByDeal, libraryAction } from "@/lib/library-groups";
+import { folderCount, groupLibrary, libraryAction } from "@/lib/library-groups";
 import type { PipelineStatus } from "@/lib/pipeline";
 
 type FinishedAsset = {
@@ -13,6 +13,7 @@ type FinishedAsset = {
   textStyle?: string;
   publicUrl: string | null;
   coverPath?: string;
+  batch?: string;
   card: {
     id: string;
     title: string;
@@ -21,6 +22,21 @@ type FinishedAsset = {
     campaign: { name: string } | null;
   };
 };
+
+function FileGrid({ assets }: { assets: FinishedAsset[] }) {
+  return (
+    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+      {assets.map((asset) => (
+        <LibraryFile
+          key={asset.id}
+          asset={asset}
+          pick={<PickBox id={asset.card.id} />}
+          liveLabel={libraryAction(asset.card.status, asset.card.scheduledAt)}
+        />
+      ))}
+    </div>
+  );
+}
 
 export function LibraryDeals({ assets }: { assets: FinishedAsset[] }) {
   if (assets.length === 0) {
@@ -35,20 +51,20 @@ export function LibraryDeals({ assets }: { assets: FinishedAsset[] }) {
     <VideoPick ids={videoIds}>
       <div className="space-y-8">
         <SelectDeleteBar total={new Set(videoIds).size} />
-        {groupByDeal(assets).map((group) => (
-          <div key={group.deal}>
+        {groupLibrary(assets).map((folder) => (
+          <div key={folder.key}>
             <h3 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-mute">
-              {group.deal} · {group.items.length}
+              {folder.title} · {folderCount(folder.still.length, folder.posted.length)}
             </h3>
-            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-              {group.items.map((asset) => (
-                <LibraryFile
-                  key={asset.id}
-                  asset={asset}
-                  pick={<PickBox id={asset.card.id} />}
-                  liveLabel={libraryAction(asset.card.status, asset.card.scheduledAt)}
-                />
-              ))}
+            <div className="space-y-4">
+              {folder.still.length > 0 && folder.posted.length > 0 ? (
+                <p className="text-sm text-mute">Still to do</p>
+              ) : null}
+              {folder.still.length > 0 ? <FileGrid assets={folder.still} /> : null}
+              {folder.posted.length > 0 && folder.still.length > 0 ? (
+                <p className="text-sm text-mute">Posted</p>
+              ) : null}
+              {folder.posted.length > 0 ? <FileGrid assets={folder.posted} /> : null}
             </div>
           </div>
         ))}

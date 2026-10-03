@@ -327,6 +327,8 @@
   Cuts asks IG · FB, TT · YT, or Both before the file lands. Schedule shows that file on its row only, and the other row gets its own drop.
 - [X] Facebook connect asks for every Page again
   A Page left unchecked the first time stayed off the available list. Connect facebook now makes Meta show that list again.
+- [X] Library folders per batch
+  Finished videos from a Multiply batch sit under that batch name. Still to do is above Posted. Hand-dropped videos stay under the deal.
 - [X] Pick the part of the song
   Words + music plays the track. Use this part marks the second, and Rebuild starts the song there. The video still cuts the song off at the end.
 - [X] Thumbnail is visible on Cut and Schedule

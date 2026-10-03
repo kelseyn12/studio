@@ -55,9 +55,9 @@
 - `generateScript` — `lib/script.ts` — spoken hook/body/plug/script from the brief plus reference clips. Used by `/api/ai/script`.
 - `deleteUpload` — `lib/files.ts` — removes a Studio file from R2 and local disk. Used by Library cleanup.
 - `rejectStudioFile` — `lib/storage.ts` — blocks camera-day files. Phone clips/1080s cap at 250MB. Voice/reference 40MB.
-- `groupByDeal` — `lib/library-groups.ts` — piles finished Library videos under the deal name.
+- `groupLibrary` / `folderCount` / `groupByDeal` — `lib/library-groups.ts` — Library folders. A Multiply batch stays together and splits into still to do vs posted. Videos with no batch stay under the deal.
+- `libraryAction` — `lib/library-groups.ts` — a Ready video with a day shows Scheduled and Open, not To schedule. Used by LibraryFile.
 - `pillLabel` — `lib/pipeline.ts` — Ready with a day is Scheduled on every status pill (video page, Today, Deals, Library, Pipeline, Live). Ready with no day stays To schedule.
-- `libraryMark` / `libraryAction` — `lib/library-groups.ts` — a Ready video with a day shows Scheduled and Open, not To schedule. Used by LibraryFile.
 - `togglePaid` — `app/cards/[id]/actions.ts` — flips `approved` so Collected on Today counts real money. Used by PaidButton on Live posted list and the video page.
 - `retryFailedPost` / `clearFailedPost` — `app/calendar/actions.ts` — re-ship or dismiss a failed Outstand post. Used by FailedPosts on Live. Retry sends only the failed apps on that same video (IG with FB, or YouTube alone) via `retryAccountIds`, so a TikTok that already published is not sent again. The notice shows the app (`IG @handle`).
 - `syncQueuedPublishes` / `publishOutcome` / `postedAtWhenLive` / `accountsReadyToRetry` / `retryAt` / `nextUploadWindow` / `heldNote` / `missedNote` / `postedAppLine` / `youtubeRetryAllowed` / `sweepFailedPublishes` — `lib/publish-sync.ts` and `lib/publish-sweep.ts` — Live reads each queued Outstand post and names the apps that posted. A YouTube cap miss stays visible with a download of the YouTube file, which then counts YouTube as posted, and a later time that has to be after the cap refills. Other failed apps are sent once more on their own. The sweep also runs every few minutes while the app is open (`instrumentation.ts`).
