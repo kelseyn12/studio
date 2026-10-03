@@ -31,7 +31,7 @@ export default async function EditsPage() {
           : "Each name is its own video. Drop one file and pick IG · FB or TT · YT. Then pick the thumbnail, accounts, caption, and time. The other version is the other name."}
       </p>
       <div className="mb-6">
-        <LiveRefresh />
+        <LiveRefresh seconds={30} />
       </div>
       {user.role === "EDITOR" ? null : (
         <Bucket title="Drop the file" items={selfCut} empty="Nothing waiting for a finished file." canDelete />

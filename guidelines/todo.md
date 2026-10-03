@@ -335,6 +335,8 @@
   The frame picker was a tiny player labeled cover, under Watch, and only on Schedule. Cut and Schedule now show a Thumbnail heading and Save this frame as the thumbnail.
 - [X] One name is one video
   Schedule no longer offers a second drop on the same name. Cuts has Delete. A TT title starts on the TT · YT drop. Library rows say IG · FB or TT · YT.
+- [X] Clicks were waiting behind Today's reload
+  Today was rebuilding the whole page every 8 seconds, so the next click sat in line. That reload is off. Posts still update on the few-minute sweep. Clerk is remembered for a minute.
 - [X] Pages and Schedule stop waiting on a full re-encode
   Today and Live no longer wait on Outstand before they paint. Schedule uploads a file that is already clean. New Multiply builds use veryfast.
 - [X] Native caption stroke, past days cannot post

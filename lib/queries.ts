@@ -5,26 +5,28 @@ import { addDays, startOfDay, startOfWeek } from "@/lib/dates";
 
 export async function machineCounts(): Promise<MachineCounts> {
   const counts = emptyCounts();
-  const grouped = await prisma.card.groupBy({
-    by: ["status"],
-    _count: { _all: true },
-  });
+  const today = startOfDay(new Date());
+  const [grouped, postedToday, deals, ready, filmed, cutSelf, totalCards] = await Promise.all([
+    prisma.card.groupBy({ by: ["status"], _count: { _all: true } }),
+    prisma.card.count({ where: { postedAt: { gte: today } } }),
+    prisma.campaign.findMany({
+      where: { status: { in: ["ACTIVE", "TRIAL"] } },
+      select: { postsPerDay: true, accountsAllowed: true },
+    }),
+    prisma.card.count({ where: { status: "READY", scheduledAt: null } }),
+    prisma.card.count({ where: { status: "FILMED", cutBy: "EDITOR" } }),
+    prisma.card.count({ where: { status: "FILMED", cutBy: "SELF" } }),
+    prisma.card.count(),
+  ]);
   for (const row of grouped) {
     const key = statusToCountKey(row.status);
     if (key) counts[key] = row._count._all;
   }
-  const today = startOfDay(new Date());
-  counts.postedToday = await prisma.card.count({
-    where: { postedAt: { gte: today } },
-  });
-  const deals = await prisma.campaign.findMany({
-    where: { status: { in: ["ACTIVE", "TRIAL"] } },
-    select: { postsPerDay: true, accountsAllowed: true },
-  });
-  counts.ready = await prisma.card.count({ where: { status: "READY", scheduledAt: null } });
-  counts.filmed = await prisma.card.count({ where: { status: "FILMED", cutBy: "EDITOR" } });
-  counts.cutSelf = await prisma.card.count({ where: { status: "FILMED", cutBy: "SELF" } });
-  counts.totalCards = await prisma.card.count();
+  counts.postedToday = postedToday;
+  counts.ready = ready;
+  counts.filmed = filmed;
+  counts.cutSelf = cutSelf;
+  counts.totalCards = totalCards;
   counts.activeDeals = deals.length;
   counts.paidSlotsToday = deals.reduce(
     (sum, deal) => sum + deal.postsPerDay * deal.accountsAllowed,

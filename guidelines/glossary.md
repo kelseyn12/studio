@@ -4,7 +4,7 @@
 - `isStalePosted` / `supersededGeneratedIds` / `staleFinishedIds` / `batchClipsAreStale` — `lib/keep.ts` — what files a volume studio can drop. Tested in `lib/keep.test.ts`.
 - `dropSuperseded` / `sweepStale` — `lib/sweep.ts` — deletes those files from R2 and the rows. Editor cut calls `dropSuperseded`; Library Free space runs `sweepStale`.
 - `pickNextAction` — `lib/next-action.ts` — chooses the single Today action. Used on `app/page.tsx`.
-- `machineCounts` — `lib/queries.ts` — pipeline and slot totals for Today.
+- `machineCounts` — `lib/queries.ts` — pipeline and slot totals for Today, loaded together so the page does not wait on one count at a time.
 - `connectUrl` / `authConnectUrl` — `lib/outstand.ts` — the Outstand connect link. Both set `force_account_selection` so Facebook shows every Page, including ones left unchecked last time. Used by `app/api/outstand/connect/route.ts`.
 - `fieldsFromSync` — `lib/account-sync.ts` — what Sync writes on an account. A new account takes Outstand's name. One already in Studio keeps the label you typed. Used by `app/api/outstand/sync/route.ts`.
 - `uploadMedia` — `lib/outstand.ts` — PUT the mp4 (or cover JPEG) into Outstand storage, returns the public URL. `safeUploadName` strips `?` from the title so the signed link stays intact, and `signedPutTarget` sends the whole file with its length.
@@ -43,7 +43,7 @@
 - `ensureLocal` — `lib/files.ts` — pulls a file from R2 into a temp folder only when ffmpeg needs it.
 - `hasR2` — `lib/r2.ts` — true when Cloudflare R2 credentials are set.
 - `hasClerk` — `lib/clerk-mode.ts` — true when Clerk keys are set. PIN login is then refused.
-- `readClerkSession` — `lib/clerk-user.ts` — maps a Clerk user onto Prisma (`clerkId` + role from publicMetadata).
+- `readClerkSession` — `lib/clerk-user.ts` — maps a Clerk user onto Prisma (`clerkId` + role from publicMetadata). The same person is remembered for a minute so each click does not call Clerk again.
 - `isDirectMediaUrl` — `lib/media-url.ts` — accepts a direct mp4 URL; rejects a Drive folder.
 - `requireUser` — `lib/auth.ts` — session gate for pages.
 - `rewriteHook` — `lib/rewrite.ts` — gpt-4o-mini hook rewrite. Used by `/api/ai/hook` and Brief.

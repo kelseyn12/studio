@@ -5,6 +5,9 @@ import { canVisit, homeFor, isPublicPath } from "@/lib/access";
 import { hasClerk, parseStudioRole } from "@/lib/clerk-mode";
 import type { Role } from "@prisma/client";
 
+const ROLE_HOLD_MS = 5 * 60_000;
+const roleHeld = new Map<string, { role: Role; at: number }>();
+
 async function clerkHandler(auth: ClerkMiddlewareAuth, request: NextRequest) {
   if (isPublicPath(request.nextUrl.pathname)) return NextResponse.next();
   const { userId, sessionClaims } = await auth();
@@ -17,11 +20,14 @@ async function clerkHandler(auth: ClerkMiddlewareAuth, request: NextRequest) {
   let role =
     parseStudioRole((sessionClaims as { metadata?: { role?: unknown } })?.metadata?.role) ||
     parseStudioRole((sessionClaims as { publicMetadata?: { role?: unknown } })?.publicMetadata?.role);
+  const remembered = roleHeld.get(userId);
+  if (!role && remembered && Date.now() - remembered.at < ROLE_HOLD_MS) role = remembered.role;
   if (!role) {
     try {
       const client = await clerkClient();
       const clerkUser = await client.users.getUser(userId);
       role = parseStudioRole(clerkUser.publicMetadata.role) || "CREATOR";
+      roleHeld.set(userId, { role, at: Date.now() });
     } catch {
       role = "CREATOR";
     }

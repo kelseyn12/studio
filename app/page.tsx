@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { ActionCard } from "@/components/action-card";
-import { LiveRefresh } from "@/components/live-refresh";
 import { FailedPosts } from "@/components/failed-posts";
 import { Shell } from "@/components/shell";
 import { StudioMap } from "@/components/studio-map";
@@ -92,9 +91,6 @@ export default async function TodayPage() {
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">Today</h1>
           <p className="mt-1 text-mute">One next step on top. Everything else can wait.</p>
-          <div className="mt-2">
-            <LiveRefresh />
-          </div>
         </div>
         <ActionCard action={pickNextAction(counts)} />
         <FailedPosts jobs={failedJobs} />
