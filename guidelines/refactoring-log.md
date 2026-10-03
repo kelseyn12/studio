@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-10-03 — A blank caption stays blank. The file name is no longer sent as the caption. A video that already has a time can update that caption without sending again.
 - 2026-10-03 — A video can only be scheduled once. `queueCard` claims the day, and a second press sends nothing unless that app's latest try failed. The video page hides Schedule once a time is set.
 - 2026-10-03 — Today no longer reloads itself every few seconds. Clicks were waiting behind that reload. Clerk is remembered between clicks, and Today's counts load together.
 - 2026-10-03 — Pages open without waiting on Outstand. Schedule uploads a clean file instead of re-encoding it. New builds use the veryfast encoder.

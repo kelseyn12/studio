@@ -12,6 +12,16 @@ export type QueueResult = { ok: true; shipped: boolean } | { ok: false; error: s
 
 export const ALREADY_SCHEDULED = "Already on the calendar";
 
+/** The words under the video. A missing caption stays blank. The file name is never the caption. */
+export function postCaption(caption: string): string {
+  return caption.trim();
+}
+
+/** Outstand posts still waiting, one id per send. */
+export function waitingPostIds(jobs: Array<{ status: string; outstandPostId: string | null }>): string[] {
+  return [...new Set(jobs.filter((job) => job.status === "QUEUED" && job.outstandPostId).map((job) => job.outstandPostId as string))];
+}
+
 type ScheduleJob = { accountId: string; status: string; createdAt: Date };
 
 /**
@@ -152,7 +162,7 @@ export async function queueCard(cardId: string, when: Date, accountId?: string |
           const covers = await shippableCoverUrls(asset, networks);
           const post = await createPost({
             accounts: group.accounts.map((account: SocialAccount) => account.outstandAccountId),
-            content: card.caption || card.title,
+            content: postCaption(card.caption),
             scheduledAt: when.toISOString(),
             media: [{ url: await shippableUrl(asset), filename: safeUploadName(asset.filename || "video.mp4") }],
             options: postOptions(networks, asset, covers.coverUrl, covers.youtubeUrl),

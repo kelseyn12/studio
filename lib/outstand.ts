@@ -134,6 +134,31 @@ export async function cancelPost(id: string): Promise<void> {
   await outstand(`/posts/${id}`, { method: "DELETE" });
 }
 
+type StoredMedia = { url?: string; filename?: string; altText?: string };
+
+/**
+ * Changes the caption on a post that has not gone out yet. The video on that post is sent again
+ * with the new words, because Outstand replaces the whole container.
+ */
+export async function updatePostContent(id: string, content: string): Promise<void> {
+  const payload = await outstand<Record<string, unknown>>(`/posts/${id}`);
+  const nested = (payload.post as Record<string, unknown> | undefined) || (payload.data as Record<string, unknown> | undefined);
+  const data = nested && Array.isArray(nested.containers) ? nested : payload;
+  const containers = (data.containers as Array<{ media?: StoredMedia[] }> | undefined) ?? [];
+  const media = (containers[0]?.media ?? [])
+    .filter((item) => item.url && item.filename)
+    .map((item) => ({
+      url: item.url as string,
+      filename: item.filename as string,
+      ...(item.altText ? { altText: item.altText } : {}),
+    }));
+  if (media.length === 0) throw new Error("That scheduled post has no video, so the caption was left as it is");
+  await outstand(`/posts/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify({ containers: [{ content, media }] }),
+  });
+}
+
 export async function getPostAnalytics(id: string): Promise<Record<string, unknown>> {
   return outstand(`/posts/${id}/analytics`);
 }

@@ -1,4 +1,4 @@
-import { approveCut, requestChanges, scheduleCard, sendForTouchUp } from "@/app/cards/[id]/actions";
+import { approveCut, requestChanges, scheduleCard, sendForTouchUp, updateScheduledCaption } from "@/app/cards/[id]/actions";
 import { LiveLooks } from "@/components/live-looks";
 import { PaidButton } from "@/components/paid-button";
 import { QuickCut } from "@/components/quick-cut";
@@ -151,7 +151,7 @@ export function CardLive({
           <button className="w-full rounded-xl border border-line px-4 py-3 font-semibold">Send to editor to polish</button>
         </form>
       ) : null}
-      <form action={scheduleCard} className="space-y-3">
+      <form action={card.scheduledAt ? updateScheduledCaption : scheduleCard} className="space-y-3">
         <input type="hidden" name="id" value={card.id} />
         <p className="text-sm text-mute">
           This video only posts the file you dropped. Check the accounts for that version. The other version is the other name.
@@ -186,19 +186,24 @@ export function CardLive({
           <textarea
             name="caption"
             defaultValue={card.caption}
-            placeholder={card.title}
+            placeholder="Leave blank for no caption"
             className="field mt-2 min-h-24"
           />
         </label>
-        {card.caption.trim() ? null : (
-          <p className="text-xs text-mute">Empty caption ships the title: {card.title}</p>
-        )}
+        <p className="text-xs text-mute">Leave this blank and the post goes out with no caption.</p>
         {card.status === "POSTED" || card.status === "DATA" ? (
           <p className="text-sm font-semibold text-live">Posted{posted ? ` · ${posted}` : ""}</p>
         ) : card.scheduledAt ? (
-          <p className="text-sm">
-            Already set for {labelWhen(card.scheduledAt)}. It will not send again. Cancel it on Live to pick a new time.
-          </p>
+          <>
+            <p className="text-sm">
+              Already set for {labelWhen(card.scheduledAt)}. Changing the caption does not send it again.
+            </p>
+            <ScheduleButton
+              label="Update caption for scheduled post"
+              pendingLabel="Updating caption…"
+              className="w-full rounded-xl border border-line px-4 py-3 font-semibold"
+            />
+          </>
         ) : (
           <>
             <label className="block text-sm">

@@ -1,5 +1,9 @@
 # To-do
 
+- [X] Blank caption, and update a scheduled caption
+  An empty caption box posts with no caption. The file name is not used.
+  Update caption for scheduled post changes the waiting post and does not send a second one.
+
 - [X] A scheduled video cannot be sent twice
   Every schedule path claims the day inside `queueCard`. A second press creates no Outstand post.
   A failed app can still be sent again. The extra Monday queue for the afternoon double was cancelled.

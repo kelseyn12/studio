@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { accountsToSend, lookFailure, parkWrite, shouldClearDay } from "@/lib/publish";
+import { accountsToSend, lookFailure, parkWrite, postCaption, shouldClearDay, waitingPostIds } from "@/lib/publish";
 
 describe("lookFailure", () => {
   it("names the video that Outstand refused", () => {
@@ -45,6 +45,28 @@ describe("parkWrite", () => {
     });
     expect(patch.status).toBe("POSTED");
     expect(patch.postedAt).toEqual(publishedAt);
+  });
+});
+
+describe("postCaption", () => {
+  it("keeps a blank caption blank", () => {
+    expect(postCaption("")).toBe("");
+    expect(postCaption("   ")).toBe("");
+    expect(postCaption("  Go do it!!  ")).toBe("Go do it!!");
+  });
+});
+
+describe("waitingPostIds", () => {
+  it("lists each waiting post once", () => {
+    expect(
+      waitingPostIds([
+        { status: "QUEUED", outstandPostId: "aM5FT" },
+        { status: "QUEUED", outstandPostId: "aM5FT" },
+        { status: "QUEUED", outstandPostId: "DawTm" },
+        { status: "CANCELLED", outstandPostId: "7tMmV" },
+        { status: "PUBLISHED", outstandPostId: "RLkVd" },
+      ]),
+    ).toEqual(["aM5FT", "DawTm"]);
   });
 });
 

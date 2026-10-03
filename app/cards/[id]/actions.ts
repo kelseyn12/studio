@@ -14,7 +14,8 @@ import { prisma } from "@/lib/prisma";
 import { markCutReady } from "@/lib/cut-ready";
 import { pingStudio } from "@/lib/manychat";
 import { timeAlreadyPassed } from "@/lib/dates";
-import { ALREADY_SCHEDULED, queueCard } from "@/lib/publish";
+import { ALREADY_SCHEDULED, postCaption, queueCard, waitingPostIds } from "@/lib/publish";
+import { updatePostContent } from "@/lib/outstand";
 
 async function saveCard(formData: FormData) {
   await requireUser();
@@ -183,6 +184,31 @@ export async function scheduleCard(formData: FormData) {
   revalidatePath("/");
   revalidatePath("/analytics");
   redirect(result.ok ? "/calendar?ship=ok" : "/calendar?ship=fail");
+}
+
+export async function updateScheduledCaption(formData: FormData) {
+  await requireUser();
+  const id = String(formData.get("id"));
+  const caption = postCaption(String(formData.get("caption") || ""));
+  const card = await prisma.card.findUnique({
+    where: { id },
+    include: { publishes: { select: { status: true, outstandPostId: true } } },
+  });
+  if (!card?.scheduledAt) redirect(`/cards/${id}`);
+  await prisma.card.update({ where: { id }, data: { caption } });
+  const postIds = waitingPostIds(card.publishes);
+  let updated = 0;
+  for (const postId of postIds) {
+    try {
+      await updatePostContent(postId, caption);
+      updated += 1;
+    } catch {
+      /* already published, or Outstand refused — the saved caption still stays on the video */
+    }
+  }
+  revalidatePath(`/cards/${id}`);
+  revalidatePath("/calendar");
+  redirect(updated > 0 ? "/calendar?ship=caption" : "/calendar?ship=caption-late");
 }
 
 export async function attachEditedUrl(formData: FormData) {

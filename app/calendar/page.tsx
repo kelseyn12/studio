@@ -179,6 +179,16 @@ export default async function CalendarPage({
           video.
         </p>
       ) : null}
+      {params.ship === "caption" ? (
+        <p className="mb-4 rounded-card border border-line bg-panel px-4 py-3 text-sm">
+          Caption updated on the scheduled post. It was not sent again.
+        </p>
+      ) : null}
+      {params.ship === "caption-late" ? (
+        <p className="mb-4 rounded-card border border-line bg-panel px-4 py-3 text-sm">
+          This video already posted, so the caption on the apps stayed as it is.
+        </p>
+      ) : null}
       {params.ship === "taken" ? (
         <p className="mb-4 rounded-card border border-line bg-panel px-4 py-3 text-sm">
           That video is already on a day. It was not sent again.
