@@ -260,6 +260,7 @@ model RepurposeBatch {
   format      Format?          @relation(fields: [formatId], references: [id], onDelete: SetNull)
   hookLines   String           @default("")
   caption     String           @default("")
+  musicLevel  Int              @default(1)
   campaignId  String?
   accountId   String?
   accountIds  String           @default("")

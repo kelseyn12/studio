@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { BatchOutputs } from "@/components/batch-outputs";
+import { MusicVolume } from "@/components/music-volume";
 import { BatchSettings } from "@/components/batch-settings";
 import { DropZone } from "@/components/drop-zone";
 import { Shell } from "@/components/shell";
@@ -154,9 +155,9 @@ export default async function BatchPage({
       <section className="mb-8 rounded-card border border-line bg-panel p-5">
         <p className="label">Music · optional</p>
         <p className="mb-3 text-sm text-mute">
-          Each video picks a random track from this list. Voice stays loud — music sits under it. Drop more than one
-          song if you want different music on each video. One song = every video gets that song. After Generate, Words +
-          music on a video picks the part of the song.
+          Each video picks a random track from this list. The slider sets how loud the song is. Your voice stays full,
+          and the right side still stays under you. Drop more than one song if you want different music on each video.
+          After Generate, Words + music on a video can change that song’s volume and the part that plays.
         </p>
         <DropZone
           action="/api/repurpose/music"
@@ -172,6 +173,7 @@ export default async function BatchPage({
             <li key={track.id}>{track.filename}</li>
           ))}
         </ul>
+        <MusicVolume level={batch.musicLevel} form="batch-generate" />
       </section>
 
       <BatchSettings

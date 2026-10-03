@@ -190,6 +190,7 @@ export async function renderBatch(input: {
               hookList: batch.listCount,
               musicPath,
               musicStart: 0,
+              musicLevel: batch.musicLevel,
               logoPath,
               avoid: logoAvoidBoxes(logoItems),
               hookX: posFor(hookPos, look).x,
@@ -228,6 +229,7 @@ export async function renderBatch(input: {
                 clips: recipeClips,
                 trackId: music?.id ?? "",
                 bodyClipId: combo.find((clip) => clip.slot === "DEMO")?.id ?? "",
+                musicLevel: batch.musicLevel,
               },
             });
           }

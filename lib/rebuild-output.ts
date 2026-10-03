@@ -103,6 +103,7 @@ async function burn(output: Loaded, recipe: OutputRecipe): Promise<void> {
     hookList: recipe.hookList || output.batch.listCount,
     musicPath,
     musicStart: musicPath ? output.musicStart : 0,
+    musicLevel: recipe.musicLevel,
     logoPath: await logoPathFor(hook),
     avoid: logoAvoidBoxes(parseLogoItems(hook?.logosJson)),
     hookX: posFor(hookPos, recipe.look).x,

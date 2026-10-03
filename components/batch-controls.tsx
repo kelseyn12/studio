@@ -31,6 +31,7 @@ export function Slider({
   value,
   max,
   onChange,
+  form,
 }: {
   name: string;
   label: string;
@@ -38,6 +39,7 @@ export function Slider({
   value: number;
   max: number;
   onChange: (value: number) => void;
+  form?: string;
 }) {
   return (
     <div className="border-t border-line pt-4">
@@ -47,6 +49,7 @@ export function Slider({
       </div>
       <input
         name={name}
+        form={form}
         type="range"
         min={0}
         max={max}

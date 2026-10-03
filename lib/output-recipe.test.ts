@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bodyMates, chosenTrackId, musicFromPrefix, musicMixFilter, parseRecipe, rebuildsEveryBodyMate, tuneSections } from "@/lib/output-recipe";
+import { bodyMates, chosenTrackId, musicFromPrefix, musicLevel, musicMixFilter, parseRecipe, rebuildsEveryBodyMate, tuneSections } from "@/lib/output-recipe";
 
 const recipe = {
   look: "tiktok" as const,
@@ -26,13 +26,20 @@ describe("output recipe", () => {
     expect(musicFromPrefix(12.5)).toBe("atrim=start=12.500,asetpts=PTS-STARTPTS,");
   });
 
-  it("keeps voice full and the song quiet", () => {
-    const filter = musicMixFilter(4, 0);
-    expect(filter).toContain("volume=0.015");
-    expect(filter).toContain("normalize=0");
-    expect(filter).toContain("dropout_transition=0");
-    expect(filter).not.toContain("volume=0.22");
-    expect(musicMixFilter(4, 8)).toContain("atrim=start=8.000");
+  it("clamps the song slider to the steps that stay under the voice", () => {
+    expect(musicLevel(undefined)).toBe(1);
+    expect(musicLevel(-3)).toBe(0);
+    expect(musicLevel(3.2)).toBe(3);
+    expect(musicLevel(20)).toBe(3);
+  });
+
+  it("keeps voice full and the song under it at every step", () => {
+    expect(musicMixFilter(4, 0, 1)).toContain("volume=0.015");
+    expect(musicMixFilter(4, 0, 0)).toContain("volume=0.008");
+    expect(musicMixFilter(4, 0, 3)).toContain("volume=0.040");
+    expect(musicMixFilter(4, 0, 9)).toContain("volume=0.040");
+    expect(musicMixFilter(4, 0, 1)).toContain("normalize=0");
+    expect(musicMixFilter(4, 8, 1)).toContain("atrim=start=8.000");
   });
 
   it("treats a blank music choice as the song from Generate", () => {

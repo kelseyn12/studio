@@ -153,6 +153,7 @@ export function BatchOutputs({
                   tracks={tracks}
                   musicTrackId={selectedMusic}
                   musicStart={output.musicStart}
+                  musicLevel={recipe?.musicLevel ?? 1}
                   sections={recipe ? tuneSections(recipe, clips, output.captionsJson) : []}
                   mates={bodyMates(outputs.map((row) => row.recipeJson), recipe?.bodyClipId || "")}
                   ready={Boolean(recipe)}

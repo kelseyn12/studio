@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { tuneBodyVideos, tuneThisVideo } from "@/app/repurposer/output-actions";
 import { CoverPick } from "@/components/cover-pick";
+import { MusicVolume } from "@/components/music-volume";
 import type { TuneSection } from "@/lib/output-recipe";
 import { publicFileUrl } from "@/lib/urls";
 
@@ -19,6 +20,7 @@ export function OutputTune({
   tracks,
   musicTrackId,
   musicStart,
+  musicLevel,
   sections,
   mates,
   ready,
@@ -30,6 +32,7 @@ export function OutputTune({
   tracks: Array<{ id: string; filename: string; path: string }>;
   musicTrackId: string;
   musicStart: number;
+  musicLevel: number;
   sections: TuneSection[];
   mates: number;
   ready: boolean;
@@ -109,6 +112,7 @@ export function OutputTune({
               Use this part
             </button>
           ) : null}
+          {song ? <MusicVolume level={musicLevel} /> : null}
           {sections.map((section) => (
             <label key={section.clipId} className="block text-xs text-mute">
               {section.label} sentences — one line each. Times stay.

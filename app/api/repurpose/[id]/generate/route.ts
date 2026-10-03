@@ -6,6 +6,7 @@ import { bodyCtaClash } from "@/lib/same-take";
 import { isRendering, renderBatch, renderStatus } from "@/lib/render-batch";
 import { readSession } from "@/lib/session";
 import { targetAccounts } from "@/lib/targets";
+import { musicLevel } from "@/lib/output-recipe";
 import { parseTextStyle } from "@/lib/text-style";
 import { LIST_MAX, parseHookLines } from "@/lib/variations";
 import { canBurnText } from "@/lib/ffmpeg";
@@ -43,6 +44,7 @@ export async function POST(
         listCount: Math.min(Math.max(Math.floor(Number(form.get("listCount") || 0)), 0), LIST_MAX),
         hookLines: String(form.get("hookLines") || ""),
         caption: String(form.get("caption") || ""),
+        musicLevel: musicLevel(form.get("musicLevel")),
         campaignId: String(form.get("campaignId") || "") || null,
         formatId: String(form.get("formatId") || "") || null,
         accountId: String(form.getAll("accountIds")[0] || form.get("accountId") || "") || null,

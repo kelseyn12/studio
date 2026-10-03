@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { applyCaptionLines } from "@/lib/captions-math";
-import { parseCaptionMap, parseRecipe, rebuildsEveryBodyMate, wordsForClip } from "@/lib/output-recipe";
+import { musicLevel, parseCaptionMap, parseRecipe, rebuildsEveryBodyMate, wordsForClip } from "@/lib/output-recipe";
 import { prisma } from "@/lib/prisma";
 import { rebuildBody, rebuildOutput } from "@/lib/rebuild-output";
 
@@ -42,6 +42,7 @@ export async function tuneOutput(formData: FormData) {
     where: { id: outputId },
     data: {
       captionsJson: JSON.stringify(map),
+      recipeJson: JSON.stringify({ ...recipe, musicLevel: musicLevel(formData.get("musicLevel")) }),
       musicTrackId: String(formData.get("musicTrackId") || "none"),
       musicStart: Math.max(0, Number(formData.get("musicStart") || 0)),
     },

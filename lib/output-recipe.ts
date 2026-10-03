@@ -22,15 +22,33 @@ export type OutputRecipe = {
   clips: RecipeClip[];
   trackId: string;
   bodyClipId: string;
+  musicLevel: number;
 };
 
 const LOOKS = new Set(["tiktok", "instagram", "plain"]);
 
 /**
  * Licensed tracks peak near full scale. Phone voice on these clips peaks about 25 dB quieter.
- * 0.015 keeps the song under that voice. amix must not normalize, or it cuts the voice in half.
+ * Every step stays under that voice. amix must not normalize, or it cuts the voice in half.
  */
-export const MUSIC_UNDER_VOICE = 0.015;
+export const MUSIC_GAINS = [0.008, 0.015, 0.025, 0.04] as const;
+
+export const MUSIC_LEVEL_HINTS = [
+  "Barely there",
+  "Under your voice",
+  "A bit louder",
+  "Loudest that still stays under you",
+] as const;
+
+export function musicLevel(value: unknown): number {
+  const level = Math.round(Number(value));
+  if (!Number.isFinite(level)) return 1;
+  return Math.min(MUSIC_GAINS.length - 1, Math.max(0, level));
+}
+
+export function musicGainForLevel(value: unknown): number {
+  return MUSIC_GAINS[musicLevel(value)];
+}
 
 /** Starts the song at this second. The video still ends the music when the clip ends. */
 export function musicFromPrefix(seconds: number): string {
@@ -40,8 +58,8 @@ export function musicFromPrefix(seconds: number): string {
 }
 
 /** Voice stays full. The song is quiet and stops when the video stops. */
-export function musicMixFilter(musicIndex: number, start: number): string {
-  return `[${musicIndex}:a]${musicFromPrefix(start)}volume=${MUSIC_UNDER_VOICE},aresample=44100[mus];[outa][mus]amix=inputs=2:duration=first:dropout_transition=0:normalize=0[mix]`;
+export function musicMixFilter(musicIndex: number, start: number, gain: number): string {
+  return `[${musicIndex}:a]${musicFromPrefix(start)}volume=${musicGainForLevel(gain).toFixed(3)},aresample=44100[mus];[outa][mus]amix=inputs=2:duration=first:dropout_transition=0:normalize=0[mix]`;
 }
 
 /** "" keeps the song from Generate. "none" is silence. Anything else is a track id. */
@@ -77,6 +95,7 @@ export function parseRecipe(raw: string | null | undefined): OutputRecipe | null
         .filter((clip) => clip.id),
       trackId: String(parsed.trackId || ""),
       bodyClipId: String(parsed.bodyClipId || ""),
+      musicLevel: musicLevel(parsed.musicLevel),
     };
   } catch {
     return null;

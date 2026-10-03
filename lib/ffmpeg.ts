@@ -190,6 +190,8 @@ export async function assembleVideo(input: {
   hookList?: number;
   musicPath?: string;
   musicStart?: number;
+  /** 0–3. Voice stays full. Every step keeps the song under it. */
+  musicLevel?: number;
   logoPath?: string;
   /** Logo row boxes the first clip's headline keeps clear of. */
   avoid?: Box[];
@@ -293,7 +295,7 @@ export async function assembleVideo(input: {
   const concatIn = Array.from({ length: n }, (_, index) => `[v${index}][a${index}]`).join("");
   chains.push(`${concatIn}concat=n=${n}:v=1:a=1[outv][outa]`);
   if (input.musicPath && musicIndex >= 0) {
-    chains.push(musicMixFilter(musicIndex, input.musicStart ?? 0));
+    chains.push(musicMixFilter(musicIndex, input.musicStart ?? 0, input.musicLevel ?? 1));
   }
   args.push("-filter_complex", chains.join(";"));
   args.push("-map", "[outv]", "-map", input.musicPath ? "[mix]" : "[outa]");

@@ -88,7 +88,7 @@ export function BatchSettings({
   const preview = variationFor(1, { speedAmt, colorAmt, cropAmt, mirrorOn, hookColorOn });
 
   return (
-    <form action={`/api/repurpose/${batchId}/generate`} method="post" className="space-y-6">
+    <form id="batch-generate" action={`/api/repurpose/${batchId}/generate`} method="post" className="space-y-6">
       <input type="hidden" name="name" value={name} />
       <input type="hidden" name="listCount" value={listCount} />
 
