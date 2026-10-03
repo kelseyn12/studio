@@ -5,6 +5,7 @@ import { useFormStatus } from "react-dom";
 import { tuneBodyVideos, tuneThisVideo } from "@/app/repurposer/output-actions";
 import { CoverPick } from "@/components/cover-pick";
 import type { TuneSection } from "@/lib/output-recipe";
+import { publicFileUrl } from "@/lib/urls";
 
 type Panel = "off" | "tune" | "cover";
 
@@ -26,7 +27,7 @@ export function OutputTune({
 }: {
   outputId: string;
   src: string;
-  tracks: Array<{ id: string; filename: string }>;
+  tracks: Array<{ id: string; filename: string; path: string }>;
   musicTrackId: string;
   musicStart: number;
   sections: TuneSection[];
@@ -35,9 +36,11 @@ export function OutputTune({
   assetId: string;
   coverAt?: number;
 }) {
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const songRef = useRef<HTMLAudioElement>(null);
   const [open, setOpen] = useState<Panel>("off");
+  const [trackId, setTrackId] = useState(musicTrackId || "none");
   const [start, setStart] = useState(musicStart > 0 ? musicStart.toFixed(1) : "0");
+  const song = tracks.find((track) => track.id === trackId);
   return (
     <div className="mt-2 space-y-2">
       <div className="flex gap-3">
@@ -69,10 +72,17 @@ export function OutputTune({
       {open === "tune" && ready ? (
         <form className="space-y-2 border-t border-line pt-3">
           <input type="hidden" name="outputId" value={outputId} />
-          <video ref={videoRef} src={src} controls playsInline className="aspect-[9/16] w-36 rounded-lg bg-ink" />
           <label className="block text-xs text-mute">
             Music on this video
-            <select name="musicTrackId" defaultValue={musicTrackId} className="field mt-1 text-sm">
+            <select
+              name="musicTrackId"
+              value={trackId}
+              onChange={(event) => {
+                setTrackId(event.target.value);
+                setStart("0");
+              }}
+              className="field mt-1 text-sm"
+            >
               <option value="none">None</option>
               {tracks.map((track) => (
                 <option key={track.id} value={track.id}>
@@ -81,15 +91,24 @@ export function OutputTune({
               ))}
             </select>
           </label>
+          {song ? (
+            <audio key={song.path} ref={songRef} src={publicFileUrl(song.path)} controls className="w-full" />
+          ) : null}
           <input type="hidden" name="musicStart" value={start} />
-          <p className="text-xs text-mute">Music starts at {start}s. Play to the beat, then mark it.</p>
-          <button
-            type="button"
-            className="rounded-lg border border-line px-2 py-1 text-xs"
-            onClick={() => setStart((videoRef.current?.currentTime || 0).toFixed(1))}
-          >
-            Music starts now
-          </button>
+          <p className="text-xs text-mute">
+            {song
+              ? `Song starts at ${start}s. Play to the part you want, then mark it. Rebuild. The video cuts the song off at the end.`
+              : "No song on this video."}
+          </p>
+          {song ? (
+            <button
+              type="button"
+              className="rounded-lg border border-line px-2 py-1 text-xs"
+              onClick={() => setStart((songRef.current?.currentTime || 0).toFixed(1))}
+            >
+              Use this part
+            </button>
+          ) : null}
           {sections.map((section) => (
             <label key={section.clipId} className="block text-xs text-mute">
               {section.label} sentences — one line each. Times stay.

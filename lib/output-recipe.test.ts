@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bodyMates, chosenTrackId, musicDelayPrefix, parseRecipe, rebuildsEveryBodyMate, tuneSections } from "@/lib/output-recipe";
+import { bodyMates, chosenTrackId, musicFromPrefix, parseRecipe, rebuildsEveryBodyMate, tuneSections } from "@/lib/output-recipe";
 
 const recipe = {
   look: "tiktok" as const,
@@ -21,9 +21,9 @@ const recipe = {
 };
 
 describe("output recipe", () => {
-  it("delays music only when the start is past zero", () => {
-    expect(musicDelayPrefix(0)).toBe("");
-    expect(musicDelayPrefix(3.2)).toBe("adelay=3200|3200,");
+  it("starts the song at the chosen second", () => {
+    expect(musicFromPrefix(0)).toBe("");
+    expect(musicFromPrefix(12.5)).toBe("atrim=start=12.500,asetpts=PTS-STARTPTS,");
   });
 
   it("treats a blank music choice as the song from Generate", () => {

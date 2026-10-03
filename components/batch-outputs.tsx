@@ -17,7 +17,7 @@ type Output = {
   captionsJson: string;
 };
 type Clip = { id: string; slot: string; captionsJson: string };
-type Track = { id: string; filename: string };
+type Track = { id: string; filename: string; path: string };
 type CardState = {
   id: string;
   status: string;

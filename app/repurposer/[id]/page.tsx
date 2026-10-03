@@ -148,7 +148,8 @@ export default async function BatchPage({
         <p className="label">Music · optional</p>
         <p className="mb-3 text-sm text-mute">
           Each video picks a random track from this list. Voice stays loud — music sits under it. Drop more than one
-          song if you want different music on each video. One song = every video gets that song.
+          song if you want different music on each video. One song = every video gets that song. After Generate, Words +
+          music on a video picks the part of the song.
         </p>
         <DropZone
           action="/api/repurpose/music"
@@ -246,7 +247,7 @@ export default async function BatchPage({
         polish={query.polish}
         tuned={query.tuned}
         clips={batch.clips.map((clip) => ({ id: clip.id, slot: clip.slot, captionsJson: clip.captionsJson }))}
-        tracks={batch.tracks.map((track) => ({ id: track.id, filename: track.filename }))}
+        tracks={batch.tracks.map((track) => ({ id: track.id, filename: track.filename, path: track.path }))}
       />
     </Shell>
   );

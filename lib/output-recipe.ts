@@ -26,9 +26,11 @@ export type OutputRecipe = {
 
 const LOOKS = new Set(["tiktok", "instagram", "plain"]);
 
-export function musicDelayPrefix(seconds: number): string {
-  const ms = Math.round(Math.max(0, seconds) * 1000);
-  return ms > 0 ? `adelay=${ms}|${ms},` : "";
+/** Starts the song at this second. The video still ends the music when the clip ends. */
+export function musicFromPrefix(seconds: number): string {
+  const start = Math.max(0, seconds);
+  if (start <= 0) return "";
+  return `atrim=start=${start.toFixed(3)},asetpts=PTS-STARTPTS,`;
 }
 
 /** "" keeps the song from Generate. "none" is silence. Anything else is a track id. */

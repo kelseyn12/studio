@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-10-02 — Words + music can start a song at a chosen second. The file used to always play from the beginning.
 - 2026-10-02 — Thumbnail is a labeled player on Cut and on Schedule. It was a tiny “cover” button under the Watch link, so it read as missing.
 - 2026-10-02 — Each named video stays one file. Schedule no longer asks for the other version on the same name. Cuts can delete an empty slot. A TT name starts on the TT · YT drop.
 - 2026-10-02 — Sync no longer replaces the label typed on Accounts. A new account still starts with Outstand's name.
