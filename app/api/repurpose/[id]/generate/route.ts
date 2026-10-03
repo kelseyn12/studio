@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { pickCombos } from "@/lib/combinations";
+import { ensureLocal } from "@/lib/files";
 import { prisma } from "@/lib/prisma";
+import { bodyCtaClash } from "@/lib/same-take";
 import { isRendering, renderBatch, renderStatus } from "@/lib/render-batch";
 import { readSession } from "@/lib/session";
 import { targetAccounts } from "@/lib/targets";
@@ -66,6 +68,14 @@ export async function POST(
   const combos = pickCombos([hooks, bodies, ctas], batch.count, batch.allCombos);
   if (combos.length === 0) {
     return NextResponse.json({ error: "Add clips first" }, { status: 400 });
+  }
+  const clash = await bodyCtaClash(
+    await Promise.all(bodies.map(async (clip) => ({ path: await ensureLocal(clip.path) }))),
+    await Promise.all(ctas.map(async (clip) => ({ path: await ensureLocal(clip.path) }))),
+  );
+  if (clash) {
+    await prisma.repurposeBatch.update({ where: { id }, data: { status: "draft" } });
+    return NextResponse.redirect(new URL(`/repurposer/${id}?mix=same-take`, request.url), 303);
   }
   const targets = targetAccounts(await prisma.socialAccount.findMany(), batch);
   if (targets.length === 0) {

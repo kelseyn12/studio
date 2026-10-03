@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-10-03 — Multiply was burying the voice under the song and stitching a CTA into the middle. The song now stays under the voice, and Generate stops when Bodies and a CTA are the same recording.
 - 2026-10-02 — Library files from Multiply sit in a folder named for that batch, with still to do above posted.
 - 2026-10-02 — Words + music can start a song at a chosen second. The file used to always play from the beginning.
 - 2026-10-02 — Thumbnail is a labeled player on Cut and on Schedule. It was a tiny “cover” button under the Watch link, so it read as missing.

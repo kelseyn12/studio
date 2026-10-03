@@ -335,6 +335,8 @@
   The frame picker was a tiny player labeled cover, under Watch, and only on Schedule. Cut and Schedule now show a Thumbnail heading and Save this frame as the thumbnail.
 - [X] One name is one video
   Schedule no longer offers a second drop on the same name. Cuts has Delete. A TT title starts on the TT · YT drop. Library rows say IG · FB or TT · YT.
+- [X] Multiply voice and the middle clip
+  The song was louder than the phone voice, so the mix now keeps the voice full and the song quiet. Generate stops when the Bodies clip is the same recording as a CTA, which was playing the ending twice.
 - [X] Account labels survive Sync
   Sync was writing Outstand's name over the label. Existing accounts keep the label. The wiped ig/tt/yt/fb labels were put back.
 

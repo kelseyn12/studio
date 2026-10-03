@@ -26,11 +26,22 @@ export type OutputRecipe = {
 
 const LOOKS = new Set(["tiktok", "instagram", "plain"]);
 
+/**
+ * Licensed tracks peak near full scale. Phone voice on these clips peaks about 25 dB quieter.
+ * 0.015 keeps the song under that voice. amix must not normalize, or it cuts the voice in half.
+ */
+export const MUSIC_UNDER_VOICE = 0.015;
+
 /** Starts the song at this second. The video still ends the music when the clip ends. */
 export function musicFromPrefix(seconds: number): string {
   const start = Math.max(0, seconds);
   if (start <= 0) return "";
   return `atrim=start=${start.toFixed(3)},asetpts=PTS-STARTPTS,`;
+}
+
+/** Voice stays full. The song is quiet and stops when the video stops. */
+export function musicMixFilter(musicIndex: number, start: number): string {
+  return `[${musicIndex}:a]${musicFromPrefix(start)}volume=${MUSIC_UNDER_VOICE},aresample=44100[mus];[outa][mus]amix=inputs=2:duration=first:dropout_transition=0:normalize=0[mix]`;
 }
 
 /** "" keeps the song from Generate. "none" is silence. Anything else is a track id. */

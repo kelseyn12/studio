@@ -10,7 +10,7 @@ import { hasR2 } from "@/lib/r2";
 import { prisma } from "@/lib/prisma";
 import { pickTracks } from "@/lib/combinations";
 import { targetAccounts } from "@/lib/targets";
-import { openAiFailStatus } from "@/lib/whisper";
+import { renderFailNote } from "@/lib/whisper";
 import { stripHighlight } from "@/lib/ass";
 import type { OutputRecipe } from "@/lib/output-recipe";
 import { hookLooks, LOOK_TAG } from "@/lib/text-style";
@@ -269,7 +269,7 @@ export async function renderBatch(input: {
   } catch (error) {
     await prisma.repurposeBatch.update({
       where: { id },
-      data: { status: openAiFailStatus(error) },
+      data: { status: renderFailNote(error) },
     });
   }
 }

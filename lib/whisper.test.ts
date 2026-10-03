@@ -9,6 +9,7 @@ import {
   OPENAI_BILLING_URL,
   openAiFailStatus,
   openAiUserError,
+  renderFailNote,
   parseTranscript,
   TRANSCRIBE_MODEL,
   WHISPER_FILE_MAX_BYTES,
@@ -40,6 +41,9 @@ describe("OpenAI billing errors", () => {
     );
     expect(openAiUserError(NO_CREDITS)).toContain(OPENAI_BILLING_URL);
     expect(openAiFailStatus(new Error("ffmpeg missing drawtext")).length).toBeLessThanOrEqual(160);
+    const dump = `${"Duration: 00:00:03.20, bitrate stream ".repeat(20)}\nConversion failed!`;
+    expect(renderFailNote(new Error(dump))).toContain("Conversion failed!");
+    expect(renderFailNote(new Error(dump)).startsWith("Duration")).toBe(false);
   });
 
   it("maps Whisper's 25 MB upload cap instead of showing the 413", () => {

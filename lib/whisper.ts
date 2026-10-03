@@ -28,6 +28,19 @@ export function openAiFailStatus(error: unknown): string {
   return (message || "failed").trim().slice(0, 160);
 }
 
+/** Keep the real ffmpeg line. A long dump used to save the middle of the probe text. */
+export function renderFailNote(error: unknown): string {
+  const message = error instanceof Error ? error.message : "";
+  if (isNoCredits(message) || isListenTooBig(message)) return openAiFailStatus(error);
+  const lines = message
+    .trim()
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const tail = lines.slice(-2).join(" ");
+  return (tail || "failed").slice(-160);
+}
+
 export function openAiUserError(message: string): string {
   if (isNoCredits(message)) return `OpenAI is out of credits. Add some at ${OPENAI_BILLING_URL}`;
   if (isListenTooBig(message)) {

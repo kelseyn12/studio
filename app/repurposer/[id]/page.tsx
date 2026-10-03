@@ -23,7 +23,7 @@ export default async function BatchPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ hook?: string; polish?: string; tuned?: string }>;
+  searchParams: Promise<{ hook?: string; polish?: string; tuned?: string; mix?: string }>;
 }) {
   const { id } = await params;
   const query = await searchParams;
@@ -101,6 +101,13 @@ export default async function BatchPage({
             </Link>
           ))}
         </div>
+      ) : null}
+
+      {query.mix === "same-take" ? (
+        <p className="mt-6 rounded-card border border-line bg-panel px-5 py-4 text-sm text-review">
+          The clip in Bodies is the same recording as one of the CTAs. Those videos play that ending twice and skip a
+          middle. Put the walkthrough in Bodies, and leave endings only in CTAs.
+        </p>
       ) : null}
 
       <section className="my-8">

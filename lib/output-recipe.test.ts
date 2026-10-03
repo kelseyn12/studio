@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bodyMates, chosenTrackId, musicFromPrefix, parseRecipe, rebuildsEveryBodyMate, tuneSections } from "@/lib/output-recipe";
+import { bodyMates, chosenTrackId, musicFromPrefix, musicMixFilter, parseRecipe, rebuildsEveryBodyMate, tuneSections } from "@/lib/output-recipe";
 
 const recipe = {
   look: "tiktok" as const,
@@ -24,6 +24,15 @@ describe("output recipe", () => {
   it("starts the song at the chosen second", () => {
     expect(musicFromPrefix(0)).toBe("");
     expect(musicFromPrefix(12.5)).toBe("atrim=start=12.500,asetpts=PTS-STARTPTS,");
+  });
+
+  it("keeps voice full and the song quiet", () => {
+    const filter = musicMixFilter(4, 0);
+    expect(filter).toContain("volume=0.015");
+    expect(filter).toContain("normalize=0");
+    expect(filter).toContain("dropout_transition=0");
+    expect(filter).not.toContain("volume=0.22");
+    expect(musicMixFilter(4, 8)).toContain("atrim=start=8.000");
   });
 
   it("treats a blank music choice as the song from Generate", () => {
