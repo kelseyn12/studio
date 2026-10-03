@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-10-03 — The song slider moves in small steps instead of four snaps. The batch count says stories, then two files when IG and TikTok both get a copy.
 - 2026-10-03 — Multiply has a song-volume slider. Every step keeps the voice full and the song under it.
 - 2026-10-03 — Multiply was burying the voice under the song and stitching a CTA into the middle. The song now stays under the voice, and Generate stops when Bodies and a CTA are the same recording.
 - 2026-10-02 — Library files from Multiply sit in a folder named for that batch, with still to do above posted.

@@ -6,7 +6,7 @@ import { BatchTargets, Row, type BatchAccount } from "@/components/batch-targets
 import { TextStylePick } from "@/components/text-style-pick";
 import { dealAccounts, parseAccountIds } from "@/lib/targets";
 import { hookLooks, parseTextStyle, type TextStyle } from "@/lib/text-style";
-import { LIST_MAX, mixStoryNote, outputCount, parseHookLines, plannedMixes, variationFor } from "@/lib/variations";
+import { LIST_MAX, mixStoryNote, parseHookLines, plannedMixes, variationFor } from "@/lib/variations";
 
 type Option = { id: string; name: string };
 
@@ -82,8 +82,9 @@ export function BatchSettings({
     () => plannedMixes(hooks, bodies, ctas, allCombos, count),
     [hooks, bodies, ctas, allCombos, count],
   );
-  const files = outputCount(mixes, variants) * Math.max(textCount, 1);
-  const looks = textCount > 0 ? hookLooks(textStyle, targetNetworks, true).length : 1;
+  const stories = mixes * Math.max(textCount, 1) * Math.max(variants, 1);
+  const looks = hookLooks(textStyle, targetNetworks, textCount > 0 || captionsOn || listCount > 0).length;
+  const files = stories * looks;
   const copy1 = variationFor(0, { speedAmt, colorAmt, cropAmt, mirrorOn, hookColorOn });
   const preview = variationFor(1, { speedAmt, colorAmt, cropAmt, mirrorOn, hookColorOn });
 
@@ -106,17 +107,15 @@ export function BatchSettings({
           {bodies > 0 ? ` × ${bodies} body` : ""}
           {ctas > 0 ? ` × ${ctas} CTA` : ""}
           {textCount > 0 ? ` × ${textCount} text line` : ""}
-          {variants > 1 ? ` × ${variants} copies` : ""} = {mixes * Math.max(textCount, 1) * Math.max(variants, 1)}{" "}
-          stor{mixes * Math.max(textCount, 1) * Math.max(variants, 1) === 1 ? "y" : "ies"}
+          {variants > 1 ? ` × ${variants} copies` : ""} = {stories} stor{stories === 1 ? "y" : "ies"}
+          {looks > 1 ? ` · ${files} files` : ""}
         </p>
         <p className="mt-2 text-sm text-ink/80">
           {mixStoryNote(hooks, bodies)}
           {variants > 1
             ? " Copies are the same clips with a nudge — not a new story."
             : ""}
-          {looks > 1
-            ? ` Both looks doubles the files (${files * looks}) — same video, Instagram text and TikTok text.`
-            : ""}
+          {looks > 1 ? " Each story is two files: one for IG · FB and one for TT · YT." : ""}
         </p>
       </div>
 

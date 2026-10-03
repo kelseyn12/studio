@@ -42,7 +42,11 @@ export async function tuneOutput(formData: FormData) {
     where: { id: outputId },
     data: {
       captionsJson: JSON.stringify(map),
-      recipeJson: JSON.stringify({ ...recipe, musicLevel: musicLevel(formData.get("musicLevel")) }),
+      recipeJson: JSON.stringify({
+        ...recipe,
+        musicLevel: musicLevel(formData.get("musicLevel")),
+        musicSmooth: true,
+      }),
       musicTrackId: String(formData.get("musicTrackId") || "none"),
       musicStart: Math.max(0, Number(formData.get("musicStart") || 0)),
     },

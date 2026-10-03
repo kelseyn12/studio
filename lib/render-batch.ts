@@ -230,6 +230,7 @@ export async function renderBatch(input: {
                 trackId: music?.id ?? "",
                 bodyClipId: combo.find((clip) => clip.slot === "DEMO")?.id ?? "",
                 musicLevel: batch.musicLevel,
+                musicSmooth: true,
               },
             });
           }

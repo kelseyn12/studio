@@ -53,6 +53,7 @@ export function Slider({
         type="range"
         min={0}
         max={max}
+        step={1}
         value={value}
         onChange={(event) => onChange(Number(event.target.value))}
         className="w-full accent-sun"

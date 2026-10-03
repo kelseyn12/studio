@@ -7,7 +7,7 @@ import { hookEmojiSpots, writeHookAss, type HookAssInput } from "@/lib/ass";
 import { chainOverlays, emojiArtFor, emojiOverlayFilter, emojiPrepFilter, type EmojiArt, type OverlayStage } from "@/lib/emoji-overlay";
 import { logoOverlayFilter } from "@/lib/hook-logos-math";
 import { sharedListPlan, type Box } from "@/lib/list-layout";
-import { musicMixFilter } from "@/lib/output-recipe";
+import { MUSIC_LEVEL_DEFAULT, musicMixFilter } from "@/lib/output-recipe";
 import type { DrawnStyle } from "@/lib/text-style";
 
 const FFMPEG_FULL = "/opt/homebrew/opt/ffmpeg-full/bin/ffmpeg";
@@ -295,7 +295,7 @@ export async function assembleVideo(input: {
   const concatIn = Array.from({ length: n }, (_, index) => `[v${index}][a${index}]`).join("");
   chains.push(`${concatIn}concat=n=${n}:v=1:a=1[outv][outa]`);
   if (input.musicPath && musicIndex >= 0) {
-    chains.push(musicMixFilter(musicIndex, input.musicStart ?? 0, input.musicLevel ?? 1));
+    chains.push(musicMixFilter(musicIndex, input.musicStart ?? 0, input.musicLevel ?? MUSIC_LEVEL_DEFAULT));
   }
   args.push("-filter_complex", chains.join(";"));
   args.push("-map", "[outv]", "-map", input.musicPath ? "[mix]" : "[outa]");

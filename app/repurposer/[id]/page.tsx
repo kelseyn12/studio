@@ -270,7 +270,7 @@ function RenderProgress({ status, batchId }: { status: string; batchId: string }
   return (
     <div className="mt-6 rounded-card border border-line bg-panel px-5 py-4">
       <p className="text-sm font-semibold text-sun">
-        Building your videos · {done} of {total} done
+        Building {done} of {total} stories
       </p>
       <div className="mt-3 h-2 overflow-hidden rounded-full bg-lift">
         <div className="h-full rounded-full bg-sun transition-all" style={{ width: `${pct}%` }} />

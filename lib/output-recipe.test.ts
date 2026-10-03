@@ -26,20 +26,20 @@ describe("output recipe", () => {
     expect(musicFromPrefix(12.5)).toBe("atrim=start=12.500,asetpts=PTS-STARTPTS,");
   });
 
-  it("clamps the song slider to the steps that stay under the voice", () => {
-    expect(musicLevel(undefined)).toBe(1);
+  it("lets the song slider land anywhere from quiet to just under the voice", () => {
+    expect(musicLevel(undefined)).toBe(40);
     expect(musicLevel(-3)).toBe(0);
-    expect(musicLevel(3.2)).toBe(3);
-    expect(musicLevel(20)).toBe(3);
-  });
-
-  it("keeps voice full and the song under it at every step", () => {
-    expect(musicMixFilter(4, 0, 1)).toContain("volume=0.015");
-    expect(musicMixFilter(4, 0, 0)).toContain("volume=0.008");
-    expect(musicMixFilter(4, 0, 3)).toContain("volume=0.040");
-    expect(musicMixFilter(4, 0, 9)).toContain("volume=0.040");
-    expect(musicMixFilter(4, 0, 1)).toContain("normalize=0");
-    expect(musicMixFilter(4, 8, 1)).toContain("atrim=start=8.000");
+    expect(musicLevel(20)).toBe(20);
+    expect(musicLevel(140)).toBe(100);
+    expect(musicMixFilter(4, 0, 0)).toContain("volume=0.0080");
+    expect(musicMixFilter(4, 0, 100)).toContain("volume=0.0400");
+    expect(musicMixFilter(4, 0, 40)).toContain("normalize=0");
+    const mid = Number(musicMixFilter(4, 0, 40).match(/volume=([\d.]+)/)?.[1]);
+    expect(mid).toBeGreaterThan(0.012);
+    expect(mid).toBeLessThan(0.02);
+    expect(musicMixFilter(4, 8, 40)).toContain("atrim=start=8.000");
+    expect(parseRecipe(JSON.stringify({ ...recipe, musicLevel: 1 }))?.musicLevel).toBe(40);
+    expect(parseRecipe(JSON.stringify({ ...recipe, musicLevel: 12, musicSmooth: true }))?.musicLevel).toBe(12);
   });
 
   it("treats a blank music choice as the song from Generate", () => {
