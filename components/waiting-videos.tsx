@@ -24,8 +24,8 @@ type WaitingCard = {
 };
 
 /**
- * Finished mixes with no day yet, closed under the batch name you typed. Open a mix for its
- * accounts. Each look stays a dropdown — closed it shows who is checked. A tap saves right away.
+ * Finished mixes with no day yet. The batch name is the dropdown. Opening it shows every mix
+ * in that batch. Each look stays a dropdown — closed it shows who is checked. A tap saves right away.
  */
 export function WaitingVideos({
   folders,
@@ -44,25 +44,22 @@ export function WaitingVideos({
               {folder.cards.length} {folder.cards.length === 1 ? "mix" : "mixes"} ▾
             </span>
           </summary>
-          <div className="space-y-2 border-t border-line px-3 py-3">
+          <div className="space-y-3 border-t border-line px-3 py-3">
             {folder.cards.map((card) => (
-              <details key={card.id} className="rounded-xl border border-line">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-2 [&::-webkit-details-marker]:hidden">
-                  <span className="min-w-0 flex-1 truncate text-sm font-medium">{card.mixLabel}</span>
-                  <Link
-                    href={`/cards/${card.id}?step=live`}
-                    onClick={(event) => event.stopPropagation()}
-                    className="shrink-0 text-sm text-sun"
-                  >
+              <form
+                key={card.id}
+                action={saveCardAccounts}
+                onChange={(event) => event.currentTarget.requestSubmit()}
+                className="rounded-xl border border-line px-3 py-3"
+              >
+                <input type="hidden" name="cardId" value={card.id} />
+                <div className="flex items-center justify-between gap-3">
+                  <p className="min-w-0 flex-1 truncate text-sm font-medium">{card.mixLabel}</p>
+                  <Link href={`/cards/${card.id}?step=live`} className="shrink-0 text-sm text-sun">
                     Cover + caption
                   </Link>
-                </summary>
-                <form
-                  action={saveCardAccounts}
-                  onChange={(event) => event.currentTarget.requestSubmit()}
-                  className="grid gap-2 border-t border-line px-3 py-3 md:grid-cols-2"
-                >
-                  <input type="hidden" name="cardId" value={card.id} />
+                </div>
+                <div className="mt-2 grid gap-2 md:grid-cols-2">
                   {card.lookRows.map((row) => (
                     <details key={row.look} className="rounded-xl border border-line">
                       <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2 text-sm [&::-webkit-details-marker]:hidden">
@@ -87,8 +84,8 @@ export function WaitingVideos({
                       </div>
                     </details>
                   ))}
-                </form>
-              </details>
+                </div>
+              </form>
             ))}
           </div>
         </details>

@@ -273,8 +273,8 @@ export default async function CalendarPage({
         <section className="mt-8 max-w-3xl">
           <h2 className="mb-3 text-lg font-semibold">{waiting.length} finished, no day yet</h2>
           <p className="mb-3 text-sm text-mute">
-            Open the batch you named, then a mix. Check IG · FB or TT · YT (a tap saves), then schedule that mix on a
-            day above.
+            Open the batch you named. Every mix in it is listed there. Check IG · FB or TT · YT (a tap saves), then
+            schedule that mix on a day above.
           </p>
           <WaitingVideos folders={waitingFolders} accounts={accounts} />
         </section>
