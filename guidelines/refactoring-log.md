@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-10-04 — Live's waiting list is a closed folder per Multiply name. Open the folder, then a mix, to check accounts.
 - 2026-10-03 — A blank caption stays blank. The file name is no longer sent as the caption. A video that already has a time can update that caption without sending again.
 - 2026-10-03 — A video can only be scheduled once. `queueCard` claims the day, and a second press sends nothing unless that app's latest try failed. The video page hides Schedule once a time is set.
 - 2026-10-03 — Today no longer reloads itself every few seconds. Clicks were waiting behind that reload. Clerk is remembered between clicks, and Today's counts load together.

@@ -1,5 +1,9 @@
 # To-do
 
+- [X] Waiting videos sit in a folder
+  Live groups finished videos with no day under the Multiply name you typed.
+  Each mix opens on its own. The file name is not the folder name.
+
 - [X] Blank caption, and update a scheduled caption
   An empty caption box posts with no caption. The file name is not used.
   Update caption for scheduled post changes the waiting post and does not send a second one.

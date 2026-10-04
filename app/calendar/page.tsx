@@ -17,6 +17,7 @@ import {
   weekGrid,
 } from "@/lib/dates";
 import { fileLooks } from "@/lib/card-desk";
+import { groupWaitingFolders } from "@/lib/waiting-folders";
 import { prisma } from "@/lib/prisma";
 import { heldNote, missedNote, postedAppLine } from "@/lib/publish-sync";
 import { sweepFailedPublishes } from "@/lib/publish-sweep";
@@ -42,11 +43,12 @@ export default async function CalendarPage({
   const weekStart = startOfWeek(anchor);
   const days = view === "month" ? monthGrid(anchor) : weekGrid(anchor);
   const weekEnd = addDays(weekStart, 7);
-  const [cards, accounts, failedJobs] = await Promise.all([
+  const [cards, accounts, failedJobs, batchLinks] = await Promise.all([
     prisma.card.findMany({
       where: { OR: [{ scheduledAt: { not: null } }, { status: "READY" }] },
       include: {
         account: true,
+        campaign: { select: { name: true } },
         assets: { select: { kind: true, textStyle: true } },
         publishes: { select: { status: true, scheduledAt: true, account: { select: { network: true } } } },
       },
@@ -69,7 +71,16 @@ export default async function CalendarPage({
       },
       orderBy: { createdAt: "desc" },
     }),
+    prisma.repurposeOut.findMany({
+      where: { cardId: { not: null } },
+      select: { cardId: true, batch: { select: { name: true } } },
+    }),
   ]);
+  const batchByCard = new Map<string, string>();
+  for (const link of batchLinks) {
+    const name = link.batch.name.trim();
+    if (link.cardId && name) batchByCard.set(link.cardId, name);
+  }
   const withLooks = cards.map((card) => ({
     ...card,
     looks: targetApps(targetAccounts(accounts, card)),
@@ -83,10 +94,15 @@ export default async function CalendarPage({
   const waiting = withLooks
     .filter((card) => card.status === "READY" && !card.scheduledAt)
     .map((card) => ({
-      ...card,
+      id: card.id,
+      title: card.title,
+      hook: card.hook,
+      batch: batchByCard.get(card.id) ?? "",
+      deal: card.campaign?.name ?? "",
       lookRows: fileLooks(card.assets),
       selectedIds: targetAccounts(accounts, card).map((account) => account.id),
     }));
+  const waitingFolders = groupWaitingFolders(waiting);
   const parked = withLooks.filter((card) => card.scheduledAt && card.status !== "POSTED" && card.status !== "DATA");
   const posted = withLooks.filter((card) => card.status === "POSTED" || card.status === "DATA");
   const thisWeek = cards.filter(
@@ -254,13 +270,13 @@ export default async function CalendarPage({
       )}
 
       {waiting.length > 0 && view === "week" ? (
-        <section className="mt-8">
+        <section className="mt-8 max-w-3xl">
           <h2 className="mb-3 text-lg font-semibold">{waiting.length} finished, no day yet</h2>
           <p className="mb-3 text-sm text-mute">
-            Each mix is two videos. Open IG · FB or TT · YT to check the accounts (a tap saves), then schedule the mix
-            on a day above.
+            Open the batch you named, then a mix. Check IG · FB or TT · YT (a tap saves), then schedule that mix on a
+            day above.
           </p>
-          <WaitingVideos cards={waiting} accounts={accounts} />
+          <WaitingVideos folders={waitingFolders} accounts={accounts} />
         </section>
       ) : null}
     </Shell>
