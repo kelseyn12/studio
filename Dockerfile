@@ -28,6 +28,13 @@ ENV NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=/
 ENV NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL=/
 ENV DATABASE_URL=file:/tmp/build.db
 
+# These are public-at-build on purpose. Next bakes NEXT_PUBLIC_ into the pages, so a
+# deploy without them shows the laptop PIN form on the public site.
+RUN if [ -z "$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY" ] || [ -z "$CLERK_SECRET_KEY" ]; then \
+      echo "Clerk keys were not passed to this build. Refusing to ship the PIN login."; \
+      exit 1; \
+    fi
+
 RUN pnpm exec prisma generate && pnpm exec prisma db push --skip-generate && pnpm build
 
 EXPOSE 3000

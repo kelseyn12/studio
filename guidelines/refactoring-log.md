@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-10-05 — The public site was showing the laptop PIN form because Clerk keys are baked in at build and the last deploy did not pass them. The image build now refuses to finish without those keys.
 - 2026-10-05 — Job pings go to Discord (`lib/discord.ts`). `pingStudio` mentions the editor on a new job or a revision, and you when a cut comes back. ManyChat still runs only when its keys exist.
 - 2026-10-05 — The editor's job shows the script, reference link, and deadline (`components/editor-brief.tsx`); Cuts cards show Due. Editor guide covers both kinds of video: batch (put the words on) and full edit (cut from the clips).
 - 2026-10-05 — The editor owes one file per mix. Two files (IG · FB + TT · YT) only when the batch's text look is Both looks; the deal's accounts no longer decide it. `batchNameByCard` → `batchByCard` with `twoLooks`. Editor guide rewritten around `mix 2.mp4`.
