@@ -21,6 +21,7 @@
 - `pingStudio` — `lib/manychat.ts` — optional DM when a job is sent or parked. Recipes live on `/dms`.
 - `wordsSheet` / `neededLooks` / `mixNumberIn` / `lookInFileName` / `matchDropToCard` / `groupEditorBatches` / `editorStage` / `ONE_FILE_TAG` — `lib/editor-batches.ts` — the editor's batch folders. Words (Hook / Body / CTA) from the card, one file per mix unless the batch is set to Both looks (then IG · FB + TT · YT), and which video a dropped file belongs to by the mix number in its name. Used by Cuts (`app/edits/page.tsx`, `components/editor-batch.tsx`), the video page's "Your job", and `POST /api/assets/batch`.
 - `EditorBrief` — `components/editor-brief.tsx` — the editor's read-first block on a job: due day, note, words to put on, script (folded), reference link (https only). Used by `CardEditorStage` when `desk`.
+- `discordMessage` / `postDiscord` / `hasDiscord` — `lib/discord.ts` — job pings in the Studio- Editing channel. Mentions the editor or you, and adds the Cuts link. `pingStudio` in `lib/manychat.ts` calls this first.
 - `attachEditedFile` — `lib/cut-ready.ts` — saves a finished file as an EDITED asset and calls `markCutReady`. Used by `/api/assets` and `/api/assets/batch`.
 - `batchByCard` — `lib/queries.ts` — card id → `{ name, twoLooks }` for its Multiply batch. Used by Live's waiting folders and Cuts' batch folders.
 - `RepurposeBatch.burnText` — Multiply "Draw the words on the video". Off: `renderBatch` skips hook text, lists, and spoken captions, makes one file per mix, and still saves `hook` / `body` / `plug` on the card.

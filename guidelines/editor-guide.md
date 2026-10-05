@@ -10,6 +10,7 @@ Site: https://system-studio.fly.dev
 1. Kelsey invites you. You get an email from Studio.
 2. Open it and sign up with **that same email**. Google sign-in works if it is the same address.
 3. You land on **Cuts**. That is your page. Bookmark it.
+4. When a job is sent, Studio pings you in the **Studio- Editing** Discord. You do not have to keep the page open.
 
 ## 2. Two kinds of video
 
@@ -158,5 +159,6 @@ You never schedule, pick thumbnails, or write captions.
 4. Open the video → Live: watch, pick the thumbnail, check accounts, caption (blank stays blank),
    schedule. Needs a fix? Send it back to the editor with a note.
 5. Add him once on **Team** with his email → Invite. Mark him **default** so Send never asks.
+6. Discord pings: you are mentioned when a cut comes back, he is mentioned when you send a job. Keys live in `.env` (`DISCORD_BOT_TOKEN`, `DISCORD_CHANNEL_ID`, `DISCORD_EDITOR_ID`, `DISCORD_CREATOR_ID`). The same four have to be on Fly or a drop on the public site stays quiet.
 
 Fly cost does not change for any of this. Multiply still renders on your Mac.
