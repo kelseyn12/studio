@@ -40,6 +40,7 @@ export function BatchSettings({
     trimOn: boolean;
     hookColorOn: boolean;
     captionsOn: boolean;
+    burnText: boolean;
     listCount: number;
     textStyle: string;
     hookLines: string;
@@ -64,6 +65,7 @@ export function BatchSettings({
   const [trimOn, setTrimOn] = useState(defaults.trimOn);
   const [hookColorOn, setHookColorOn] = useState(defaults.hookColorOn);
   const [captionsOn, setCaptionsOn] = useState(defaults.captionsOn);
+  const [burnText, setBurnText] = useState(defaults.burnText);
   const [listCount, setListCount] = useState(defaults.listCount);
   const [hookLines, setHookLines] = useState(defaults.hookLines);
   const [campaignId, setCampaignId] = useState(defaults.campaignId);
@@ -83,7 +85,7 @@ export function BatchSettings({
     [hooks, bodies, ctas, allCombos, count],
   );
   const stories = mixes * Math.max(textCount, 1) * Math.max(variants, 1);
-  const looks = hookLooks(textStyle, targetNetworks, textCount > 0 || captionsOn || listCount > 0).length;
+  const looks = hookLooks(textStyle, targetNetworks, burnText && (textCount > 0 || captionsOn || listCount > 0)).length;
   const files = stories * looks;
   const copy1 = variationFor(0, { speedAmt, colorAmt, cropAmt, mirrorOn, hookColorOn });
   const preview = variationFor(1, { speedAmt, colorAmt, cropAmt, mirrorOn, hookColorOn });
@@ -261,6 +263,15 @@ export function BatchSettings({
               <input type="hidden" name="cropAmt" value={cropAmt} />
             </>
           )}
+          <Row label="Draw the words on the video">
+            <div className="flex items-center gap-3">
+              <p className="max-w-56 text-right text-xs text-mute">
+                Off: videos come out clean, and the hook and CTA words go to your editor to add in CapCut. One file per
+                mix.
+              </p>
+              <Toggle name="burnText" on={burnText} onChange={setBurnText} />
+            </div>
+          </Row>
           <Row label="Spoken words on screen">
             <div className="flex items-center gap-3">
               <p className="max-w-56 text-right text-xs text-mute">

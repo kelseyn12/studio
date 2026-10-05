@@ -40,6 +40,7 @@ export async function POST(
         trimOn: form.get("trimOn") === "on",
         hookColorOn: form.get("hookColorOn") === "on",
         captionsOn: form.get("captionsOn") === "on",
+        burnText: form.get("burnText") === "on",
         textStyle: parseTextStyle(form.get("textStyle")),
         listCount: Math.min(Math.max(Math.floor(Number(form.get("listCount") || 0)), 0), LIST_MAX),
         hookLines: String(form.get("hookLines") || ""),

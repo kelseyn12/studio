@@ -1,5 +1,12 @@
 # To-do
 
+- [X] Editor batches: clean videos + the words, in folders
+  Multiply "Draw the words on the video" off → one clean file per mix; hook, body, CTA saved on the card for the editor.
+  Cuts groups batch videos into a folder per Multiply name: words per mix, Needs IG · FB + TT · YT, Download all, drop many files named "mix 2 IG.mp4".
+
+- [ ] Verify editor folders in the browser
+  Sign in, open Cuts and a Multiply batch, confirm the toggle and the folder drop. The Clerk session had expired when this was built.
+
 - [X] Waiting videos sit in a folder
   Live groups finished videos with no day under the Multiply name you typed.
   Each mix opens on its own. The file name is not the folder name.

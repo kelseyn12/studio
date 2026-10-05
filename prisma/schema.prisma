@@ -254,6 +254,7 @@ model RepurposeBatch {
   trimOn      Boolean          @default(false)
   hookColorOn Boolean          @default(false)
   captionsOn  Boolean          @default(false)
+  burnText    Boolean          @default(true)
   textStyle   String           @default("auto")
   listCount   Int              @default(0)
   formatId    String?

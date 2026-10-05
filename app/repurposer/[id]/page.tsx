@@ -193,6 +193,7 @@ export default async function BatchPage({
           trimOn: batch.trimOn,
           hookColorOn: batch.hookColorOn,
           captionsOn: batch.captionsOn,
+          burnText: batch.burnText,
           textStyle: batch.textStyle,
           listCount: batch.listCount,
           hookLines: batch.hookLines,

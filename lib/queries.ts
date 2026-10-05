@@ -3,6 +3,20 @@ import { videoMoneyCents } from "@/lib/deal-bonuses";
 import { emptyCounts, statusToCountKey, type MachineCounts } from "@/lib/next-action";
 import { addDays, startOfDay, startOfWeek } from "@/lib/dates";
 
+/** The Multiply batch name behind each video, for folders on Live and Cuts. */
+export async function batchNameByCard(): Promise<Map<string, string>> {
+  const links = await prisma.repurposeOut.findMany({
+    where: { cardId: { not: null } },
+    select: { cardId: true, batch: { select: { name: true } } },
+  });
+  const names = new Map<string, string>();
+  for (const link of links) {
+    const name = link.batch.name.trim();
+    if (link.cardId && name) names.set(link.cardId, name);
+  }
+  return names;
+}
+
 export async function machineCounts(): Promise<MachineCounts> {
   const counts = emptyCounts();
   const today = startOfDay(new Date());

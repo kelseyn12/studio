@@ -19,6 +19,7 @@ import {
 import { fileLooks } from "@/lib/card-desk";
 import { groupWaitingFolders } from "@/lib/waiting-folders";
 import { prisma } from "@/lib/prisma";
+import { batchNameByCard } from "@/lib/queries";
 import { heldNote, missedNote, postedAppLine } from "@/lib/publish-sync";
 import { sweepFailedPublishes } from "@/lib/publish-sweep";
 import { targetAccounts, targetApps } from "@/lib/targets";
@@ -43,7 +44,7 @@ export default async function CalendarPage({
   const weekStart = startOfWeek(anchor);
   const days = view === "month" ? monthGrid(anchor) : weekGrid(anchor);
   const weekEnd = addDays(weekStart, 7);
-  const [cards, accounts, failedJobs, batchLinks] = await Promise.all([
+  const [cards, accounts, failedJobs, batchByCard] = await Promise.all([
     prisma.card.findMany({
       where: { OR: [{ scheduledAt: { not: null } }, { status: "READY" }] },
       include: {
@@ -71,16 +72,8 @@ export default async function CalendarPage({
       },
       orderBy: { createdAt: "desc" },
     }),
-    prisma.repurposeOut.findMany({
-      where: { cardId: { not: null } },
-      select: { cardId: true, batch: { select: { name: true } } },
-    }),
+    batchNameByCard(),
   ]);
-  const batchByCard = new Map<string, string>();
-  for (const link of batchLinks) {
-    const name = link.batch.name.trim();
-    if (link.cardId && name) batchByCard.set(link.cardId, name);
-  }
   const withLooks = cards.map((card) => ({
     ...card,
     looks: targetApps(targetAccounts(accounts, card)),

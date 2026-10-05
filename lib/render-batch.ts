@@ -45,6 +45,8 @@ export async function renderBatch(input: {
   const lines: Array<string | null> = textLines.length ? textLines : [null];
   const total = combos.length * lines.length * copies;
   const musicQueue = pickTracks(batch.tracks, total);
+  // Words off: the video comes out clean and the words ride on the card for the editor.
+  const burn = batch.burnText;
   try {
     // Deal batches post to every account on the deal; the text look follows that set.
     const targets = targetAccounts(await prisma.socialAccount.findMany(), batch);
@@ -59,7 +61,7 @@ export async function renderBatch(input: {
     }
     // Spoken captions: listen to each clip once, remember the words on the clip.
     const phrasesByClip = new Map<string, CaptionPhrase[]>();
-    if (batch.captionsOn) {
+    if (batch.captionsOn && burn) {
       for (const clip of batch.clips) {
         if (!spokenOnClip(clip.slot)) continue;
         let words = parseCaptionWords(clip.captionsJson);
@@ -92,15 +94,16 @@ export async function renderBatch(input: {
               const trim = trims.get(clip.path) ?? NO_TRIM;
               const phrases = spokenOnClip(clip.slot) ? phrasesByClip.get(clip.path) : undefined;
               const layout = parseHookLayout(clip.hookLayout);
+              const words = index === 0 ? line || clip.hookText || undefined : clip.hookText || undefined;
               return {
                 path: await ensureLocal(clip.path),
-                hookText: index === 0 ? line || clip.hookText || undefined : clip.hookText || undefined,
+                hookText: burn ? words : undefined,
                 trim,
                 phrases,
                 hookX: layout?.x,
                 hookY: layout?.y,
                 places: layout?.places,
-                listItems: layout?.list,
+                listItems: burn ? layout?.list : undefined,
                 listAt: layout?.listAt,
                 textFrom: layout?.from,
                 textTo: layout?.to,
@@ -139,7 +142,7 @@ export async function renderBatch(input: {
             const trim = trims.get(clip.path) ?? NO_TRIM;
             return {
               id: clip.id,
-              hookText: index === 0 ? line || clip.hookText || "" : clip.hookText || "",
+              hookText: burn ? (index === 0 ? line || clip.hookText || "" : clip.hookText || "") : "",
               trimStart: trim.start,
               trimEnd: trim.end,
             };
@@ -147,7 +150,7 @@ export async function renderBatch(input: {
           const looks = hookLooks(
             batch.textStyle,
             networks,
-            Boolean(hookLine) || batch.listCount > 0 || batch.captionsOn || clips.some((clip) => clip.listItems?.length),
+            burn && (Boolean(hookLine) || batch.listCount > 0 || batch.captionsOn || clips.some((clip) => clip.listItems?.length)),
           );
           const files: Array<{
             kind: "GENERATED";
@@ -187,7 +190,7 @@ export async function renderBatch(input: {
               outputName: `${id}-${fileNumber}${suffix}.mp4`,
               ...variation,
               hookStyle: look,
-              hookList: batch.listCount,
+              hookList: burn ? batch.listCount : 0,
               musicPath,
               musicStart: 0,
               musicLevel: batch.musicLevel,
@@ -225,7 +228,7 @@ export async function renderBatch(input: {
                 mirror: variation.mirror,
                 hookColor: variation.hookColor,
                 accentColor: variation.accentColor,
-                hookList: batch.listCount,
+                hookList: burn ? batch.listCount : 0,
                 clips: recipeClips,
                 trackId: music?.id ?? "",
                 bodyClipId: combo.find((clip) => clip.slot === "DEMO")?.id ?? "",
@@ -244,6 +247,8 @@ export async function renderBatch(input: {
               accountIds: targets.map((target) => target.id).join(","),
               createdById: userId,
               hook: stripHighlight(hookLine),
+              body: stripHighlight(combo.find((clip) => clip.slot === "DEMO")?.hookText || ""),
+              plug: stripHighlight(combo.find((clip) => clip.slot === "CTA")?.hookText || ""),
               caption: hookClip?.postCaption?.trim() || batch.caption,
               editorNote: `Uniqueness: ${variation.label}`,
               payoutCents: basePayCents,

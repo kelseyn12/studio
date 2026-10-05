@@ -5,6 +5,7 @@ import { FinishedDrop } from "@/components/finished-drop";
 import { EditorNeed } from "@/components/editor-need";
 import { PacketFiles } from "@/components/packet-files";
 import { lookForNewDrop } from "@/lib/card-desk";
+import { wordsSheet } from "@/lib/editor-batches";
 import type { PacketItem } from "@/lib/editor-packet";
 import { formatBytes, STUDIO_FILE_MAX_BYTES } from "@/lib/storage";
 import { watchUrl } from "@/lib/urls";
@@ -20,6 +21,9 @@ export function CardEditorStage({
   card: {
     id: string;
     title: string;
+    hook: string;
+    body: string;
+    plug: string;
     editorId: string | null;
     editorNote: string;
     capcutUrl: string;
@@ -51,6 +55,7 @@ export function CardEditorStage({
     Boolean(card.rawsUrl.trim()) ||
     files.some((file) => file.kind === "RAW" || file.kind === "VOICE" || file.kind === "REFERENCE");
   const dropOnly = self && !hasSources;
+  const words = wordsSheet(card);
   return (
     <div className="space-y-4">
       <section className="rounded-card border border-line bg-panel p-5">
@@ -68,6 +73,17 @@ export function CardEditorStage({
         </p>
         {desk && card.editorNote ? (
           <p className="mb-3 rounded-xl bg-lift px-4 py-3 text-sm">{card.editorNote}</p>
+        ) : null}
+        {desk && words.length > 0 ? (
+          <dl className="mb-3 space-y-1 rounded-xl bg-lift px-4 py-3 text-sm">
+            <p className="text-xs text-mute">Words to put on the video</p>
+            {words.map((line) => (
+              <div key={line.label} className="flex gap-2">
+                <dt className="w-10 shrink-0 text-mute">{line.label}</dt>
+                <dd className="whitespace-pre-wrap">{line.words}</dd>
+              </div>
+            ))}
+          </dl>
         ) : null}
         {desk ? <CapcutLink url={card.capcutUrl} editable={false} /> : null}
         {dropOnly ? null : <EditorNeed items={packet} />}

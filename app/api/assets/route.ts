@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { readSession } from "@/lib/session";
 import { saveUpload } from "@/lib/files";
 import { rejectStudioFile } from "@/lib/storage";
-import { markCutReady } from "@/lib/cut-ready";
+import { attachEditedFile } from "@/lib/cut-ready";
 import { prisma } from "@/lib/prisma";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
 import { hasOpenAI, transcribeFile } from "@/lib/whisper";
@@ -24,16 +24,16 @@ export async function POST(request: Request) {
   }
   const blocked = rejectStudioFile(file.size, kind);
   if (blocked) return NextResponse.json({ error: blocked }, { status: 400 });
-  const saved = await saveUpload(file, `cards/${id}`);
   const style = String(form.get("textStyle") || "");
   const textStyle = style === "instagram" || style === "tiktok" || style === "plain" ? style : "";
-  await prisma.asset.create({
-    data: { cardId: id, kind, ...saved, ...(kind === "EDITED" ? { textStyle } : {}) },
-  });
-  let transcript = "";
   if (kind === "EDITED") {
-    await markCutReady(id);
-  } else if (kind === "RAW" || kind === "VOICE") {
+    await attachEditedFile(id, file, textStyle);
+    return NextResponse.json({ ok: true, transcript: "" });
+  }
+  const saved = await saveUpload(file, `cards/${id}`);
+  await prisma.asset.create({ data: { cardId: id, kind, ...saved } });
+  let transcript = "";
+  if (kind === "RAW" || kind === "VOICE") {
     const card = await prisma.card.findUnique({ where: { id } });
     if (card && (card.status === "IDEA" || card.status === "SCRIPTED")) {
       await prisma.card.update({ where: { id }, data: { status: "FILMED" } });
