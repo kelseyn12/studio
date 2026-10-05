@@ -1,5 +1,13 @@
 import { watchUrl } from "@/lib/urls";
 
+/** What the editor downloads. The clean Multiply video is the one he puts words on. */
+const PACKET_LABEL: Record<string, string> = {
+  GENERATED: "Clean video",
+  RAW: "Clip",
+  VOICE: "Voice note",
+  REFERENCE: "Reference",
+};
+
 export function PacketFiles({
   rawsUrl,
   files,
@@ -7,7 +15,7 @@ export function PacketFiles({
   rawsUrl: string;
   files: Array<{ id: string; kind: string; filename: string; path: string; publicUrl: string }>;
 }) {
-  const packet = files.filter((file) => file.kind === "RAW" || file.kind === "VOICE" || file.kind === "REFERENCE");
+  const packet = files.filter((file) => PACKET_LABEL[file.kind]);
   return (
     <section className="space-y-2 rounded-card border border-line bg-panel p-5">
       <h2 className="font-semibold">Download files</h2>
@@ -28,7 +36,7 @@ export function PacketFiles({
             className="flex items-center justify-between rounded-xl bg-lift px-3 py-2 text-sm"
           >
             <span className="truncate">{file.filename}</span>
-            <span className="text-mute">{file.kind}</span>
+            <span className="text-mute">{PACKET_LABEL[file.kind]}</span>
           </a>
         ))
       )}

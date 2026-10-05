@@ -4,6 +4,10 @@
   Multiply "Draw the words on the video" off → one clean file per mix; hook, body, CTA saved on the card for the editor.
   Cuts groups batch videos into a folder per Multiply name: words per mix, Needs IG · FB + TT · YT, Download all, drop many files named "mix 2 IG.mp4".
 
+- [X] Editor guide
+  `guidelines/editor-guide.md` — sign in, folders, Hook / Body / CTA, one file or two, naming `mix 2 IG.mp4`, drop back.
+  The single video page's Download files now lists the clean Multiply video too.
+
 - [ ] Verify editor folders in the browser
   Sign in, open Cuts and a Multiply batch, confirm the toggle and the folder drop. The Clerk session had expired when this was built.
 
