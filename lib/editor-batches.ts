@@ -1,5 +1,5 @@
-import { dealAccounts } from "@/lib/targets";
-import { LOOK_TAG, looksForNetworks, type DrawnStyle } from "@/lib/text-style";
+import type { CardBatch } from "@/lib/queries";
+import { LOOK_TAG, type DrawnStyle } from "@/lib/text-style";
 import { groupWaitingFolders } from "@/lib/waiting-folders";
 
 export type WordsLine = { label: string; words: string };
@@ -13,7 +13,6 @@ export type EditorBatchCard = {
   body: string;
   plug: string;
   status: string;
-  campaignId: string | null;
   campaign: { name: string } | null;
   assets: Array<{ kind: string; textStyle: string | null; path: string; filename: string }>;
 };
@@ -41,25 +40,23 @@ export function editorStage(status: string): EditorStage {
  */
 export function groupEditorBatches<T extends EditorBatchCard>(
   cards: T[],
-  accounts: Array<{ network: string; isActive: boolean; campaignId: string | null }>,
-  batchByCard: Map<string, string>,
+  batchByCard: Map<string, CardBatch>,
 ): { folders: EditorBatchFolder[]; loose: T[] } {
   const inBatch = cards.filter((card) => batchByCard.has(card.id));
   const loose = cards.filter((card) => !batchByCard.has(card.id));
   const grouped = groupWaitingFolders(
-    inBatch.map((card) => ({ ...card, batch: batchByCard.get(card.id) ?? "", deal: card.campaign?.name ?? "" })),
+    inBatch.map((card) => ({ ...card, batch: batchByCard.get(card.id)?.name ?? "", deal: card.campaign?.name ?? "" })),
   );
   const folders = grouped.map((group) => ({
     key: group.key,
     name: group.title,
     rows: group.cards.map((card) => {
-      const networks = dealAccounts(accounts, card.campaignId).map((account) => account.network);
       const dropped = card.assets.filter((asset) => asset.kind === "EDITED").map((asset) => asset.textStyle ?? "");
       return {
         id: card.id,
         mixLabel: card.mixLabel,
         words: wordsSheet(card),
-        needs: neededLooks(networks, dropped),
+        needs: neededLooks(batchByCard.get(card.id)?.twoLooks ?? false, dropped),
         cleanFiles: card.assets
           .filter((asset) => asset.kind === "GENERATED")
           .map((asset) => ({ path: asset.path, filename: asset.filename })),
@@ -81,17 +78,18 @@ export function wordsSheet(card: { hook: string; body: string; plug: string }): 
 
 export type NeededLook = { look: DrawnStyle; tag: string; done: boolean };
 
+export const ONE_FILE_TAG = "One file for every app";
+
 /**
- * Which finished files this video needs. A deal on Instagram and TikTok needs two: IG · FB and
- * TT · YT. One app family, or no accounts, needs one file for every app.
+ * Which finished files this video needs. Normally one file that posts everywhere. Only a batch
+ * set to Both looks asks for two: IG · FB and TT · YT.
  */
-export function neededLooks(networks: string[], dropped: string[]): NeededLook[] {
-  const looks = looksForNetworks(networks);
-  const show: DrawnStyle[] = looks.length > 1 ? looks : ["plain"];
+export function neededLooks(twoLooks: boolean, dropped: string[]): NeededLook[] {
+  const show: DrawnStyle[] = twoLooks ? ["instagram", "tiktok"] : ["plain"];
   const have = new Set(dropped);
   return show.map((look) => ({
     look,
-    tag: LOOK_TAG[look] || "Every app",
+    tag: LOOK_TAG[look] || ONE_FILE_TAG,
     done: have.has(look) || (look !== "plain" && have.has("plain")) || (look === "plain" && have.size > 0),
   }));
 }

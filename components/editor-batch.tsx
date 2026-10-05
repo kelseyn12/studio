@@ -37,6 +37,10 @@ export function EditorBatch({
   const [saving, setSaving] = useState(false);
   const files = rows.flatMap((row) => row.cleanFiles);
   const done = rows.filter((row) => row.needs.every((need) => need.done)).length;
+  const twoLooks = rows.some((row) => row.needs.length > 1);
+  const nameHint = twoLooks
+    ? "Name each file with its mix number and look: “mix 2 IG.mp4” and “mix 2 TT.mp4”."
+    : "Name each file with its mix number: “mix 2.mp4”.";
 
   async function downloadAll() {
     setSaving(true);
@@ -97,17 +101,16 @@ export function EditorBatch({
                 <p className="mt-2 text-sm text-mute">No words on this one.</p>
               )}
               <p className="mt-2 text-xs text-mute">
-                Needs{" "}
+                {row.needs.length > 1 ? "Two files: " : ""}
                 {row.needs.map((need, index) => (
                   <span key={need.look}>
                     {index > 0 ? " + " : ""}
                     <span className={need.done ? "text-sun" : ""}>
                       {need.tag}
-                      {need.done ? " ✓" : ""}
+                      {need.done ? " ✓ in" : ""}
                     </span>
                   </span>
                 ))}
-                {row.needs.length > 1 ? " — two files, one for each" : ""}
               </p>
             </li>
           ))}
@@ -117,7 +120,7 @@ export function EditorBatch({
             action="/api/assets/batch"
             extra={{ cardIds: rows.map((row) => row.id).join(",") }}
             label="Drop the finished videos here"
-            hint={`Name each file with its mix number and look: “mix 2 IG.mp4”, “mix 2 TT.mp4”. Under ${sizeLabel}.`}
+            hint={`${nameHint} Under ${sizeLabel}.`}
             accept="video/*"
             maxBytes={maxBytes}
           />

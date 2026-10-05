@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-10-05 — The editor owes one file per mix. Two files (IG · FB + TT · YT) only when the batch's text look is Both looks; the deal's accounts no longer decide it. `batchNameByCard` → `batchByCard` with `twoLooks`. Editor guide rewritten around `mix 2.mp4`.
 - 2026-10-05 — Editor batches. Multiply has "Draw the words on the video"; off builds one clean file per mix and keeps hook / body / CTA words on the card. Cuts shows each batch as a folder (words per mix, which looks are still needed, Download all, one drop that files by mix number). Cuts' loose list moved to `components/cuts-bucket.tsx`; `attachEditedFile` in `lib/cut-ready.ts` is the one path for a finished drop; `batchNameByCard` in `lib/queries.ts` replaces the inline query on Live.
 - 2026-10-04 — Live's waiting list is a closed folder per Multiply name. Opening the batch shows every mix in it.
 - 2026-10-03 — A blank caption stays blank. The file name is no longer sent as the caption. A video that already has a time can update that caption without sending again.

@@ -46,11 +46,14 @@ export function CardEditorStage({
 }) {
   const self = card.cutBy === "SELF" && !desk;
   const editedLooks = files.filter((file) => file.kind === "EDITED").map((file) => file.textStyle);
+  // The editor's one file posts everywhere unless a look is already in; the creator's guess follows the title.
   const defaultLook = editedLooks.includes("tiktok") && !editedLooks.includes("instagram")
     ? "tiktok"
     : editedLooks.includes("instagram")
       ? "instagram"
-      : lookForNewDrop(card.title);
+      : desk
+        ? "plain"
+        : lookForNewDrop(card.title);
   const hasSources =
     Boolean(card.rawsUrl.trim()) ||
     files.some((file) => file.kind === "RAW" || file.kind === "VOICE" || file.kind === "REFERENCE");

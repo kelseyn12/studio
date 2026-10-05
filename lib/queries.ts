@@ -3,18 +3,23 @@ import { videoMoneyCents } from "@/lib/deal-bonuses";
 import { emptyCounts, statusToCountKey, type MachineCounts } from "@/lib/next-action";
 import { addDays, startOfDay, startOfWeek } from "@/lib/dates";
 
-/** The Multiply batch name behind each video, for folders on Live and Cuts. */
-export async function batchNameByCard(): Promise<Map<string, string>> {
+export type CardBatch = { name: string; twoLooks: boolean };
+
+/**
+ * The Multiply batch behind each video, for folders on Live and Cuts. `twoLooks` is the batch
+ * set to Both looks, the only time the editor owes an IG · FB file and a TT · YT file.
+ */
+export async function batchByCard(): Promise<Map<string, CardBatch>> {
   const links = await prisma.repurposeOut.findMany({
     where: { cardId: { not: null } },
-    select: { cardId: true, batch: { select: { name: true } } },
+    select: { cardId: true, batch: { select: { name: true, textStyle: true } } },
   });
-  const names = new Map<string, string>();
+  const batches = new Map<string, CardBatch>();
   for (const link of links) {
     const name = link.batch.name.trim();
-    if (link.cardId && name) names.set(link.cardId, name);
+    if (link.cardId && name) batches.set(link.cardId, { name, twoLooks: link.batch.textStyle === "both" });
   }
-  return names;
+  return batches;
 }
 
 export async function machineCounts(): Promise<MachineCounts> {

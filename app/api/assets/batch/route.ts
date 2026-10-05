@@ -8,7 +8,7 @@ import { rejectStudioFile } from "@/lib/storage";
 
 export const maxDuration = 60;
 
-const NAME_HELP = "Name the file with its mix number, like “mix 2 IG.mp4” or “mix 2 TT.mp4”.";
+const NAME_HELP = "Name the file with its mix number, like “mix 2.mp4”.";
 
 /**
  * One finished file for a whole batch folder. The mix number in the file name picks the video,

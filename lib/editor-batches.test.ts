@@ -5,14 +5,11 @@ import {
   matchDropToCard,
   mixNumberIn,
   neededLooks,
+  ONE_FILE_TAG,
   wordsSheet,
 } from "@/lib/editor-batches";
 
 describe("groupEditorBatches", () => {
-  const accounts = [
-    { network: "instagram", isActive: true, campaignId: "polsia" },
-    { network: "tiktok", isActive: true, campaignId: "polsia" },
-  ];
   const card = (id: string, title: string, status: string) => ({
     id,
     title,
@@ -20,7 +17,6 @@ describe("groupEditorBatches", () => {
     body: "",
     plug: "Go do it",
     status,
-    campaignId: "polsia",
     campaign: { name: "Polsia" },
     assets: [
       { kind: "GENERATED", textStyle: "plain", path: `cards/${id}/clean.mp4`, filename: `${title}.mp4` },
@@ -29,14 +25,13 @@ describe("groupEditorBatches", () => {
   });
 
   it("folders batch videos by name with words, needs, and clean files; leaves the rest loose", () => {
-    const names = new Map([
-      ["one", "Polsia Millionaire"],
-      ["two", "Polsia Millionaire"],
+    const batches = new Map([
+      ["one", { name: "Polsia Millionaire", twoLooks: true }],
+      ["two", { name: "Polsia Millionaire", twoLooks: true }],
     ]);
     const { folders, loose } = groupEditorBatches(
       [card("two", "Polsia Millionaire · mix 2 · copy_1", "EDITING"), card("one", "Polsia Millionaire · mix 1 · copy_1", "REVIEW"), card("solo", "Reaction 1", "EDITING")],
-      accounts,
-      names,
+      batches,
     );
     expect(loose.map((row) => row.id)).toEqual(["solo"]);
     expect(folders).toHaveLength(1);
@@ -57,6 +52,12 @@ describe("groupEditorBatches", () => {
       { path: "cards/two/clean.mp4", filename: "Polsia Millionaire · mix 2 · copy_1.mp4" },
     ]);
   });
+
+  it("asks for one file per mix unless the batch is set to Both looks", () => {
+    const batches = new Map([["two", { name: "Polsia Millionaire", twoLooks: false }]]);
+    const { folders } = groupEditorBatches([card("two", "Polsia Millionaire · mix 2 · copy_1", "EDITING")], batches);
+    expect(folders[0].rows[0].needs).toEqual([{ look: "plain", tag: ONE_FILE_TAG, done: true }]);
+  });
 });
 
 describe("wordsSheet", () => {
@@ -70,21 +71,18 @@ describe("wordsSheet", () => {
 });
 
 describe("neededLooks", () => {
-  it("asks for two files when the deal spans Instagram and TikTok", () => {
-    expect(neededLooks(["instagram", "facebook", "tiktok", "youtube"], [])).toEqual([
+  it("asks for two files only when the batch is set to Both looks", () => {
+    expect(neededLooks(true, [])).toEqual([
       { look: "instagram", tag: "IG · FB", done: false },
       { look: "tiktok", tag: "TT · YT", done: false },
     ]);
+    expect(neededLooks(false, [])).toEqual([{ look: "plain", tag: ONE_FILE_TAG, done: false }]);
   });
 
   it("marks a look done once its file is dropped", () => {
-    const looks = neededLooks(["instagram", "tiktok"], ["tiktok"]);
-    expect(looks.map((look) => look.done)).toEqual([false, true]);
-  });
-
-  it("asks for one file for every app when there is one app family", () => {
-    expect(neededLooks(["tiktok", "youtube"], [])).toEqual([{ look: "plain", tag: "Every app", done: false }]);
-    expect(neededLooks([], ["plain"])[0].done).toBe(true);
+    expect(neededLooks(true, ["tiktok"]).map((look) => look.done)).toEqual([false, true]);
+    expect(neededLooks(true, ["plain"]).map((look) => look.done)).toEqual([true, true]);
+    expect(neededLooks(false, ["instagram"])[0].done).toBe(true);
   });
 });
 

@@ -5,7 +5,7 @@ import { Shell } from "@/components/shell";
 import { requireUser } from "@/lib/auth";
 import { groupEditorBatches } from "@/lib/editor-batches";
 import { prisma } from "@/lib/prisma";
-import { batchNameByCard } from "@/lib/queries";
+import { batchByCard } from "@/lib/queries";
 import { formatBytes, STUDIO_FILE_MAX_BYTES } from "@/lib/storage";
 import { watchUrl } from "@/lib/urls";
 
@@ -13,16 +13,15 @@ export default async function EditsPage() {
   const user = await requireUser();
   const editor = user.role === "EDITOR";
   const mine = editor ? { editorId: user.id } : {};
-  const [cards, accounts, batchByCard] = await Promise.all([
+  const [cards, batches] = await Promise.all([
     prisma.card.findMany({
       where: { status: { in: ["FILMED", "EDITING", "REVIEW"] }, ...mine },
       include: { campaign: true, assets: true, editor: true },
       orderBy: { updatedAt: "desc" },
     }),
-    prisma.socialAccount.findMany({ where: { isActive: true } }),
-    batchNameByCard(),
+    batchByCard(),
   ]);
-  const { folders, loose } = groupEditorBatches(cards, accounts, batchByCard);
+  const { folders, loose } = groupEditorBatches(cards, batches);
   const selfCut = editor ? [] : loose.filter((card) => card.status === "FILMED" && card.cutBy === "SELF");
   const send = loose.filter((card) => card.status === "FILMED" && card.cutBy === "EDITOR");
   const cutting = loose.filter((card) => card.status === "EDITING");
@@ -34,7 +33,7 @@ export default async function EditsPage() {
       <h1 className="text-3xl font-semibold tracking-tight">{editor ? "Your cuts" : "Cuts"}</h1>
       <p className="mt-2 mb-2 max-w-2xl text-mute">
         {editor
-          ? "Open a folder. Download the clean videos, put the words on in CapCut, add captions, then drop the finished files back into the same folder. Name each file with its mix number and look."
+          ? "Open a folder. Download the clean videos, put the words on in CapCut, add captions, then drop the finished files back into the same folder. Name each file with its mix number, like mix 2.mp4."
           : "Each folder is one Multiply batch. Open it to see every mix, the words on each, and which finished files are in. Loose videos are listed below the folders."}
       </p>
       <div className="mb-6">

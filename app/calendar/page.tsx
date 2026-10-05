@@ -19,7 +19,7 @@ import {
 import { fileLooks } from "@/lib/card-desk";
 import { groupWaitingFolders } from "@/lib/waiting-folders";
 import { prisma } from "@/lib/prisma";
-import { batchNameByCard } from "@/lib/queries";
+import { batchByCard } from "@/lib/queries";
 import { heldNote, missedNote, postedAppLine } from "@/lib/publish-sync";
 import { sweepFailedPublishes } from "@/lib/publish-sweep";
 import { targetAccounts, targetApps } from "@/lib/targets";
@@ -44,7 +44,7 @@ export default async function CalendarPage({
   const weekStart = startOfWeek(anchor);
   const days = view === "month" ? monthGrid(anchor) : weekGrid(anchor);
   const weekEnd = addDays(weekStart, 7);
-  const [cards, accounts, failedJobs, batchByCard] = await Promise.all([
+  const [cards, accounts, failedJobs, batches] = await Promise.all([
     prisma.card.findMany({
       where: { OR: [{ scheduledAt: { not: null } }, { status: "READY" }] },
       include: {
@@ -72,7 +72,7 @@ export default async function CalendarPage({
       },
       orderBy: { createdAt: "desc" },
     }),
-    batchNameByCard(),
+    batchByCard(),
   ]);
   const withLooks = cards.map((card) => ({
     ...card,
@@ -90,7 +90,7 @@ export default async function CalendarPage({
       id: card.id,
       title: card.title,
       hook: card.hook,
-      batch: batchByCard.get(card.id) ?? "",
+      batch: batches.get(card.id)?.name ?? "",
       deal: card.campaign?.name ?? "",
       lookRows: fileLooks(card.assets),
       selectedIds: targetAccounts(accounts, card).map((account) => account.id),
