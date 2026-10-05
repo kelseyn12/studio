@@ -2,6 +2,7 @@ import Link from "next/link";
 import { DeleteVideoButton } from "@/components/delete-video";
 import { EditorNeed } from "@/components/editor-need";
 import { StatusPill } from "@/components/status-pill";
+import { labelDay } from "@/lib/dates";
 import { DEAL_KIND_LABEL } from "@/lib/deal-kind";
 import { editorNeeds, packetReady } from "@/lib/editor-packet";
 
@@ -16,6 +17,7 @@ export type CutsCard = {
   status: Parameters<typeof StatusPill>[0]["status"];
   cutBy: "SELF" | "EDITOR";
   scheduledAt: Date | null;
+  deadlineAt: Date | null;
   campaign: { name: string; brand: string; kind: "TECH" | "UGC" } | null;
   editor: { name: string } | null;
   assets: Array<{ kind: string }>;
@@ -57,6 +59,7 @@ export function CutsBucket({
                         ? `${DEAL_KIND_LABEL[card.campaign.kind]} · ${card.campaign.brand || card.campaign.name}`
                         : "Personal"}
                       {card.editor ? ` · ${card.editor.name}` : ""}
+                      {card.deadlineAt && card.status !== "REVIEW" ? ` · Due ${labelDay(card.deadlineAt)}` : ""}
                     </p>
                   </Link>
                   <div className="flex flex-col items-end gap-2">
