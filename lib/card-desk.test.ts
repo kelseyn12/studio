@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { alreadyWithEditor, deskStage, filmChipLabel, nextStatusFor, pickFinished, sendBackStatus } from "@/lib/card-desk";
+import { alreadyWithEditor, deskStage, filmChipLabel, keepInToCut, nextStatusFor, pickFinished, sendBackStatus, shouldStartCutting } from "@/lib/card-desk";
 import { pillLabel } from "@/lib/pipeline";
 
 describe("filmChipLabel", () => {
@@ -38,8 +38,17 @@ describe("card desk", () => {
     const sent = { status: "EDITING", cutBy: "EDITOR", editorId: "tarikh" };
     expect(alreadyWithEditor(null, "tarikh")).toBe(false);
     expect(alreadyWithEditor({ status: "FILMED", cutBy: "SELF", editorId: "tarikh" }, "tarikh")).toBe(false);
+    expect(alreadyWithEditor({ status: "FILMED", cutBy: "EDITOR", editorId: "tarikh" }, "tarikh")).toBe(true);
     expect(alreadyWithEditor(sent, "tarikh")).toBe(true);
     expect(alreadyWithEditor(sent, "kelso")).toBe(false);
+  });
+
+  it("keeps a new job in To cut until he downloads", () => {
+    expect(keepInToCut("FILMED")).toBe("FILMED");
+    expect(keepInToCut("EDITING")).toBeNull();
+    expect(shouldStartCutting({ status: "FILMED", cutBy: "EDITOR", editorId: "tarikh" }, { role: "EDITOR", id: "tarikh" })).toBe(true);
+    expect(shouldStartCutting({ status: "FILMED", cutBy: "EDITOR", editorId: "tarikh" }, { role: "CREATOR", id: "kelsey" })).toBe(false);
+    expect(shouldStartCutting({ status: "EDITING", cutBy: "EDITOR", editorId: "tarikh" }, { role: "EDITOR", id: "tarikh" })).toBe(false);
   });
 
   it("sends a cut back to the editor from To approve", () => {

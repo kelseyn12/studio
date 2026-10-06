@@ -1,4 +1,5 @@
 import { deleteAsset } from "@/app/library/actions";
+import { StartLink } from "@/components/start-link";
 import { watchUrl } from "@/lib/urls";
 
 export function MediaRow({
@@ -8,6 +9,7 @@ export function MediaRow({
   path,
   mime,
   canDelete = false,
+  cardId,
 }: {
   id?: string;
   kind: string;
@@ -16,6 +18,8 @@ export function MediaRow({
   mime: string;
   publicUrl?: string;
   canDelete?: boolean;
+  /** Set for the editor. Downloading moves To cut into Cutting. */
+  cardId?: string;
 }) {
   const href = watchUrl(path);
   const audio = mime.startsWith("audio") || filename.endsWith(".webm") || filename.endsWith(".mp3");
@@ -31,9 +35,15 @@ export function MediaRow({
               <button className="text-mute">Delete</button>
             </form>
           ) : null}
-          <a href={href} className="text-sun" download={filename}>
-            Download
-          </a>
+          {cardId ? (
+            <StartLink href={href} download={filename} cardId={cardId} className="text-sun">
+              Download
+            </StartLink>
+          ) : (
+            <a href={href} className="text-sun" download={filename}>
+              Download
+            </a>
+          )}
         </span>
       </div>
       <p className="mb-2 truncate text-sm">{filename}</p>

@@ -1,7 +1,19 @@
+import { shouldStartCutting } from "@/lib/card-desk";
 import { saveUpload } from "@/lib/files";
 import { pingStudio } from "@/lib/manychat";
 import { prisma } from "@/lib/prisma";
 import { dropSuperseded } from "@/lib/sweep";
+
+/** To cut → Cutting. Only the assigned editor, and only before he has started. */
+export async function beginCutting(cardId: string, user: { id: string; role: string }): Promise<boolean> {
+  const card = await prisma.card.findUnique({
+    where: { id: cardId },
+    select: { status: true, cutBy: true, editorId: true },
+  });
+  if (!shouldStartCutting(card, user)) return false;
+  await prisma.card.update({ where: { id: cardId }, data: { status: "EDITING" } });
+  return true;
+}
 
 /** Stores a finished video on its card and moves the card to To approve. */
 export async function attachEditedFile(cardId: string, file: File, textStyle: string): Promise<void> {

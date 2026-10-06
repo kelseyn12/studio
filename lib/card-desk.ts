@@ -23,12 +23,33 @@ export function nextStatusFor(stage: DeskStage, status: PipelineStatus): Pipelin
   return null;
 }
 
-/** Already on his Cuts page. A second Send must not ping him again. */
+/** Already on his Cuts page, in To cut or Cutting. A second Send must not ping him again. */
 export function alreadyWithEditor(
   card: { status: string; cutBy: string; editorId: string | null } | null,
   editorId: string,
 ): boolean {
-  return Boolean(card && card.status === "EDITING" && card.cutBy === "EDITOR" && card.editorId === editorId);
+  const withHim = card?.status === "FILMED" || card?.status === "EDITING";
+  return Boolean(card && withHim && card.cutBy === "EDITOR" && card.editorId === editorId);
+}
+
+/** Send leaves a new job in To cut. Cutting starts when he downloads, not when she sends. */
+export function keepInToCut(next: PipelineStatus | null): PipelineStatus | null {
+  if (next === "EDITING") return null;
+  return next;
+}
+
+/** He has the job and has not downloaded yet. Only his click moves it to Cutting. */
+export function shouldStartCutting(
+  card: { status: string; cutBy: string; editorId: string | null } | null,
+  user: { role: string; id: string },
+): boolean {
+  return Boolean(
+    card &&
+      user.role === "EDITOR" &&
+      card.status === "FILMED" &&
+      card.cutBy === "EDITOR" &&
+      card.editorId === user.id,
+  );
 }
 
 export function sendBackStatus(status: PipelineStatus): PipelineStatus | null {

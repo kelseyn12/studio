@@ -20,7 +20,7 @@ export default async function CardPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ step?: string; as?: string }>;
+  searchParams: Promise<{ step?: string; as?: string; link?: string }>;
 }) {
   const { id } = await params;
   const query = await searchParams;
@@ -104,6 +104,8 @@ export default async function CardPage({
             files={card.assets}
             edited={edited}
             desk={desk}
+            canStart={isEditor}
+            linkNote={query.link === "no"}
           />
         ) : null}
         {stage === "live" ? (
@@ -127,6 +129,7 @@ export default async function CardPage({
               mime={asset.mime}
               publicUrl={asset.publicUrl}
               canDelete={!desk}
+              cardId={isEditor ? card.id : undefined}
             />
           ))}
         </div>

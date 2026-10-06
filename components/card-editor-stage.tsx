@@ -17,6 +17,8 @@ export function CardEditorStage({
   files,
   edited,
   desk,
+  canStart = false,
+  linkNote = false,
 }: {
   card: {
     id: string;
@@ -33,6 +35,7 @@ export function CardEditorStage({
     capcutUrl: string;
     cutBy: "SELF" | "EDITOR";
     rawsUrl: string;
+    status: string;
   };
   editors: Array<{ id: string; name: string; defaultEditor?: boolean }>;
   packet: PacketItem[];
@@ -47,6 +50,8 @@ export function CardEditorStage({
   }>;
   edited?: { path: string; publicUrl: string | null };
   desk: boolean;
+  canStart?: boolean;
+  linkNote?: boolean;
 }) {
   const self = card.cutBy === "SELF" && !desk;
   const editedLooks = files.filter((file) => file.kind === "EDITED").map((file) => file.textStyle);
@@ -77,11 +82,16 @@ export function CardEditorStage({
                 ? "Download the files, cut the finished video, drop it here or paste a direct mp4 link."
                 : "Send only if someone else cuts this. I’ll cut this is on Clips."}
         </p>
+        {desk && card.status === "FILMED" ? (
+          <p className="mb-3 rounded-xl bg-sun/15 px-4 py-2 text-sm">
+            This is in To cut. Download the files, or open the 4K folder, and it moves to Cutting.
+          </p>
+        ) : null}
         {desk ? <EditorBrief card={card} /> : null}
         {desk ? <CapcutLink url={card.capcutUrl} editable={false} /> : null}
         {dropOnly ? null : <EditorNeed items={packet} />}
       </section>
-      {dropOnly ? null : <PacketFiles rawsUrl={card.rawsUrl} files={files} />}
+      {dropOnly ? null : <PacketFiles rawsUrl={card.rawsUrl} files={files} cardId={canStart ? card.id : undefined} />}
       {self || desk ? null : (
         <form action={finishStage.bind(null, "editor")} className="space-y-3">
           <input type="hidden" name="id" value={card.id} />
@@ -136,11 +146,16 @@ export function CardEditorStage({
       />
       <form action={attachEditedUrl} className="space-y-2 rounded-card border border-line bg-panel p-5">
         <input type="hidden" name="id" value={card.id} />
-        <p className="text-sm text-mute">Or paste a direct video link. Not a Drive folder.</p>
+        <p className="text-sm text-mute">
+          Drop the finished video above, or paste a link to that one file. A Drive link to the file is fine. A Drive folder is not.
+        </p>
+        {linkNote ? (
+          <p className="text-sm text-sun">That link did not download a video. Drop the mp4, or paste the Drive link to the file itself.</p>
+        ) : null}
         <select name="textStyle" defaultValue={defaultLook} className="field">
           <option value="instagram">IG · FB</option>
           <option value="tiktok">TT · YT</option>
-          <option value="plain">Both — same video</option>
+          <option value="plain">One video</option>
         </select>
         <input name="editedUrl" placeholder="https://…/export.mp4" className="field" />
         <button className="rounded-xl border border-line px-4 py-2 text-sm">Attach URL</button>

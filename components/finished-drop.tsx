@@ -6,7 +6,7 @@ import { DropZone } from "@/components/drop-zone";
 const CHOICES = [
   { id: "instagram", label: "IG · FB" },
   { id: "tiktok", label: "TT · YT" },
-  { id: "plain", label: "Both" },
+  { id: "plain", label: "One video" },
 ] as const;
 
 type Look = (typeof CHOICES)[number]["id"];
@@ -14,7 +14,7 @@ type Look = (typeof CHOICES)[number]["id"];
 function dropLabel(look: Look): string {
   if (look === "tiktok") return "Drop the TT · YT video";
   if (look === "instagram") return "Drop the IG · FB video";
-  return "Drop the video for every app";
+  return "Drop the finished video";
 }
 
 export function FinishedDrop({
@@ -36,7 +36,9 @@ export function FinishedDrop({
     <div className="space-y-2">
       {look ? null : (
         <div className="flex flex-wrap gap-2">
-          <p className="w-full text-xs text-mute">Which video is this?</p>
+          <p className="w-full text-xs text-mute">
+            Which video is this? Leave One video selected. IG · FB and TT · YT are only when you export two versions.
+          </p>
           {CHOICES.map((choice) => (
             <button
               key={choice.id}

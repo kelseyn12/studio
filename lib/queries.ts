@@ -33,7 +33,7 @@ export async function machineCounts(): Promise<MachineCounts> {
       select: { postsPerDay: true, accountsAllowed: true },
     }),
     prisma.card.count({ where: { status: "READY", scheduledAt: null } }),
-    prisma.card.count({ where: { status: "FILMED", cutBy: "EDITOR" } }),
+    prisma.card.count({ where: { status: "FILMED", cutBy: "EDITOR", editorId: null } }),
     prisma.card.count({ where: { status: "FILMED", cutBy: "SELF" } }),
     prisma.card.count(),
   ]);

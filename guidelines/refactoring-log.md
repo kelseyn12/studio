@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-10-06 — A sent video stays in To cut until the editor downloads a file or opens the 4K folder. That moves it to Cutting. One video is the default finished file. A Drive file link can come back; a folder cannot.
 - 2026-10-06 — Cuts and the video page have My page / his page. His page is his Cuts list and, on a video assigned to him, the job sheet he reads.
 - 2026-10-06 — Send to editor on Clips was opening the Cut tab and not handing the video over. It now sends once. A second click does not ping him again.
 - 2026-10-06 — A voice note has Delete on its player. That removes the file and the Voice paragraph, so you can record a new one.

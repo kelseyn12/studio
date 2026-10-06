@@ -84,16 +84,16 @@ export default async function EditsPage({ searchParams }: { searchParams: Promis
         <CutsBucket title="Drop the file" items={selfCut} empty="Nothing waiting for a finished file." canDelete />
       )}
       <CutsBucket
-        title={asEditor ? "To cut" : "Send"}
+        title="To cut"
         items={send}
-        empty={asEditor ? "No raw-clip jobs yet." : "Nothing waiting to send."}
+        empty={asEditor ? "No raw-clip jobs yet." : "Nothing waiting for him to start."}
         canDelete={!asEditor}
         preview={previewId ?? undefined}
       />
       <CutsBucket
-        title={asEditor ? "Cutting" : "With the editor"}
+        title="Cutting"
         items={cutting}
-        empty={asEditor ? "No raw-clip job in progress." : "Nothing with the editor."}
+        empty={asEditor ? "No raw-clip job in progress." : "Nothing he has started."}
         canDelete={!asEditor}
         preview={previewId ?? undefined}
       />

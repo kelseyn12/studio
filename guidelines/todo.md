@@ -1,5 +1,9 @@
 # To-do
 
+- [X] To cut until he downloads
+  Send leaves the card in To cut. His download or Open 4K folder moves it to Cutting.
+  One video is the finished-file choice. A Drive file link works. A folder does not.
+
 - [X] See his Cuts page
   My page / his page on Cuts and on the video. His page uses his list names and, when the video is his, the job sheet.
   A video he does not have stays on your page with a line saying so.

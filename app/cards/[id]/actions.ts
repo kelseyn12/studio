@@ -3,15 +3,15 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
-import { alreadyWithEditor, isDeskStage, nextStatusFor, sendBackStatus, type DeskStage } from "@/lib/card-desk";
+import { alreadyWithEditor, isDeskStage, keepInToCut, nextStatusFor, sendBackStatus, type DeskStage } from "@/lib/card-desk";
 import { cardPatch } from "@/lib/card-patch";
 import { dropCards } from "@/lib/drop-cards";
 import { deleteUpload, saveUpload, mimeFromName } from "@/lib/files";
-import { isDirectMediaUrl } from "@/lib/media-url";
+import { directMediaUrl } from "@/lib/media-url";
 import { rejectStudioFile } from "@/lib/storage";
 import type { PipelineStatus } from "@/lib/pipeline";
 import { prisma } from "@/lib/prisma";
-import { markCutReady } from "@/lib/cut-ready";
+import { beginCutting, markCutReady } from "@/lib/cut-ready";
 import { pingStudio } from "@/lib/manychat";
 import { timeAlreadyPassed } from "@/lib/dates";
 import { ALREADY_SCHEDULED, postCaption, queueCard, waitingPostIds } from "@/lib/publish";
@@ -52,10 +52,12 @@ export async function finishStage(stage: DeskStage, formData: FormData) {
     : null;
   await saveCard(formData);
   const card = await prisma.card.findUnique({ where: { id } });
-  const next = card ? nextStatusFor(stage, card.status) : null;
-  const patch: { status?: PipelineStatus; editorId?: string } = {};
-  if (next) patch.status = next;
   const cutBy = String(formData.get("cutBy") || card?.cutBy || "SELF");
+  const handingOff = cutBy === "EDITOR" && (stage === "footage" || stage === "editor");
+  const next = card ? nextStatusFor(stage, card.status) : null;
+  const kept = handingOff ? keepInToCut(next) : next;
+  const patch: { status?: PipelineStatus; editorId?: string } = {};
+  if (kept) patch.status = kept;
   if (stage === "editor" && card && !card.editorId && cutBy !== "SELF") {
     const fallback = await prisma.user.findFirst({ where: { defaultEditor: true, role: "EDITOR" } });
     if (fallback) patch.editorId = fallback.id;
@@ -66,22 +68,19 @@ export async function finishStage(stage: DeskStage, formData: FormData) {
       (
         await prisma.user.findFirst({ where: { defaultEditor: true, role: "EDITOR" } })
       )?.id;
-    if (chosen) {
-      patch.status = "EDITING";
-      patch.editorId = chosen;
-    }
+    if (chosen) patch.editorId = chosen;
   }
   if (Object.keys(patch).length) {
     await prisma.card.update({ where: { id }, data: patch });
   }
   revalidatePath(`/cards/${id}`);
   revalidatePath("/edits");
-  const sent = stage === "editor" || (stage === "footage" && cutBy === "EDITOR" && patch.status === "EDITING");
+  const chosenEditor = String(patch.editorId || card?.editorId || "");
+  const sent = handingOff && Boolean(chosenEditor);
   if (sent && cutBy !== "SELF") {
-    const chosenEditor = String(patch.editorId || card?.editorId || "");
     if (!alreadyWithEditor(before, chosenEditor)) {
       try {
-        await pingStudio("editor", `New job: ${card?.title || "a video"}. Open Cuts in Studio.`);
+        await pingStudio("editor", `New job: ${card?.title || "a video"}. It is under To cut.`);
       } catch {
         /* ManyChat must not block the handoff */
       }
@@ -230,20 +229,31 @@ export async function updateScheduledCaption(formData: FormData) {
   redirect(updated > 0 ? "/calendar?ship=caption" : "/calendar?ship=caption-late");
 }
 
+export async function startCutting(cardId: string) {
+  const user = await requireUser();
+  const started = await beginCutting(cardId, user);
+  if (!started) return;
+  revalidatePath("/edits");
+  revalidatePath(`/cards/${cardId}`);
+}
+
 export async function attachEditedUrl(formData: FormData) {
   await requireUser();
   const id = String(formData.get("id"));
-  const url = String(formData.get("editedUrl") || "").trim();
-  if (!id || !isDirectMediaUrl(url)) {
-    redirect(id ? `/cards/${id}?step=editor` : "/");
+  const url = directMediaUrl(String(formData.get("editedUrl") || ""));
+  if (!id || !url) {
+    redirect(id ? `/cards/${id}?step=editor&link=no` : "/");
   }
   const response = await fetch(url);
-  if (!response.ok) redirect(`/cards/${id}?step=editor`);
+  if (!response.ok || (response.headers.get("content-type") || "").includes("text/html")) {
+    redirect(`/cards/${id}?step=editor&link=no`);
+  }
   const length = Number(response.headers.get("content-length") || 0);
   if (length > 0 && rejectStudioFile(length, "EDITED")) redirect(`/cards/${id}?step=editor`);
   const bytes = Buffer.from(await response.arrayBuffer());
   if (rejectStudioFile(bytes.length, "EDITED")) redirect(`/cards/${id}?step=editor`);
-  const name = url.split("?")[0].split("/").pop() || "export.mp4";
+  const rawName = url.split("?")[0].split("/").pop() || "export.mp4";
+  const name = rawName.includes(".") ? rawName : "export.mp4";
   const type = response.headers.get("content-type") || mimeFromName(name);
   const saved = await saveUpload(new File([new Uint8Array(bytes)], name, { type }), `cards/${id}`);
   const style = String(formData.get("textStyle") || "");

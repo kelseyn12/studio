@@ -85,7 +85,8 @@ If a mix does not say "Two files", ignore this.
 ### What you see
 
 A card under **To cut** on Cuts with the video's name, the deal, and **Due …** if there is a
-deadline. Click it to open the job. On the job page:
+deadline. Click it to open the job. It stays in **To cut** until you download a file or open the
+4K folder. That moves it to **Cutting**, so she can see you started. On the job page:
 
 - **Your job** — the deadline, Kelsey's note, the **words to put on the video** (hook / CTA if
   any), the **script** (what is said; open it to read), and **reference** links when she
@@ -94,8 +95,8 @@ deadline. Click it to open the job. On the job page:
 - A **CapCut** button if she set up a shared CapCut project for it.
 - **Download files** — every raw clip, the voice note, reference files, and an **Open 4K folder**
   button if the footage is in Drive.
-- **Which video is this?** — leave it on **Both**.
-- The drop zone, or a box to paste a direct mp4 link instead.
+- **Which video is this?** — leave it on **One video**. IG · FB and TT · YT are only when she asked for two exports.
+- The drop zone, or a link to that one finished file. A Drive link to the file works. A Drive folder does not.
 
 ### What you do
 
@@ -104,7 +105,7 @@ deadline. Click it to open the job. On the job page:
 3. Cut the video to the script: hook up top, tight pacing, captions on everything spoken, hook
    words on screen if they are listed. Match each reference, and follow the note under it.
 4. Export 1080 × 1920 mp4, under 250 MB, no watermark. Any file name is fine here.
-5. Drop it on the job page (**Both** stays selected). It moves to **To approve**.
+5. Drop it on the job page (**One video** stays selected). It moves to **To approve**.
 
 ### Deadlines
 
@@ -151,7 +152,7 @@ You never schedule, pick thumbnails, or write captions.
 1. Open the video → **Write**: hook, script, reference links (a note under each one), **editor deadline**. These all show on
    his job.
 2. **Clips**: drop raw clips or paste the 4K Drive folder, add a voice note or written note, a
-   reference clip. **Send to editor**. It lands under his To cut.
+   reference clip. **Send to editor**. It lands under his To cut. It moves to Cutting when he downloads the files.
 
 **Both**
 
