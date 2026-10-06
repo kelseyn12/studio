@@ -32,7 +32,7 @@ export function scriptPrompt(input: {
     input.body ? `Current body: ${input.body}` : "",
     input.plug ? `Current plug: ${input.plug}` : "",
     input.script ? `Current script: ${input.script.slice(0, 800)}` : "",
-    input.referenceUrl ? `Reference link: ${input.referenceUrl}` : "",
+    input.referenceUrl ? `References:\n${input.referenceUrl}` : "",
     input.referenceTranscript ? `What the reference says: ${input.referenceTranscript.slice(0, 1200)}` : "",
   ]
     .filter(Boolean)

@@ -1,6 +1,7 @@
 import type { Prisma } from "@prisma/client";
 import { parseLocalDate } from "@/lib/dates";
 import { isPipelineStatus } from "@/lib/pipeline";
+import { packReferences } from "@/lib/references";
 
 function text(form: FormData, key: string): string | undefined {
   if (!form.has(key)) return undefined;
@@ -42,8 +43,16 @@ export function cardPatch(form: FormData): Prisma.CardUncheckedUpdateInput {
   if (script !== undefined) data.script = script;
   const caption = text(form, "caption");
   if (caption !== undefined) data.caption = caption;
-  const referenceUrl = text(form, "referenceUrl");
-  if (referenceUrl !== undefined) data.referenceUrl = referenceUrl;
+  if (form.has("referenceNote")) {
+    const urls = form.getAll("referenceUrl").map(String);
+    const notes = form.getAll("referenceNote").map(String);
+    const packed = packReferences(urls.map((url, index) => ({ url, note: notes[index] || "" })));
+    data.referencesJson = packed.referencesJson;
+    data.referenceUrl = packed.referenceUrl;
+  } else {
+    const referenceUrl = text(form, "referenceUrl");
+    if (referenceUrl !== undefined) data.referenceUrl = referenceUrl;
+  }
   const rawsUrl = text(form, "rawsUrl");
   if (rawsUrl !== undefined) data.rawsUrl = rawsUrl;
   const editorNote = text(form, "editorNote");

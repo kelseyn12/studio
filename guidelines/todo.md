@@ -1,5 +1,9 @@
 # To-do
 
+- [X] Several reference links, each with a note
+  Write holds a link and a note, and Add another reference. The editor sees each one on the job.
+  The old single link still shows when the list is empty.
+
 - [X] See if the editor signed in
   Team shows "Has not signed in" until they open Studio. After that it shows the day they last did.
   `readClerkSession` writes `User.lastSeenAt`. Laptop PIN logins stay blank.

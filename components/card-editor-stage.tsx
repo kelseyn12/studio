@@ -26,6 +26,7 @@ export function CardEditorStage({
     plug: string;
     script: string;
     referenceUrl: string;
+    referencesJson: string;
     deadlineAt: Date | null;
     editorId: string | null;
     editorNote: string;

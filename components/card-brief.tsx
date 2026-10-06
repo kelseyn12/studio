@@ -1,9 +1,11 @@
 import { finishStage, updateCard } from "@/app/cards/[id]/actions";
 import { DropZone } from "@/components/drop-zone";
 import { BriefAi } from "@/components/hook-rewrite";
+import { ReferenceLinks } from "@/components/reference-links";
 import { DEAL_KIND_LABEL } from "@/lib/deal-kind";
 import { toInputDate } from "@/lib/dates";
 import { REFERENCE_MAX_BYTES } from "@/lib/files";
+import { parseReferences } from "@/lib/references";
 import type { DealKind } from "@prisma/client";
 import { handle } from "@/lib/targets";
 
@@ -21,6 +23,7 @@ export function CardBrief({
     plug: string;
     script: string;
     referenceUrl: string;
+    referencesJson: string;
     campaignId: string | null;
     formatId: string | null;
     accountId: string | null;
@@ -82,7 +85,7 @@ export function CardBrief({
           <span className="label">Editor deadline</span>
           <input name="deadlineAt" type="date" defaultValue={card.deadlineAt ? toInputDate(card.deadlineAt) : ""} className="field" />
         </label>
-        <input name="referenceUrl" defaultValue={card.referenceUrl} placeholder="Reference link (optional)" className="field" />
+        <ReferenceLinks links={parseReferences(card.referencesJson, card.referenceUrl)} />
         <textarea name="premise" defaultValue={card.premise} placeholder="Payoff — why would someone watch" className="field min-h-16" />
         <textarea name="hook" defaultValue={card.hook} placeholder="Hook — first line + first visual" className="field min-h-16" />
         <BriefAi cardId={card.id} />

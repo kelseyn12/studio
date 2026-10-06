@@ -1,14 +1,6 @@
 import { labelDay } from "@/lib/dates";
 import { wordsSheet } from "@/lib/editor-batches";
-
-function safeLink(raw: string): string | null {
-  try {
-    const url = new URL(raw.trim());
-    return url.protocol === "https:" ? url.toString() : null;
-  } catch {
-    return null;
-  }
-}
+import { httpsUrl, parseReferences } from "@/lib/references";
 
 /** Everything the editor needs to read before he cuts: deadline, note, words, script, reference. */
 export function EditorBrief({
@@ -21,12 +13,13 @@ export function EditorBrief({
     script: string;
     editorNote: string;
     referenceUrl: string;
+    referencesJson: string;
     deadlineAt: Date | null;
   };
 }) {
   const words = wordsSheet(card);
   const script = card.script.trim();
-  const reference = safeLink(card.referenceUrl);
+  const references = parseReferences(card.referencesJson, card.referenceUrl);
   return (
     <div className="mb-3 space-y-3">
       {card.deadlineAt ? (
@@ -50,10 +43,25 @@ export function EditorBrief({
           <p className="mt-2 whitespace-pre-wrap">{script}</p>
         </details>
       ) : null}
-      {reference ? (
-        <a href={reference} target="_blank" rel="noreferrer" className="block text-sm underline">
-          Reference video — match this feel
-        </a>
+      {references.length > 0 ? (
+        <div className="space-y-2">
+          {references.map((link, index) => {
+            const href = httpsUrl(link.url);
+            const label = references.length === 1 ? "Reference" : `Reference ${index + 1}`;
+            return (
+              <div key={`${link.url}-${index}`} className="rounded-xl bg-lift px-4 py-3 text-sm">
+                {href ? (
+                  <a href={href} target="_blank" rel="noreferrer" className="underline">
+                    {label}
+                  </a>
+                ) : (
+                  <p>{link.url || label}</p>
+                )}
+                {link.note ? <p className="mt-1 whitespace-pre-wrap text-mute">{link.note}</p> : null}
+              </div>
+            );
+          })}
+        </div>
       ) : null}
     </div>
   );

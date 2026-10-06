@@ -88,8 +88,8 @@ A card under **To cut** on Cuts with the video's name, the deal, and **Due …**
 deadline. Click it to open the job. On the job page:
 
 - **Your job** — the deadline, Kelsey's note, the **words to put on the video** (hook / CTA if
-  any), the **script** (what is said; open it to read), and a **reference video** link when she
-  wants you to match a feel.
+  any), the **script** (what is said; open it to read), and **reference** links when she
+  wants you to match a feel. Each link has a note saying what to copy.
 - A checklist of what is in the packet: hook, script, clips, note.
 - A **CapCut** button if she set up a shared CapCut project for it.
 - **Download files** — every raw clip, the voice note, reference files, and an **Open 4K folder**
@@ -102,7 +102,7 @@ deadline. Click it to open the job. On the job page:
 1. Read the note and the script first. Listen to the voice note if there is one. That is the brief.
 2. Download the clips (or open the 4K folder).
 3. Cut the video to the script: hook up top, tight pacing, captions on everything spoken, hook
-   words on screen if they are listed. Match the reference if there is one.
+   words on screen if they are listed. Match each reference, and follow the note under it.
 4. Export 1080 × 1920 mp4, under 250 MB, no watermark. Any file name is fine here.
 5. Drop it on the job page (**Both** stays selected). It moves to **To approve**.
 
@@ -148,7 +148,7 @@ You never schedule, pick thumbnails, or write captions.
 
 **Full edits (Traditional UGC)**
 
-1. Open the video → **Brief**: hook, script, reference link, **editor deadline**. These all show on
+1. Open the video → **Write**: hook, script, reference links (a note under each one), **editor deadline**. These all show on
    his job.
 2. **Clips**: drop raw clips or paste the 4K Drive folder, add a voice note or written note, a
    reference clip. **Send to editor**. It lands under his To cut.

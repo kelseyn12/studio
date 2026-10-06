@@ -4,6 +4,7 @@ import { writeThumb } from "@/lib/ffmpeg";
 import { ensureLocal } from "@/lib/files";
 import { prisma } from "@/lib/prisma";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
+import { referenceLines, referencesFromForm } from "@/lib/references";
 import { generateScript } from "@/lib/script";
 import { readSession } from "@/lib/session";
 import { openAiUserError, transcribeFile } from "@/lib/whisper";
@@ -62,7 +63,9 @@ export async function POST(request: Request) {
         plug: String(body.plug || card.plug || ""),
         script: String(body.script || card.script || ""),
         brand: card.campaign?.brand || card.campaign?.name || "",
-        referenceUrl: String(body.referenceUrl || card.referenceUrl || ""),
+        referenceUrl: referenceLines(
+          referencesFromForm(body.referenceUrls, body.referenceNotes, card.referencesJson, card.referenceUrl),
+        ),
         referenceTranscript: transcripts.filter(Boolean).join("\n"),
       },
       images,

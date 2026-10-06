@@ -45,7 +45,8 @@ export function BriefAi({ cardId }: { cardId: string }) {
         body: data.get("body"),
         plug: data.get("plug"),
         script: data.get("script"),
-        referenceUrl: data.get("referenceUrl"),
+        referenceUrls: data.getAll("referenceUrl"),
+        referenceNotes: data.getAll("referenceNote"),
       }),
     });
     const body = await response.json();

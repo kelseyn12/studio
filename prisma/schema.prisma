@@ -159,6 +159,7 @@ model Card {
   script           String          @default("")
   caption          String          @default("")
   referenceUrl     String          @default("")
+  referencesJson   String          @default("[]")
   rawsUrl          String          @default("")
   editorNote       String          @default("")
   capcutUrl        String          @default("")
