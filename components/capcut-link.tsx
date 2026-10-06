@@ -1,6 +1,6 @@
 import { capcutHref } from "@/lib/capcut";
 
-/** A CapCut Teams link on the editor job. Open it, edit there, drop the export back here. */
+/** His CapCut project. He pastes the link. She opens it. */
 export function CapcutLink({ url, editable }: { url: string; editable: boolean }) {
   const href = capcutHref(url);
   if (!editable && !href) return null;
@@ -8,7 +8,7 @@ export function CapcutLink({ url, editable }: { url: string; editable: boolean }
     <div className="space-y-2">
       {editable ? (
         <label className="block text-sm">
-          CapCut link
+          Your CapCut link
           <input
             name="capcutUrl"
             defaultValue={url}

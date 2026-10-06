@@ -41,7 +41,7 @@
 - `unscheduleCard` — `app/calendar/actions.ts` — Cancel on the scheduled list. `postsToCancel` / `canUnschedule` in `lib/unschedule.ts` pick the Outstand posts still waiting; `cancelPost` drops them, then the day is cleared.
 - `closeLoop` / `parseAnalytics` / `withHandYouTube` — `lib/analytics.ts` — Posted when live, Data when views exist. `parseAnalytics` reads Outstand `aggregated_metrics`. `withHandYouTube` adds a Studio upload only when Outstand has no YouTube views. Used by `/api/analytics/sync`.
 - `youtubeVideoId` / `youtubePublicViews` — `lib/youtube-public.ts` — a pasted YouTube link, and its public view count. Used when YouTube was posted outside Outstand.
-- `capcutHref` — `lib/capcut.ts` — keeps an https CapCut link for the editor job. `CapcutLink` opens it.
+- `capcutHref` — `lib/capcut.ts` — keeps an https CapCut link. The editor pastes his project. She gets Open in CapCut.
 - `nextLanes` — `lib/formats.ts` — 70/20/10 winner promotion after stats land.
 - `canVisit` / `isPublicPath` — `lib/access.ts` — rooms a role may open, and pages a signed-out visitor can open (`/privacy`). Used by middleware and nav.
 - `fileHasEditList` / `withoutEditLists` / `prependCover` / `writeYoutubeThumb` — `lib/ship-media.ts` — Schedule uploads a clean Multiply file as-is. It re-encodes only when the file still has an edit list, or to put the saved cover on the first frames. YouTube also gets that frame at 1280×720.

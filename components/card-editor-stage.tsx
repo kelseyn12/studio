@@ -5,6 +5,7 @@ import { FinishedDrop } from "@/components/finished-drop";
 import { EditorNeed } from "@/components/editor-need";
 import { PacketFiles } from "@/components/packet-files";
 import { EditorBrief } from "@/components/editor-brief";
+import { capcutHref } from "@/lib/capcut";
 import { lookForNewDrop } from "@/lib/card-desk";
 import type { PacketItem } from "@/lib/editor-packet";
 import { formatBytes, STUDIO_FILE_MAX_BYTES } from "@/lib/storage";
@@ -89,6 +90,7 @@ export function CardEditorStage({
             <li>Press Start cutting when you begin. Watching or downloading does not start it.</li>
             <li>Cut one video. Leave Which video on One video.</li>
             <li>Drop the finished mp4 below, or paste a Drive link to that file. Not the raw folder.</li>
+            <li>Paste your CapCut link so she can open your project.</li>
           </ol>
         ) : null}
         {desk && card.status === "FILMED" ? (
@@ -119,10 +121,16 @@ export function CardEditorStage({
             <input type="hidden" name="step" value="editor" />
             <CapcutLink url={card.capcutUrl} editable />
             <p className="text-xs text-mute">
-              Paste the CapCut project link and save. If she cannot open it, invite her email on that project.
+              This is your project link for her. Save it. If CapCut asks her to join, invite her email on that project.
             </p>
             <button className="rounded-xl border border-line px-4 py-2 text-sm">Save CapCut link</button>
           </form>
+        ) : null}
+        {!desk && capcutHref(card.capcutUrl) ? (
+          <div className="mb-3">
+            <p className="mb-2 text-sm font-semibold">His CapCut project</p>
+            <CapcutLink url={card.capcutUrl} editable={false} />
+          </div>
         ) : null}
         {dropOnly ? null : <EditorNeed items={packet} />}
       </section>
@@ -151,7 +159,6 @@ export function CardEditorStage({
             placeholder="Must keep / CTA / words to avoid"
             className="field min-h-24"
           />
-          <CapcutLink url={card.capcutUrl} editable />
           <div className="flex gap-2">
             <button formAction={updateCard} className="flex-1 rounded-xl border border-line py-3">
               Save
@@ -169,7 +176,6 @@ export function CardEditorStage({
             placeholder="Notes for yourself"
             className="field min-h-16"
           />
-          <CapcutLink url={card.capcutUrl} editable />
           <button className="rounded-xl border border-line px-4 py-2 text-sm">Save notes</button>
         </form>
       ) : null}

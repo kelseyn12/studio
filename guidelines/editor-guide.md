@@ -93,7 +93,7 @@ Watching, downloading, or opening Drive does not move it. On the job page:
   wants you to match a feel. Each link has a note saying what to copy.
 - A checklist of what is in the packet: hook, script, clips, note.
 - The **voice note** at the top. Listen before you read.
-- A **CapCut project link** you can paste. Save it. If she cannot open it, invite her email on that project.
+- **Your CapCut link** — paste your project so she can open it. She does not send you hers. If CapCut asks her to join, invite her email on that project.
 - **Download files** — raw clips, reference files, and **Open Google Drive (raw footage)** when the footage is in Drive.
 - **Which video is this?** — leave it on **One video**. IG · FB and TT · YT are only when she asked for two exports.
 - The drop zone, or a link to that one finished file. A Drive link to the file works. A Drive folder does not.
