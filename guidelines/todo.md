@@ -1,5 +1,9 @@
 # To-do
 
+- [X] Redo a voice note
+  Record again replaces the last voice-note file and the Voice paragraph on the note.
+  A note typed above that paragraph stays.
+
 - [X] Voice note shows that it is recording
   The button says Stop recording, with a countdown, while the mic is open.
   It still stops itself after 20 seconds and saves the note.

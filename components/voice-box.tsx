@@ -48,7 +48,7 @@ export function VoiceBox({ cardId }: { cardId: string }) {
           setStatus(payload.error || "The note did not save. Try again.");
           return;
         }
-        setStatus(payload.transcript ? `Editor note: ${payload.transcript.slice(0, 80)}` : "Voice note saved");
+        setStatus(payload.transcript ? `Saved. Record again to replace it. ${payload.transcript.slice(0, 80)}` : "Saved. Record again to replace it.");
         router.refresh();
       };
       recorder.start();
@@ -76,7 +76,7 @@ export function VoiceBox({ cardId }: { cardId: string }) {
           Recording. Talk now. {secondsLeft}s left.
         </p>
       ) : (
-        <p className="text-sm text-mute">{status || "Talk for up to 20 seconds. That becomes the note for the editor."}</p>
+        <p className="text-sm text-mute">{status || "Talk for up to 20 seconds. Record again to replace the last one."}</p>
       )}
     </div>
   );

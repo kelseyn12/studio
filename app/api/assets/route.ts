@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { readSession } from "@/lib/session";
-import { saveUpload } from "@/lib/files";
+import { deleteUpload, saveUpload } from "@/lib/files";
 import { rejectStudioFile } from "@/lib/storage";
 import { attachEditedFile } from "@/lib/cut-ready";
 import { prisma } from "@/lib/prisma";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
 import { hasOpenAI, transcribeFile } from "@/lib/whisper";
+import { RECORDED_VOICE_NAME, withVoiceTranscript } from "@/lib/voice-note";
 
 export const maxDuration = 60;
 
@@ -30,6 +31,15 @@ export async function POST(request: Request) {
     await attachEditedFile(id, file, textStyle);
     return NextResponse.json({ ok: true, transcript: "" });
   }
+  if (kind === "VOICE" && file.name === RECORDED_VOICE_NAME) {
+    const prior = await prisma.asset.findMany({
+      where: { cardId: id, kind: "VOICE", filename: RECORDED_VOICE_NAME },
+    });
+    for (const asset of prior) {
+      await deleteUpload(asset.path);
+      await prisma.asset.delete({ where: { id: asset.id } });
+    }
+  }
   const saved = await saveUpload(file, `cards/${id}`);
   await prisma.asset.create({ data: { cardId: id, kind, ...saved } });
   let transcript = "";
@@ -43,9 +53,7 @@ export async function POST(request: Request) {
     try {
       transcript = await transcribeFile(file);
       const card = await prisma.card.findUnique({ where: { id } });
-      const note = card?.editorNote?.trim()
-        ? `${card.editorNote.trim()}\n\nVoice: ${transcript}`
-        : transcript;
+      const note = withVoiceTranscript(card?.editorNote || "", transcript);
       await prisma.card.update({ where: { id }, data: { editorNote: note } });
     } catch (error) {
       transcript = error instanceof Error ? error.message : "Transcription failed";
