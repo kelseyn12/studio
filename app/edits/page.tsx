@@ -33,8 +33,8 @@ export default async function EditsPage() {
       <h1 className="text-3xl font-semibold tracking-tight">{editor ? "Your cuts" : "Cuts"}</h1>
       <p className="mt-2 mb-2 max-w-2xl text-mute">
         {editor
-          ? "Open a folder. Download the clean videos, put the words on in CapCut, add captions, then drop the finished files back into the same folder. Name each file with its mix number, like mix 2.mp4."
-          : "Each folder is one Multiply batch. Open it to see every mix, the words on each, and which finished files are in. Loose videos are listed below the folders."}
+          ? "A batch arrives as a folder. Download the clean videos, put the words on in CapCut, add captions, and drop the files back named with the mix number, like mix 2.mp4. A raw-clip job is not a folder. It shows up under To cut, one video at a time, with the clips and the script."
+          : "Each folder is one Multiply batch. Open it to see every mix, the words on each, and which finished files are in. Raw-clip jobs are listed under the folders, one video at a time."}
       </p>
       <div className="mb-6">
         <LiveRefresh seconds={30} />
@@ -66,9 +66,24 @@ export default async function EditsPage() {
       {editor ? null : (
         <CutsBucket title="Drop the file" items={selfCut} empty="Nothing waiting for a finished file." canDelete />
       )}
-      <CutsBucket title={editor ? "To cut" : "Send"} items={send} empty="Nothing waiting to send." canDelete={!editor} />
-      <CutsBucket title="With the editor" items={cutting} empty="Nothing with the editor." canDelete={!editor} />
-      <CutsBucket title="To approve" items={review} empty="Nothing waiting for you." canDelete={!editor} />
+      <CutsBucket
+        title={editor ? "To cut" : "Send"}
+        items={send}
+        empty={editor ? "No raw-clip jobs yet." : "Nothing waiting to send."}
+        canDelete={!editor}
+      />
+      <CutsBucket
+        title={editor ? "Cutting" : "With the editor"}
+        items={cutting}
+        empty={editor ? "No raw-clip job in progress." : "Nothing with the editor."}
+        canDelete={!editor}
+      />
+      <CutsBucket
+        title="To approve"
+        items={review}
+        empty={editor ? "Nothing sent back yet." : "Nothing waiting for you."}
+        canDelete={!editor}
+      />
     </Shell>
   );
 }
