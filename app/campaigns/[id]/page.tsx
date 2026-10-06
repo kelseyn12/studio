@@ -86,7 +86,7 @@ export default async function CampaignDetailPage({
       <form action={pullDeal} className="mb-8 max-w-xl space-y-3 rounded-2xl border border-line bg-panel p-5">
         <p className="font-semibold">Posts made in the apps</p>
         <p className="text-sm text-mute">
-          Pulls posts from this deal's pages since the date, including ones you posted after a brand approved them.
+          Pulls posts from the pages on this deal since the date, including ones you posted after a brand approved them.
           Posts Studio already sent are skipped.
         </p>
         <div className="flex flex-wrap items-center gap-2">
