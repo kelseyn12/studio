@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { pullDeal } from "@/app/campaigns/[id]/pull";
 import { DealEdit } from "@/components/deal-edit";
 import { Shell } from "@/components/shell";
 import { StatusPill } from "@/components/status-pill";
 import { DEAL_KIND_LABEL } from "@/lib/deal-kind";
+import { defaultPullSince, pullMessage } from "@/lib/hand-posts";
 import { formatViews, parseBonuses, videoMoneyCents } from "@/lib/deal-bonuses";
 import { formatMoney, formatMoneyExact, scoreDeal } from "@/lib/deals";
 import { prisma } from "@/lib/prisma";
@@ -22,8 +24,15 @@ async function addFormat(formData: FormData) {
   redirect(`/campaigns/${campaignId}`);
 }
 
-export default async function CampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function CampaignDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ pull?: string; more?: string }>;
+}) {
   const { id } = await params;
+  const query = await searchParams;
   const [campaign, posted] = await Promise.all([
     prisma.campaign.findUnique({
       where: { id },
@@ -74,6 +83,21 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
           )}
         </p>
       </div>
+      <form action={pullDeal} className="mb-8 max-w-xl space-y-3 rounded-2xl border border-line bg-panel p-5">
+        <p className="font-semibold">Posts made in the apps</p>
+        <p className="text-sm text-mute">
+          Pulls posts from this deal's pages since the date, including ones you posted after a brand approved them.
+          Posts Studio already sent are skipped.
+        </p>
+        <div className="flex flex-wrap items-center gap-2">
+          <input type="hidden" name="id" value={campaign.id} />
+          <input type="date" name="since" defaultValue={defaultPullSince()} className="field max-w-44" />
+          <button className="rounded-xl bg-sun px-4 py-2 text-sm font-semibold text-ink">Pull posts</button>
+        </div>
+        {pullMessage(query.pull, query.more === "1") ? (
+          <p className="text-sm text-sun">{pullMessage(query.pull, query.more === "1")}</p>
+        ) : null}
+      </form>
       <section className="mb-8 grid gap-3 md:grid-cols-3">
         <div className="rounded-2xl bg-sun px-5 py-4 text-ink">
           <p className="text-xs font-semibold uppercase tracking-[0.16em]">Score</p>
@@ -153,7 +177,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
           {campaign.cards.map((card) => (
             <Link key={card.id} href={`/cards/${card.id}`} className="flex items-center justify-between rounded-2xl border border-line bg-panel px-4 py-3">
               <span>{card.title}</span>
-              <StatusPill status={card.status} />
+              <StatusPill status={card.status} scheduledAt={card.scheduledAt} />
             </Link>
           ))}
         </div>

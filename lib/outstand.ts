@@ -41,7 +41,7 @@ function apiKey(): string {
   return key;
 }
 
-async function outstand<T>(path: string, init?: RequestInit): Promise<T> {
+export async function outstand<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${BASE}${path}`, {
     ...init,
     headers: {

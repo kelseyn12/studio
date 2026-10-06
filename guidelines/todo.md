@@ -1,5 +1,9 @@
 # To-do
 
+- [X] Pull posts made in the apps
+  A deal page button imports that deal's accounts since a date. Posts Studio already sent are skipped.
+  New posts become posted videos with their caption, link, and view count, so Numbers includes them.
+
 - [X] Editor batches: clean videos + the words, in folders
   Multiply "Draw the words on the video" off → one clean file per mix; hook, body, CTA saved on the card for the editor.
   Cuts groups batch videos into a folder per Multiply name: words per mix, Needs IG · FB + TT · YT, Download all, drop many files named "mix 2 IG.mp4".

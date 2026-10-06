@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-10-05 — A deal can pull posts made in the apps. Outstand imports that deal's accounts, Studio skips posts it already sent, and the new ones land as posted videos so Numbers can count them.
 - 2026-10-05 — An editor's Cuts page names both kinds of job. Batch videos are the folder. Raw-clip videos are To cut, one at a time. Each editor only sees cards assigned to them.
 - 2026-10-05 — The public site was showing the laptop PIN form because Clerk keys are baked in at build and the last deploy did not pass them. The image build now refuses to finish without those keys.
 - 2026-10-05 — Job pings go to Discord (`lib/discord.ts`). `pingStudio` mentions the editor on a new job or a revision, and you when a cut comes back. ManyChat still runs only when its keys exist.
