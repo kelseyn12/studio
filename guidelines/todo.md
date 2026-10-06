@@ -1,5 +1,9 @@
 # To-do
 
+- [X] Voice note shows that it is recording
+  The button says Stop recording, with a countdown, while the mic is open.
+  It still stops itself after 20 seconds and saves the note.
+
 - [X] Clips remembers the editor on Save
   Picking Tarikh and clicking Save reloads Clips with him still selected.
   The menu uses the person saved on the video before anyone marked default.
