@@ -1,4 +1,4 @@
-import { finishStage, updateCard } from "@/app/cards/[id]/actions";
+import { keepCutting, sendFootageToEditor, updateCard } from "@/app/cards/[id]/actions";
 import { DropZone } from "@/components/drop-zone";
 import { VoiceBox } from "@/components/voice-box";
 import { REFERENCE_MAX_BYTES } from "@/lib/files";
@@ -17,7 +17,7 @@ export function CardFootage({
       <p className="text-sm text-mute">
         Phone clips and voice live here. A 4K day stays a Drive folder — paste the link. Then pick: you cut, or send to the editor.
       </p>
-      <form action={finishStage.bind(null, "footage")} className="space-y-3">
+      <form action={sendFootageToEditor} className="space-y-3">
         <input type="hidden" name="id" value={card.id} />
         <input type="hidden" name="step" value="footage" />
         <input name="rawsUrl" defaultValue={card.rawsUrl} placeholder="4K folder — Drive or Dropbox" className="field" />
@@ -40,12 +40,10 @@ export function CardFootage({
           Save
         </button>
         <div className="grid gap-2 sm:grid-cols-2">
-          <button name="cutBy" value="SELF" className="rounded-xl bg-sun py-3 font-semibold text-ink">
+          <button formAction={keepCutting} className="rounded-xl border border-line py-3">
             I’ll cut this
           </button>
-          <button name="cutBy" value="EDITOR" className="rounded-xl border border-line py-3">
-            Send to editor
-          </button>
+          <button className="rounded-xl bg-sun py-3 font-semibold text-ink">Send to editor</button>
         </div>
       </form>
       <VoiceBox cardId={card.id} />

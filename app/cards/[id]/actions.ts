@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
-import { isDeskStage, nextStatusFor, sendBackStatus, type DeskStage } from "@/lib/card-desk";
+import { alreadyWithEditor, isDeskStage, nextStatusFor, sendBackStatus, type DeskStage } from "@/lib/card-desk";
 import { cardPatch } from "@/lib/card-patch";
 import { dropCards } from "@/lib/drop-cards";
 import { deleteUpload, saveUpload, mimeFromName } from "@/lib/files";
@@ -35,8 +35,22 @@ export async function updateCard(formData: FormData) {
   if (isDeskStage(step)) redirect(`/cards/${id}?step=${step}`);
 }
 
+export async function sendFootageToEditor(formData: FormData) {
+  formData.set("cutBy", "EDITOR");
+  await finishStage("footage", formData);
+}
+
+export async function keepCutting(formData: FormData) {
+  formData.set("cutBy", "SELF");
+  await finishStage("footage", formData);
+}
+
 export async function finishStage(stage: DeskStage, formData: FormData) {
-  const id = await saveCard(formData);
+  const id = String(formData.get("id"));
+  const before = id
+    ? await prisma.card.findUnique({ where: { id }, select: { status: true, cutBy: true, editorId: true } })
+    : null;
+  await saveCard(formData);
   const card = await prisma.card.findUnique({ where: { id } });
   const next = card ? nextStatusFor(stage, card.status) : null;
   const patch: { status?: PipelineStatus; editorId?: string } = {};
@@ -64,10 +78,13 @@ export async function finishStage(stage: DeskStage, formData: FormData) {
   revalidatePath("/edits");
   const sent = stage === "editor" || (stage === "footage" && cutBy === "EDITOR" && patch.status === "EDITING");
   if (sent && cutBy !== "SELF") {
-    try {
-      await pingStudio("editor", `New job: ${card?.title || "a video"}. Open Cuts in Studio.`);
-    } catch {
-      /* ManyChat must not block the handoff */
+    const chosenEditor = String(patch.editorId || card?.editorId || "");
+    if (!alreadyWithEditor(before, chosenEditor)) {
+      try {
+        await pingStudio("editor", `New job: ${card?.title || "a video"}. Open Cuts in Studio.`);
+      } catch {
+        /* ManyChat must not block the handoff */
+      }
     }
     redirect("/edits");
   }

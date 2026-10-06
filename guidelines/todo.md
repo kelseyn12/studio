@@ -1,5 +1,9 @@
 # To-do
 
+- [X] Send to editor sends once
+  Clips Send to editor hands him the video and opens Cuts. It was opening the Cut tab instead.
+  Clicking it again does not ping him a second time.
+
 - [X] Delete a voice note
   Delete on the voice player removes that file. The Voice paragraph goes too when it was the last one.
   Record a voice note starts a fresh take.

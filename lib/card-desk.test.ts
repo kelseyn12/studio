@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { deskStage, filmChipLabel, nextStatusFor, pickFinished, sendBackStatus } from "@/lib/card-desk";
+import { alreadyWithEditor, deskStage, filmChipLabel, nextStatusFor, pickFinished, sendBackStatus } from "@/lib/card-desk";
 import { pillLabel } from "@/lib/pipeline";
 
 describe("filmChipLabel", () => {
@@ -32,6 +32,14 @@ describe("card desk", () => {
     expect(nextStatusFor("footage", "SCRIPTED")).toBe("FILMED");
     expect(nextStatusFor("editor", "FILMED")).toBe("EDITING");
     expect(nextStatusFor("live", "READY")).toBeNull();
+  });
+
+  it("pings the editor once when the video is first sent", () => {
+    const sent = { status: "EDITING", cutBy: "EDITOR", editorId: "tarikh" };
+    expect(alreadyWithEditor(null, "tarikh")).toBe(false);
+    expect(alreadyWithEditor({ status: "FILMED", cutBy: "SELF", editorId: "tarikh" }, "tarikh")).toBe(false);
+    expect(alreadyWithEditor(sent, "tarikh")).toBe(true);
+    expect(alreadyWithEditor(sent, "kelso")).toBe(false);
   });
 
   it("sends a cut back to the editor from To approve", () => {

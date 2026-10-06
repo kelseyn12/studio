@@ -23,6 +23,14 @@ export function nextStatusFor(stage: DeskStage, status: PipelineStatus): Pipelin
   return null;
 }
 
+/** Already on his Cuts page. A second Send must not ping him again. */
+export function alreadyWithEditor(
+  card: { status: string; cutBy: string; editorId: string | null } | null,
+  editorId: string,
+): boolean {
+  return Boolean(card && card.status === "EDITING" && card.cutBy === "EDITOR" && card.editorId === editorId);
+}
+
 export function sendBackStatus(status: PipelineStatus): PipelineStatus | null {
   if (status === "REVIEW") return "EDITING";
   return null;

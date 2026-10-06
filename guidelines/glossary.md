@@ -66,6 +66,8 @@
 - `pullMedia` — `lib/pull-media.ts` — fetches a direct mp4 or yt-dlp page URL for Transcribe. Blocks private hosts.
 - `approveCut` — `app/cards/[id]/actions.ts` — To approve → ready. Used on Live as Approve.
 - `requestChanges` — `app/cards/[id]/actions.ts` — To approve → With editor. Used on Live as Needs changes.
+- `alreadyWithEditor` — `lib/card-desk.ts` — true when this video is already on his Cuts page for the same editor. A second Send does not ping him again.
+- `sendFootageToEditor` / `keepCutting` — `app/cards/[id]/actions.ts` — Clips buttons. Send hands the video to him and opens Cuts. I’ll cut this stays on the Cut tab.
 - `sendBackStatus` — `lib/card-desk.ts` — REVIEW maps to EDITING. Used by requestChanges.
 - `markCutReady` — `lib/cut-ready.ts` — finished drop → To approve and pings you. Used by Cuts drop and URL attach.
 - `deleteVideo` — `app/cards/[id]/actions.ts` — removes a video and its files. Used on Film days (×) and the video page.
