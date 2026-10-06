@@ -1,5 +1,9 @@
 # To-do
 
+- [X] Clips remembers the editor on Save
+  Picking Tarikh and clicking Save reloads Clips with him still selected.
+  The menu uses the person saved on the video before anyone marked default.
+
 - [X] Several reference links, each with a note
   Write holds a link and a note, and Add another reference. The editor sees each one on the job.
   The old single link still shows when the list is empty.

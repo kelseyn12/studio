@@ -85,6 +85,7 @@ export function CardEditorStage({
       {self || desk ? null : (
         <form action={finishStage.bind(null, "editor")} className="space-y-3">
           <input type="hidden" name="id" value={card.id} />
+          <input type="hidden" name="step" value="editor" />
           <input type="hidden" name="cutBy" value="EDITOR" />
           <select
             name="editorId"

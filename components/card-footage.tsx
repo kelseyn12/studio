@@ -11,7 +11,7 @@ export function CardFootage({
   card: { id: string; rawsUrl: string; editorId: string | null };
   editors: Array<{ id: string; name: string; defaultEditor?: boolean }>;
 }) {
-  const defaultEditor = editors.find((person) => person.defaultEditor)?.id ?? card.editorId ?? "";
+  const selectedEditor = card.editorId ?? editors.find((person) => person.defaultEditor)?.id ?? "";
   return (
     <div className="space-y-4">
       <p className="text-sm text-mute">
@@ -19,6 +19,7 @@ export function CardFootage({
       </p>
       <form action={finishStage.bind(null, "footage")} className="space-y-3">
         <input type="hidden" name="id" value={card.id} />
+        <input type="hidden" name="step" value="footage" />
         <input name="rawsUrl" defaultValue={card.rawsUrl} placeholder="4K folder — Drive or Dropbox" className="field" />
         {card.rawsUrl ? (
           <a href={card.rawsUrl} target="_blank" rel="noreferrer" className="block rounded-xl border border-line px-4 py-3 text-center">
@@ -26,7 +27,7 @@ export function CardFootage({
           </a>
         ) : null}
         {editors.length > 0 ? (
-          <select name="editorId" defaultValue={defaultEditor} className="field">
+          <select key={selectedEditor || "none"} name="editorId" defaultValue={selectedEditor} className="field">
             <option value="">Editor if you send</option>
             {editors.map((person) => (
               <option key={person.id} value={person.id}>

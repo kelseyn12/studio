@@ -43,6 +43,7 @@ export function CardBrief({
     <div className="space-y-3">
       <form action={finishStage.bind(null, "brief")} className="space-y-3">
         <input type="hidden" name="id" value={card.id} />
+        <input type="hidden" name="step" value="brief" />
         <p className="text-sm text-mute">Write it. Pick the day you will film and which account it is for. This does not publish.</p>
         <input name="title" defaultValue={card.title} className="field" placeholder="Title" />
         <select name="accountId" defaultValue={card.accountId ?? ""} className="field">

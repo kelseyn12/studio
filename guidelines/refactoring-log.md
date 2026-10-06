@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-10-06 — Clips Save was putting the old editor back in the menu. Save now reloads that step so the person you picked stays selected.
 - 2026-10-06 — A video can have several reference links, each with a note about what to copy. The editor sees them on the job. The old single link still shows.
 - 2026-10-06 — A capital letter in an invite email was splitting one person into two. Sign-in now matches the email either way and keeps the invite row.
 - 2026-10-06 — Team shows whether someone signed in. `User.lastSeenAt` is written when they open Studio. No `clerkId` means the invite has not been used.

@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
-import { nextStatusFor, sendBackStatus, type DeskStage } from "@/lib/card-desk";
+import { isDeskStage, nextStatusFor, sendBackStatus, type DeskStage } from "@/lib/card-desk";
 import { cardPatch } from "@/lib/card-patch";
 import { dropCards } from "@/lib/drop-cards";
 import { deleteUpload, saveUpload, mimeFromName } from "@/lib/files";
@@ -30,7 +30,9 @@ async function saveCard(formData: FormData) {
 }
 
 export async function updateCard(formData: FormData) {
-  await saveCard(formData);
+  const id = await saveCard(formData);
+  const step = String(formData.get("step") || "");
+  if (isDeskStage(step)) redirect(`/cards/${id}?step=${step}`);
 }
 
 export async function finishStage(stage: DeskStage, formData: FormData) {
