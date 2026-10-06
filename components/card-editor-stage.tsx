@@ -6,7 +6,7 @@ import { EditorNeed } from "@/components/editor-need";
 import { PacketFiles } from "@/components/packet-files";
 import { EditorBrief } from "@/components/editor-brief";
 import { capcutHref } from "@/lib/capcut";
-import { lookForNewDrop } from "@/lib/card-desk";
+import { visibleAssets } from "@/lib/card-desk";
 import type { PacketItem } from "@/lib/editor-packet";
 import { formatBytes, STUDIO_FILE_MAX_BYTES } from "@/lib/storage";
 import { watchUrl } from "@/lib/urls";
@@ -46,8 +46,9 @@ export function CardEditorStage({
     filename: string;
     path: string;
     publicUrl: string;
-    textStyle?: string;
+    textStyle: string;
     coverAt?: number;
+    createdAt: Date;
   }>;
   edited?: { path: string; publicUrl: string | null };
   desk: boolean;
@@ -56,14 +57,13 @@ export function CardEditorStage({
 }) {
   const self = card.cutBy === "SELF" && !desk;
   const editedLooks = files.filter((file) => file.kind === "EDITED").map((file) => file.textStyle);
-  // The editor's one file posts everywhere unless a look is already in; the creator's guess follows the title.
-  const defaultLook = editedLooks.includes("tiktok") && !editedLooks.includes("instagram")
-    ? "tiktok"
-    : editedLooks.includes("instagram")
-      ? "instagram"
-      : desk
-        ? "plain"
-        : lookForNewDrop(card.title);
+  const oneVideo =
+    self || desk || editedLooks.length === 0 || editedLooks.some((style) => !style || style === "plain");
+  const defaultLook = oneVideo
+    ? "plain"
+    : editedLooks.includes("tiktok") && !editedLooks.includes("instagram")
+      ? "tiktok"
+      : "instagram";
   const hasSources =
     Boolean(card.rawsUrl.trim()) ||
     files.some((file) => file.kind === "RAW" || file.kind === "VOICE" || file.kind === "REFERENCE");
@@ -201,7 +201,7 @@ export function CardEditorStage({
         <input name="editedUrl" placeholder="https://…/export.mp4" className="field" />
         <button className="rounded-xl border border-line px-4 py-2 text-sm">Attach URL</button>
       </form>
-      {files
+      {visibleAssets(files)
         .filter((file) => file.kind === "EDITED")
         .map((file) => (
           <section key={file.id} className="rounded-card border border-line bg-panel p-5">

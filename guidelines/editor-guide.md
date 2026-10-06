@@ -105,7 +105,7 @@ Watching, downloading, or opening Drive does not move it. On the job page:
 3. Cut the video to the script: hook up top, tight pacing, captions on everything spoken, hook
    words on screen if they are listed. Match each reference, and follow the note under it.
 4. Export 1080 × 1920 mp4, under 250 MB, no watermark. Any file name is fine here.
-5. Drop it on the job page (**One video** stays selected). It moves to **To approve**.
+5. Drop it on the job page (**One video** stays selected). It moves to **To approve** for her. When she cuts it herself, it goes straight to Schedule and every account is on that one file.
 
 ### Deadlines
 

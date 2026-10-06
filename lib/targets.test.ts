@@ -111,6 +111,12 @@ describe("accountsForLook", () => {
     ];
     expect(accountsForLook(mix, "instagram").map((account) => account.network)).toEqual(["instagram", "facebook"]);
     expect(accountsForLook(mix, "tiktok").map((account) => account.network)).toEqual(["tiktok", "youtube"]);
+    expect(accountsForLook(mix, "plain").map((account) => account.network)).toEqual([
+      "instagram",
+      "facebook",
+      "tiktok",
+      "youtube",
+    ]);
   });
 });
 

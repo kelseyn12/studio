@@ -106,9 +106,54 @@ export function lookForNewDrop(title: string): "instagram" | "tiktok" {
   return /\btt\b/i.test(title) && !/\big\b/i.test(title) ? "tiktok" : "instagram";
 }
 
+function isFinished(kind: string): boolean {
+  return kind === "EDITED" || kind === "GENERATED";
+}
+
+/** One file for every app. Two tagged looks (IG and TT) stay split. A plain file wins over a stray tag. */
+export function isOneVideo(assets: Array<{ kind: string; textStyle: string }>): boolean {
+  const finished = assets.filter((asset) => isFinished(asset.kind));
+  if (finished.length === 0) return false;
+  const looks = looksOnFiles(finished);
+  if (looks.includes("instagram") && looks.includes("tiktok")) return false;
+  return finished.some((asset) => !asset.textStyle || asset.textStyle === "plain");
+}
+
+/** Dropping One video replaces every finished file. Dropping one look replaces that look and any one-video file. */
+export function priorEditedIds(
+  assets: Array<{ id: string; kind: string; textStyle: string }>,
+  textStyle: string,
+  keepId?: string,
+): string[] {
+  const edited = assets.filter((asset) => asset.kind === "EDITED" && asset.id !== keepId);
+  if (!textStyle || textStyle === "plain") return edited.map((asset) => asset.id);
+  return edited
+    .filter((asset) => asset.textStyle === textStyle || !asset.textStyle || asset.textStyle === "plain")
+    .map((asset) => asset.id);
+}
+
+/** She cuts it herself, so the drop is ready to schedule. His drop still waits for her. */
+export function statusAfterDrop(cutBy: string, status: string): "READY" | "REVIEW" | null {
+  if (status === "POSTED" || status === "DATA") return null;
+  if (cutBy === "SELF") return status === "READY" ? null : "READY";
+  if (status === "READY" || status === "REVIEW") return null;
+  return "REVIEW";
+}
+
+/** One video shows once. The plain file is the one that posts. */
+export function visibleAssets<T extends { id: string; kind: string; textStyle: string; createdAt: Date }>(assets: T[]): T[] {
+  if (!isOneVideo(assets)) return assets;
+  const newestFirst = [...assets].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  const keep =
+    newestFirst.find((asset) => asset.kind === "EDITED" && (!asset.textStyle || asset.textStyle === "plain")) ??
+    newestFirst.find((asset) => asset.kind === "EDITED");
+  if (!keep) return assets;
+  return assets.filter((asset) => asset.kind !== "EDITED" || asset.id === keep.id);
+}
+
 /**
  * One row per file already on this video. An IG-only upload does not grow a TT drop —
- * that other version is its own video. A file marked both still fills every account look.
+ * that other version is its own video. One video is a single row with every account.
  */
 export function shipLooks<
   A extends { kind: string; createdAt: Date; textStyle: string },
@@ -116,6 +161,12 @@ export function shipLooks<
 >(assets: A[], targets: T[]): Array<ShipLook<A, T>> {
   const finished = pickFinished(assets);
   if (!finished) return [];
+  if (isOneVideo(assets)) {
+    const newestFirst = [...assets].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    const asset =
+      newestFirst.find((item) => isFinished(item.kind) && (!item.textStyle || item.textStyle === "plain")) ?? finished;
+    return [{ look: "plain", tag: "All apps", accounts: targets, asset }];
+  }
   const groups = targetsByLook(targets);
   const byLook = new Map(groups.map((group) => [group.look, group.accounts]));
   const onFiles = looksOnFiles(assets);
@@ -132,6 +183,7 @@ export type FileLook = { look: DrawnStyle; tag: string };
 
 /** The looks on a mix's finished files — one "IG · FB" row and one "TT · YT" row when it has both. */
 export function fileLooks(assets: Array<{ kind: string; textStyle: string }>): FileLook[] {
+  if (isOneVideo(assets)) return [{ look: "plain", tag: "All apps" }];
   const looks = looksOnFiles(assets);
   const show = looks.length > 0 ? looks : (["plain"] as DrawnStyle[]);
   return show.map((look) => ({ look, tag: LOOK_TAG[look] || "All apps" }));

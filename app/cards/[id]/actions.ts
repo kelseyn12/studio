@@ -11,7 +11,7 @@ import { directMediaUrl } from "@/lib/media-url";
 import { rejectStudioFile } from "@/lib/storage";
 import type { PipelineStatus } from "@/lib/pipeline";
 import { prisma } from "@/lib/prisma";
-import { beginCutting, markCutReady } from "@/lib/cut-ready";
+import { beginCutting, markCutReady, replaceEditedLook } from "@/lib/cut-ready";
 import { pingStudio } from "@/lib/manychat";
 import { timeAlreadyPassed } from "@/lib/dates";
 import { ALREADY_SCHEDULED, postCaption, queueCard, waitingPostIds } from "@/lib/publish";
@@ -261,9 +261,10 @@ export async function attachEditedUrl(formData: FormData) {
   const saved = await saveUpload(new File([new Uint8Array(bytes)], name, { type }), `cards/${id}`);
   const style = String(formData.get("textStyle") || "");
   const textStyle = style === "instagram" || style === "tiktok" || style === "plain" ? style : "plain";
-  await prisma.asset.create({
+  const created = await prisma.asset.create({
     data: { cardId: id, kind: "EDITED", ...saved, publicUrl: saved.publicUrl || url, textStyle },
   });
+  await replaceEditedLook(id, textStyle, created.id);
   await markCutReady(id);
   revalidatePath(`/cards/${id}`);
   revalidatePath("/edits");

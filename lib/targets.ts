@@ -29,18 +29,20 @@ export function parseAccountIds(raw: string | string[] | null | undefined): stri
   return [...new Set(parts.map((part) => part.trim()).filter(Boolean))];
 }
 
-/** Active accounts that take this look — IG · FB or TT · YT. */
+/** Active accounts that take this look. One video (plain) is every account. */
 export function accountsForLook<T extends { network: string; isActive?: boolean }>(accounts: T[], look: string): T[] {
-  return accounts.filter(
-    (account) => account.isActive !== false && textStyleForNetwork(account.network) === look,
-  );
+  return accounts.filter((account) => {
+    if (account.isActive === false) return false;
+    if (look === "plain") return true;
+    return textStyleForNetwork(account.network) === look;
+  });
 }
 
 /** Short app names on a mix card — IG + FB, or TT + YT. */
 export const LOOK_APPS: Record<string, string[]> = {
   instagram: ["IG", "FB"],
   tiktok: ["TT", "YT"],
-  plain: [],
+  plain: ["IG", "FB", "TT", "YT"],
 };
 
 /**

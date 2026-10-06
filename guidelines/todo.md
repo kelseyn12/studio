@@ -1,5 +1,9 @@
 # To-do
 
+- [X] One video, every account
+  A self-cut with one file shows that file once and lists IG, FB, TikTok, and YouTube.
+  Approve stays for his cut. Hers goes straight to Schedule.
+
 - [X] Start cutting button
   The job stays in To cut until he presses Start cutting. The voice note is at the top.
   He can paste a CapCut project link on the job. Drive raw footage is labeled as raw footage.

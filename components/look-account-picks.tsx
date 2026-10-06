@@ -37,7 +37,9 @@ export function LookAccountPicks({
     <div className="space-y-2">
       {compact ? null : (
         <p className="text-xs text-mute">
-          This mix is for {apps.join(" and ") || tag}. Check every account it should go to — as many as you want.
+          {look === "plain"
+            ? "One video. Check every account it should go to — as many as you want."
+            : `This mix is for ${apps.join(" and ") || tag}. Check every account it should go to — as many as you want.`}
         </p>
       )}
       {choices.map((account) => {

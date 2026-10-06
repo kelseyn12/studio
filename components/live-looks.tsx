@@ -61,7 +61,7 @@ export function LiveLooks({
           ) : (
             <FinishedDrop
               cardId={cardId}
-              look={row.look === "tiktok" ? "tiktok" : "instagram"}
+              look={row.look === "tiktok" ? "tiktok" : row.look === "plain" ? "plain" : "instagram"}
               maxBytes={STUDIO_FILE_MAX_BYTES}
               sizeLabel={formatBytes(STUDIO_FILE_MAX_BYTES)}
             />

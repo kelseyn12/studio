@@ -9,7 +9,7 @@ import { MediaRow } from "@/components/media-row";
 import { Shell } from "@/components/shell";
 import { StatusPill } from "@/components/status-pill";
 import { Stepper } from "@/components/stepper";
-import { deskStage, isDeskStage, pickFinished } from "@/lib/card-desk";
+import { deskStage, isDeskStage, pickFinished, visibleAssets } from "@/lib/card-desk";
 import { editorNeeds } from "@/lib/editor-packet";
 import { previewEditorId } from "@/lib/editor-preview";
 import { requireUser } from "@/lib/auth";
@@ -119,7 +119,9 @@ export default async function CardPage({
           />
         ) : null}
         <div className="mt-6 space-y-2">
-          {card.assets.filter((asset) => !(desk && asset.kind === "VOICE")).map((asset) => (
+          {visibleAssets(card.assets)
+            .filter((asset) => !(desk && asset.kind === "VOICE"))
+            .map((asset) => (
             <MediaRow
               key={asset.id}
               id={asset.id}

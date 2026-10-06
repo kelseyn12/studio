@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fileLooks, lookForNewDrop, pickForLook, shipLooks } from "@/lib/card-desk";
+import { fileLooks, isOneVideo, lookForNewDrop, pickForLook, priorEditedIds, shipLooks, statusAfterDrop } from "@/lib/card-desk";
 import { hookLooks } from "@/lib/text-style";
 
 const at = (minutes: number) => new Date(2026, 8, 26, 12, minutes);
@@ -63,6 +63,56 @@ describe("shipLooks", () => {
       { network: "tiktok" },
     ]);
     expect(rows.map((row) => [row.tag, row.asset?.id])).toEqual([["IG · FB", "ig"]]);
+  });
+
+  it("lists every account on one video", () => {
+    const rows = shipLooks(
+      [
+        { id: "ig", kind: "EDITED", textStyle: "instagram", createdAt: at(1) },
+        { id: "one", kind: "EDITED", textStyle: "plain", createdAt: at(2) },
+      ],
+      [{ network: "instagram" }, { network: "facebook" }, { network: "tiktok" }, { network: "youtube" }],
+    );
+    expect(rows).toHaveLength(1);
+    expect(rows[0]?.tag).toBe("All apps");
+    expect(rows[0]?.asset?.id).toBe("one");
+    expect(rows[0]?.accounts.map((account) => account.network)).toEqual([
+      "instagram",
+      "facebook",
+      "tiktok",
+      "youtube",
+    ]);
+  });
+});
+
+describe("one video", () => {
+  it("treats a plain file as one video and a two-look pair as two files", () => {
+    expect(isOneVideo([{ kind: "EDITED", textStyle: "plain" }])).toBe(true);
+    expect(isOneVideo([{ kind: "EDITED", textStyle: "instagram" }])).toBe(false);
+    expect(
+      isOneVideo([
+        { kind: "GENERATED", textStyle: "instagram" },
+        { kind: "GENERATED", textStyle: "tiktok" },
+      ]),
+    ).toBe(false);
+  });
+
+  it("replaces every finished file when the drop is one video", () => {
+    const assets = [
+      { id: "ig", kind: "EDITED", textStyle: "instagram" },
+      { id: "one", kind: "EDITED", textStyle: "plain" },
+    ];
+    expect(priorEditedIds(assets, "plain", "fresh")).toEqual(["ig", "one"]);
+    expect(priorEditedIds(assets, "instagram", "fresh")).toEqual(["ig", "one"]);
+    expect(priorEditedIds([{ id: "tt", kind: "EDITED", textStyle: "tiktok" }], "instagram", "fresh")).toEqual([]);
+  });
+
+  it("skips approve when she cuts it herself", () => {
+    expect(statusAfterDrop("SELF", "FILMED")).toBe("READY");
+    expect(statusAfterDrop("SELF", "REVIEW")).toBe("READY");
+    expect(statusAfterDrop("SELF", "READY")).toBeNull();
+    expect(statusAfterDrop("EDITOR", "EDITING")).toBe("REVIEW");
+    expect(statusAfterDrop("EDITOR", "REVIEW")).toBeNull();
   });
 });
 

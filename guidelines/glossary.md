@@ -28,11 +28,11 @@
 - `defaultPullSince` / `pullSince` / `handPostTitle` / `postsWorthSaving` / `pullMessage` — `lib/hand-posts.ts` — which app posts are new, and what the deal page says after a pull.
 - `parseImportJob` / `parseHandPosts` / `startImport` / `listHandPosts` — `lib/outstand-import.ts` — Outstand's account import and the post list that follows it.
 - `pullDealPosts` — `lib/pull-deal.ts` — runs the pull for one deal and saves new posts as cards. Used by `pullDeal` on the deal page.
-- `attachEditedFile` — `lib/cut-ready.ts` — saves a finished file as an EDITED asset and calls `markCutReady`. Used by `/api/assets` and `/api/assets/batch`.
+- `attachEditedFile` / `replaceEditedLook` — `lib/cut-ready.ts` — saves a finished file as an EDITED asset. One video replaces the old file. A look replaces that look. Then `markCutReady`. Used by `/api/assets` and the Drive-link attach.
 - `batchByCard` — `lib/queries.ts` — card id → `{ name, twoLooks }` for its Multiply batch. Used by Live's waiting folders and Cuts' batch folders.
 - `RepurposeBatch.burnText` — Multiply "Draw the words on the video". Off: `renderBatch` skips hook text, lists, and spoken captions, makes one file per mix, and still saves `hook` / `body` / `plug` on the card.
 - `groupWaitingFolders` / `waitingFolderName` / `waitingMixLabel` — `lib/waiting-folders.ts` — Live's "finished, no day yet" list. The batch name is the dropdown. Opening it shows every mix in that batch. A file name is not used as the mix label.
-- `deskStage` / `shipLooks` / `fileLooks` / `filmChipLabel` — `lib/card-desk.ts` — pipeline stage; one Live row per look (`IG · FB` vs `TT · YT`); the looks on a mix's files for the Live waiting list; `filmChipLabel` is the short name on a Film days chip (`Mix 6 · BANGER`). `LiveLooks` + `LookAccountPicks` let you check multiple @s per mix, each tagged IG / FB / TT / YT.
+- `deskStage` / `shipLooks` / `fileLooks` / `isOneVideo` / `filmChipLabel` — `lib/card-desk.ts` — pipeline stage; one Live row per look (`IG · FB` vs `TT · YT`); one video is a single row with every account. `filmChipLabel` is the short name on a Film days chip (`Mix 6 · BANGER`). `LiveLooks` + `LookAccountPicks` let you check multiple @s, each tagged IG / FB / TT / YT.
 - `accountsForLook` / `LOOK_APPS` / `targetApps` / `targetAccounts` — `lib/targets.ts` — accounts that match a look; mix app pills; `targetApps` = the apps a video actually posts to (calendar chips + day-slot dropdown); checked Mix/Live ids win, else the deal list.
 - `cardPatch` — `lib/card-patch.ts` — writes only fields present on the form so a Brief save cannot wipe editor notes.
 - `queueCard` — `lib/publish.ts` — parks a card on Live and ships through Outstand. Never overwrites `plannedDate`. Marks Posted only if Outstand already published. A retry deletes failed jobs only for the accounts it is sending again, and `shouldClearDay` keeps the day when another app already published. The file name Outstand stores is `safeUploadName`, so the public link stays plain letters. `postCaption` sends the caption box only — a blank box stays blank, and the file name is never the caption. `accountsToSend` is the gate: the first claim can send, and once the day is taken only an app whose latest try failed can go again. A second Schedule creates no post. `waitingPostIds` plus `updatePostContent` change the caption on posts that are still waiting.
@@ -73,7 +73,7 @@
 - `alreadyWithEditor` — `lib/card-desk.ts` — true when this video is already on his Cuts page (To cut or Cutting) for the same editor. A second Send does not ping him again.
 - `sendFootageToEditor` / `keepCutting` — `app/cards/[id]/actions.ts` — Clips buttons. Send hands the video to him and opens Cuts. I’ll cut this stays on the Cut tab.
 - `sendBackStatus` — `lib/card-desk.ts` — REVIEW maps to EDITING. Used by requestChanges.
-- `markCutReady` — `lib/cut-ready.ts` — finished drop → To approve and pings you. Used by Cuts drop and URL attach.
+- `markCutReady` / `statusAfterDrop` — `lib/cut-ready.ts` and `lib/card-desk.ts` — his finished drop → To approve and pings you. Your own cut goes to To schedule with no approve step.
 - `deleteVideo` — `app/cards/[id]/actions.ts` — removes a video and its files. Used on Film days (×) and the video page.
 - `generateScript` — `lib/script.ts` — spoken hook/body/plug/script from the brief plus reference clips. Used by `/api/ai/script`.
 - `deleteUpload` — `lib/files.ts` — removes a Studio file from R2 and local disk. Used by Library cleanup.
@@ -100,7 +100,7 @@
 - `SelectDeleteBar` / `usePicked` / `PickBox` — `components/select-videos.tsx` — checkbox selection + confirm-before-delete toolbar.
 - `hookLooks` / `looksForNetworks` — `lib/text-style.ts` — which looks to render for one Multiply output (`both` always Instagram + TikTok; `auto` does the same when the deal spans those looks) / distinct looks a set of accounts needs. Tested in `lib/card-desk-look.test.ts` and `lib/text-style.test.ts`.
 - `targetsByLook` — `lib/targets.ts` — groups a video's target accounts by app look so each look's file posts to its own accounts. Used by `queueCard`.
-- `pickForLook` / `lookForNewDrop` / `shipLooks` — `lib/card-desk.ts` — `pickForLook` is the file for one look. An IG/FB upload does not fill TT/YT. `lookForNewDrop` starts a TT title on TT · YT. `shipLooks` lists only looks that already have a file, so the other version stays its own video.
+- `pickForLook` / `lookForNewDrop` / `shipLooks` / `priorEditedIds` / `visibleAssets` — `lib/card-desk.ts` — `pickForLook` is the file for one look. An IG/FB upload does not fill TT/YT. One video (`plain`) lists every account and shows once. `priorEditedIds` is the old file a new drop replaces.
 - `postIdsFor` — `lib/analytics.ts` — distinct Outstand post ids behind a video (card + publish jobs); analytics sync sums them.
 - `targetAccounts` / `dealAccounts` / `parseAccountIds` / `describeTargets` / `networkShort` / `accountsForLook` / `LOOK_APPS` — `lib/targets.ts` — checked Mix/Live ids win, else the deal list. `accountsForLook` keeps IG with FB and TT with YT. Mix cards use `LOOK_APPS` pills.
 - `watchUrl` / `isPublicMediaUrl` — `lib/urls.ts` / `lib/r2.ts` — in-app play/download always goes through `/api/files`. S3 API hosts (`*.r2.cloudflarestorage.com`) are not treated as public.

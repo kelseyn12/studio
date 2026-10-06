@@ -43,6 +43,7 @@ export function CardLive({
     accountId: string | null;
     accountIds?: string;
     campaignId: string | null;
+    cutBy?: "SELF" | "EDITOR";
     account: { username: string } | null;
     approved: boolean;
     payoutCents: number;
@@ -114,7 +115,7 @@ export function CardLive({
           <PaidButton card={card} />
         </div>
       ) : null}
-      {card.status === "REVIEW" ? (
+      {card.status === "REVIEW" && card.cutBy !== "SELF" ? (
         <>
           <form action={approveCut} className="rounded-card border border-line bg-panel p-5">
             <input type="hidden" name="id" value={card.id} />
@@ -135,7 +136,7 @@ export function CardLive({
           </form>
         </>
       ) : null}
-      {card.status === "READY" && !card.scheduledAt ? (
+      {card.status === "READY" && !card.scheduledAt && card.cutBy !== "SELF" ? (
         <form action={sendForTouchUp} className="space-y-3 rounded-card border border-line bg-panel p-5">
           <input type="hidden" name="id" value={card.id} />
           <p className="text-sm text-mute">
@@ -154,7 +155,9 @@ export function CardLive({
       <form action={card.scheduledAt ? updateScheduledCaption : scheduleCard} className="space-y-3">
         <input type="hidden" name="id" value={card.id} />
         <p className="text-sm text-mute">
-          This video only posts the file you dropped. Check the accounts for that version. The other version is the other name.
+          {looks.length === 1 && looks[0]?.look === "plain"
+            ? "One video. Check every account it should go to."
+            : "This video only posts the file you dropped. Check the accounts for that version. The other version is the other name."}
         </p>
         <LiveLooks
           cardId={card.id}
@@ -175,7 +178,7 @@ export function CardLive({
                 .join(". ")
             : dealTargets.length > 0
               ? `Posts to ${describeTargets(dealTargets)} at the time you set.`
-              : `${card.account ? handle(card.account.username) : "Pick accounts on each look"} at the time you set.`}
+              : `${card.account ? handle(card.account.username) : looks[0]?.look === "plain" ? "Pick the accounts below" : "Pick accounts on each look"} at the time you set.`}
         </p>
         <label className="block text-sm">
           Caption on every app
