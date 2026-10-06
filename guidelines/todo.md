@@ -1,5 +1,9 @@
 # To-do
 
+- [X] Delete a voice note
+  Delete on the voice player removes that file. The Voice paragraph goes too when it was the last one.
+  Record a voice note starts a fresh take.
+
 - [X] Redo a voice note
   Record again replaces the last voice-note file and the Voice paragraph on the note.
   A note typed above that paragraph stays.

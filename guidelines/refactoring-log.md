@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-10-06 — A voice note has Delete on its player. That removes the file and the Voice paragraph, so you can record a new one.
 - 2026-10-06 — Recording a voice note again replaces the last take, including the words written into the editor note.
 - 2026-10-06 — The voice note button now shows a countdown and Stop while the mic is open. The old line was easy to miss.
 - 2026-10-06 — Clips Save was putting the old editor back in the menu. Save now reloads that step so the person you picked stays selected.

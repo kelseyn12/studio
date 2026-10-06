@@ -7,6 +7,7 @@ import { dropCards, dropOutputs } from "@/lib/drop-cards";
 import { deleteUpload } from "@/lib/files";
 import { prisma } from "@/lib/prisma";
 import { sweepStale } from "@/lib/sweep";
+import { withVoiceTranscript } from "@/lib/voice-note";
 
 export async function deleteSelectedVideos(formData: FormData) {
   const user = await requireUser();
@@ -25,14 +26,29 @@ export async function deleteSelectedVideos(formData: FormData) {
 }
 
 export async function deleteAsset(formData: FormData) {
-  await requireUser();
+  const user = await requireUser();
   const id = String(formData.get("id") || "");
   const asset = await prisma.asset.findUnique({ where: { id } });
   if (!asset) return;
+  if (asset.kind === "VOICE" && user.role === "EDITOR") return;
+  const voicesLeft =
+    asset.kind === "VOICE"
+      ? await prisma.asset.count({ where: { cardId: asset.cardId, kind: "VOICE", id: { not: asset.id } } })
+      : 1;
   await deleteUpload(asset.path);
   await prisma.asset.delete({ where: { id } });
+  if (asset.kind === "VOICE" && voicesLeft === 0) {
+    const card = await prisma.card.findUnique({ where: { id: asset.cardId } });
+    if (card) {
+      await prisma.card.update({
+        where: { id: card.id },
+        data: { editorNote: withVoiceTranscript(card.editorNote, "") },
+      });
+    }
+  }
   revalidatePath("/library");
   revalidatePath(`/cards/${asset.cardId}`);
+  revalidatePath("/edits");
   revalidatePath("/");
 }
 

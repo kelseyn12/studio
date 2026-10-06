@@ -6,5 +6,6 @@ describe("withVoiceTranscript", () => {
     expect(withVoiceTranscript("Use take 2\n\nVoice: old take", "new take")).toBe("Use take 2\n\nVoice: new take");
     expect(withVoiceTranscript("Voice: old take\n\nVoice: second", "third")).toBe("Voice: third");
     expect(withVoiceTranscript("", "hello")).toBe("Voice: hello");
+    expect(withVoiceTranscript("Use take 2\n\nVoice: old take", "")).toBe("Use take 2");
   });
 });

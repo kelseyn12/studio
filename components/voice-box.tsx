@@ -76,7 +76,9 @@ export function VoiceBox({ cardId }: { cardId: string }) {
           Recording. Talk now. {secondsLeft}s left.
         </p>
       ) : (
-        <p className="text-sm text-mute">{status || "Talk for up to 20 seconds. Record again to replace the last one."}</p>
+        <p className="text-sm text-mute">
+          {status || "Talk for up to 20 seconds. Delete it under the player if you do not want it, then record again."}
+        </p>
       )}
     </div>
   );

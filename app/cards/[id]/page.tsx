@@ -96,11 +96,13 @@ export default async function CardPage({
           {card.assets.map((asset) => (
             <MediaRow
               key={asset.id}
+              id={asset.id}
               kind={asset.kind}
               filename={asset.filename}
               path={asset.path}
               mime={asset.mime}
               publicUrl={asset.publicUrl}
+              canDelete={!desk}
             />
           ))}
         </div>
