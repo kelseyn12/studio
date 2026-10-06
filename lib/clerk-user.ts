@@ -19,6 +19,7 @@ export async function readClerkSession(): Promise<SessionUser | null> {
   let user = await prisma.user.findFirst({
     where: { OR: [{ clerkId: userId }, { email }] },
   });
+  const seenAt = new Date();
   if (!user) {
     user = await prisma.user.create({
       data: {
@@ -26,12 +27,13 @@ export async function readClerkSession(): Promise<SessionUser | null> {
         email,
         name: clerk?.firstName || clerk?.fullName || email,
         role: metaRole || "CREATOR",
+        lastSeenAt: seenAt,
       },
     });
-  } else if (user.clerkId !== userId) {
+  } else {
     user = await prisma.user.update({
       where: { id: user.id },
-      data: { clerkId: userId },
+      data: { lastSeenAt: seenAt, ...(user.clerkId !== userId ? { clerkId: userId } : {}) },
     });
   }
   if (metaRole && metaRole !== user.role) {

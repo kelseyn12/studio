@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-10-06 — Team shows whether someone signed in. `User.lastSeenAt` is written when they open Studio. No `clerkId` means the invite has not been used.
 - 2026-10-05 — A deal can pull posts made in the apps. Outstand imports that deal's accounts, Studio skips posts it already sent, and the new ones land as posted videos so Numbers can count them.
 - 2026-10-05 — An editor's Cuts page names both kinds of job. Batch videos are the folder. Raw-clip videos are To cut, one at a time. Each editor only sees cards assigned to them.
 - 2026-10-05 — The public site was showing the laptop PIN form because Clerk keys are baked in at build and the last deploy did not pass them. The image build now refuses to finish without those keys.

@@ -1,5 +1,9 @@
 # To-do
 
+- [X] See if the editor signed in
+  Team shows "Has not signed in" until they open Studio. After that it shows the day they last did.
+  `readClerkSession` writes `User.lastSeenAt`. Laptop PIN logins stay blank.
+
 - [X] Pull posts made in the apps
   A deal page button imports that deal's accounts since a date. Posts Studio already sent are skipped.
   New posts become posted videos with their caption, link, and view count, so Numbers includes them.

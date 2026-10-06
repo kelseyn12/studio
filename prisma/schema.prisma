@@ -85,6 +85,7 @@ model User {
   pinHash        String?
   clerkId        String?  @unique
   defaultEditor  Boolean  @default(false)
+  lastSeenAt     DateTime?
   createdAt      DateTime @default(now())
   cards          Card[]   @relation("CreatedCards")
   edits          Card[]   @relation("EditorCards")

@@ -3,6 +3,7 @@ import { RemoveMemberButton } from "@/components/remove-member";
 import { Shell } from "@/components/shell";
 import { requireUser } from "@/lib/auth";
 import { hasClerk } from "@/lib/clerk-mode";
+import { memberStatus } from "@/lib/member-status";
 import { prisma } from "@/lib/prisma";
 import type { Role } from "@prisma/client";
 
@@ -76,6 +77,7 @@ export default async function TeamPage({ searchParams }: { searchParams: Promise
             <div>
               <p className="font-medium">{user.name}</p>
               <p className="text-sm text-mute">{user.email}</p>
+              {memberStatus(user) ? <p className="text-xs text-mute">{memberStatus(user)}</p> : null}
             </div>
             <div className="flex items-center gap-3">
               <p className="text-sm capitalize text-mute">{user.role.toLowerCase()}</p>
