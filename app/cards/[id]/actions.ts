@@ -77,7 +77,7 @@ export async function finishStage(stage: DeskStage, formData: FormData) {
   revalidatePath("/edits");
   const chosenEditor = String(patch.editorId || card?.editorId || "");
   const sent = handingOff && Boolean(chosenEditor);
-  if (sent && cutBy !== "SELF") {
+  if (sent) {
     if (!alreadyWithEditor(before, chosenEditor)) {
       try {
         await pingStudio("editor", `New job: ${card?.title || "a video"}. It is under To cut.`);
