@@ -4,12 +4,14 @@ import { CardBrief } from "@/components/card-brief";
 import { CardEditorStage } from "@/components/card-editor-stage";
 import { CardFootage } from "@/components/card-footage";
 import { CardLive } from "@/components/card-live";
+import { EditorPreview } from "@/components/editor-preview";
 import { MediaRow } from "@/components/media-row";
 import { Shell } from "@/components/shell";
 import { StatusPill } from "@/components/status-pill";
 import { Stepper } from "@/components/stepper";
 import { deskStage, isDeskStage, pickFinished } from "@/lib/card-desk";
 import { editorNeeds } from "@/lib/editor-packet";
+import { previewEditorId } from "@/lib/editor-preview";
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -18,7 +20,7 @@ export default async function CardPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ step?: string }>;
+  searchParams: Promise<{ step?: string; as?: string }>;
 }) {
   const { id } = await params;
   const query = await searchParams;
@@ -34,7 +36,14 @@ export default async function CardPage({
   ]);
   if (!card) notFound();
   if (user.role === "EDITOR" && card.editorId !== user.id) notFound();
-  const desk = user.role === "EDITOR";
+  const isEditor = user.role === "EDITOR";
+  const previewId = previewEditorId(
+    user.role,
+    query.as,
+    editors.map((person) => person.id),
+  );
+  const seeingHisJob = Boolean(previewId && card.editorId === previewId);
+  const desk = isEditor || seeingHisJob;
   const stage = desk ? "editor" : isDeskStage(query.step) ? query.step : deskStage(card.status);
   const edited = pickFinished(card.assets);
   const cutSource = card.assets
@@ -53,6 +62,21 @@ export default async function CardPage({
           <StatusPill status={card.status} scheduledAt={card.scheduledAt} />
         </div>
       </div>
+      {isEditor ? null : (
+        <div className="mb-6 max-w-xl">
+          <EditorPreview
+            editors={editors}
+            activeId={previewId}
+            mineHref={`/cards/${card.id}?step=${query.step && isDeskStage(query.step) ? query.step : "editor"}`}
+            hrefFor={(editorId) => `/cards/${card.id}?as=${editorId}`}
+            note={
+              previewId && !seeingHisJob
+                ? `${editors.find((person) => person.id === previewId)?.name ?? "He"} does not have this video.`
+                : undefined
+            }
+          />
+        </div>
+      )}
       {desk ? null : (
         <div className="mb-6 max-w-xl">
           <DeleteVideoButton id={card.id} />

@@ -29,11 +29,13 @@ export function CutsBucket({
   items,
   empty,
   canDelete = false,
+  preview,
 }: {
   title: string;
   canDelete?: boolean;
   items: CutsCard[];
   empty: string;
+  preview?: string;
 }) {
   return (
     <section className="mb-8">
@@ -48,7 +50,7 @@ export function CutsBucket({
             const packet = editorNeeds(card);
             const dropFile = card.cutBy === "SELF" && card.status === "FILMED";
             const schedule = card.status === "REVIEW";
-            const href = `/cards/${card.id}?step=${schedule ? "live" : "editor"}`;
+            const href = `/cards/${card.id}?step=${schedule ? "live" : "editor"}${preview ? `&as=${preview}` : ""}`;
             return (
               <article key={card.id} className="rounded-card border border-line bg-panel p-5">
                 <div className="flex items-start justify-between gap-3">

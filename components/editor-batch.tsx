@@ -27,12 +27,14 @@ export function EditorBatch({
   editor,
   maxBytes,
   sizeLabel,
+  preview,
 }: {
   name: string;
   rows: EditorBatchRow[];
   editor: boolean;
   maxBytes: number;
   sizeLabel: string;
+  preview?: string;
 }) {
   const [saving, setSaving] = useState(false);
   const files = rows.flatMap((row) => row.cleanFiles);
@@ -83,7 +85,10 @@ export function EditorBatch({
           {rows.map((row) => (
             <li key={row.id} className="rounded-xl bg-lift px-4 py-3">
               <div className="flex items-start justify-between gap-3">
-                <Link href={`/cards/${row.id}?step=${row.stage === "review" ? "live" : "editor"}`} className="font-semibold">
+                <Link
+                  href={`/cards/${row.id}?step=${row.stage === "review" ? "live" : "editor"}${preview ? `&as=${preview}` : ""}`}
+                  className="font-semibold"
+                >
                   {row.mixLabel}
                 </Link>
                 <span className="text-xs text-mute">{STAGE_LABEL[row.stage]}</span>

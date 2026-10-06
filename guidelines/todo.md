@@ -1,5 +1,9 @@
 # To-do
 
+- [X] See his Cuts page
+  My page / his page on Cuts and on the video. His page uses his list names and, when the video is his, the job sheet.
+  A video he does not have stays on your page with a line saying so.
+
 - [X] Send to editor sends once
   Clips Send to editor hands him the video and opens Cuts. It was opening the Cut tab instead.
   Clicking it again does not ping him a second time.
