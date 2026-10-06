@@ -32,7 +32,7 @@ export function alreadyWithEditor(
   return Boolean(card && withHim && card.cutBy === "EDITOR" && card.editorId === editorId);
 }
 
-/** Send leaves a new job in To cut. Cutting starts when he downloads, not when she sends. */
+/** Send leaves a new job in To cut. Cutting starts when he presses Start cutting. */
 export function keepInToCut(next: PipelineStatus | null): PipelineStatus | null {
   if (next === "EDITING") return null;
   return next;

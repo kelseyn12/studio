@@ -1,4 +1,4 @@
-import { attachEditedUrl, finishStage, updateCard } from "@/app/cards/[id]/actions";
+import { attachEditedUrl, finishStage, startCutting, updateCard } from "@/app/cards/[id]/actions";
 import { CapcutLink } from "@/components/capcut-link";
 import { CoverPick } from "@/components/cover-pick";
 import { FinishedDrop } from "@/components/finished-drop";
@@ -79,19 +79,54 @@ export function CardEditorStage({
             : self
               ? "Download if you need the clips. Cut the finished video. Drop it below."
               : desk
-                ? "Download the files, cut the finished video, drop it here or paste a direct mp4 link."
+                ? "One card is one video. Do these in order."
                 : "Send only if someone else cuts this. I’ll cut this is on Clips."}
         </p>
-        {desk && card.status === "FILMED" ? (
-          <p className="mb-3 rounded-xl bg-sun/15 px-4 py-2 text-sm">
-            This is in To cut. Download the files, or open the 4K folder, and it moves to Cutting.
-          </p>
+        {desk && !dropOnly ? (
+          <ol className="mb-3 list-decimal space-y-1 pl-5 text-sm">
+            <li>Listen to the voice note. Read the words and the script.</li>
+            <li>Open Google Drive for the raw footage. Watch the references here.</li>
+            <li>Press Start cutting when you begin. Watching or downloading does not start it.</li>
+            <li>Cut one video. Leave Which video on One video.</li>
+            <li>Drop the finished mp4 below, or paste a Drive link to that file. Not the raw folder.</li>
+          </ol>
         ) : null}
-        {desk ? <EditorBrief card={card} /> : null}
-        {desk ? <CapcutLink url={card.capcutUrl} editable={false} /> : null}
+        {desk && card.status === "FILMED" ? (
+          canStart ? (
+            <form action={startCutting} className="mb-3">
+              <input type="hidden" name="id" value={card.id} />
+              <button className="rounded-xl bg-sun px-4 py-3 font-semibold text-ink">Start cutting</button>
+            </form>
+          ) : (
+            <div className="mb-3">
+              <p className="rounded-xl bg-sun px-4 py-3 text-center font-semibold text-ink">Start cutting</p>
+              <p className="mt-2 text-xs text-mute">He presses this. You are looking at his page, so it stays in To cut.</p>
+            </div>
+          )
+        ) : null}
+        {desk && card.status === "EDITING" ? (
+          <p className="mb-3 rounded-xl bg-sun/15 px-4 py-2 text-sm">You are cutting this. Drop the finished video when it is done.</p>
+        ) : null}
+        {desk ? (
+          <EditorBrief
+            card={card}
+            voices={files.filter((file) => file.kind === "VOICE").map((file) => ({ id: file.id, path: file.path, filename: file.filename }))}
+          />
+        ) : null}
+        {desk ? (
+          <form action={updateCard} className="mb-3 space-y-2">
+            <input type="hidden" name="id" value={card.id} />
+            <input type="hidden" name="step" value="editor" />
+            <CapcutLink url={card.capcutUrl} editable />
+            <p className="text-xs text-mute">
+              Paste the CapCut project link and save. If she cannot open it, invite her email on that project.
+            </p>
+            <button className="rounded-xl border border-line px-4 py-2 text-sm">Save CapCut link</button>
+          </form>
+        ) : null}
         {dropOnly ? null : <EditorNeed items={packet} />}
       </section>
-      {dropOnly ? null : <PacketFiles rawsUrl={card.rawsUrl} files={files} cardId={canStart ? card.id : undefined} />}
+      {dropOnly ? null : <PacketFiles rawsUrl={card.rawsUrl} files={files} />}
       {self || desk ? null : (
         <form action={finishStage.bind(null, "editor")} className="space-y-3">
           <input type="hidden" name="id" value={card.id} />

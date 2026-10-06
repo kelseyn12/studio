@@ -1,5 +1,9 @@
 # To-do
 
+- [X] Start cutting button
+  The job stays in To cut until he presses Start cutting. The voice note is at the top.
+  He can paste a CapCut project link on the job. Drive raw footage is labeled as raw footage.
+
 - [X] To cut until he downloads
   Send leaves the card in To cut. His download or Open 4K folder moves it to Cutting.
   One video is the finished-file choice. A Drive file link works. A folder does not.

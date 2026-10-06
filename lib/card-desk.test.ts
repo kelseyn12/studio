@@ -43,7 +43,7 @@ describe("card desk", () => {
     expect(alreadyWithEditor(sent, "kelso")).toBe(false);
   });
 
-  it("keeps a new job in To cut until he downloads", () => {
+  it("keeps a new job in To cut until he presses Start cutting", () => {
     expect(keepInToCut("FILMED")).toBe("FILMED");
     expect(keepInToCut("EDITING")).toBeNull();
     expect(shouldStartCutting({ status: "FILMED", cutBy: "EDITOR", editorId: "tarikh" }, { role: "EDITOR", id: "tarikh" })).toBe(true);

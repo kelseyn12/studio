@@ -229,12 +229,15 @@ export async function updateScheduledCaption(formData: FormData) {
   redirect(updated > 0 ? "/calendar?ship=caption" : "/calendar?ship=caption-late");
 }
 
-export async function startCutting(cardId: string) {
+export async function startCutting(formData: FormData) {
   const user = await requireUser();
+  const cardId = String(formData.get("id") || "");
+  if (!cardId) return;
   const started = await beginCutting(cardId, user);
   if (!started) return;
   revalidatePath("/edits");
   revalidatePath(`/cards/${cardId}`);
+  redirect(`/cards/${cardId}?step=editor`);
 }
 
 export async function attachEditedUrl(formData: FormData) {

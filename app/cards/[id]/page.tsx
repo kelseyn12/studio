@@ -119,7 +119,7 @@ export default async function CardPage({
           />
         ) : null}
         <div className="mt-6 space-y-2">
-          {card.assets.map((asset) => (
+          {card.assets.filter((asset) => !(desk && asset.kind === "VOICE")).map((asset) => (
             <MediaRow
               key={asset.id}
               id={asset.id}
@@ -129,7 +129,6 @@ export default async function CardPage({
               mime={asset.mime}
               publicUrl={asset.publicUrl}
               canDelete={!desk}
-              cardId={isEditor ? card.id : undefined}
             />
           ))}
         </div>

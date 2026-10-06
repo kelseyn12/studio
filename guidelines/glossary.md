@@ -68,7 +68,7 @@
 - `requestChanges` — `app/cards/[id]/actions.ts` — To approve → With editor. Used on Live as Needs changes.
 - `previewEditorId` — `lib/editor-preview.ts` — which editor's Cuts page the creator is looking at (`?as=`). An editor cannot open someone else's page.
 - `keepInToCut` / `shouldStartCutting` — `lib/card-desk.ts` — Send leaves a job in To cut (FILMED). Downloading, only by the assigned editor, moves it to Cutting.
-- `beginCutting` — `lib/cut-ready.ts` — To cut → Cutting when he downloads a file or opens the 4K folder.
+- `beginCutting` — `lib/cut-ready.ts` — To cut → Cutting when the assigned editor presses Start cutting.
 - `directMediaUrl` — `lib/media-url.ts` — a finished-file link. A Drive file link becomes a download. A Drive folder is rejected.
 - `alreadyWithEditor` — `lib/card-desk.ts` — true when this video is already on his Cuts page (To cut or Cutting) for the same editor. A second Send does not ping him again.
 - `sendFootageToEditor` / `keepCutting` — `app/cards/[id]/actions.ts` — Clips buttons. Send hands the video to him and opens Cuts. I’ll cut this stays on the Cut tab.

@@ -1,10 +1,12 @@
 import { labelDay } from "@/lib/dates";
 import { wordsSheet } from "@/lib/editor-batches";
 import { httpsUrl, parseReferences } from "@/lib/references";
+import { watchUrl } from "@/lib/urls";
 
 /** Everything the editor needs to read before he cuts: deadline, note, words, script, reference. */
 export function EditorBrief({
   card,
+  voices = [],
 }: {
   card: {
     hook: string;
@@ -16,12 +18,24 @@ export function EditorBrief({
     referencesJson: string;
     deadlineAt: Date | null;
   };
+  voices?: Array<{ id: string; path: string; filename: string }>;
 }) {
   const words = wordsSheet(card);
   const script = card.script.trim();
   const references = parseReferences(card.referencesJson, card.referenceUrl);
   return (
     <div className="mb-3 space-y-3">
+      {voices.map((file) => (
+        <div key={file.id} className="rounded-xl bg-lift px-4 py-3">
+          <div className="mb-2 flex items-center justify-between gap-3 text-sm">
+            <p className="font-semibold">Voice note</p>
+            <a href={watchUrl(file.path)} download={file.filename} className="text-sun">
+              Download
+            </a>
+          </div>
+          <audio controls src={watchUrl(file.path)} className="w-full" />
+        </div>
+      ))}
       {card.deadlineAt ? (
         <p className="rounded-xl bg-sun/15 px-4 py-2 text-sm font-semibold">Due {labelDay(card.deadlineAt)}</p>
       ) : null}

@@ -85,23 +85,23 @@ If a mix does not say "Two files", ignore this.
 ### What you see
 
 A card under **To cut** on Cuts with the video's name, the deal, and **Due …** if there is a
-deadline. Click it to open the job. It stays in **To cut** until you download a file or open the
-4K folder. That moves it to **Cutting**, so she can see you started. On the job page:
+deadline. Click it to open the job. It stays in **To cut** until you press **Start cutting**.
+Watching, downloading, or opening Drive does not move it. On the job page:
 
 - **Your job** — the deadline, Kelsey's note, the **words to put on the video** (hook / CTA if
   any), the **script** (what is said; open it to read), and **reference** links when she
   wants you to match a feel. Each link has a note saying what to copy.
 - A checklist of what is in the packet: hook, script, clips, note.
-- A **CapCut** button if she set up a shared CapCut project for it.
-- **Download files** — every raw clip, the voice note, reference files, and an **Open 4K folder**
-  button if the footage is in Drive.
+- The **voice note** at the top. Listen before you read.
+- A **CapCut project link** you can paste. Save it. If she cannot open it, invite her email on that project.
+- **Download files** — raw clips, reference files, and **Open Google Drive (raw footage)** when the footage is in Drive.
 - **Which video is this?** — leave it on **One video**. IG · FB and TT · YT are only when she asked for two exports.
 - The drop zone, or a link to that one finished file. A Drive link to the file works. A Drive folder does not.
 
 ### What you do
 
-1. Read the note and the script first. Listen to the voice note if there is one. That is the brief.
-2. Download the clips (or open the 4K folder).
+1. Listen to the voice note. Read the words and the script.
+2. Open Google Drive for the raw footage. Press **Start cutting** when you begin.
 3. Cut the video to the script: hook up top, tight pacing, captions on everything spoken, hook
    words on screen if they are listed. Match each reference, and follow the note under it.
 4. Export 1080 × 1920 mp4, under 250 MB, no watermark. Any file name is fine here.
@@ -152,7 +152,7 @@ You never schedule, pick thumbnails, or write captions.
 1. Open the video → **Write**: hook, script, reference links (a note under each one), **editor deadline**. These all show on
    his job.
 2. **Clips**: drop raw clips or paste the 4K Drive folder, add a voice note or written note, a
-   reference clip. **Send to editor**. It lands under his To cut. It moves to Cutting when he downloads the files.
+   reference clip. **Send to editor**. It lands under his To cut. It moves to Cutting when he presses Start cutting.
 
 **Both**
 
