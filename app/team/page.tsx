@@ -10,7 +10,7 @@ import type { Role } from "@prisma/client";
 async function addMember(formData: FormData) {
   "use server";
   const name = String(formData.get("name") || "Member");
-  const email = String(formData.get("email") || `${Date.now()}@studio.local`);
+  const email = String(formData.get("email") || `${Date.now()}@studio.local`).trim().toLowerCase();
   const role = (formData.get("role") as Role) || "EDITOR";
   await prisma.user.create({
     data: { name, email, role },

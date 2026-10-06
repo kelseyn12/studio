@@ -1,3 +1,4 @@
+import { pickStudioUser } from "@/lib/clerk-match";
 import { prisma } from "@/lib/prisma";
 import { hasClerk, parseStudioRole } from "@/lib/clerk-mode";
 import type { SessionUser } from "@/lib/session";
@@ -16,24 +17,29 @@ export async function readClerkSession(): Promise<SessionUser | null> {
   const email = clerk?.primaryEmailAddress?.emailAddress || clerk?.emailAddresses[0]?.emailAddress;
   if (!email) return null;
   const metaRole = parseStudioRole(clerk?.publicMetadata?.role);
-  let user = await prisma.user.findFirst({
-    where: { OR: [{ clerkId: userId }, { email }] },
-  });
+  const folded = email.toLowerCase();
+  const people = await prisma.user.findMany();
+  let user = pickStudioUser(people, userId, folded);
   const seenAt = new Date();
   if (!user) {
     user = await prisma.user.create({
       data: {
         clerkId: userId,
-        email,
-        name: clerk?.firstName || clerk?.fullName || email,
+        email: folded,
+        name: clerk?.firstName || clerk?.fullName || folded,
         role: metaRole || "CREATOR",
         lastSeenAt: seenAt,
       },
     });
   } else {
+    const emailTaken = people.some((person) => person.id !== user!.id && person.email.toLowerCase() === folded);
     user = await prisma.user.update({
       where: { id: user.id },
-      data: { lastSeenAt: seenAt, ...(user.clerkId !== userId ? { clerkId: userId } : {}) },
+      data: {
+        lastSeenAt: seenAt,
+        ...(emailTaken ? {} : { email: folded }),
+        ...(user.clerkId !== userId ? { clerkId: userId } : {}),
+      },
     });
   }
   if (metaRole && metaRole !== user.role) {

@@ -54,6 +54,7 @@
 - `ensureLocal` — `lib/files.ts` — pulls a file from R2 into a temp folder only when ffmpeg needs it.
 - `hasR2` — `lib/r2.ts` — true when Cloudflare R2 credentials are set.
 - `hasClerk` — `lib/clerk-mode.ts` — true when Clerk keys are set. PIN login is then refused.
+- `pickStudioUser` — `lib/clerk-match.ts` — which Team row a Clerk login belongs to. Capitals in the email do not make a second person. The invite row wins over a later duplicate.
 - `readClerkSession` — `lib/clerk-user.ts` — maps a Clerk user onto Prisma (`clerkId` + role from publicMetadata) and sets `User.lastSeenAt`. The same person is remembered for a minute so each click does not call Clerk again.
 - `memberStatus` — `lib/member-status.ts` — Team line. Laptop logins stay blank. A real email with no `clerkId` is "Has not signed in". With a `clerkId`, "Signed in" plus the last day they opened Studio.
 - `isDirectMediaUrl` — `lib/media-url.ts` — accepts a direct mp4 URL; rejects a Drive folder.
