@@ -34,6 +34,6 @@ export async function POST(request: Request) {
   });
   const match = matchDropToCard(file.name, cards);
   if (!match) return NextResponse.json({ error: `${file.name}: ${NAME_HELP}` }, { status: 400 });
-  await attachEditedFile(match.card.id, file, match.textStyle);
+  await attachEditedFile(match.card.id, file, match.textStyle, user.role);
   return NextResponse.json({ ok: true, cardId: match.card.id, textStyle: match.textStyle });
 }

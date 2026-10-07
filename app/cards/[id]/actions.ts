@@ -103,11 +103,6 @@ export async function requestChanges(formData: FormData) {
     where: { id },
     data: { status: next, editorNote: note || card?.editorNote || "" },
   });
-  try {
-    await pingStudio("editor", `Changes on ${card?.title || "a video"}. Open Cuts.`);
-  } catch {
-    /* optional ping */
-  }
   revalidatePath(`/cards/${id}`);
   revalidatePath("/edits");
   revalidatePath("/");
@@ -145,11 +140,6 @@ export async function sendForTouchUp(formData: FormData) {
     where: { id },
     data: { status: "EDITING", cutBy: "EDITOR", editorId, editorNote: note || card.editorNote },
   });
-  try {
-    await pingStudio("editor", `Polish job: ${card.title}. Open Cuts.`);
-  } catch {
-    /* optional ping */
-  }
   revalidatePath(`/cards/${id}`);
   revalidatePath("/edits");
   revalidatePath("/calendar");
@@ -236,7 +226,7 @@ export async function startCutting(formData: FormData) {
 }
 
 export async function attachEditedUrl(formData: FormData) {
-  await requireUser();
+  const user = await requireUser();
   const id = String(formData.get("id"));
   const url = directMediaUrl(String(formData.get("editedUrl") || ""));
   if (!id || !url) {
@@ -260,7 +250,7 @@ export async function attachEditedUrl(formData: FormData) {
     data: { cardId: id, kind: "EDITED", ...saved, publicUrl: saved.publicUrl || url, textStyle },
   });
   await replaceEditedLook(id, textStyle, created.id);
-  await markCutReady(id);
+  await markCutReady(id, user.role);
   revalidatePath(`/cards/${id}`);
   revalidatePath("/edits");
   redirect(`/cards/${id}?step=live`);

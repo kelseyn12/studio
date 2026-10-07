@@ -1,8 +1,8 @@
 # To-do
 
-- [X] Discord only between you and the editor
-  A new job, changes, a polish, and his finished cut still ping.
-  Your own drop and Schedule do not.
+- [X] Discord only when a file changes hands
+  Sending him a job pings him. His finished drop pings you.
+  Your own drop, Schedule, notes, and Polish stay quiet.
 
 - [X] One video, every account
   A self-cut with one file shows that file once and lists IG, FB, TikTok, and YouTube.

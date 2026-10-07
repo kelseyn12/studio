@@ -28,7 +28,7 @@ export async function POST(request: Request) {
   const style = String(form.get("textStyle") || "");
   const textStyle = style === "instagram" || style === "tiktok" || style === "plain" ? style : "";
   if (kind === "EDITED") {
-    await attachEditedFile(id, file, textStyle);
+    await attachEditedFile(id, file, textStyle, user.role);
     return NextResponse.json({ ok: true, transcript: "" });
   }
   if (kind === "VOICE" && file.name === RECORDED_VOICE_NAME) {

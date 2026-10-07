@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fileLooks, isOneVideo, lookForNewDrop, pickForLook, priorEditedIds, shipLooks, statusAfterDrop } from "@/lib/card-desk";
+import { fileLooks, isOneVideo, lookForNewDrop, pickForLook, pingForFinishedDrop, priorEditedIds, shipLooks, statusAfterDrop } from "@/lib/card-desk";
 import { hookLooks } from "@/lib/text-style";
 
 const at = (minutes: number) => new Date(2026, 8, 26, 12, minutes);
@@ -113,6 +113,12 @@ describe("one video", () => {
     expect(statusAfterDrop("SELF", "READY")).toBeNull();
     expect(statusAfterDrop("EDITOR", "EDITING")).toBe("REVIEW");
     expect(statusAfterDrop("EDITOR", "REVIEW")).toBeNull();
+  });
+
+  it("pings her only when he drops the finished file", () => {
+    expect(pingForFinishedDrop("EDITOR", "EDITOR")).toBe(true);
+    expect(pingForFinishedDrop("CREATOR", "SELF")).toBe(false);
+    expect(pingForFinishedDrop("CREATOR", "EDITOR")).toBe(false);
   });
 });
 

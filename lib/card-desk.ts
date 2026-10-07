@@ -132,6 +132,11 @@ export function priorEditedIds(
     .map((asset) => asset.id);
 }
 
+/** Discord only when he drops the finished file on a job she sent him. Her own drop stays quiet. */
+export function pingForFinishedDrop(uploaderRole: string, cutBy: string): boolean {
+  return uploaderRole === "EDITOR" && cutBy === "EDITOR";
+}
+
 /** She cuts it herself, so the drop is ready to schedule. His drop still waits for her. */
 export function statusAfterDrop(cutBy: string, status: string): "READY" | "REVIEW" | null {
   if (status === "POSTED" || status === "DATA") return null;

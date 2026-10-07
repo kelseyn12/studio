@@ -160,6 +160,6 @@ You never schedule, pick thumbnails, or write captions.
 4. Open the video → Live: watch, pick the thumbnail, check accounts, caption (blank stays blank),
    schedule. Needs a fix? Send it back to the editor with a note.
 5. Add him once on **Team** with his email → Invite. Mark him **default** so Send never asks.
-6. Discord pings only go between you and him: a new job, changes, a polish, or his finished cut. Your own drop and Schedule stay quiet. Keys live in `.env` (`DISCORD_BOT_TOKEN`, `DISCORD_CHANNEL_ID`, `DISCORD_EDITOR_ID`, `DISCORD_CREATOR_ID`). The same four have to be on Fly or a drop on the public site stays quiet.
+6. Discord pings only when a file changes hands. You send him a job, or he drops the finished cut. Your own drop, Schedule, a note, and Polish stay quiet. Keys live in `.env` (`DISCORD_BOT_TOKEN`, `DISCORD_CHANNEL_ID`, `DISCORD_EDITOR_ID`, `DISCORD_CREATOR_ID`). The same four have to be on Fly or a drop on the public site stays quiet.
 
 Fly cost does not change for any of this. Multiply still renders on your Mac.
