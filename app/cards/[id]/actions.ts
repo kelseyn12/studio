@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { alreadyWithEditor, isDeskStage, keepInToCut, nextStatusFor, sendBackStatus, type DeskStage } from "@/lib/card-desk";
 import { cardPatch } from "@/lib/card-patch";
+import { withChangeNote } from "@/lib/change-note";
 import { dropCards } from "@/lib/drop-cards";
 import { beginCutting, attachEditedSaved } from "@/lib/cut-ready";
 import { attachDriveLink } from "@/lib/drive-finished";
@@ -102,7 +103,7 @@ export async function requestChanges(formData: FormData) {
   const note = String(formData.get("editorNote") || "").trim();
   await prisma.card.update({
     where: { id },
-    data: { status: next, editorNote: note || card?.editorNote || "" },
+    data: { status: next, editorNote: withChangeNote(card?.editorNote || "", note) },
   });
   revalidatePath(`/cards/${id}`);
   revalidatePath("/edits");
@@ -139,7 +140,7 @@ export async function sendForTouchUp(formData: FormData) {
   const note = String(formData.get("editorNote") || "").trim();
   await prisma.card.update({
     where: { id },
-    data: { status: "EDITING", cutBy: "EDITOR", editorId, editorNote: note || card.editorNote },
+    data: { status: "EDITING", cutBy: "EDITOR", editorId, editorNote: withChangeNote(card.editorNote, note) },
   });
   try {
     await pingStudio("editor", `Polish job: ${card.title}. Open Cuts.`);

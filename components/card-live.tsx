@@ -124,10 +124,11 @@ export function CardLive({
           </form>
           <form action={requestChanges} className="space-y-3 rounded-card border border-line bg-panel p-5">
             <input type="hidden" name="id" value={card.id} />
-            <p className="text-sm text-mute">Needs changes. They see this note on Cuts and drop a new finished video.</p>
+            <p className="text-sm text-mute">
+              Needs changes. Write only what to fix. He sees it at the top of his job, with your first note still under it.
+            </p>
             <textarea
               name="editorNote"
-              defaultValue={card.editorNote}
               placeholder="What to fix — hook, captions, end frame…"
               className="field min-h-24"
               required

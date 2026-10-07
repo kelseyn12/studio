@@ -1,3 +1,4 @@
+import { splitChangeNote } from "@/lib/change-note";
 import { labelDay } from "@/lib/dates";
 import { wordsSheet } from "@/lib/editor-batches";
 import { httpsUrl, parseReferences } from "@/lib/references";
@@ -23,8 +24,15 @@ export function EditorBrief({
   const words = wordsSheet(card);
   const script = card.script.trim();
   const references = parseReferences(card.referencesJson, card.referenceUrl);
+  const note = splitChangeNote(card.editorNote);
   return (
     <div className="mb-3 space-y-3">
+      {note.fix ? (
+        <div className="rounded-xl bg-sun/15 px-4 py-3 text-sm">
+          <p className="mb-1 font-semibold">Fix this, then drop the new video</p>
+          <p className="whitespace-pre-wrap">{note.fix}</p>
+        </div>
+      ) : null}
       {voices.map((file) => (
         <div key={file.id} className="rounded-xl bg-lift px-4 py-3">
           <div className="mb-2 flex items-center justify-between gap-3 text-sm">
@@ -39,7 +47,7 @@ export function EditorBrief({
       {card.deadlineAt ? (
         <p className="rounded-xl bg-sun/15 px-4 py-2 text-sm font-semibold">Due {labelDay(card.deadlineAt)}</p>
       ) : null}
-      {card.editorNote ? <p className="rounded-xl bg-lift px-4 py-3 text-sm">{card.editorNote}</p> : null}
+      {note.brief ? <p className="whitespace-pre-wrap rounded-xl bg-lift px-4 py-3 text-sm">{note.brief}</p> : null}
       {words.length > 0 ? (
         <dl className="space-y-1 rounded-xl bg-lift px-4 py-3 text-sm">
           <p className="text-xs text-mute">Words to put on the video</p>

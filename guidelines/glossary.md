@@ -65,7 +65,7 @@
 - `rewriteHook` — `lib/rewrite.ts` — gpt-4o-mini hook rewrite. Used by `/api/ai/hook` and Brief.
 - `pullMedia` — `lib/pull-media.ts` — fetches a direct mp4 or yt-dlp page URL for Transcribe. Blocks private hosts.
 - `approveCut` — `app/cards/[id]/actions.ts` — To approve → ready. Used on Live as Approve.
-- `requestChanges` — `app/cards/[id]/actions.ts` — To approve → With editor. Used on Live as Needs changes.
+- `requestChanges` — `app/cards/[id]/actions.ts` — To approve → With editor. Used on Live as Needs changes. The box starts empty; `withChangeNote` / `splitChangeNote` (`lib/change-note.ts`) put a `Fix:` line on top of the editor note and keep the first brief under it. `sendForTouchUp` does the same. `EditorBrief` shows the Fix in its own box.
 - `previewEditorId` — `lib/editor-preview.ts` — which editor's Cuts page the creator is looking at (`?as=`). An editor cannot open someone else's page.
 - `keepInToCut` / `shouldStartCutting` — `lib/card-desk.ts` — Send leaves a job in To cut (FILMED). Downloading, only by the assigned editor, moves it to Cutting.
 - `beginCutting` — `lib/cut-ready.ts` — To cut → Cutting when the assigned editor presses Start cutting.
