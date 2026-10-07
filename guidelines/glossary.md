@@ -24,7 +24,7 @@
 - `VoiceBox` — `components/voice-box.tsx` — Record a voice note on Clips. Shows a countdown and Stop while the mic is open, then saves a VOICE file and the transcript as the editor note. Recording again replaces that take. Delete on the player removes it and the Voice paragraph.
 - `withVoiceTranscript` — `lib/voice-note.ts` — puts the new transcript in the editor note and drops the previous Voice paragraph. Used by `POST /api/assets` when the file is `voice-note.webm`.
 - `parseReferences` / `packReferences` / `referencesFromForm` — `lib/references.ts` — several reference links, each with a note. The old single `referenceUrl` still shows when the list is empty. `ReferenceLinks` on the brief is the form.
-- `discordMessage` / `postDiscord` / `hasDiscord` — `lib/discord.ts` — job pings in the Studio- Editing channel. Mentions the editor or you, and adds the Cuts link. `pingStudio` in `lib/manychat.ts` calls this first.
+- `discordMessage` / `postDiscord` / `hasDiscord` — `lib/discord.ts` — pings in the Studio- Editing channel, only between you and the editor. A new job, changes, or a polish mention him. His finished cut mentions you. Your own drop and Schedule do not ping. `pingStudio` in `lib/manychat.ts` calls this first.
 - `defaultPullSince` / `pullSince` / `handPostTitle` / `postsWorthSaving` / `pullMessage` — `lib/hand-posts.ts` — which app posts are new, and what the deal page says after a pull.
 - `parseImportJob` / `parseHandPosts` / `startImport` / `listHandPosts` — `lib/outstand-import.ts` — Outstand's account import and the post list that follows it.
 - `pullDealPosts` — `lib/pull-deal.ts` — runs the pull for one deal and saves new posts as cards. Used by `pullDeal` on the deal page.

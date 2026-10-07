@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-10-06 — Discord pings only the handoff with the editor. Scheduling a video no longer posts in the channel.
 - 2026-10-06 — One video is a single file with every account, and her own cut skips Approve. Two exports still split into IG · FB and TT · YT.
 - 2026-10-06 — The CapCut box is his project link for her. Her pages only show Open in CapCut after he saves one.
 - 2026-10-06 — Start cutting is a button on the open job. The voice note plays at the top. He can paste a CapCut project link. The raw folder button says Open Google Drive (raw footage).

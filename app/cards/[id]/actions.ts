@@ -192,11 +192,6 @@ export async function scheduleCard(formData: FormData) {
     revalidatePath(`/cards/${id}`);
     redirect("/calendar?ship=taken");
   }
-  try {
-    await pingStudio("creator", `Scheduled: ${id}`);
-  } catch {
-    /* optional ping */
-  }
   revalidatePath(`/cards/${id}`);
   revalidatePath("/calendar");
   revalidatePath("/");
