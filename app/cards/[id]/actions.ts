@@ -140,6 +140,11 @@ export async function sendForTouchUp(formData: FormData) {
     where: { id },
     data: { status: "EDITING", cutBy: "EDITOR", editorId, editorNote: note || card.editorNote },
   });
+  try {
+    await pingStudio("editor", `Polish job: ${card.title}. Open Cuts.`);
+  } catch {
+    /* a missed ping still leaves the job on Cuts */
+  }
   revalidatePath(`/cards/${id}`);
   revalidatePath("/edits");
   revalidatePath("/calendar");

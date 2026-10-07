@@ -1,8 +1,8 @@
 # To-do
 
-- [X] Discord only when a file changes hands
-  Sending him a job pings him. His finished drop pings you.
-  Your own drop, Schedule, notes, and Polish stay quiet.
+- [X] Discord only when work changes hands
+  Sending him a job or a polish pings him. His finished drop pings you.
+  Your own drop, Schedule, and notes stay quiet.
 
 - [X] One video, every account
   A self-cut with one file shows that file once and lists IG, FB, TikTok, and YouTube.

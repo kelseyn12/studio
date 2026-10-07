@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { cardsToPolish, polishNote } from "@/lib/batch-polish";
+import { pingStudio } from "@/lib/manychat";
 import { prisma } from "@/lib/prisma";
 
 export async function createBatch(formData: FormData) {
@@ -56,6 +57,11 @@ export async function sendBatchToEditor(formData: FormData) {
     where: { id: { in: toSend } },
     data: { status: "EDITING", cutBy: "EDITOR", editorId, editorNote: polishNote(batch.name, String(formData.get("editorNote") || "")) },
   });
+  try {
+    await pingStudio("editor", `${toSend.length} polish jobs from ${batch.name}. Open Cuts.`);
+  } catch {
+    /* a missed ping still leaves the jobs on Cuts */
+  }
   revalidatePath("/edits");
   revalidatePath("/pipeline");
   revalidatePath("/calendar");
