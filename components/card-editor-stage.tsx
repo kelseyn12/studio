@@ -89,7 +89,7 @@ export function CardEditorStage({
             <li>Open Google Drive for the raw footage. Watch the references here.</li>
             <li>Press Start cutting when you begin. Watching or downloading does not start it.</li>
             <li>Cut one video. Leave Which video on One video.</li>
-            <li>Put the finished video in that same Google Drive folder. Any file name is fine.</li>
+            <li>Paste a Drive link to the finished video. It can be in this folder, or a folder you made.</li>
             <li>Paste your CapCut link so she can open your project.</li>
           </ol>
         ) : null}
@@ -188,17 +188,17 @@ export function CardEditorStage({
       <form action={attachEditedUrl} className="space-y-2 rounded-card border border-line bg-panel p-5">
         <input type="hidden" name="id" value={card.id} />
         <p className="text-sm text-mute">
-          Drop the finished video above, or paste the Share link for that one file and press Attach URL. Anyone with the link has to be allowed to view it. A folder link will not work.
+          Paste a Google Drive link and press Attach URL. The video, or a folder with the video in it.
         </p>
         {linkNote ? (
-          <p className="text-sm text-sun">That link did not come in. Paste the Share link on the video file, not the folder. Anyone with the link has to be allowed to view it.</p>
+          <p className="text-sm text-sun">That link did not come in. Paste a Drive link anyone can open. A video, or a folder with the video in it.</p>
         ) : null}
         <select name="textStyle" defaultValue={defaultLook} className="field">
           <option value="instagram">IG · FB</option>
           <option value="tiktok">TT · YT</option>
           <option value="plain">One video</option>
         </select>
-        <input name="editedUrl" placeholder="https://…/export.mp4" className="field" />
+        <input name="editedUrl" placeholder="https://drive.google.com/…" className="field" />
         <button className="rounded-xl border border-line px-4 py-2 text-sm">Attach URL</button>
       </form>
       {visibleAssets(files)

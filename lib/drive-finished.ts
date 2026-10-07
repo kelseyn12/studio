@@ -1,7 +1,7 @@
 import { after } from "next/server";
 import { attachEditedFile } from "@/lib/cut-ready";
 import { driveFolderId, finishedDriveFile, parseDriveFolderList } from "@/lib/drive-folder";
-import { directMediaUrl } from "@/lib/media-url";
+import { directMediaUrl, driveFileId, driveLinkKind } from "@/lib/media-url";
 import { rejectStudioFile } from "@/lib/storage";
 
 const pulling = new Set<string>();
@@ -29,7 +29,12 @@ export function scheduleDrivePull(card: PullCard): void {
   });
 }
 
-async function driveBytes(fileId: string): Promise<{ bytes: Buffer; type: string } | null> {
+function namedFile(header: string, fallback: string): string {
+  const quoted = header.match(/filename="([^"]+)"/i)?.[1] || fallback;
+  return quoted.includes(".") ? quoted : `${quoted}.mp4`;
+}
+
+async function driveBytes(fileId: string, fallbackName: string): Promise<{ bytes: Buffer; type: string; name: string } | null> {
   const first = directMediaUrl(`https://drive.google.com/file/d/${fileId}/view`);
   if (!first) return null;
   const response = await fetch(first);
@@ -37,21 +42,40 @@ async function driveBytes(fileId: string): Promise<{ bytes: Buffer; type: string
   if (!response.ok || type.includes("text/html")) return null;
   const bytes = Buffer.from(await response.arrayBuffer());
   if (bytes.length === 0) return null;
-  return { bytes, type: type || "video/mp4" };
+  return { bytes, type: type || "video/mp4", name: namedFile(response.headers.get("content-disposition") || "", fallbackName) };
+}
+
+async function newestInFolder(folderId: string): Promise<{ id: string; name: string } | null> {
+  const listing = await fetch(`https://drive.google.com/embeddedfolderview?id=${folderId}`);
+  if (!listing.ok) return null;
+  const file = finishedDriveFile(parseDriveFolderList(await listing.text()));
+  return file ? { id: file.id, name: file.name } : null;
+}
+
+/** A Drive file link, or a Drive folder that has the video in it. Her folder or one he made. */
+export async function attachDriveLink(cardId: string, rawUrl: string, textStyle: string, uploaderRole: string): Promise<boolean> {
+  const kind = driveLinkKind(rawUrl);
+  const picked =
+    kind === "file"
+      ? { id: driveFileId(rawUrl) || "", name: "export.mp4" }
+      : kind === "folder"
+        ? await newestInFolder(driveFolderId(rawUrl) || "")
+        : null;
+  if (!picked?.id) return false;
+  const downloaded = await driveBytes(picked.id, picked.name);
+  if (!downloaded) return false;
+  if (rejectStudioFile(downloaded.bytes.length, "EDITED")) return false;
+  await attachEditedFile(
+    cardId,
+    new File([new Uint8Array(downloaded.bytes)], downloaded.name, { type: downloaded.type }),
+    textStyle,
+    uploaderRole,
+  );
+  return true;
 }
 
 /** Any video he added in the same folder as the raw clips. The newest one is the cut. */
 export async function pullFinishedFromDrive(cardId: string, rawsUrl: string): Promise<boolean> {
-  const folderId = driveFolderId(rawsUrl);
-  if (!folderId) return false;
-  const listing = await fetch(`https://drive.google.com/embeddedfolderview?id=${folderId}`);
-  if (!listing.ok) return false;
-  const file = finishedDriveFile(parseDriveFolderList(await listing.text()));
-  if (!file) return false;
-  const downloaded = await driveBytes(file.id);
-  if (!downloaded) return false;
-  if (rejectStudioFile(downloaded.bytes.length, "EDITED")) return false;
-  const name = file.name.includes(".") ? file.name : "finished.mp4";
-  await attachEditedFile(cardId, new File([new Uint8Array(downloaded.bytes)], name, { type: downloaded.type }), "plain", "EDITOR");
-  return true;
+  if (!driveFolderId(rawsUrl)) return false;
+  return attachDriveLink(cardId, rawsUrl, "plain", "EDITOR");
 }

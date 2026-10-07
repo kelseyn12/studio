@@ -7,7 +7,8 @@ import { alreadyWithEditor, isDeskStage, keepInToCut, nextStatusFor, sendBackSta
 import { cardPatch } from "@/lib/card-patch";
 import { dropCards } from "@/lib/drop-cards";
 import { deleteUpload, saveUpload, mimeFromName } from "@/lib/files";
-import { directMediaUrl } from "@/lib/media-url";
+import { attachDriveLink } from "@/lib/drive-finished";
+import { directMediaUrl, driveLinkKind } from "@/lib/media-url";
 import { rejectStudioFile } from "@/lib/storage";
 import type { PipelineStatus } from "@/lib/pipeline";
 import { prisma } from "@/lib/prisma";
@@ -233,7 +234,17 @@ export async function startCutting(formData: FormData) {
 export async function attachEditedUrl(formData: FormData) {
   const user = await requireUser();
   const id = String(formData.get("id"));
-  const url = directMediaUrl(String(formData.get("editedUrl") || ""));
+  const raw = String(formData.get("editedUrl") || "");
+  const style = String(formData.get("textStyle") || "");
+  const textStyle = style === "instagram" || style === "tiktok" || style === "plain" ? style : "plain";
+  if (id && driveLinkKind(raw)) {
+    const saved = await attachDriveLink(id, raw, textStyle, user.role);
+    if (!saved) redirect(`/cards/${id}?step=editor&link=no`);
+    revalidatePath(`/cards/${id}`);
+    revalidatePath("/edits");
+    redirect(`/cards/${id}?step=live`);
+  }
+  const url = directMediaUrl(raw);
   if (!id || !url) {
     redirect(id ? `/cards/${id}?step=editor&link=no` : "/");
   }
@@ -249,8 +260,6 @@ export async function attachEditedUrl(formData: FormData) {
   const name = rawName.includes(".") ? rawName : "export.mp4";
   const type = response.headers.get("content-type") || mimeFromName(name);
   const saved = await saveUpload(new File([new Uint8Array(bytes)], name, { type }), `cards/${id}`);
-  const style = String(formData.get("textStyle") || "");
-  const textStyle = style === "instagram" || style === "tiktok" || style === "plain" ? style : "plain";
   const created = await prisma.asset.create({
     data: { cardId: id, kind: "EDITED", ...saved, publicUrl: saved.publicUrl || url, textStyle },
   });

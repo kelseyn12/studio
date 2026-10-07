@@ -1,4 +1,11 @@
-import { driveFileDownloadUrl } from "@/lib/drive-folder";
+import { driveFileDownloadUrl, driveFolderId } from "@/lib/drive-folder";
+
+/** A pasted Drive link. A file link is the video. A folder link is a folder that holds it. */
+export function driveLinkKind(raw: string): "file" | "folder" | null {
+  if (driveFileId(raw)) return "file";
+  if (driveFolderId(raw)) return "folder";
+  return null;
+}
 
 /** The file id in a Drive file link. A folder link has none. */
 export function driveFileId(value: string): string | null {

@@ -19,7 +19,7 @@ export function PacketFiles({
     <section className="space-y-2 rounded-card border border-line bg-panel p-5">
       <h2 className="font-semibold">Download files</h2>
       <p className="text-sm text-mute">
-        Raw clips are in the Google Drive folder. Put the finished video in that same folder. Any file name is fine.
+        Raw clips are in the Google Drive folder. A finished Drive link can be this folder or a different one.
       </p>
       {rawsUrl ? (
         <a
