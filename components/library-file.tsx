@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { deleteAsset } from "@/app/library/actions";
 import { StatusPill } from "@/components/status-pill";
-import { libraryMark } from "@/lib/library-groups";
 import { formatBytes } from "@/lib/storage";
 import type { PipelineStatus } from "@/lib/pipeline";
 import { watchUrl } from "@/lib/urls";
@@ -43,6 +42,7 @@ export function LibraryFile({
       {video ? (
         <video
           controls
+          preload="none"
           src={href}
           poster={asset.coverPath ? watchUrl(asset.coverPath) : undefined}
           className="mb-3 aspect-[9/16] max-h-80 w-full rounded-xl bg-ink object-cover"
@@ -53,11 +53,11 @@ export function LibraryFile({
         <div>
           <p className="font-medium">{asset.card.title}</p>
           <p className="text-sm text-mute">
-            {asset.card.campaign?.name ?? "No deal"}
+            {asset.card.campaign?.name ?? "Personal"}
             {look ? ` · ${look}` : ""} · {asset.filename} · {formatBytes(asset.size)}
           </p>
         </div>
-        <StatusPill status={asset.card.status} label={libraryMark(asset.card.status, asset.card.scheduledAt)} />
+        <StatusPill status={asset.card.status} scheduledAt={asset.card.scheduledAt} />
       </div>
       <div className="mt-3 flex flex-wrap items-center gap-3">
         <Link href={`/cards/${asset.card.id}${liveLabel ? "?step=live" : ""}`} className="text-sm text-sun">

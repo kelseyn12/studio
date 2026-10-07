@@ -62,6 +62,14 @@ function modifiedTime(value: string, now: Date): number {
   return Number.isNaN(parsed) ? 0 : parsed;
 }
 
+/** A later Drive time is a new cut. No time means there is nothing newer to bring in. */
+export function driveCutIsNewer(modified: string, importedAt: Date | null, now = new Date()): boolean {
+  if (!importedAt) return true;
+  const when = modifiedTime(modified, now);
+  if (!when) return false;
+  return when > importedAt.getTime();
+}
+
 /** Any video he added in that folder. Raw folders are skipped. The newest video wins. */
 export function finishedDriveFile(entries: DriveEntry[], now = new Date()): DriveEntry | null {
   const videos = entries.filter((entry) => !entry.folder && VIDEO_NAME.test(entry.name));

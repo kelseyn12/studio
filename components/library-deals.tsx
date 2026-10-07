@@ -1,4 +1,5 @@
 import { LibraryFile } from "@/components/library-file";
+import { LibraryFolder } from "@/components/library-folder";
 import { PickBox, SelectDeleteBar, VideoPick } from "@/components/select-videos";
 import { folderCount, groupLibrary, libraryAction } from "@/lib/library-groups";
 import type { PipelineStatus } from "@/lib/pipeline";
@@ -52,21 +53,20 @@ export function LibraryDeals({ assets }: { assets: FinishedAsset[] }) {
       <div className="space-y-8">
         <SelectDeleteBar total={new Set(videoIds).size} />
         {groupLibrary(assets).map((folder) => (
-          <div key={folder.key}>
-            <h3 className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-mute">
-              {folder.title} · {folderCount(folder.still.length, folder.posted.length)}
-            </h3>
-            <div className="space-y-4">
-              {folder.still.length > 0 && folder.posted.length > 0 ? (
-                <p className="text-sm text-mute">Still to do</p>
-              ) : null}
-              {folder.still.length > 0 ? <FileGrid assets={folder.still} /> : null}
-              {folder.posted.length > 0 && folder.still.length > 0 ? (
-                <p className="text-sm text-mute">Posted</p>
-              ) : null}
-              {folder.posted.length > 0 ? <FileGrid assets={folder.posted} /> : null}
-            </div>
-          </div>
+          <LibraryFolder
+            key={folder.key}
+            title={folder.title}
+            count={folderCount(folder.still.length, folder.posted.length)}
+          >
+            {folder.still.length > 0 ? <FileGrid assets={folder.still} /> : null}
+            {folder.posted.length > 0 && folder.still.length > 0 ? (
+              <LibraryFolder title="Posted" count={String(folder.posted.length)}>
+                <FileGrid assets={folder.posted} />
+              </LibraryFolder>
+            ) : folder.posted.length > 0 ? (
+              <FileGrid assets={folder.posted} />
+            ) : null}
+          </LibraryFolder>
         ))}
       </div>
     </VideoPick>

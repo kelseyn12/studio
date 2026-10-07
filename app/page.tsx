@@ -24,11 +24,20 @@ export default async function TodayPage() {
   const driveCards = await prisma.card.findMany({
     where: {
       cutBy: "EDITOR",
-      status: { in: ["FILMED", "EDITING"] },
       rawsUrl: { not: "" },
-      assets: { none: { kind: "EDITED" } },
+      OR: [
+        { status: { in: ["FILMED", "EDITING"] }, assets: { none: { kind: "EDITED" } } },
+        { status: "EDITING", editorNote: { startsWith: "Fix:" } },
+      ],
     },
-    select: { id: true, rawsUrl: true, cutBy: true, assets: { select: { kind: true } } },
+    select: {
+      id: true,
+      rawsUrl: true,
+      cutBy: true,
+      status: true,
+      editorNote: true,
+      assets: { select: { kind: true, createdAt: true } },
+    },
   });
   for (const card of driveCards) scheduleDrivePull(card);
   const [counts, snap, todayCards, chase, cutting, fileBytes, failedJobs] = await Promise.all([

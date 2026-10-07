@@ -1,5 +1,9 @@
 # To-do
 
+- [X] One finished file, library folders
+  A newer cut in the Drive folder replaces the Studio file while the job needs changes. The old Studio file is deleted.
+  Library folders: Multiply batch, deal (Trybe and other UGC), Personal. Posted stays closed. A video does not download until play.
+
 - [X] Needs changes is the job
   A sent-back cut opens as Needs changes. The fix is first. Voice, words, script, and references sit under Original brief.
   Cuts lists it first. A gold bar stays on his pages. Discord nudges again after 4 hours, then once a day, until he drops the new video.

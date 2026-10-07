@@ -1,6 +1,7 @@
 import { after } from "next/server";
 import { attachEditedSaved } from "@/lib/cut-ready";
-import { driveFolderId, finishedDriveFile, parseDriveFolderList } from "@/lib/drive-folder";
+import { needsChanges } from "@/lib/change-note";
+import { driveCutIsNewer, driveFolderId, finishedDriveFile, parseDriveFolderList } from "@/lib/drive-folder";
 import { mimeFromName, saveStreamedFile } from "@/lib/files";
 import { directMediaUrl, driveFileId, driveLinkKind } from "@/lib/media-url";
 import type { SavedFile } from "@/lib/r2";
@@ -12,19 +13,30 @@ type PullCard = {
   id: string;
   rawsUrl: string;
   cutBy: string;
-  assets: Array<{ kind: string }>;
+  status?: string;
+  editorNote?: string;
+  assets: Array<{ kind: string; createdAt?: Date }>;
 };
+
+function importedAt(card: PullCard): Date | null {
+  const times = card.assets.filter((asset) => asset.kind === "EDITED" && asset.createdAt).map((asset) => asset.createdAt as Date);
+  if (times.length === 0) return null;
+  return times.sort((left, right) => right.getTime() - left.getTime())[0];
+}
 
 /** Look in the shared Drive folder after the page answers. One look at a time per video. */
 export function scheduleDrivePull(card: PullCard): void {
   if (card.cutBy !== "EDITOR") return;
   if (!driveFolderId(card.rawsUrl)) return;
-  if (card.assets.some((asset) => asset.kind === "EDITED")) return;
+  const hasCut = card.assets.some((asset) => asset.kind === "EDITED");
+  const fixing = needsChanges(card.status || "", card.editorNote || "");
+  if (hasCut && !fixing) return;
   if (pulling.has(card.id)) return;
   pulling.add(card.id);
+  const already = importedAt(card);
   after(async () => {
     try {
-      await pullFinishedFromDrive(card.id, card.rawsUrl);
+      await pullFinishedFromDrive(card.id, card.rawsUrl, already);
     } finally {
       pulling.delete(card.id);
     }
@@ -71,8 +83,16 @@ export async function attachDriveLink(cardId: string, rawUrl: string, textStyle:
   return true;
 }
 
-/** Any video he added in the same folder as the raw clips. The newest one is the cut. */
-export async function pullFinishedFromDrive(cardId: string, rawsUrl: string): Promise<boolean> {
-  if (!driveFolderId(rawsUrl)) return false;
-  return attachDriveLink(cardId, rawsUrl, "plain", "EDITOR");
+/** Any video he added in the same folder as the raw clips. A newer one replaces the cut already in Studio. */
+export async function pullFinishedFromDrive(cardId: string, rawsUrl: string, importedAt: Date | null = null): Promise<boolean> {
+  const folderId = driveFolderId(rawsUrl);
+  if (!folderId) return false;
+  const listing = await fetch(`https://drive.google.com/embeddedfolderview?id=${folderId}`);
+  if (!listing.ok) return false;
+  const file = finishedDriveFile(parseDriveFolderList(await listing.text()));
+  if (!file || !driveCutIsNewer(file.modified, importedAt)) return false;
+  const saved = await downloadDriveFile(cardId, file.id, file.name);
+  if (!saved) return false;
+  await attachEditedSaved(cardId, saved, "plain", "EDITOR");
+  return true;
 }

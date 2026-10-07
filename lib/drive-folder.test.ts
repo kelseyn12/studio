@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { driveFolderId, finishedDriveFile, parseDriveFolderList } from "@/lib/drive-folder";
+import { driveCutIsNewer, driveFolderId, finishedDriveFile, parseDriveFolderList } from "@/lib/drive-folder";
 
 const html = `
 <div class="flip-entry" id="entry-FOLDER1">
@@ -34,6 +34,15 @@ describe("drive folder", () => {
     ]);
     expect(finishedDriveFile(entries, new Date("2026-10-07T12:00:00Z"))?.id).toBe("FILE2");
     expect(finishedDriveFile([{ id: "a", name: "B-Roll", folder: true, modified: "" }])).toBeNull();
+  });
+
+  it("brings in a Drive cut only when it is newer than the one already in Studio", () => {
+    const now = new Date("2026-10-08T18:00:00Z");
+    const imported = new Date("2026-10-07T15:00:00Z");
+    expect(driveCutIsNewer("2026-10-08T20:00:00Z", imported, now)).toBe(true);
+    expect(driveCutIsNewer("2026-10-06T20:00:00Z", imported, now)).toBe(false);
+    expect(driveCutIsNewer("", imported, now)).toBe(false);
+    expect(driveCutIsNewer("", null, now)).toBe(true);
   });
 
   it("sees a video row that has no folder label", () => {

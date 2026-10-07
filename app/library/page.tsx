@@ -2,11 +2,38 @@ import { deletePostedRaws, freeSpace } from "@/app/library/actions";
 import { KEEP_FILE_DAYS } from "@/lib/keep";
 import { LibraryDeals } from "@/components/library-deals";
 import { LibraryFile } from "@/components/library-file";
+import { LibraryFolder } from "@/components/library-folder";
 import { Shell } from "@/components/shell";
 import { StorageMeter } from "@/components/storage-meter";
 import { hasR2 } from "@/lib/r2";
+import { groupByDeal } from "@/lib/library-groups";
 import { prisma } from "@/lib/prisma";
 import { studioBytes } from "@/lib/queries";
+
+function AssetFolders({
+  assets,
+  empty,
+}: {
+  assets: Array<{ id: string; card: { campaign: { name: string } | null } } & Parameters<typeof LibraryFile>[0]["asset"]>;
+  empty: string;
+}) {
+  if (assets.length === 0) {
+    return <p className="rounded-card border border-dashed border-line px-5 py-8 text-mute">{empty}</p>;
+  }
+  return (
+    <div className="space-y-3">
+      {groupByDeal(assets).map((group) => (
+        <LibraryFolder key={group.deal} title={group.deal} count={String(group.items.length)}>
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {group.items.map((asset) => (
+              <LibraryFile key={asset.id} asset={asset} />
+            ))}
+          </div>
+        </LibraryFolder>
+      ))}
+    </div>
+  );
+}
 
 export default async function LibraryPage() {
   const [assets, batches, drive, totals] = await Promise.all([
@@ -20,8 +47,8 @@ export default async function LibraryPage() {
     }),
     prisma.card.findMany({
       where: { rawsUrl: { not: "" } },
+      include: { campaign: { select: { name: true } } },
       orderBy: { updatedAt: "desc" },
-      take: 40,
     }),
     studioBytes(),
   ]);
@@ -37,8 +64,9 @@ export default async function LibraryPage() {
     <Shell>
       <h1 className="text-3xl font-semibold tracking-tight">Library</h1>
       <p className="mt-2 mb-6 max-w-2xl text-mute">
-        Each Multiply batch is its own folder. Still to do sits above Posted. Anything you dropped by hand stays under
-        the deal. Posted files drop after {KEEP_FILE_DAYS} days — the video and its numbers stay. 4K days stay in Drive.
+        Canvas videos sit in the Multiply batch. UGC videos sit in the deal, like Trybe. Personal videos sit in
+        Personal. Open a folder to see them. Posted stays closed. Posted files drop after {KEEP_FILE_DAYS} days — the
+        video and its numbers stay. 4K days stay in Drive.
       </p>
       <div className="mb-8 max-w-xl space-y-3">
         <StorageMeter bytes={totals} r2={hasR2()} />
@@ -64,43 +92,32 @@ export default async function LibraryPage() {
           ) : null}
         </div>
         <p className="mb-3 text-sm text-mute">Small clips you uploaded onto a video. Delete if you will not reuse them.</p>
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-          {raws.length === 0 ? (
-            <p className="rounded-card border border-dashed border-line px-5 py-8 text-mute md:col-span-2">
-              No small clips in Studio. 4K folders are listed below.
-            </p>
-          ) : (
-            raws.map((asset) => <LibraryFile key={asset.id} asset={asset} />)
-          )}
-        </div>
+        <AssetFolders assets={raws} empty="No small clips in Studio. 4K folders are listed below." />
       </section>
       <section className="mb-10">
         <h2 className="mb-3 text-lg font-semibold">Voice and references</h2>
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-          {voice.length === 0 ? (
-            <p className="rounded-card border border-dashed border-line px-5 py-8 text-mute">None in Studio.</p>
-          ) : (
-            voice.map((asset) => <LibraryFile key={asset.id} asset={asset} />)
-          )}
-        </div>
+        <AssetFolders assets={voice} empty="None in Studio." />
       </section>
       <section>
         <h2 className="mb-3 text-lg font-semibold">4K in Drive</h2>
-        <p className="mb-3 text-sm text-mute">Not in the 10 GB. Open the folder to delete or move there.</p>
-        <div className="space-y-2">
+        <p className="mb-3 text-sm text-mute">Not in the 10 GB. The old cut can stay here. Delete it in Drive when you do not need it.</p>
+        <div className="space-y-3">
           {drive.length === 0 ? (
             <p className="rounded-card border border-dashed border-line px-5 py-8 text-mute">No Drive folders linked.</p>
           ) : (
-            drive.map((video) => (
-              <div
-                key={video.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-card border border-line bg-panel px-5 py-4"
-              >
-                <p className="font-medium">{video.title}</p>
-                <a href={video.rawsUrl} target="_blank" rel="noreferrer" className="text-sm text-sun">
-                  Open folder
-                </a>
-              </div>
+            groupByDeal(drive.map((video) => ({ ...video, card: { campaign: video.campaign } }))).map((group) => (
+              <LibraryFolder key={group.deal} title={group.deal} count={String(group.items.length)}>
+                <div className="space-y-2">
+                  {group.items.map((video) => (
+                    <div key={video.id} className="flex flex-wrap items-center justify-between gap-3">
+                      <p className="font-medium">{video.title}</p>
+                      <a href={video.rawsUrl} target="_blank" rel="noreferrer" className="text-sm text-sun">
+                        Open folder
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              </LibraryFolder>
             ))
           )}
         </div>
