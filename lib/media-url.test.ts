@@ -13,7 +13,7 @@ describe("isDirectMediaUrl", () => {
 
   it("turns a Drive file link into the download", () => {
     expect(directMediaUrl("https://drive.google.com/file/d/FILE123/view?usp=sharing")).toBe(
-      "https://drive.google.com/uc?export=download&id=FILE123",
+      "https://drive.usercontent.google.com/download?id=FILE123&export=download&confirm=t",
     );
   });
 });

@@ -41,7 +41,7 @@
 - `unscheduleCard` — `app/calendar/actions.ts` — Cancel on the scheduled list. `postsToCancel` / `canUnschedule` in `lib/unschedule.ts` pick the Outstand posts still waiting; `cancelPost` drops them, then the day is cleared.
 - `closeLoop` / `parseAnalytics` / `withHandYouTube` — `lib/analytics.ts` — Posted when live, Data when views exist. `parseAnalytics` reads Outstand `aggregated_metrics`. `withHandYouTube` adds a Studio upload only when Outstand has no YouTube views. Used by `/api/analytics/sync`.
 - `youtubeVideoId` / `youtubePublicViews` — `lib/youtube-public.ts` — a pasted YouTube link, and its public view count. Used when YouTube was posted outside Outstand.
-- `driveFolderId` / `parseDriveFolderList` / `finishedDriveFile` — `lib/drive-folder.ts` — the shared Drive folder, and the newest video file in it. The name does not matter. `scheduleDrivePull` in `lib/drive-finished.ts` brings that file onto the job and pings her. Used when Today, Cuts, or the job is opened.
+- `driveFolderId` / `parseDriveFolderList` / `finishedDriveFile` / `driveFileDownloadUrl` — `lib/drive-folder.ts` — the shared Drive folder, and the newest video file in it. A video row has no Folder label. The name does not matter. `driveFileDownloadUrl` skips Google's too-big-to-scan page. `scheduleDrivePull` in `lib/drive-finished.ts` brings that file onto the job and pings her. Used when Today, Cuts, or the job is opened. `driveFileId` in `lib/media-url.ts` reads a Share link to that file.
 - `nextLanes` — `lib/formats.ts` — 70/20/10 winner promotion after stats land.
 - `canVisit` / `isPublicPath` — `lib/access.ts` — rooms a role may open, and pages a signed-out visitor can open (`/privacy`). Used by middleware and nav.
 - `fileHasEditList` / `withoutEditLists` / `prependCover` / `writeYoutubeThumb` — `lib/ship-media.ts` — Schedule uploads a clean Multiply file as-is. It re-encodes only when the file still has an edit list, or to put the saved cover on the first frames. YouTube also gets that frame at 1280×720.
@@ -69,7 +69,7 @@
 - `previewEditorId` — `lib/editor-preview.ts` — which editor's Cuts page the creator is looking at (`?as=`). An editor cannot open someone else's page.
 - `keepInToCut` / `shouldStartCutting` — `lib/card-desk.ts` — Send leaves a job in To cut (FILMED). Downloading, only by the assigned editor, moves it to Cutting.
 - `beginCutting` — `lib/cut-ready.ts` — To cut → Cutting when the assigned editor presses Start cutting.
-- `directMediaUrl` — `lib/media-url.ts` — a finished-file link. A Drive file link becomes a download. A Drive folder is rejected.
+- `directMediaUrl` / `driveFileId` — `lib/media-url.ts` — a finished-file link. A Drive file Share link becomes a download that skips the scan page. A Drive folder is rejected.
 - `alreadyWithEditor` — `lib/card-desk.ts` — true when this video is already on his Cuts page (To cut or Cutting) for the same editor. A second Send does not ping him again.
 - `sendFootageToEditor` / `keepCutting` — `app/cards/[id]/actions.ts` — Clips buttons. Send hands the video to him and opens Cuts. I’ll cut this stays on the Cut tab.
 - `sendBackStatus` — `lib/card-desk.ts` — REVIEW maps to EDITING. Used by requestChanges.

@@ -21,24 +21,33 @@ function decodeName(value: string): string {
     .trim();
 }
 
-/** Names in the public folder page. Subfolders stay folders. Files keep their ids. */
+/** Names in the public folder page. A video row has no Folder label. Subfolders stay folders. */
 export function parseDriveFolderList(html: string): DriveEntry[] {
   const entries: DriveEntry[] = [];
   const seen = new Set<string>();
-  const pattern =
-    /id="entry-([^"]+)"[\s\S]*?aria-label="([^"]*)"[\s\S]*?class="flip-entry-title">([^<]*)<[\s\S]{0,400}?flip-entry-last-modified"><div>([^<]*)</g;
+  const pattern = /id="entry-([^"]+)"([\s\S]*?)(?=id="entry-|<\/body>|$)/g;
   for (const match of html.matchAll(pattern)) {
     const id = match[1];
+    const block = match[2] || "";
     if (!id || seen.has(id)) continue;
+    const name = decodeName(block.match(/class="flip-entry-title">([^<]*)</)?.[1] || "");
+    if (!name) continue;
     seen.add(id);
+    const folder = /aria-label="Folder"/.test(block) || /\/folders\//.test(block);
     entries.push({
       id,
-      name: decodeName(match[3] || ""),
-      folder: match[2] === "Folder",
-      modified: decodeName(match[4] || ""),
+      name,
+      folder,
+      modified: decodeName(block.match(/flip-entry-last-modified"><div>([^<]*)</)?.[1] || ""),
     });
   }
   return entries;
+}
+
+/** The download that skips Google's "too big to scan" page. */
+export function driveFileDownloadUrl(fileId: string): string {
+  const params = new URLSearchParams({ id: fileId, export: "download", confirm: "t" });
+  return `https://drive.usercontent.google.com/download?${params}`;
 }
 
 function modifiedTime(value: string, now: Date): number {

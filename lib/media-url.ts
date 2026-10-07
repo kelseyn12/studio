@@ -1,16 +1,29 @@
-/** A finished-file URL. A Drive folder is rejected. A Drive file link becomes the download URL. */
-export function directMediaUrl(value: string): string | null {
+import { driveFileDownloadUrl } from "@/lib/drive-folder";
+
+/** The file id in a Drive file link. A folder link has none. */
+export function driveFileId(value: string): string | null {
   try {
     const parsed = new URL(value.trim());
     if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return null;
     const host = parsed.hostname;
-    if (host === "drive.google.com" || host === "docs.google.com") {
-      if (parsed.pathname.includes("/folders/")) return null;
-      const fromPath = parsed.pathname.match(/\/file\/d\/([^/]+)/)?.[1];
-      const id = fromPath || parsed.searchParams.get("id");
-      if (!id) return null;
-      return `https://drive.google.com/uc?export=download&id=${id}`;
-    }
+    if (host !== "drive.google.com" && host !== "docs.google.com" && host !== "drive.usercontent.google.com") return null;
+    if (parsed.pathname.includes("/folders/")) return null;
+    const fromPath = parsed.pathname.match(/\/file\/d\/([^/]+)/)?.[1];
+    return fromPath || parsed.searchParams.get("id");
+  } catch {
+    return null;
+  }
+}
+
+/** A finished-file URL. A Drive folder is rejected. A Drive file link becomes the download URL. */
+export function directMediaUrl(value: string): string | null {
+  const fileId = driveFileId(value);
+  if (fileId) return driveFileDownloadUrl(fileId);
+  try {
+    const parsed = new URL(value.trim());
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return null;
+    const host = parsed.hostname;
+    if (host === "drive.google.com" || host === "docs.google.com" || host === "drive.usercontent.google.com") return null;
     return parsed.toString();
   } catch {
     return null;

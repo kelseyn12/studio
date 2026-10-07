@@ -34,18 +34,10 @@ async function driveBytes(fileId: string): Promise<{ bytes: Buffer; type: string
   if (!first) return null;
   const response = await fetch(first);
   const type = response.headers.get("content-type") || "";
-  if (!response.ok) return null;
-  if (!type.includes("text/html")) {
-    const bytes = Buffer.from(await response.arrayBuffer());
-    return { bytes, type: type || "video/mp4" };
-  }
-  const html = await response.text();
-  const confirm = html.match(/confirm=([0-9A-Za-z_]+)/)?.[1];
-  if (!confirm) return null;
-  const again = await fetch(`${first}&confirm=${confirm}`);
-  const againType = again.headers.get("content-type") || "";
-  if (!again.ok || againType.includes("text/html")) return null;
-  return { bytes: Buffer.from(await again.arrayBuffer()), type: againType || "video/mp4" };
+  if (!response.ok || type.includes("text/html")) return null;
+  const bytes = Buffer.from(await response.arrayBuffer());
+  if (bytes.length === 0) return null;
+  return { bytes, type: type || "video/mp4" };
 }
 
 /** Any video he added in the same folder as the raw clips. The newest one is the cut. */

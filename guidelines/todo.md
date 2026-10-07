@@ -2,7 +2,7 @@
 
 - [X] Finished file in the Drive folder
   He puts the cut in the same folder as the raw clips. Any file name is fine.
-  Opening Today, Cuts, or the job brings that file in and pings her.
+  A Share link to that file also comes in. A folder link does not. Opening Today, Cuts, or the job brings the file in and pings her.
 
 - [X] Discord only when work changes hands
   Sending him a job or a polish pings him. His finished drop pings you.

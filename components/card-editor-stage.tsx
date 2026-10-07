@@ -188,10 +188,10 @@ export function CardEditorStage({
       <form action={attachEditedUrl} className="space-y-2 rounded-card border border-line bg-panel p-5">
         <input type="hidden" name="id" value={card.id} />
         <p className="text-sm text-mute">
-          Drop the finished video above, or paste a link to that one file. A Drive link to the file is fine. A Drive folder is not.
+          Drop the finished video above, or paste the Share link for that one file and press Attach URL. Anyone with the link has to be allowed to view it. A folder link will not work.
         </p>
         {linkNote ? (
-          <p className="text-sm text-sun">That link did not download a video. Drop the mp4, or paste the Drive link to the file itself.</p>
+          <p className="text-sm text-sun">That link did not come in. Paste the Share link on the video file, not the folder. Anyone with the link has to be allowed to view it.</p>
         ) : null}
         <select name="textStyle" defaultValue={defaultLook} className="field">
           <option value="instagram">IG · FB</option>

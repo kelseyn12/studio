@@ -96,7 +96,7 @@ Watching, downloading, or opening Drive does not move it. On the job page:
 - **Your CapCut link** — paste your project so she can open it. She does not send you hers. If CapCut asks her to join, invite her email on that project.
 - **Download files** — raw clips, reference files, and **Open the Google Drive folder**. The finished video goes in that same folder. Any file name is fine.
 - **Which video is this?** — leave it on **One video**. IG · FB and TT · YT are only when she asked for two exports.
-- The drop zone, or a link to that one finished file. A Drive link to the file works. A Drive folder does not.
+- The drop zone, or the Share link for that one finished file. Press Attach URL. Anyone with the link has to be allowed to view it. A Drive folder link does not work there.
 
 ### What you do
 
