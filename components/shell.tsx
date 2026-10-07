@@ -1,3 +1,4 @@
+import { EditorFixBanner } from "@/components/editor-fix-banner";
 import { Nav } from "@/components/nav";
 import { SignOutControl } from "@/components/sign-out";
 import { requireUser } from "@/lib/auth";
@@ -17,6 +18,7 @@ export async function Shell({ children }: { children: React.ReactNode }) {
           </p>
           <SignOutControl name={user.name} role={user.role} clerk={hasClerk()} />
         </header>
+        <EditorFixBanner userId={user.id} role={user.role} />
         <main className="flex-1 px-8 py-8">{children}</main>
       </div>
     </div>

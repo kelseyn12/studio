@@ -76,7 +76,7 @@ export function CutsBucket({
                   </div>
                 </div>
                 <Link href={href} className="mt-4 block">
-                  {dropFile || schedule ? null : <EditorNeed items={packet} />}
+                  {dropFile || schedule || fix ? null : <EditorNeed items={packet} />}
                   {fix ? (
                     <p className="mt-3 rounded-xl bg-sun/15 px-4 py-2 text-sm">
                       <span className="font-semibold">Changes asked. </span>

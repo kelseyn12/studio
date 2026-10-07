@@ -117,9 +117,7 @@ to miss it, tell her before the day, not after.
 Kelsey watches it on her side. Two things can happen:
 
 - **Approved.** She picks the thumbnail, writes the caption, and schedules it. You are done.
-- **Needs a change.** It comes back to you as **Cutting** with a note saying what to fix. Fix it,
-  export, drop it again the same way (same file name for batch videos). The newest file is the one
-  that posts.
+- **Needs a change.** Discord pings you once. The video moves to the top of Cuts, under **Needs changes**, and a gold bar stays at the top of the app until you drop the new video. Open the job: the title is **Needs changes**, and her fix is the first thing on the page. The voice note, words, script, and references are under **Original brief** if you need them. Fix it, export, and drop the new video the same way (same file name for batch videos). The newest file is the one that posts. If you miss Discord, the bar and the Cuts list are still there. If the fix is still open after 4 hours, Discord pings you again, then once a day until the new video is in.
 
 You never schedule, pick thumbnails, or write captions.
 

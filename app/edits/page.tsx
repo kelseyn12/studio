@@ -59,6 +59,15 @@ export default async function EditsPage({ searchParams }: { searchParams: Promis
       <div className="mb-6">
         <LiveRefresh seconds={30} />
       </div>
+      {changes.length > 0 ? (
+        <CutsBucket
+          title="Needs changes"
+          items={changes}
+          empty=""
+          canDelete={!asEditor}
+          preview={previewId ?? undefined}
+        />
+      ) : null}
       {folders.length > 0 ? (
         <section className="mb-8">
           <h2 className="mb-3 text-lg font-semibold">Batches · {folders.length}</h2>
@@ -94,15 +103,6 @@ export default async function EditsPage({ searchParams }: { searchParams: Promis
         canDelete={!asEditor}
         preview={previewId ?? undefined}
       />
-      {changes.length > 0 ? (
-        <CutsBucket
-          title="Needs changes"
-          items={changes}
-          empty=""
-          canDelete={!asEditor}
-          preview={previewId ?? undefined}
-        />
-      ) : null}
       <CutsBucket
         title="Cutting"
         items={cutting}

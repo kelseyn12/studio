@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-10-07 — A fix no longer opens as Your job. The page is Needs changes, the original brief is folded, and a missed Discord ping still shows a gold bar plus a nudge after 4 hours.
 - 2026-10-07 — A cut sent back for a fix leaves Cutting and sits in its own Needs changes list. His job opens with that flag.
 - 2026-10-07 — Needs changes pings him on Discord and the Cuts card in Cutting says Changes asked.
 - 2026-10-07 — Needs changes starts empty. What she types goes on top of his job as Fix, with the first brief and voice words still under it. A second ask replaces the first.

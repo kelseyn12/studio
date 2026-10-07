@@ -70,22 +70,25 @@ export function CardEditorStage({
     Boolean(card.rawsUrl.trim()) ||
     files.some((file) => file.kind === "RAW" || file.kind === "VOICE" || file.kind === "REFERENCE");
   const dropOnly = self && !hasSources;
+  const revision = desk && needsChanges(card.status, card.editorNote);
   return (
     <div className="space-y-4">
       <section className="rounded-card border border-line bg-panel p-5">
         <h2 className="mb-1 font-semibold">
-          {dropOnly ? "Drop the finished video" : self ? "You cut this" : desk ? "Your job" : "Files for the editor"}
+          {dropOnly ? "Drop the finished video" : revision ? "Needs changes" : self ? "You cut this" : desk ? "Your job" : "Files for the editor"}
         </h2>
         <p className="mb-3 text-sm text-mute">
           {dropOnly
             ? "This one is already edited. Drop the file below."
             : self
               ? "Download if you need the clips. Cut the finished video. Drop it below."
-              : desk
-                ? "One card is one video. Do these in order."
-                : "Send only if someone else cuts this. I’ll cut this is on Clips."}
+              : revision
+                ? "Fix this cut, then drop the new video. The original brief is below if you need it."
+                : desk
+                  ? "One card is one video. Do these in order."
+                  : "Send only if someone else cuts this. I’ll cut this is on Clips."}
         </p>
-        {desk && !dropOnly ? (
+        {desk && !dropOnly && !revision ? (
           <ol className="mb-3 list-decimal space-y-1 pl-5 text-sm">
             <li>Listen to the voice note. Read the words and the script.</li>
             <li>Open Google Drive for the raw footage. Watch the references here.</li>
@@ -108,16 +111,13 @@ export function CardEditorStage({
             </div>
           )
         ) : null}
-        {desk && needsChanges(card.status, card.editorNote) ? (
-          <p className="mb-3 rounded-xl bg-sun px-4 py-3 text-sm font-semibold text-ink">
-            Needs changes. Read the fix at the top, then drop the new video.
-          </p>
-        ) : desk && card.status === "EDITING" ? (
+        {revision ? null : desk && card.status === "EDITING" ? (
           <p className="mb-3 rounded-xl bg-sun/15 px-4 py-2 text-sm">You are cutting this. Drop the finished video when it is done.</p>
         ) : null}
         {desk ? (
           <EditorBrief
             card={card}
+            revision={revision}
             voices={files.filter((file) => file.kind === "VOICE").map((file) => ({ id: file.id, path: file.path, filename: file.filename }))}
           />
         ) : null}
@@ -138,7 +138,7 @@ export function CardEditorStage({
             <CapcutLink url={card.capcutUrl} editable={false} />
           </div>
         ) : null}
-        {dropOnly ? null : <EditorNeed items={packet} />}
+        {dropOnly || revision ? null : <EditorNeed items={packet} />}
       </section>
       {dropOnly ? null : <PacketFiles rawsUrl={card.rawsUrl} files={files} />}
       {self || desk ? null : (

@@ -8,7 +8,9 @@ import { watchUrl } from "@/lib/urls";
 export function EditorBrief({
   card,
   voices = [],
+  revision = false,
 }: {
+  revision?: boolean;
   card: {
     hook: string;
     body: string;
@@ -25,25 +27,29 @@ export function EditorBrief({
   const script = card.script.trim();
   const references = parseReferences(card.referencesJson, card.referenceUrl);
   const note = splitChangeNote(card.editorNote);
-  return (
-    <div className="mb-3 space-y-3">
-      {note.fix ? (
-        <div className="rounded-xl bg-sun/15 px-4 py-3 text-sm">
-          <p className="mb-1 font-semibold">Fix this, then drop the new video</p>
-          <p className="whitespace-pre-wrap">{note.fix}</p>
-        </div>
-      ) : null}
-      {voices.map((file) => (
-        <div key={file.id} className="rounded-xl bg-lift px-4 py-3">
-          <div className="mb-2 flex items-center justify-between gap-3 text-sm">
-            <p className="font-semibold">Voice note</p>
-            <a href={watchUrl(file.path)} download={file.filename} className="text-sun">
-              Download
-            </a>
-          </div>
-          <audio controls src={watchUrl(file.path)} className="w-full" />
-        </div>
-      ))}
+  const fixVoices = voices.filter((file) => file.filename === "fix-note.webm");
+  const briefVoices = voices.filter((file) => file.filename !== "fix-note.webm");
+  const voicePlayer = (file: { id: string; path: string; filename: string }, label: string) => (
+    <div key={file.id} className="rounded-xl bg-lift px-4 py-3">
+      <div className="mb-2 flex items-center justify-between gap-3 text-sm">
+        <p className="font-semibold">{label}</p>
+        <a href={watchUrl(file.path)} download={file.filename} className="text-sun">
+          Download
+        </a>
+      </div>
+      <audio controls src={watchUrl(file.path)} className="w-full" />
+    </div>
+  );
+  const hasOriginal =
+    briefVoices.length > 0 ||
+    Boolean(card.deadlineAt) ||
+    Boolean(note.brief) ||
+    words.length > 0 ||
+    Boolean(script) ||
+    references.length > 0;
+  const original = (
+    <>
+      {briefVoices.map((file) => voicePlayer(file, "Voice note"))}
       {card.deadlineAt ? (
         <p className="rounded-xl bg-sun/15 px-4 py-2 text-sm font-semibold">Due {labelDay(card.deadlineAt)}</p>
       ) : null}
@@ -85,6 +91,25 @@ export function EditorBrief({
           })}
         </div>
       ) : null}
+    </>
+  );
+  return (
+    <div className="mb-3 space-y-3">
+      {note.fix ? (
+        <div className="rounded-xl bg-sun/15 px-4 py-3 text-sm">
+          <p className="mb-1 font-semibold">Fix this, then drop the new video</p>
+          <p className="whitespace-pre-wrap">{note.fix}</p>
+        </div>
+      ) : null}
+      {fixVoices.map((file) => voicePlayer(file, "Listen to the fix"))}
+      {revision && hasOriginal ? (
+        <details className="rounded-xl border border-line px-4 py-3 text-sm">
+          <summary className="cursor-pointer text-mute">Original brief</summary>
+          <div className="mt-3 space-y-3">{original}</div>
+        </details>
+      ) : revision ? null : (
+        original
+      )}
     </div>
   );
 }

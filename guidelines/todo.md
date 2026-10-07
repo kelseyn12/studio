@@ -1,5 +1,9 @@
 # To-do
 
+- [X] Needs changes is the job
+  A sent-back cut opens as Needs changes. The fix is first. Voice, words, script, and references sit under Original brief.
+  Cuts lists it first. A gold bar stays on his pages. Discord nudges again after 4 hours, then once a day, until he drops the new video.
+
 - [X] Finished file in the Drive folder
   He puts the cut in the same folder as the raw clips. Any file name is fine.
   He pastes a Drive link to the video, or to a folder with the video in it. Her folder or one he made. The job tells him to make that link public. The download streams to disk so the button can finish. Opening Today, Cuts, or the job still checks her folder.
