@@ -89,7 +89,7 @@ export function CardEditorStage({
             <li>Open Google Drive for the raw footage. Watch the references here.</li>
             <li>Press Start cutting when you begin. Watching or downloading does not start it.</li>
             <li>Cut one video. Leave Which video on One video.</li>
-            <li>Paste a Drive link to the finished video. It can be in this folder, or a folder you made.</li>
+            <li>Paste a Drive link to the finished video. Make it public. It can be in this folder, or a folder you made.</li>
             <li>Paste your CapCut link so she can open your project.</li>
           </ol>
         ) : null}
@@ -190,6 +190,7 @@ export function CardEditorStage({
         <p className="text-sm text-mute">
           Paste a Google Drive link and press Attach URL. The video, or a folder with the video in it.
         </p>
+        <p className="rounded-xl bg-sun/15 px-4 py-2 text-sm">Make the Drive link public before you paste it.</p>
         {linkNote ? (
           <p className="text-sm text-sun">That link did not come in. Paste a Drive link anyone can open. A video, or a folder with the video in it.</p>
         ) : null}

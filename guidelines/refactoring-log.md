@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-10-07 — The job tells him to make the Drive link public before he pastes it.
 - 2026-10-07 — Attach URL takes a Drive link to the video or to a folder that holds it. Her folder and a folder he made both work, as long as anyone with the link can open it.
 - 2026-10-07 — Attach URL follows a Drive file Share link past the "too big to scan" page. A video sitting in the folder is read even when Drive does not label it as a folder.
 - 2026-10-07 — A video he adds to the raw Drive folder is the cut, whatever the file is named. The newest video in that folder is the one that comes in.

@@ -96,7 +96,7 @@ Watching, downloading, or opening Drive does not move it. On the job page:
 - **Your CapCut link** — paste your project so she can open it. She does not send you hers. If CapCut asks her to join, invite her email on that project.
 - **Download files** — raw clips, reference files, and **Open the Google Drive folder**.
 - **Which video is this?** — leave it on **One video**. IG · FB and TT · YT are only when she asked for two exports.
-- The drop zone, or a Google Drive link. Press Attach URL. The link can be the video, or a folder with the video in it. Her folder or one you made. Anyone with the link has to be able to open it.
+- The drop zone, or a Google Drive link. Press Attach URL. The link can be the video, or a folder with the video in it. Her folder or one you made. Make the Drive link public before you paste it.
 
 ### What you do
 
@@ -105,7 +105,7 @@ Watching, downloading, or opening Drive does not move it. On the job page:
 3. Cut the video to the script: hook up top, tight pacing, captions on everything spoken, hook
    words on screen if they are listed. Match each reference, and follow the note under it.
 4. Export 1080 × 1920 mp4, under 250 MB, no watermark. Any file name is fine here.
-5. Paste a Drive link to the finished video and press Attach URL. It can be in her folder, or a folder you made. Dropping the mp4 on the job still works. Studio pings her.
+5. Paste a Drive link to the finished video and press Attach URL. Make it public first. It can be in her folder, or a folder you made. Dropping the mp4 on the job still works. Studio pings her.
 
 ### Deadlines
 
