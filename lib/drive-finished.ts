@@ -1,8 +1,10 @@
 import { after } from "next/server";
-import { attachEditedFile } from "@/lib/cut-ready";
+import { attachEditedSaved } from "@/lib/cut-ready";
 import { driveFolderId, finishedDriveFile, parseDriveFolderList } from "@/lib/drive-folder";
+import { mimeFromName, saveStreamedFile } from "@/lib/files";
 import { directMediaUrl, driveFileId, driveLinkKind } from "@/lib/media-url";
-import { rejectStudioFile } from "@/lib/storage";
+import type { SavedFile } from "@/lib/r2";
+import { STUDIO_FILE_MAX_BYTES } from "@/lib/storage";
 
 const pulling = new Set<string>();
 
@@ -34,15 +36,16 @@ function namedFile(header: string, fallback: string): string {
   return quoted.includes(".") ? quoted : `${quoted}.mp4`;
 }
 
-async function driveBytes(fileId: string, fallbackName: string): Promise<{ bytes: Buffer; type: string; name: string } | null> {
+async function downloadDriveFile(cardId: string, fileId: string, fallbackName: string): Promise<SavedFile | null> {
   const first = directMediaUrl(`https://drive.google.com/file/d/${fileId}/view`);
   if (!first) return null;
   const response = await fetch(first);
   const type = response.headers.get("content-type") || "";
-  if (!response.ok || type.includes("text/html")) return null;
-  const bytes = Buffer.from(await response.arrayBuffer());
-  if (bytes.length === 0) return null;
-  return { bytes, type: type || "video/mp4", name: namedFile(response.headers.get("content-disposition") || "", fallbackName) };
+  if (!response.ok || type.includes("text/html") || !response.body) return null;
+  const length = Number(response.headers.get("content-length") || 0);
+  if (length > STUDIO_FILE_MAX_BYTES) return null;
+  const name = namedFile(response.headers.get("content-disposition") || "", fallbackName);
+  return saveStreamedFile(response.body, `cards/${cardId}`, name, type || mimeFromName(name), STUDIO_FILE_MAX_BYTES);
 }
 
 async function newestInFolder(folderId: string): Promise<{ id: string; name: string } | null> {
@@ -62,15 +65,9 @@ export async function attachDriveLink(cardId: string, rawUrl: string, textStyle:
         ? await newestInFolder(driveFolderId(rawUrl) || "")
         : null;
   if (!picked?.id) return false;
-  const downloaded = await driveBytes(picked.id, picked.name);
-  if (!downloaded) return false;
-  if (rejectStudioFile(downloaded.bytes.length, "EDITED")) return false;
-  await attachEditedFile(
-    cardId,
-    new File([new Uint8Array(downloaded.bytes)], downloaded.name, { type: downloaded.type }),
-    textStyle,
-    uploaderRole,
-  );
+  const saved = await downloadDriveFile(cardId, picked.id, picked.name);
+  if (!saved) return false;
+  await attachEditedSaved(cardId, saved, textStyle, uploaderRole);
   return true;
 }
 

@@ -1,4 +1,5 @@
 import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import type { Readable } from "stream";
 
 export type SavedFile = {
   filename: string;
@@ -47,13 +48,15 @@ export function r2PublicUrl(key: string): string {
   return `${base}/${key}`;
 }
 
-export async function putR2(key: string, bytes: Buffer, mime: string): Promise<string> {
+export async function putR2(key: string, body: Buffer | Readable, mime: string, size?: number): Promise<string> {
+  const contentLength = size ?? (Buffer.isBuffer(body) ? body.length : undefined);
   await client().send(
     new PutObjectCommand({
       Bucket: process.env.R2_BUCKET,
       Key: key,
-      Body: bytes,
+      Body: body,
       ContentType: mime,
+      ContentLength: contentLength,
     }),
   );
   return r2PublicUrl(key);

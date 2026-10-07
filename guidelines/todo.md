@@ -2,7 +2,7 @@
 
 - [X] Finished file in the Drive folder
   He puts the cut in the same folder as the raw clips. Any file name is fine.
-  He pastes a Drive link to the video, or to a folder with the video in it. Her folder or one he made. The job tells him to make that link public. Opening Today, Cuts, or the job still checks her folder.
+  He pastes a Drive link to the video, or to a folder with the video in it. Her folder or one he made. The job tells him to make that link public. The download streams to disk so the button can finish. Opening Today, Cuts, or the job still checks her folder.
 
 - [X] Discord only when work changes hands
   Sending him a job or a polish pings him. His finished drop pings you.

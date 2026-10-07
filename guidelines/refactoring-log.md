@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-10-07 — Attach URL was dying because the whole video was loaded into a 512 MB machine. The download now streams to disk, and the button says Bringing it in… while it runs.
 - 2026-10-07 — The job tells him to make the Drive link public before he pastes it.
 - 2026-10-07 — Attach URL takes a Drive link to the video or to a folder that holds it. Her folder and a folder he made both work, as long as anyone with the link can open it.
 - 2026-10-07 — Attach URL follows a Drive file Share link past the "too big to scan" page. A video sitting in the folder is read even when Drive does not label it as a folder.

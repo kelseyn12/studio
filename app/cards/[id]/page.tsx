@@ -16,6 +16,8 @@ import { previewEditorId } from "@/lib/editor-preview";
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+export const maxDuration = 300;
+
 export default async function CardPage({
   params,
   searchParams,

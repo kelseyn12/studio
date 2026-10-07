@@ -6,13 +6,13 @@ import { requireUser } from "@/lib/auth";
 import { alreadyWithEditor, isDeskStage, keepInToCut, nextStatusFor, sendBackStatus, type DeskStage } from "@/lib/card-desk";
 import { cardPatch } from "@/lib/card-patch";
 import { dropCards } from "@/lib/drop-cards";
-import { deleteUpload, saveUpload, mimeFromName } from "@/lib/files";
+import { beginCutting, attachEditedSaved } from "@/lib/cut-ready";
 import { attachDriveLink } from "@/lib/drive-finished";
+import { mimeFromName, saveStreamedFile } from "@/lib/files";
 import { directMediaUrl, driveLinkKind } from "@/lib/media-url";
-import { rejectStudioFile } from "@/lib/storage";
+import { rejectStudioFile, STUDIO_FILE_MAX_BYTES } from "@/lib/storage";
 import type { PipelineStatus } from "@/lib/pipeline";
 import { prisma } from "@/lib/prisma";
-import { beginCutting, markCutReady, replaceEditedLook } from "@/lib/cut-ready";
 import { pingStudio } from "@/lib/manychat";
 import { timeAlreadyPassed } from "@/lib/dates";
 import { ALREADY_SCHEDULED, postCaption, queueCard, waitingPostIds } from "@/lib/publish";
@@ -249,22 +249,17 @@ export async function attachEditedUrl(formData: FormData) {
     redirect(id ? `/cards/${id}?step=editor&link=no` : "/");
   }
   const response = await fetch(url);
-  if (!response.ok || (response.headers.get("content-type") || "").includes("text/html")) {
+  const typeHeader = response.headers.get("content-type") || "";
+  if (!response.ok || typeHeader.includes("text/html") || !response.body) {
     redirect(`/cards/${id}?step=editor&link=no`);
   }
   const length = Number(response.headers.get("content-length") || 0);
-  if (length > 0 && rejectStudioFile(length, "EDITED")) redirect(`/cards/${id}?step=editor`);
-  const bytes = Buffer.from(await response.arrayBuffer());
-  if (rejectStudioFile(bytes.length, "EDITED")) redirect(`/cards/${id}?step=editor`);
+  if (length > 0 && rejectStudioFile(length, "EDITED")) redirect(`/cards/${id}?step=editor&link=no`);
   const rawName = url.split("?")[0].split("/").pop() || "export.mp4";
   const name = rawName.includes(".") ? rawName : "export.mp4";
-  const type = response.headers.get("content-type") || mimeFromName(name);
-  const saved = await saveUpload(new File([new Uint8Array(bytes)], name, { type }), `cards/${id}`);
-  const created = await prisma.asset.create({
-    data: { cardId: id, kind: "EDITED", ...saved, publicUrl: saved.publicUrl || url, textStyle },
-  });
-  await replaceEditedLook(id, textStyle, created.id);
-  await markCutReady(id, user.role);
+  const saved = await saveStreamedFile(response.body, `cards/${id}`, name, typeHeader || mimeFromName(name), STUDIO_FILE_MAX_BYTES);
+  if (!saved) redirect(`/cards/${id}?step=editor&link=no`);
+  await attachEditedSaved(id, saved, textStyle, user.role);
   revalidatePath(`/cards/${id}`);
   revalidatePath("/edits");
   redirect(`/cards/${id}?step=live`);

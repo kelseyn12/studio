@@ -1,5 +1,7 @@
+import path from "path";
+import { rm } from "fs/promises";
 import { describe, expect, it } from "vitest";
-import { localRoot, UPLOAD_ROOT } from "@/lib/files";
+import { localRoot, saveStreamedFile, UPLOAD_ROOT } from "@/lib/files";
 import { hasR2, isPublicMediaUrl, r2PublicUrl } from "@/lib/r2";
 
 const R2_KEYS = [
@@ -55,5 +57,30 @@ describe("r2", () => {
     expect(isPublicMediaUrl("https://files.example.com/generated/a.mp4")).toBe(true);
     if (previous === undefined) delete process.env.R2_PUBLIC_URL;
     else process.env.R2_PUBLIC_URL = previous;
+  });
+});
+
+describe("saveStreamedFile", () => {
+  it("writes a download in pieces and stops over the cap", async () => {
+    const previous = snapshotR2();
+    for (const key of R2_KEYS) delete process.env[key];
+    const small = new ReadableStream({
+      start(controller) {
+        controller.enqueue(new Uint8Array([1, 2, 3, 4]));
+        controller.close();
+      },
+    });
+    const saved = await saveStreamedFile(small, "stream-test", "clip.mp4", "video/mp4", 10);
+    expect(saved?.size).toBe(4);
+    expect(saved?.filename).toBe("clip.mp4");
+    if (saved) await rm(path.join(UPLOAD_ROOT, saved.path), { force: true });
+    const big = new ReadableStream({
+      start(controller) {
+        controller.enqueue(new Uint8Array([1, 2, 3]));
+        controller.close();
+      },
+    });
+    expect(await saveStreamedFile(big, "stream-test", "clip.mp4", "video/mp4", 2)).toBeNull();
+    restoreR2(previous);
   });
 });

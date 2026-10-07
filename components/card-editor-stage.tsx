@@ -1,4 +1,5 @@
 import { attachEditedUrl, finishStage, startCutting, updateCard } from "@/app/cards/[id]/actions";
+import { ScheduleButton } from "@/components/schedule-button";
 import { CapcutLink } from "@/components/capcut-link";
 import { CoverPick } from "@/components/cover-pick";
 import { FinishedDrop } from "@/components/finished-drop";
@@ -200,7 +201,11 @@ export function CardEditorStage({
           <option value="plain">One video</option>
         </select>
         <input name="editedUrl" placeholder="https://drive.google.com/…" className="field" />
-        <button className="rounded-xl border border-line px-4 py-2 text-sm">Attach URL</button>
+        <ScheduleButton
+          label="Attach URL"
+          pendingLabel="Bringing it in…"
+          className="rounded-xl border border-line px-4 py-2 text-sm"
+        />
       </form>
       {visibleAssets(files)
         .filter((file) => file.kind === "EDITED")

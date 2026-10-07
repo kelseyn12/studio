@@ -1,5 +1,6 @@
 import { pingForFinishedDrop, priorEditedIds, shouldStartCutting, statusAfterDrop } from "@/lib/card-desk";
 import { deleteUpload, saveUpload } from "@/lib/files";
+import type { SavedFile } from "@/lib/r2";
 import { pingStudio } from "@/lib/manychat";
 import { prisma } from "@/lib/prisma";
 import { dropSuperseded } from "@/lib/sweep";
@@ -30,12 +31,17 @@ export async function replaceEditedLook(cardId: string, textStyle: string, keepI
   }
 }
 
-/** Stores a finished video on its card. Her own cut is ready to schedule. His cut waits for her. */
-export async function attachEditedFile(cardId: string, file: File, textStyle: string, uploaderRole: string): Promise<void> {
-  const saved = await saveUpload(file, `cards/${cardId}`);
+/** Stores a finished video that is already on disk. Her own cut is ready to schedule. His cut waits for her. */
+export async function attachEditedSaved(cardId: string, saved: SavedFile, textStyle: string, uploaderRole: string): Promise<void> {
   const created = await prisma.asset.create({ data: { cardId, kind: "EDITED", ...saved, textStyle } });
   await replaceEditedLook(cardId, textStyle, created.id);
   await markCutReady(cardId, uploaderRole);
+}
+
+/** Stores a finished video on its card. Her own cut is ready to schedule. His cut waits for her. */
+export async function attachEditedFile(cardId: string, file: File, textStyle: string, uploaderRole: string): Promise<void> {
+  const saved = await saveUpload(file, `cards/${cardId}`);
+  await attachEditedSaved(cardId, saved, textStyle, uploaderRole);
 }
 
 export async function markCutReady(id: string, uploaderRole: string): Promise<void> {

@@ -1,4 +1,7 @@
+import { createReadStream, createWriteStream } from "fs";
 import { mkdir, readFile, rm, writeFile } from "fs/promises";
+import { once } from "events";
+import { finished } from "stream/promises";
 import os from "os";
 import path from "path";
 import { randomUUID } from "crypto";
@@ -22,6 +25,50 @@ export async function saveLocalUpload(file: File, folder: string): Promise<Local
   await mkdir(path.dirname(absolute), { recursive: true });
   await writeFile(absolute, bytes);
   return { relative, absolute, mime: file.type || mimeFromName(file.name), size: bytes.length };
+}
+
+/** Writes a download to disk in pieces, then stores it. The whole video never sits in memory. */
+export async function saveStreamedFile(
+  body: ReadableStream<Uint8Array>,
+  folder: string,
+  filename: string,
+  mime: string,
+  maxBytes: number,
+): Promise<SavedFile | null> {
+  const safeName = filename.replace(/[^a-zA-Z0-9._-]/g, "_") || "export.mp4";
+  const relative = path.join(folder, `${randomUUID()}-${safeName}`).replace(/\\/g, "/");
+  const absolute = path.join(UPLOAD_ROOT, relative);
+  await mkdir(path.dirname(absolute), { recursive: true });
+  const out = createWriteStream(absolute);
+  const reader = body.getReader();
+  let size = 0;
+  try {
+    for (;;) {
+      const chunk = await reader.read();
+      if (chunk.done) break;
+      size += chunk.value.byteLength;
+      if (size > maxBytes) {
+        await reader.cancel();
+        out.destroy();
+        await rm(absolute, { force: true });
+        return null;
+      }
+      if (!out.write(chunk.value)) await once(out, "drain");
+    }
+    out.end();
+    await finished(out);
+  } catch (error) {
+    out.destroy();
+    await rm(absolute, { force: true });
+    throw error;
+  }
+  if (size <= 0) {
+    await rm(absolute, { force: true });
+    return null;
+  }
+  const publicUrl = hasR2() ? await putR2(relative, createReadStream(absolute), mime, size) : "";
+  if (hasR2()) await rm(absolute, { force: true });
+  return { filename, path: relative, mime, size, publicUrl };
 }
 
 export async function saveUpload(file: File, folder: string): Promise<SavedFile> {
