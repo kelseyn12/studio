@@ -7,6 +7,11 @@ export function splitChangeNote(note: string): { fix: string; brief: string } {
   return { fix: match[1].trim(), brief: note.slice(match[0].length).trim() };
 }
 
+/** A job he already cut, sent back because she asked for a fix. */
+export function needsChanges(status: string, note: string): boolean {
+  return status === "EDITING" && Boolean(splitChangeNote(note).fix);
+}
+
 /** The first line of a fix, short enough for Discord and the Cuts list. */
 export function changePreview(fix: string, limit = 140): string {
   const line = fix.split(/\r?\n/).map((row) => row.trim()).find(Boolean) || "";

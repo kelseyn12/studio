@@ -2,7 +2,7 @@ import Link from "next/link";
 import { DeleteVideoButton } from "@/components/delete-video";
 import { EditorNeed } from "@/components/editor-need";
 import { StatusPill } from "@/components/status-pill";
-import { changePreview, splitChangeNote } from "@/lib/change-note";
+import { changePreview, needsChanges, splitChangeNote } from "@/lib/change-note";
 import { labelDay } from "@/lib/dates";
 import { DEAL_KIND_LABEL } from "@/lib/deal-kind";
 import { editorNeeds, packetReady } from "@/lib/editor-packet";
@@ -67,7 +67,11 @@ export function CutsBucket({
                     </p>
                   </Link>
                   <div className="flex flex-col items-end gap-2">
-                    <StatusPill status={card.status} scheduledAt={card.scheduledAt} />
+                    <StatusPill
+                      status={card.status}
+                      scheduledAt={card.scheduledAt}
+                      label={needsChanges(card.status, card.editorNote) ? "Needs changes" : undefined}
+                    />
                     {canDelete ? <DeleteVideoButton id={card.id} back="/edits" label="Delete" /> : null}
                   </div>
                 </div>

@@ -7,6 +7,7 @@ import { EditorNeed } from "@/components/editor-need";
 import { PacketFiles } from "@/components/packet-files";
 import { EditorBrief } from "@/components/editor-brief";
 import { capcutHref } from "@/lib/capcut";
+import { needsChanges } from "@/lib/change-note";
 import { visibleAssets } from "@/lib/card-desk";
 import type { PacketItem } from "@/lib/editor-packet";
 import { formatBytes, STUDIO_FILE_MAX_BYTES } from "@/lib/storage";
@@ -107,7 +108,11 @@ export function CardEditorStage({
             </div>
           )
         ) : null}
-        {desk && card.status === "EDITING" ? (
+        {desk && needsChanges(card.status, card.editorNote) ? (
+          <p className="mb-3 rounded-xl bg-sun px-4 py-3 text-sm font-semibold text-ink">
+            Needs changes. Read the fix at the top, then drop the new video.
+          </p>
+        ) : desk && card.status === "EDITING" ? (
           <p className="mb-3 rounded-xl bg-sun/15 px-4 py-2 text-sm">You are cutting this. Drop the finished video when it is done.</p>
         ) : null}
         {desk ? (

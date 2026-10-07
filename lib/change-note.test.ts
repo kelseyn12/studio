@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { changePreview, splitChangeNote, withChangeNote } from "@/lib/change-note";
+import { changePreview, needsChanges, splitChangeNote, withChangeNote } from "@/lib/change-note";
 
 describe("change note", () => {
   it("puts the fix on top and keeps the brief", () => {
@@ -12,6 +12,12 @@ describe("change note", () => {
   it("a second fix replaces the first", () => {
     const twice = withChangeNote("Fix: old ask\n\nKeep the drawer shot", "Bigger captions");
     expect(twice).toBe("Fix: Bigger captions\n\nKeep the drawer shot");
+  });
+
+  it("flags a cut that was sent back", () => {
+    expect(needsChanges("EDITING", "Fix: Bigger captions\n\nKeep the drawer shot")).toBe(true);
+    expect(needsChanges("EDITING", "Keep the drawer shot")).toBe(false);
+    expect(needsChanges("REVIEW", "Fix: Bigger captions")).toBe(false);
   });
 
   it("keeps the first line short for the Cuts list", () => {

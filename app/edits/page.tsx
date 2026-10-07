@@ -8,6 +8,7 @@ import { groupEditorBatches } from "@/lib/editor-batches";
 import { previewEditorId } from "@/lib/editor-preview";
 import { prisma } from "@/lib/prisma";
 import { batchByCard } from "@/lib/queries";
+import { needsChanges } from "@/lib/change-note";
 import { scheduleDrivePull } from "@/lib/drive-finished";
 import { formatBytes, STUDIO_FILE_MAX_BYTES } from "@/lib/storage";
 import { watchUrl } from "@/lib/urls";
@@ -33,7 +34,8 @@ export default async function EditsPage({ searchParams }: { searchParams: Promis
   const { folders, loose } = groupEditorBatches(cards, batches);
   const selfCut = asEditor ? [] : loose.filter((card) => card.status === "FILMED" && card.cutBy === "SELF");
   const send = loose.filter((card) => card.status === "FILMED" && card.cutBy === "EDITOR");
-  const cutting = loose.filter((card) => card.status === "EDITING");
+  const changes = loose.filter((card) => needsChanges(card.status, card.editorNote));
+  const cutting = loose.filter((card) => card.status === "EDITING" && !needsChanges(card.status, card.editorNote));
   const review = loose.filter((card) => card.status === "REVIEW");
   const sizeLabel = formatBytes(STUDIO_FILE_MAX_BYTES);
   for (const card of cards) scheduleDrivePull(card);
@@ -92,6 +94,15 @@ export default async function EditsPage({ searchParams }: { searchParams: Promis
         canDelete={!asEditor}
         preview={previewId ?? undefined}
       />
+      {changes.length > 0 ? (
+        <CutsBucket
+          title="Needs changes"
+          items={changes}
+          empty=""
+          canDelete={!asEditor}
+          preview={previewId ?? undefined}
+        />
+      ) : null}
       <CutsBucket
         title="Cutting"
         items={cutting}
