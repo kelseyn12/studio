@@ -8,9 +8,13 @@ import { watchUrl } from "@/lib/urls";
 export function EditorBrief({
   card,
   voices = [],
+  shots = [],
+  fixShots = [],
   revision = false,
 }: {
   revision?: boolean;
+  shots?: Array<{ id: string; path: string; filename: string }>;
+  fixShots?: Array<{ id: string; path: string; filename: string }>;
   card: {
     hook: string;
     body: string;
@@ -40,8 +44,19 @@ export function EditorBrief({
       <audio controls src={watchUrl(file.path)} className="w-full" />
     </div>
   );
+  const shotGrid = (files: Array<{ id: string; path: string; filename: string }>) =>
+    files.length === 0 ? null : (
+      <div className="grid grid-cols-2 gap-2">
+        {files.map((file) => (
+          <a key={file.id} href={watchUrl(file.path)} target="_blank" rel="noreferrer" className="block">
+            <img src={watchUrl(file.path)} alt={file.filename} className="w-full rounded-xl bg-ink" />
+          </a>
+        ))}
+      </div>
+    );
   const hasOriginal =
     briefVoices.length > 0 ||
+    shots.length > 0 ||
     Boolean(card.deadlineAt) ||
     Boolean(note.brief) ||
     words.length > 0 ||
@@ -50,6 +65,7 @@ export function EditorBrief({
   const original = (
     <>
       {briefVoices.map((file) => voicePlayer(file, "Voice note"))}
+      {shotGrid(shots)}
       {card.deadlineAt ? (
         <p className="rounded-xl bg-sun/15 px-4 py-2 text-sm font-semibold">Due {labelDay(card.deadlineAt)}</p>
       ) : null}
@@ -102,6 +118,7 @@ export function EditorBrief({
         </div>
       ) : null}
       {fixVoices.map((file) => voicePlayer(file, "Listen to the fix"))}
+      {shotGrid(fixShots)}
       {revision && hasOriginal ? (
         <details className="rounded-xl border border-line px-4 py-3 text-sm">
           <summary className="cursor-pointer text-mute">Original brief</summary>

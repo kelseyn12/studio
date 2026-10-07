@@ -10,6 +10,7 @@ import { capcutHref } from "@/lib/capcut";
 import { needsChanges } from "@/lib/change-note";
 import { visibleAssets } from "@/lib/card-desk";
 import type { PacketItem } from "@/lib/editor-packet";
+import { shotsForFix } from "@/lib/files";
 import { formatBytes, STUDIO_FILE_MAX_BYTES } from "@/lib/storage";
 import { watchUrl } from "@/lib/urls";
 
@@ -71,6 +72,7 @@ export function CardEditorStage({
     files.some((file) => file.kind === "RAW" || file.kind === "VOICE" || file.kind === "REFERENCE");
   const dropOnly = self && !hasSources;
   const revision = desk && needsChanges(card.status, card.editorNote);
+  const pictures = shotsForFix(files, revision);
   return (
     <div className="space-y-4">
       <section className="rounded-card border border-line bg-panel p-5">
@@ -119,6 +121,8 @@ export function CardEditorStage({
             card={card}
             revision={revision}
             voices={files.filter((file) => file.kind === "VOICE").map((file) => ({ id: file.id, path: file.path, filename: file.filename }))}
+            shots={pictures.earlier}
+            fixShots={pictures.fix}
           />
         ) : null}
         {desk ? (

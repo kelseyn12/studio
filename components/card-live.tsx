@@ -1,4 +1,5 @@
-import { approveCut, requestChanges, scheduleCard, sendForTouchUp, updateScheduledCaption } from "@/app/cards/[id]/actions";
+import { scheduleCard, updateScheduledCaption } from "@/app/cards/[id]/actions";
+import { PolishAsk, ReviewAsk } from "@/components/review-ask";
 import { LiveLooks } from "@/components/live-looks";
 import { PaidButton } from "@/components/paid-button";
 import { QuickCut } from "@/components/quick-cut";
@@ -10,6 +11,7 @@ import { coverCanChange } from "@/lib/post-cover";
 import { dealAccounts, describeTargets, handle, parseAccountIds, targetAccounts } from "@/lib/targets";
 import { YouTubeMiss, youtubeDownload } from "@/components/youtube-miss";
 import { postedAppLine } from "@/lib/publish-sync";
+import { isStill } from "@/lib/files";
 import { watchUrl } from "@/lib/urls";
 
 type LiveAsset = {
@@ -116,43 +118,14 @@ export function CardLive({
         </div>
       ) : null}
       {card.status === "REVIEW" && card.cutBy !== "SELF" ? (
-        <>
-          <form action={approveCut} className="rounded-card border border-line bg-panel p-5">
-            <input type="hidden" name="id" value={card.id} />
-            <p className="text-sm text-mute">Approve stays on this video. Then set the thumbnail, caption, accounts, and time below.</p>
-            <button className="mt-3 w-full rounded-xl bg-sun px-4 py-3 font-semibold text-ink">Approve</button>
-          </form>
-          <form action={requestChanges} className="space-y-3 rounded-card border border-line bg-panel p-5">
-            <input type="hidden" name="id" value={card.id} />
-            <p className="text-sm text-mute">
-              Needs changes. Write only what to fix. He sees it at the top of his job, with your first note still under it.
-            </p>
-            <textarea
-              name="editorNote"
-              placeholder="What to fix — hook, captions, end frame…"
-              className="field min-h-24"
-              required
-            />
-            <button className="w-full rounded-xl border border-line px-4 py-3 font-semibold">Needs changes</button>
-          </form>
-        </>
+        <ReviewAsk
+          cardId={card.id}
+          shots={assets
+            .filter((file) => file.kind === "REFERENCE" && isStill(file.filename))
+            .map((file) => ({ id: file.id, path: file.path, filename: file.filename }))}
+        />
       ) : null}
-      {card.status === "READY" && !card.scheduledAt && card.cutBy !== "SELF" ? (
-        <form action={sendForTouchUp} className="space-y-3 rounded-card border border-line bg-panel p-5">
-          <input type="hidden" name="id" value={card.id} />
-          <p className="text-sm text-mute">
-            Not quite right? Send it to your editor to polish. They drop the fixed video and it lands back in To
-            approve.
-          </p>
-          <textarea
-            name="editorNote"
-            placeholder="What to polish — trim the hook, tighten the end, fix captions…"
-            className="field min-h-20"
-            required
-          />
-          <button className="w-full rounded-xl border border-line px-4 py-3 font-semibold">Send to editor to polish</button>
-        </form>
-      ) : null}
+      {card.status === "READY" && !card.scheduledAt && card.cutBy !== "SELF" ? <PolishAsk cardId={card.id} /> : null}
       <form action={card.scheduledAt ? updateScheduledCaption : scheduleCard} className="space-y-3">
         <input type="hidden" name="id" value={card.id} />
         <p className="text-sm text-mute">

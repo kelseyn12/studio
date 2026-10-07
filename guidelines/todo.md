@@ -1,5 +1,9 @@
 # To-do
 
+- [X] Approve pings him, screenshots on a fix
+  Approve sends a Discord ping. The note box can say good job. A blank note still says he is done.
+  Needs changes takes a screenshot of a font, text style, or frame. He sees that picture with the fix.
+
 - [X] One finished file, library folders
   A newer cut in the Drive folder replaces the Studio file while the job needs changes. The old Studio file is deleted.
   Library folders: Multiply batch, deal (Trybe and other UGC), Personal. Posted stays closed. A video does not download until play.

@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { alreadyWithEditor, isDeskStage, keepInToCut, nextStatusFor, sendBackStatus, type DeskStage } from "@/lib/card-desk";
 import { cardPatch } from "@/lib/card-patch";
-import { changePreview, splitChangeNote, withChangeNote } from "@/lib/change-note";
+import { approvalLine, changePreview, splitChangeNote, withApproval, withChangeNote } from "@/lib/change-note";
 import { dropCards } from "@/lib/drop-cards";
 import { beginCutting, attachEditedSaved } from "@/lib/cut-ready";
 import { attachDriveLink } from "@/lib/drive-finished";
@@ -123,8 +123,19 @@ export async function approveCut(formData: FormData) {
   const id = String(formData.get("id"));
   const card = await prisma.card.findUnique({ where: { id }, include: { assets: true } });
   const hasFile = card?.assets.some((asset) => asset.kind === "EDITED" || asset.kind === "GENERATED");
-  if (!id || !hasFile) redirect(id ? `/cards/${id}?step=live` : "/");
-  await prisma.card.update({ where: { id }, data: { status: "READY" } });
+  if (!id || !hasFile || !card) redirect(id ? `/cards/${id}?step=live` : "/");
+  const note = String(formData.get("note") || "").trim();
+  await prisma.card.update({
+    where: { id },
+    data: { status: "READY", editorNote: withApproval(card.editorNote, note) },
+  });
+  if (card.cutBy === "EDITOR") {
+    try {
+      await pingStudio("editor", approvalLine(card.title, note));
+    } catch {
+      /* the video is still approved */
+    }
+  }
   revalidatePath(`/cards/${id}`);
   revalidatePath("/edits");
   revalidatePath("/library");

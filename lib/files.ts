@@ -114,6 +114,30 @@ export function publicFileUrl(relative: string): string {
   return `/api/files/${relative.split(path.sep).join("/")}`;
 }
 
+const STILL_NAME = /\.(png|jpe?g|webp|gif|heic)$/i;
+
+/** A picture she can drop on a fix: font, text style, or a frame. */
+export function isStill(filename: string): boolean {
+  return STILL_NAME.test(filename);
+}
+
+/** Pictures dropped after the cut sit on the fix. Earlier pictures stay in the original brief. */
+export function shotsForFix<T extends { kind: string; filename: string; createdAt: Date }>(
+  files: T[],
+  revision: boolean,
+): { fix: T[]; earlier: T[] } {
+  const shots = files.filter((file) => file.kind === "REFERENCE" && isStill(file.filename));
+  if (!revision) return { fix: [], earlier: shots };
+  const cutAt = files
+    .filter((file) => file.kind === "EDITED" || file.kind === "GENERATED")
+    .reduce((latest, file) => Math.max(latest, file.createdAt.getTime()), 0);
+  if (!cutAt) return { fix: shots, earlier: [] };
+  return {
+    fix: shots.filter((file) => file.createdAt.getTime() >= cutAt),
+    earlier: shots.filter((file) => file.createdAt.getTime() < cutAt),
+  };
+}
+
 export function mimeFromName(name: string): string {
   const ext = name.split(".").pop()?.toLowerCase();
   if (ext === "mp4" || ext === "mov" || ext === "webm") return `video/${ext === "mp4" ? "mp4" : ext}`;
