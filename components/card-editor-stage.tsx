@@ -89,7 +89,7 @@ export function CardEditorStage({
             <li>Open Google Drive for the raw footage. Watch the references here.</li>
             <li>Press Start cutting when you begin. Watching or downloading does not start it.</li>
             <li>Cut one video. Leave Which video on One video.</li>
-            <li>Put the finished video in that same Google Drive folder. Name the file finished.</li>
+            <li>Put the finished video in that same Google Drive folder. Any file name is fine.</li>
             <li>Paste your CapCut link so she can open your project.</li>
           </ol>
         ) : null}

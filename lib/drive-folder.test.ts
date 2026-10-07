@@ -5,14 +5,17 @@ const html = `
 <div class="flip-entry" id="entry-FOLDER1">
   <div aria-label="Folder"></div>
   <div class="flip-entry-title">B-Roll</div>
+  <div class="flip-entry-last-modified"><div>Oct 6</div></div>
 </div>
 <div class="flip-entry" id="entry-FILE1">
   <div aria-label="MP4"></div>
   <div class="flip-entry-title">finished.mp4</div>
+  <div class="flip-entry-last-modified"><div>Oct 6</div></div>
 </div>
 <div class="flip-entry" id="entry-FILE2">
   <div aria-label="MP4"></div>
   <div class="flip-entry-title">hook take.mp4</div>
+  <div class="flip-entry-last-modified"><div>Oct 7</div></div>
 </div>
 `;
 
@@ -22,14 +25,14 @@ describe("drive folder", () => {
     expect(driveFolderId("https://drive.google.com/file/d/FILE/view")).toBeNull();
   });
 
-  it("picks the video named finished and leaves the raw folders alone", () => {
+  it("picks the newest video and leaves the raw folders alone", () => {
     const entries = parseDriveFolderList(html);
     expect(entries.map((entry) => [entry.name, entry.folder])).toEqual([
       ["B-Roll", true],
       ["finished.mp4", false],
       ["hook take.mp4", false],
     ]);
-    expect(finishedDriveFile(entries)?.id).toBe("FILE1");
-    expect(finishedDriveFile([{ id: "a", name: "B-Roll", folder: true }])).toBeNull();
+    expect(finishedDriveFile(entries, new Date("2026-10-07T12:00:00Z"))?.id).toBe("FILE2");
+    expect(finishedDriveFile([{ id: "a", name: "B-Roll", folder: true, modified: "" }])).toBeNull();
   });
 });

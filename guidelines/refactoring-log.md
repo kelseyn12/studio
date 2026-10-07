@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-10-07 — A video he adds to the raw Drive folder is the cut, whatever the file is named. The newest video in that folder is the one that comes in.
 - 2026-10-07 — The finished cut can sit in the same Google Drive folder as the raw clips. Name the file finished. Opening Today, Cuts, or the job brings it in and pings her.
 - 2026-10-06 — Polish pings him again. A polish is a video handed to him. Notes, her own drop, and Schedule stay quiet.
 - 2026-10-06 — One video is a single file with every account, and her own cut skips Approve. Two exports still split into IG · FB and TT · YT.

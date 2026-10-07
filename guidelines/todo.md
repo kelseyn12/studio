@@ -1,7 +1,7 @@
 # To-do
 
 - [X] Finished file in the Drive folder
-  He puts the cut in the same folder as the raw clips and names it finished.
+  He puts the cut in the same folder as the raw clips. Any file name is fine.
   Opening Today, Cuts, or the job brings that file in and pings her.
 
 - [X] Discord only when work changes hands

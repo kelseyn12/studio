@@ -94,7 +94,7 @@ Watching, downloading, or opening Drive does not move it. On the job page:
 - A checklist of what is in the packet: hook, script, clips, note.
 - The **voice note** at the top. Listen before you read.
 - **Your CapCut link** — paste your project so she can open it. She does not send you hers. If CapCut asks her to join, invite her email on that project.
-- **Download files** — raw clips, reference files, and **Open the Google Drive folder**. The finished video goes in that same folder, named finished.
+- **Download files** — raw clips, reference files, and **Open the Google Drive folder**. The finished video goes in that same folder. Any file name is fine.
 - **Which video is this?** — leave it on **One video**. IG · FB and TT · YT are only when she asked for two exports.
 - The drop zone, or a link to that one finished file. A Drive link to the file works. A Drive folder does not.
 
@@ -105,7 +105,7 @@ Watching, downloading, or opening Drive does not move it. On the job page:
 3. Cut the video to the script: hook up top, tight pacing, captions on everything spoken, hook
    words on screen if they are listed. Match each reference, and follow the note under it.
 4. Export 1080 × 1920 mp4, under 250 MB, no watermark. Any file name is fine here.
-5. Put the finished video in the same Google Drive folder as the raw clips. Name the file **finished**. Studio brings it in and pings her. Dropping the mp4 on the job still works.
+5. Put the finished video in the same Google Drive folder as the raw clips. Any file name is fine. Studio brings it in and pings her. Dropping the mp4 on the job still works.
 
 ### Deadlines
 

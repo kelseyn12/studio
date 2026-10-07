@@ -48,7 +48,7 @@ async function driveBytes(fileId: string): Promise<{ bytes: Buffer; type: string
   return { bytes: Buffer.from(await again.arrayBuffer()), type: againType || "video/mp4" };
 }
 
-/** His finished file, named finished, in the same folder as the raw clips. */
+/** Any video he added in the same folder as the raw clips. The newest one is the cut. */
 export async function pullFinishedFromDrive(cardId: string, rawsUrl: string): Promise<boolean> {
   const folderId = driveFolderId(rawsUrl);
   if (!folderId) return false;
