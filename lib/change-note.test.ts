@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { splitChangeNote, withChangeNote } from "@/lib/change-note";
+import { changePreview, splitChangeNote, withChangeNote } from "@/lib/change-note";
 
 describe("change note", () => {
   it("puts the fix on top and keeps the brief", () => {
@@ -12,6 +12,11 @@ describe("change note", () => {
   it("a second fix replaces the first", () => {
     const twice = withChangeNote("Fix: old ask\n\nKeep the drawer shot", "Bigger captions");
     expect(twice).toBe("Fix: Bigger captions\n\nKeep the drawer shot");
+  });
+
+  it("keeps the first line short for the Cuts list", () => {
+    expect(changePreview("Tighten the hook\n\nAnd the end")).toBe("Tighten the hook");
+    expect(changePreview("x".repeat(20), 10)).toBe(`${"x".repeat(9)}…`);
   });
 
   it("an empty fix leaves the brief alone", () => {

@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { alreadyWithEditor, isDeskStage, keepInToCut, nextStatusFor, sendBackStatus, type DeskStage } from "@/lib/card-desk";
 import { cardPatch } from "@/lib/card-patch";
-import { withChangeNote } from "@/lib/change-note";
+import { changePreview, splitChangeNote, withChangeNote } from "@/lib/change-note";
 import { dropCards } from "@/lib/drop-cards";
 import { beginCutting, attachEditedSaved } from "@/lib/cut-ready";
 import { attachDriveLink } from "@/lib/drive-finished";
@@ -101,10 +101,17 @@ export async function requestChanges(formData: FormData) {
   const next = card ? sendBackStatus(card.status) : null;
   if (!id || !next) redirect(id ? `/cards/${id}?step=live` : "/");
   const note = String(formData.get("editorNote") || "").trim();
+  const editorNote = withChangeNote(card?.editorNote || "", note);
   await prisma.card.update({
     where: { id },
-    data: { status: next, editorNote: withChangeNote(card?.editorNote || "", note) },
+    data: { status: next, editorNote },
   });
+  const fix = splitChangeNote(editorNote).fix;
+  try {
+    await pingStudio("editor", `Changes: ${card?.title || "a video"}. ${changePreview(fix) || "Open the job."} Open Cuts.`);
+  } catch {
+    /* the job is still back in Cutting */
+  }
   revalidatePath(`/cards/${id}`);
   revalidatePath("/edits");
   revalidatePath("/");

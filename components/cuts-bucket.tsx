@@ -2,6 +2,7 @@ import Link from "next/link";
 import { DeleteVideoButton } from "@/components/delete-video";
 import { EditorNeed } from "@/components/editor-need";
 import { StatusPill } from "@/components/status-pill";
+import { changePreview, splitChangeNote } from "@/lib/change-note";
 import { labelDay } from "@/lib/dates";
 import { DEAL_KIND_LABEL } from "@/lib/deal-kind";
 import { editorNeeds, packetReady } from "@/lib/editor-packet";
@@ -50,6 +51,7 @@ export function CutsBucket({
             const packet = editorNeeds(card);
             const dropFile = card.cutBy === "SELF" && card.status === "FILMED";
             const schedule = card.status === "REVIEW";
+            const fix = card.status === "EDITING" ? splitChangeNote(card.editorNote).fix : "";
             const href = `/cards/${card.id}?step=${schedule ? "live" : "editor"}${preview ? `&as=${preview}` : ""}`;
             return (
               <article key={card.id} className="rounded-card border border-line bg-panel p-5">
@@ -71,15 +73,22 @@ export function CutsBucket({
                 </div>
                 <Link href={href} className="mt-4 block">
                   {dropFile || schedule ? null : <EditorNeed items={packet} />}
-                  <p className="mt-3 text-sm text-mute">
-                    {dropFile
-                      ? "Drop one file. Pick IG · FB or TT · YT."
-                      : schedule
-                        ? "Set the thumbnail, accounts, caption, and time."
-                        : packetReady(packet)
-                          ? "Files are ready. Cut it."
-                          : "Still missing files."}
-                  </p>
+                  {fix ? (
+                    <p className="mt-3 rounded-xl bg-sun/15 px-4 py-2 text-sm">
+                      <span className="font-semibold">Changes asked. </span>
+                      {changePreview(fix)}
+                    </p>
+                  ) : (
+                    <p className="mt-3 text-sm text-mute">
+                      {dropFile
+                        ? "Drop one file. Pick IG · FB or TT · YT."
+                        : schedule
+                          ? "Set the thumbnail, accounts, caption, and time."
+                          : packetReady(packet)
+                            ? "Files are ready. Cut it."
+                            : "Still missing files."}
+                    </p>
+                  )}
                 </Link>
               </article>
             );

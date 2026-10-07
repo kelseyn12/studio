@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-10-07 — Needs changes pings him on Discord and the Cuts card in Cutting says Changes asked.
 - 2026-10-07 — Needs changes starts empty. What she types goes on top of his job as Fix, with the first brief and voice words still under it. A second ask replaces the first.
 - 2026-10-07 — Attach URL was dying because the whole video was loaded into a 512 MB machine. The download now streams to disk, and the button says Bringing it in… while it runs.
 - 2026-10-07 — The job tells him to make the Drive link public before he pastes it.

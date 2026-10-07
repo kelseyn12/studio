@@ -154,6 +154,7 @@
 - [X] Needs changes on Live
   From To approve, write what to fix. Job goes back to Cuts. Editor sees the note and drops a new finished video.
   The box starts empty. The fix sits on top of his job; the first brief stays under it.
+  Discord pings him. Cutting says Changes asked.
 
 - [X] Delete a video from Film days
   × on the chip or Delete this video on the video page. Files leave R2 too.
