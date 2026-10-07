@@ -18,7 +18,9 @@ export function PacketFiles({
   return (
     <section className="space-y-2 rounded-card border border-line bg-panel p-5">
       <h2 className="font-semibold">Download files</h2>
-      <p className="text-sm text-mute">Raw footage and references. The voice note is at the top.</p>
+      <p className="text-sm text-mute">
+        Raw clips are in the Google Drive folder. Put the finished video in that same folder and name the file finished.
+      </p>
       {rawsUrl ? (
         <a
           href={rawsUrl}
@@ -26,7 +28,7 @@ export function PacketFiles({
           rel="noreferrer"
           className="block rounded-xl bg-sun px-4 py-3 text-center font-semibold text-ink"
         >
-          Open Google Drive (raw footage)
+          Open the Google Drive folder
         </a>
       ) : null}
       {packet.length === 0 && !rawsUrl ? (

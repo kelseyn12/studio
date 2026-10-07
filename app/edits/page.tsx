@@ -8,6 +8,7 @@ import { groupEditorBatches } from "@/lib/editor-batches";
 import { previewEditorId } from "@/lib/editor-preview";
 import { prisma } from "@/lib/prisma";
 import { batchByCard } from "@/lib/queries";
+import { scheduleDrivePull } from "@/lib/drive-finished";
 import { formatBytes, STUDIO_FILE_MAX_BYTES } from "@/lib/storage";
 import { watchUrl } from "@/lib/urls";
 
@@ -35,6 +36,7 @@ export default async function EditsPage({ searchParams }: { searchParams: Promis
   const cutting = loose.filter((card) => card.status === "EDITING");
   const review = loose.filter((card) => card.status === "REVIEW");
   const sizeLabel = formatBytes(STUDIO_FILE_MAX_BYTES);
+  for (const card of cards) scheduleDrivePull(card);
 
   return (
     <Shell>

@@ -1,5 +1,9 @@
 # To-do
 
+- [X] Finished file in the Drive folder
+  He puts the cut in the same folder as the raw clips and names it finished.
+  Opening Today, Cuts, or the job brings that file in and pings her.
+
 - [X] Discord only when work changes hands
   Sending him a job or a polish pings him. His finished drop pings you.
   Your own drop, Schedule, and notes stay quiet.

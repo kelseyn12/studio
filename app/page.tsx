@@ -15,11 +15,22 @@ import { studioUsage } from "@/lib/storage";
 import { syncQueuedPublishes } from "@/lib/publish-sync";
 import { prisma } from "@/lib/prisma";
 import { addDays, startOfDay } from "@/lib/dates";
+import { scheduleDrivePull } from "@/lib/drive-finished";
 
 export default async function TodayPage() {
   const today = startOfDay(new Date());
   const soon = addDays(today, 2);
   void syncQueuedPublishes();
+  const driveCards = await prisma.card.findMany({
+    where: {
+      cutBy: "EDITOR",
+      status: { in: ["FILMED", "EDITING"] },
+      rawsUrl: { not: "" },
+      assets: { none: { kind: "EDITED" } },
+    },
+    select: { id: true, rawsUrl: true, cutBy: true, assets: { select: { kind: true } } },
+  });
+  for (const card of driveCards) scheduleDrivePull(card);
   const [counts, snap, todayCards, chase, cutting, fileBytes, failedJobs] = await Promise.all([
     machineCounts(),
     studioSnapshot(),

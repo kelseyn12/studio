@@ -47,7 +47,7 @@ describe("shipLooks", () => {
       { network: "tiktok" },
       { network: "youtube" },
     ]);
-    expect(rows.map((row) => [row.tag, row.asset.id, row.accounts.map((account) => account.network)])).toEqual([
+    expect(rows.map((row) => [row.tag, row.asset?.id, row.accounts.map((account) => account.network)])).toEqual([
       ["IG · FB", "ig", ["instagram", "facebook"]],
       ["TT · YT", "tt", ["tiktok", "youtube"]],
     ]);

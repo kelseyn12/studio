@@ -10,6 +10,7 @@ import { Shell } from "@/components/shell";
 import { StatusPill } from "@/components/status-pill";
 import { Stepper } from "@/components/stepper";
 import { deskStage, isDeskStage, pickFinished, visibleAssets } from "@/lib/card-desk";
+import { scheduleDrivePull } from "@/lib/drive-finished";
 import { editorNeeds } from "@/lib/editor-packet";
 import { previewEditorId } from "@/lib/editor-preview";
 import { requireUser } from "@/lib/auth";
@@ -50,6 +51,7 @@ export default async function CardPage({
     .filter((asset) => asset.kind === "GENERATED" || (asset.kind === "EDITED" && !asset.filename.startsWith("cut-")))
     .sort((left, right) => +right.createdAt - +left.createdAt)[0];
   const packet = editorNeeds(card);
+  scheduleDrivePull(card);
 
   return (
     <Shell>
