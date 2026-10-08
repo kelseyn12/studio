@@ -142,6 +142,7 @@ model Card {
   status           CardStatus      @default(IDEA)
   campaignId       String?
   campaign         Campaign?       @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  home             String          @default("personal")
   formatId         String?
   format           Format?         @relation(fields: [formatId], references: [id], onDelete: SetNull)
   accountId        String?

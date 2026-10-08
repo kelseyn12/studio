@@ -1,4 +1,5 @@
 # Refactoring log
+- 2026-10-08 — Personal is only her own UGC. Trybe and Brand work are their own folders everywhere a video is labeled. Brand videos stay on Live until she marks them sent.
 - 2026-10-08 — A brand upload, like Trybe, can be marked Sent to the brand. It leaves To schedule and does not post to her apps.
 - 2026-10-07 — Approve pings him and can carry a note. A screenshot dropped on Needs changes shows on the fix.
 - 2026-10-07 — A newer Drive cut replaces the Studio file on a fix, and Library keeps batch, deal, and Personal videos in closed folders.

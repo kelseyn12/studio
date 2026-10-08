@@ -20,6 +20,7 @@ type FinishedAsset = {
     title: string;
     status: PipelineStatus;
     scheduledAt: Date | null;
+    home?: string | null;
     campaign: { name: string } | null;
   };
 };

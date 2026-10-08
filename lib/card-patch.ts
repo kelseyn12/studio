@@ -2,6 +2,7 @@ import type { Prisma } from "@prisma/client";
 import { parseLocalDate } from "@/lib/dates";
 import { isPipelineStatus } from "@/lib/pipeline";
 import { packReferences } from "@/lib/references";
+import { placeFromForm } from "@/lib/video-home";
 
 function text(form: FormData, key: string): string | undefined {
   if (!form.has(key)) return undefined;
@@ -19,8 +20,14 @@ export function cardPatch(form: FormData): Prisma.CardUncheckedUpdateInput {
   if (title !== undefined) data.title = title || "Untitled";
   const status = text(form, "status");
   if (status && isPipelineStatus(status)) data.status = status;
-  const campaignId = idOrNull(form, "campaignId");
-  if (campaignId !== undefined) data.campaignId = campaignId;
+  if (form.has("place")) {
+    const place = placeFromForm(String(form.get("place") || ""));
+    data.home = place.home;
+    data.campaignId = place.campaignId;
+  } else {
+    const campaignId = idOrNull(form, "campaignId");
+    if (campaignId !== undefined) data.campaignId = campaignId;
+  }
   const formatId = idOrNull(form, "formatId");
   if (formatId !== undefined) data.formatId = formatId;
   const accountId = idOrNull(form, "accountId");

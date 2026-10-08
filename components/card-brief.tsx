@@ -8,6 +8,7 @@ import { REFERENCE_MAX_BYTES } from "@/lib/files";
 import { parseReferences } from "@/lib/references";
 import type { DealKind } from "@prisma/client";
 import { handle } from "@/lib/targets";
+import { VideoPlaceSelect } from "@/components/video-place";
 
 export function CardBrief({
   card,
@@ -25,6 +26,7 @@ export function CardBrief({
     referenceUrl: string;
     referencesJson: string;
     campaignId: string | null;
+    home?: string | null;
     formatId: string | null;
     accountId: string | null;
     plannedDate: Date | null;
@@ -54,14 +56,13 @@ export function CardBrief({
             </option>
           ))}
         </select>
-        <select name="campaignId" defaultValue={card.campaignId ?? ""} className="field">
-          <option value="">Personal — no deal</option>
-          {campaigns.map((campaign) => (
-            <option key={campaign.id} value={campaign.id}>
-              {DEAL_KIND_LABEL[campaign.kind]} · {campaign.brand || campaign.name}
-            </option>
-          ))}
-        </select>
+        <VideoPlaceSelect
+          value={card.campaignId || card.home || "personal"}
+          deals={campaigns.map((campaign) => ({
+            id: campaign.id,
+            label: `${DEAL_KIND_LABEL[campaign.kind]} · ${campaign.brand || campaign.name}`,
+          }))}
+        />
         {campaigns.some((campaign) => campaign.formats.length > 0) ? (
           <select name="formatId" defaultValue={card.formatId ?? ""} className="field">
             <option value="">Which format — so Numbers can score it</option>

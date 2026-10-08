@@ -14,7 +14,7 @@ function AssetFolders({
   assets,
   empty,
 }: {
-  assets: Array<{ id: string; card: { campaign: { name: string } | null } } & Parameters<typeof LibraryFile>[0]["asset"]>;
+  assets: Array<{ id: string; card: { home?: string | null; campaign: { name: string } | null } } & Parameters<typeof LibraryFile>[0]["asset"]>;
   empty: string;
 }) {
   if (assets.length === 0) {
@@ -64,8 +64,8 @@ export default async function LibraryPage() {
     <Shell>
       <h1 className="text-3xl font-semibold tracking-tight">Library</h1>
       <p className="mt-2 mb-6 max-w-2xl text-mute">
-        Canvas videos sit in the Multiply batch. UGC videos sit in the deal, like Trybe. Personal videos sit in
-        Personal. Open a folder to see them. Posted stays closed. Posted files drop after {KEEP_FILE_DAYS} days — the
+        Canvas videos sit in the Multiply batch. Trybe videos sit in Trybe. Other brand videos sit in Brand work.
+        Personal is only your own UGC. Open a folder to see them. Posted stays closed. Posted files drop after {KEEP_FILE_DAYS} days — the
         video and its numbers stay. 4K days stay in Drive.
       </p>
       <div className="mb-8 max-w-xl space-y-3">
@@ -105,7 +105,7 @@ export default async function LibraryPage() {
           {drive.length === 0 ? (
             <p className="rounded-card border border-dashed border-line px-5 py-8 text-mute">No Drive folders linked.</p>
           ) : (
-            groupByDeal(drive.map((video) => ({ ...video, card: { campaign: video.campaign } }))).map((group) => (
+            groupByDeal(drive.map((video) => ({ ...video, card: { home: video.home, campaign: video.campaign } }))).map((group) => (
               <LibraryFolder key={group.deal} title={group.deal} count={String(group.items.length)}>
                 <div className="space-y-2">
                   {group.items.map((video) => (

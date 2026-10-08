@@ -6,6 +6,7 @@ import { changePreview, needsChanges, splitChangeNote } from "@/lib/change-note"
 import { labelDay } from "@/lib/dates";
 import { DEAL_KIND_LABEL } from "@/lib/deal-kind";
 import { editorNeeds, packetReady } from "@/lib/editor-packet";
+import { homeLabel } from "@/lib/video-home";
 
 export type CutsCard = {
   id: string;
@@ -19,6 +20,7 @@ export type CutsCard = {
   cutBy: "SELF" | "EDITOR";
   scheduledAt: Date | null;
   deadlineAt: Date | null;
+  home?: string | null;
   campaign: { name: string; brand: string; kind: "TECH" | "UGC" } | null;
   editor: { name: string } | null;
   assets: Array<{ kind: string }>;
@@ -61,7 +63,7 @@ export function CutsBucket({
                     <p className="text-sm text-mute">
                       {card.campaign
                         ? `${DEAL_KIND_LABEL[card.campaign.kind]} · ${card.campaign.brand || card.campaign.name}`
-                        : "Personal"}
+                        : homeLabel(card.home, null)}
                       {card.editor ? ` · ${card.editor.name}` : ""}
                       {card.deadlineAt && card.status !== "REVIEW" ? ` · Due ${labelDay(card.deadlineAt)}` : ""}
                     </p>

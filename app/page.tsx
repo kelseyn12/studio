@@ -16,6 +16,7 @@ import { syncQueuedPublishes } from "@/lib/publish-sync";
 import { prisma } from "@/lib/prisma";
 import { addDays, startOfDay } from "@/lib/dates";
 import { scheduleDrivePull } from "@/lib/drive-finished";
+import { homeLabel } from "@/lib/video-home";
 
 export default async function TodayPage() {
   const today = startOfDay(new Date());
@@ -187,7 +188,7 @@ export default async function TodayPage() {
                   <div>
                     <p className="font-medium">{card.title}</p>
                     <p className="text-sm text-mute">
-                      {card.campaign ? `${card.campaign.brand || card.campaign.name}` : "Personal"}
+                      {card.campaign ? `${card.campaign.brand || card.campaign.name}` : homeLabel(card.home, null)}
                       {card.editor ? ` · ${card.editor.name}` : ""}
                     </p>
                   </div>

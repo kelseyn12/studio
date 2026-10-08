@@ -21,8 +21,10 @@ describe("groupByDeal", () => {
       { id: "2", card: { campaign: { name: "Brand B" } } },
       { id: "1", card: { campaign: { name: "Brand A" } } },
       { id: "3", card: { campaign: null } },
+      { id: "4", card: { home: "trybe", campaign: null } },
+      { id: "5", card: { home: "brand", campaign: null } },
     ]);
-    expect(groups.map((group) => group.deal)).toEqual(["Brand A", "Brand B", "Personal"]);
+    expect(groups.map((group) => group.deal)).toEqual(["Brand A", "Brand B", "Brand work", "Trybe", "Personal"]);
     expect(groups[0].items).toHaveLength(1);
   });
 });

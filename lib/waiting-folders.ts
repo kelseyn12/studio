@@ -4,6 +4,7 @@ export type WaitingFolderCard = {
   hook: string;
   batch: string;
   deal: string;
+  deliver?: boolean;
 };
 
 export type WaitingFolder<T extends WaitingFolderCard> = {

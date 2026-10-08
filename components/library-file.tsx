@@ -5,6 +5,7 @@ import { StatusPill } from "@/components/status-pill";
 import { formatBytes } from "@/lib/storage";
 import type { PipelineStatus } from "@/lib/pipeline";
 import { watchUrl } from "@/lib/urls";
+import { homeLabel } from "@/lib/video-home";
 
 export function LibraryFile({
   asset,
@@ -26,6 +27,7 @@ export function LibraryFile({
       title: string;
       status: PipelineStatus;
       scheduledAt: Date | null;
+      home?: string | null;
       campaign: { name: string } | null;
     };
   };
@@ -53,7 +55,7 @@ export function LibraryFile({
         <div>
           <p className="font-medium">{asset.card.title}</p>
           <p className="text-sm text-mute">
-            {asset.card.campaign?.name ?? "Personal"}
+            {homeLabel(asset.card.home, asset.card.campaign?.name)}
             {look ? ` · ${look}` : ""} · {asset.filename} · {formatBytes(asset.size)}
           </p>
         </div>

@@ -1,4 +1,5 @@
 import { pillLabel, type PipelineStatus } from "@/lib/pipeline";
+import { homeLabel } from "@/lib/video-home";
 
 /** Ready videos that already have a day should not keep reading as "To schedule". */
 export function libraryMark(status: PipelineStatus, scheduledAt: Date | null): string | undefined {
@@ -21,7 +22,7 @@ function isPosted(status: string): boolean {
 
 /** Batch videos stay together. Everything else stays under the deal. Posted files split out so the rest is what's left. */
 export function groupLibrary<
-  T extends { batch?: string; card: { status: string; campaign: { name: string } | null } },
+  T extends { batch?: string; card: { status: string; home?: string | null; campaign: { name: string } | null } },
 >(items: T[]): LibraryFolder<T>[] {
   const batches = new Map<string, T[]>();
   const loose: T[] = [];
@@ -55,12 +56,12 @@ function splitFolder<T extends { card: { status: string } }>(key: string, title:
   };
 }
 
-export function groupByDeal<T extends { card: { campaign: { name: string } | null } }>(
-  items: T[],
-): Array<{ deal: string; items: T[] }> {
+export function groupByDeal<
+  T extends { card: { home?: string | null; campaign: { name: string } | null } },
+>(items: T[]): Array<{ deal: string; items: T[] }> {
   const map = new Map<string, T[]>();
   for (const item of items) {
-    const deal = item.card.campaign?.name?.trim() || "Personal";
+    const deal = homeLabel(item.card.home, item.card.campaign?.name);
     const list = map.get(deal) ?? [];
     list.push(item);
     map.set(deal, list);

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { titlesForCount } from "@/lib/new-videos";
+import { VideoPlaceSelect } from "@/components/video-place";
 
 export function NewVideosForm({
   action,
@@ -18,14 +19,7 @@ export function NewVideosForm({
 
   return (
     <form action={action} className="grid max-w-xl gap-4">
-      <select name="campaignId" className="field">
-        <option value="">Personal — no deal</option>
-        {deals.map((deal) => (
-          <option key={deal.id} value={deal.id}>
-            {deal.label}
-          </option>
-        ))}
-      </select>
+      <VideoPlaceSelect deals={deals} />
       <label>
         <span className="label">Film day</span>
         <span className="mb-1 block text-xs font-normal text-mute">Leave blank. This is only for videos you still have to film.</span>

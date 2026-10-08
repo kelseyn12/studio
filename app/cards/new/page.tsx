@@ -5,6 +5,7 @@ import { requireUser } from "@/lib/auth";
 import { parseLocalDate } from "@/lib/dates";
 import { DEAL_KIND_LABEL } from "@/lib/deal-kind";
 import { videoTitles } from "@/lib/new-videos";
+import { placeFromForm } from "@/lib/video-home";
 import { prisma } from "@/lib/prisma";
 
 async function createCard(formData: FormData) {
@@ -12,12 +13,20 @@ async function createCard(formData: FormData) {
   const user = await requireUser();
   const titles = videoTitles(formData.getAll("title").map(String));
   if (!titles.length) redirect("/cards/new");
-  const campaignId = String(formData.get("campaignId") || "") || null;
+  const place = placeFromForm(String(formData.get("place") || formData.get("campaignId") || ""));
   const planned = formData.get("plannedDate") ? parseLocalDate(String(formData.get("plannedDate"))) : null;
   const created = await Promise.all(
     titles.map((title) =>
       prisma.card.create({
-        data: { title, campaignId, plannedDate: planned, createdById: user.id, status: "FILMED", cutBy: "SELF" },
+        data: {
+          title,
+          campaignId: place.campaignId,
+          home: place.home,
+          plannedDate: planned,
+          createdById: user.id,
+          status: "FILMED",
+          cutBy: "SELF",
+        },
       }),
     ),
   );

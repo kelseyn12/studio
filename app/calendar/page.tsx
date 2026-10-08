@@ -24,6 +24,7 @@ import { heldNote, missedNote, postedAppLine } from "@/lib/publish-sync";
 import { sweepFailedPublishes } from "@/lib/publish-sweep";
 import { targetAccounts, targetApps } from "@/lib/targets";
 import { WaitingVideos } from "@/components/waiting-videos";
+import { homeLabel, isBrandHome } from "@/lib/video-home";
 
 const VIEWS = ["week", "month", "scheduled", "posted"] as const;
 type View = (typeof VIEWS)[number];
@@ -91,7 +92,8 @@ export default async function CalendarPage({
       title: card.title,
       hook: card.hook,
       batch: batches.get(card.id)?.name ?? "",
-      deal: card.campaign?.name ?? "",
+      deal: homeLabel(card.home, card.campaign?.name),
+      deliver: isBrandHome(card.home, card.campaign?.name),
       lookRows: fileLooks(card.assets),
       selectedIds: targetAccounts(accounts, card).map((account) => account.id),
     }));
@@ -267,7 +269,7 @@ export default async function CalendarPage({
           <h2 className="mb-3 text-lg font-semibold">{waiting.length} finished, no day yet</h2>
           <p className="mb-3 text-sm text-mute">
             Open the batch you named. Every mix in it is listed there. Check IG · FB or TT · YT (a tap saves), then
-            schedule that mix on a day above.
+            schedule that mix on a day above. Trybe and Brand work stay in this list until you press Sent to the brand.
           </p>
           <WaitingVideos folders={waitingFolders} accounts={accounts} />
         </section>

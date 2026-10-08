@@ -1,5 +1,9 @@
 # To-do
 
+- [X] Trybe and Brand work folders
+  Personal is only her own UGC. Trybe has its own folder. Other brand videos sit in Brand work. The same names show on the video, Cuts, Today, Library, and Live.
+  A Trybe or Brand work video stays in finished, no day yet until she presses Sent to the brand.
+
 - [X] Sent to the brand
   A finished video can leave To schedule without posting to her apps. Sent to the brand marks it posted and creates no Outstand job.
   Schedule stays for Instagram, TikTok, YouTube, and Facebook. A video that already has a day cannot use this.

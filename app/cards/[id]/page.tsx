@@ -15,6 +15,7 @@ import { editorNeeds } from "@/lib/editor-packet";
 import { previewEditorId } from "@/lib/editor-preview";
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { homeLabel } from "@/lib/video-home";
 
 export const maxDuration = 300;
 
@@ -59,7 +60,7 @@ export default async function CardPage({
     <Shell>
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm text-mute">{card.campaign?.name ?? "Personal"}</p>
+          <p className="text-sm text-mute">{homeLabel(card.home, card.campaign?.name)}</p>
           <h1 className="text-3xl font-semibold tracking-tight">{card.title}</h1>
         </div>
         <div className="flex items-start gap-3">

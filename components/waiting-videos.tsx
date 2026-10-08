@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { saveCardAccounts } from "@/app/calendar/actions";
+import { markDelivered, saveCardAccounts } from "@/app/calendar/actions";
 import { LookAccountPicks } from "@/components/look-account-picks";
 import type { FileLook } from "@/lib/card-desk";
 import { accountsForLook, handle, networkShort } from "@/lib/targets";
@@ -21,6 +21,7 @@ type WaitingCard = {
   mixLabel: string;
   lookRows: FileLook[];
   selectedIds: string[];
+  deliver?: boolean;
 };
 
 /**
@@ -46,11 +47,10 @@ export function WaitingVideos({
           </summary>
           <div className="space-y-3 border-t border-line px-3 py-3">
             {folder.cards.map((card) => (
+              <div key={card.id} className="rounded-xl border border-line px-3 py-3">
               <form
-                key={card.id}
                 action={saveCardAccounts}
                 onChange={(event) => event.currentTarget.requestSubmit()}
-                className="rounded-xl border border-line px-3 py-3"
               >
                 <input type="hidden" name="cardId" value={card.id} />
                 <div className="flex items-center justify-between gap-3">
@@ -86,6 +86,16 @@ export function WaitingVideos({
                   ))}
                 </div>
               </form>
+              {card.deliver ? (
+                <form action={markDelivered} className="mt-3 border-t border-line pt-3">
+                  <p className="text-xs text-mute">Stays in this list until you send it to the brand. Your apps are not posted.</p>
+                  <input type="hidden" name="id" value={card.id} />
+                  <button type="submit" className="mt-2 rounded-xl border border-line px-3 py-2 text-sm font-semibold">
+                    Sent to the brand
+                  </button>
+                </form>
+              ) : null}
+              </div>
             ))}
           </div>
         </details>
