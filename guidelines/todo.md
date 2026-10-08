@@ -1,5 +1,9 @@
 # To-do
 
+- [X] Sent to the brand
+  A finished video can leave To schedule without posting to her apps. Sent to the brand marks it posted and creates no Outstand job.
+  Schedule stays for Instagram, TikTok, YouTube, and Facebook. A video that already has a day cannot use this.
+
 - [X] Approve pings him, screenshots on a fix
   Approve sends a Discord ping. The note box can say good job. A blank note still says he is done.
   Needs changes takes a screenshot of a font, text style, or frame. He sees that picture with the fix.

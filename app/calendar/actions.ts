@@ -9,9 +9,31 @@ import { prisma } from "@/lib/prisma";
 import { ALREADY_SCHEDULED, queueCard } from "@/lib/publish";
 import { retryAccountIds, youtubeRetryAllowed } from "@/lib/publish-sync";
 import { timeAlreadyPassed } from "@/lib/dates";
+import { canMarkDelivered } from "@/lib/deliver";
 import { canUnschedule, cancelAlreadyGone, postsToCancel } from "@/lib/unschedule";
 
 const RETRY_DELAY_MS = 5 * 60 * 1000;
+
+/** She uploaded the file to the brand. Posted, with no Outstand post and no second ping. */
+export async function markDelivered(formData: FormData) {
+  const user = await requireUser();
+  if (user.role === "EDITOR") return;
+  const id = String(formData.get("id") || "");
+  if (!id) return;
+  const card = await prisma.card.findUnique({
+    where: { id },
+    include: { assets: { select: { kind: true } } },
+  });
+  if (!card) return;
+  const hasFile = card.assets.some((asset) => asset.kind === "EDITED" || asset.kind === "GENERATED");
+  if (!canMarkDelivered(card.status, card.scheduledAt, hasFile)) redirect(`/cards/${id}?step=live`);
+  await prisma.card.update({ where: { id }, data: { status: "POSTED", postedAt: new Date() } });
+  revalidatePath(`/cards/${id}`);
+  revalidatePath("/calendar");
+  revalidatePath("/library");
+  revalidatePath("/");
+  redirect(`/cards/${id}?step=live`);
+}
 
 export async function saveCardAccounts(formData: FormData) {
   await requireUser();

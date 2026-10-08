@@ -1,3 +1,4 @@
+import { markDelivered } from "@/app/calendar/actions";
 import { scheduleCard, updateScheduledCaption } from "@/app/cards/[id]/actions";
 import { PolishAsk, ReviewAsk } from "@/components/review-ask";
 import { LiveLooks } from "@/components/live-looks";
@@ -10,6 +11,7 @@ import { formatMoney } from "@/lib/deals";
 import { coverCanChange } from "@/lib/post-cover";
 import { dealAccounts, describeTargets, handle, parseAccountIds, targetAccounts } from "@/lib/targets";
 import { YouTubeMiss, youtubeDownload } from "@/components/youtube-miss";
+import { canMarkDelivered, deliveredLabel } from "@/lib/deliver";
 import { postedAppLine } from "@/lib/publish-sync";
 import { isStill } from "@/lib/files";
 import { watchUrl } from "@/lib/urls";
@@ -126,6 +128,17 @@ export function CardLive({
         />
       ) : null}
       {card.status === "READY" && !card.scheduledAt && card.cutBy !== "SELF" ? <PolishAsk cardId={card.id} /> : null}
+      {canMarkDelivered(card.status, card.scheduledAt, true) ? (
+        <form action={markDelivered} className="rounded-card border border-line bg-panel p-5">
+          <p className="text-sm">
+            Going to the brand, like Trybe? Mark it sent. That does not post Instagram, TikTok, YouTube, or Facebook.
+          </p>
+          <input type="hidden" name="id" value={card.id} />
+          <button type="submit" className="mt-3 w-full rounded-xl border border-line px-4 py-3 font-semibold">
+            Sent to the brand
+          </button>
+        </form>
+      ) : null}
       <form action={card.scheduledAt ? updateScheduledCaption : scheduleCard} className="space-y-3">
         <input type="hidden" name="id" value={card.id} />
         <p className="text-sm text-mute">
@@ -169,7 +182,9 @@ export function CardLive({
         </label>
         <p className="text-xs text-mute">Leave this blank and the post goes out with no caption.</p>
         {card.status === "POSTED" || card.status === "DATA" ? (
-          <p className="text-sm font-semibold text-live">Posted{posted ? ` · ${posted}` : ""}</p>
+          <p className="text-sm font-semibold text-live">
+            {deliveredLabel(card.status, publishes.length) ?? `Posted${posted ? ` · ${posted}` : ""}`}
+          </p>
         ) : card.scheduledAt ? (
           <>
             <p className="text-sm">
